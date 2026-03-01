@@ -48,7 +48,7 @@ git status
 git add .
 
 # 3. Commit (save)
-git commit -m "오늘 한 작업 설명"
+git commit -m "Describe today's work"
 
 # 4. Push to GitHub
 git push
@@ -78,7 +78,7 @@ git init
 git add .
 
 # 4. First commit
-git commit -m "v5 프로토타입 완성"
+git commit -m "v5 prototype complete"
 
 # 5. Connect to GitHub
 git remote add origin https://github.com/clusteruni-debug/To-do-list-for-adhd.git
@@ -113,16 +113,16 @@ cd To-do-list-for-adhd
 
 ### Good Examples
 ```bash
-git commit -m "Next-Action 화면 완성"
-git commit -m "우선순위 계산 버그 수정"
-git commit -m "대시보드 통계 추가"
-git commit -m "스와이프 제스처 구현"
+git commit -m "Next-Action screen complete"
+git commit -m "Fix priority calculation bug"
+git commit -m "Add dashboard statistics"
+git commit -m "Implement swipe gesture"
 ```
 
 ### Bad Examples
 ```bash
-git commit -m "수정"        # What was fixed?
-git commit -m "ㅁㄴㅇㄹ"     # Incomprehensible
+git commit -m "fix"         # What was fixed?
+git commit -m "asdfgh"      # Incomprehensible
 git commit -m "asdf"        # Meaningless
 ```
 
@@ -130,10 +130,10 @@ git commit -m "asdf"        # Meaningless
 ```
 [verb] [subject]
 
-Add: "작업 수정 기능 추가"
-Fix: "우선순위 계산 로직 개선"
-Remove: "불필요한 주석 제거"
-Bug: "입력 포커스 버그 수정"
+Add: "Add task edit feature"
+Fix: "Improve priority calculation logic"
+Remove: "Remove unnecessary comments"
+Bug: "Fix input focus bug"
 ```
 
 ---
@@ -188,7 +188,7 @@ error: Your local changes would be overwritten by merge.
 ```bash
 # Option A: Commit now
 git add .
-git commit -m "작업 중"
+git commit -m "work in progress"
 git pull
 
 # Option B: Stash temporarily
@@ -203,13 +203,13 @@ git stash pop
 
 **Symptom**:
 ```
-git commit -m "작얽 추가"  # Typo!
+git commit -m "add tsk"    # Typo!
 ```
 
 **Solution**:
 ```bash
 # Fix last commit message
-git commit --amend -m "작업 추가"
+git commit --amend -m "add task"
 
 # OK if not pushed yet
 # If already pushed, just leave it (not a big deal)
@@ -235,24 +235,24 @@ code navigator-v5.html
 
 # 5. Mark as resolved
 git add navigator-v5.html
-git commit -m "충돌 해결"
+git commit -m "resolve conflict"
 git push
 ```
 
 **Example**:
 ```html
 <<<<<<< HEAD
-<div>회사에서 작업</div>
+<div>Work from office</div>
 =======
-<div>집에서 작업</div>
+<div>Work from home</div>
 >>>>>>> origin/main
 ```
 
 **After fixing**:
 ```html
-<div>회사에서 작업</div>
+<div>Work from office</div>
 <!-- or -->
-<div>집에서 작업</div>
+<div>Work from home</div>
 <!-- or keep both -->
 ```
 
@@ -329,7 +329,7 @@ node_modules/
 
 git checkout -b feature/dashboard
 # work
-git commit -m "대시보드 추가"
+git commit -m "add dashboard"
 git checkout main
 git merge feature/dashboard
 ```
@@ -355,7 +355,7 @@ rm -rf .git
 # Re-initialize
 git init
 git add .
-git commit -m "재시작"
+git commit -m "fresh start"
 git remote add origin https://github.com/clusteruni-debug/To-do-list-for-adhd.git
 git push -f origin main  # Warning: force push
 ```
@@ -414,7 +414,7 @@ git pull
 
 # Evening
 git add .
-git commit -m "오늘 한 일"
+git commit -m "today's work"
 git push
 ```
 
