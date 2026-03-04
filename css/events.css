@@ -484,6 +484,25 @@
       color: white;
     }
 
+    /* ── Event subtask badge & chips ── */
+    .event-subtask-badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1px 6px;
+      color: var(--text-muted);
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    .event-subtask-chips {
+      padding-left: 0;
+      margin-top: 6px;
+      width: 100%;
+    }
+
     .event-meta {
       display: none;
     }

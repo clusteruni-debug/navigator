@@ -3,6 +3,50 @@
 // ============================================
 
 /**
+ * 일상/가족 개별 작업 아이템 HTML
+ */
+function _renderLifeTaskItem(task) {
+  const hasSubtasks = task.subtasks && task.subtasks.length > 0;
+  const doneCount = hasSubtasks ? task.subtasks.filter(s => s.completed).length : 0;
+  const totalCount = hasSubtasks ? task.subtasks.length : 0;
+  const allDone = hasSubtasks && doneCount === totalCount;
+  const repeatLabel = task.repeatType && task.repeatType !== 'none'
+    ? getRepeatLabel(task.repeatType, task)
+    : '';
+
+  return `
+    <div class="life-item" style="--task-cat-color: var(--cat-${task.category})">
+      ${hasSubtasks
+        ? `<span class="subtask-progress-indicator${allDone ? ' all-done' : ''}" style="cursor:default;">${doneCount}/${totalCount}</span>`
+        : `<button class="task-check-btn" onclick="completeTask('${escapeAttr(task.id)}')" aria-label="작업 완료">○</button>`
+      }
+      <div class="life-item-content">
+        <div class="life-item-title">${escapeHtml(task.title)}</div>
+        <div class="life-item-meta">
+          ${repeatLabel ? `🔄 ${repeatLabel}` : ''}
+          ${!repeatLabel && task.deadline ? new Date(task.deadline).toLocaleDateString('ko-KR', {month:'short', day:'numeric'}) : ''}
+          ${task.estimatedTime ? `⏱ ${task.estimatedTime}분` : ''}
+        </div>
+      </div>
+      <div class="life-item-actions">
+        ${!hasSubtasks ? '' : `<button class="life-action-btn" onclick="completeTask('${escapeAttr(task.id)}')" title="전체 완료" aria-label="전체 완료">✓</button>`}
+        <button class="life-action-btn" onclick="editTask('${escapeAttr(task.id)}')" title="수정" aria-label="작업 수정">${svgIcon('edit', 14)}</button>
+        <button class="life-action-btn delete" onclick="deleteTask('${escapeAttr(task.id)}')" title="삭제" aria-label="작업 삭제">${svgIcon('trash', 14)}</button>
+      </div>
+      ${hasSubtasks ? `
+        <div class="subtask-chips" onclick="event.stopPropagation();">
+          ${task.subtasks.map((st, idx) => `
+            <span class="subtask-chip ${st.completed ? 'done' : ''}" onclick="toggleSubtaskComplete('${escapeAttr(task.id)}', ${idx})">
+              <span class="subtask-chip-check">${st.completed ? '✓' : '○'}</span>${escapeHtml(st.text)}
+            </span>
+          `).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+/**
  * 일상/가족 탭 HTML을 반환한다.
  */
 function renderLifeTab() {
@@ -82,21 +126,7 @@ function renderLifeTab() {
                 </div>
                 ${repeatTasks.length > 0 ? `
                   <div class="life-list">
-                    ${repeatTasks.map(task => `
-                      <div class="life-item" style="--task-cat-color: var(--cat-${task.category})">
-                        <button class="task-check-btn" onclick="completeTask('${escapeAttr(task.id)}')" aria-label="작업 완료">○</button>
-                        <div class="life-item-content">
-                          <div class="life-item-title">${escapeHtml(task.title)}</div>
-                          <div class="life-item-meta">
-                            ${task.repeatType === 'daily' ? '매일' : task.repeatType === 'weekdays' ? '평일' : '반복'}
-                          </div>
-                        </div>
-                        <div class="life-item-actions">
-                          <button class="life-action-btn" onclick="editTask('${escapeAttr(task.id)}')" title="수정" aria-label="작업 수정">${svgIcon('edit', 14)}</button>
-                          <button class="life-action-btn delete" onclick="deleteTask('${escapeAttr(task.id)}')" title="삭제" aria-label="작업 삭제">${svgIcon('trash', 14)}</button>
-                        </div>
-                      </div>
-                    `).join('')}
+                    ${repeatTasks.map(task => _renderLifeTaskItem(task)).join('')}
                   </div>
                 ` : `<div class="life-all-done">✓ 오늘 반복 작업 모두 완료!</div>`}
               </div>
@@ -106,21 +136,7 @@ function renderLifeTab() {
               <div class="life-section">
                 <div class="life-section-title">📌 일상 (일회성) (${onceTasks.length})</div>
                 <div class="life-list">
-                  ${onceTasks.map(task => `
-                    <div class="life-item" style="--task-cat-color: var(--cat-${task.category})">
-                      <button class="task-check-btn" onclick="completeTask('${escapeAttr(task.id)}')" aria-label="작업 완료">○</button>
-                      <div class="life-item-content">
-                        <div class="life-item-title">${escapeHtml(task.title)}</div>
-                        <div class="life-item-meta">
-                          ${task.deadline ? new Date(task.deadline).toLocaleDateString('ko-KR', {month:'short', day:'numeric'}) : ''}
-                        </div>
-                      </div>
-                      <div class="life-item-actions">
-                        <button class="life-action-btn" onclick="editTask('${escapeAttr(task.id)}')" title="수정" aria-label="작업 수정">${svgIcon('edit', 14)}</button>
-                        <button class="life-action-btn delete" onclick="deleteTask('${escapeAttr(task.id)}')" title="삭제" aria-label="작업 삭제">${svgIcon('trash', 14)}</button>
-                      </div>
-                    </div>
-                  `).join('')}
+                  ${onceTasks.map(task => _renderLifeTaskItem(task)).join('')}
                 </div>
               </div>
             ` : ''}
@@ -129,22 +145,7 @@ function renderLifeTab() {
               <div class="life-section">
                 <div class="life-section-title">👨‍👩‍👧 가족 (${familyTasks.length})</div>
                 <div class="life-list">
-                  ${familyTasks.map(task => `
-                    <div class="life-item" style="--task-cat-color: var(--cat-${task.category})">
-                      <button class="task-check-btn" onclick="completeTask('${escapeAttr(task.id)}')" aria-label="작업 완료">○</button>
-                      <div class="life-item-content">
-                        <div class="life-item-title">${escapeHtml(task.title)}</div>
-                        <div class="life-item-meta">
-                          ${task.deadline ? new Date(task.deadline).toLocaleDateString('ko-KR', {month:'short', day:'numeric'}) : ''}
-                          ${task.repeatType && task.repeatType !== 'none' ? ' 🔁' : ''}
-                        </div>
-                      </div>
-                      <div class="life-item-actions">
-                        <button class="life-action-btn" onclick="editTask('${escapeAttr(task.id)}')" title="수정" aria-label="작업 수정">${svgIcon('edit', 14)}</button>
-                        <button class="life-action-btn delete" onclick="deleteTask('${escapeAttr(task.id)}')" title="삭제" aria-label="작업 삭제">${svgIcon('trash', 14)}</button>
-                      </div>
-                    </div>
-                  `).join('')}
+                  ${familyTasks.map(task => _renderLifeTaskItem(task)).join('')}
                 </div>
               </div>
             ` : ''}

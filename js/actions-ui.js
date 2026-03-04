@@ -132,6 +132,8 @@ function updateDetailedTaskCategory(category) {
     appState.detailedTask.workStageIdx = null;
     appState.detailedTask.workSubcatIdx = null;
   }
+  // 카테고리 변경 시 마감일 토글 리셋
+  appState._detailedShowDeadline = undefined;
   renderStatic();
 }
 
@@ -346,8 +348,19 @@ function updateDetailedTaskRepeat(repeatType) {
   if (repeatType !== 'monthly') {
     appState.detailedTask.repeatMonthDay = null;
   }
+  if (repeatType !== 'interval') {
+    appState.detailedTask.repeatInterval = null;
+  }
   renderStatic();
 }
+
+/**
+ * N일 간격 변경 시 호출
+ */
+function updateRepeatInterval(value) {
+  appState.detailedTask.repeatInterval = Math.max(2, parseInt(value) || 2);
+}
+window.updateRepeatInterval = updateRepeatInterval;
 
 /**
  * 특정 요일 토글

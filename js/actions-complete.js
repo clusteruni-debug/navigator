@@ -392,6 +392,10 @@ function getRepeatLabel(repeatType, task = null) {
     return `매월 ${task.repeatMonthDay}일`;
   }
 
+  if (repeatType === 'interval' && task && task.repeatInterval) {
+    return `${task.repeatInterval}일마다`;
+  }
+
   return labels[repeatType] || '';
 }
 
@@ -445,6 +449,9 @@ function createNextRepeatTask(task) {
         nextDeadline.setDate(nextDeadline.getDate() + 1);
       }
       break;
+    case 'interval':
+      nextDeadline.setDate(nextDeadline.getDate() + (task.repeatInterval || 2));
+      break;
     default:
       nextDeadline.setDate(nextDeadline.getDate() + 1);
   }
@@ -466,7 +473,11 @@ function createNextRepeatTask(task) {
     link: task.link,
     expectedRevenue: task.expectedRevenue,
     repeatType: task.repeatType,
-    repeatDays: task.repeatDays, // 커스텀 요일 정보 유지
+    repeatDays: task.repeatDays,
+    repeatMonthDay: task.repeatMonthDay,
+    repeatInterval: task.repeatInterval,
+    subtasks: (task.subtasks || []).map(st => ({ text: st.text, completed: false })),
+    tags: task.tags || [],
     completed: false,
     createdAt: now.toISOString(),
     updatedAt: now.toISOString()

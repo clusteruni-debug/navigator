@@ -28,9 +28,10 @@ const _collapsedEventGroups = new Set(); // 접힌 그룹 ID
  * @property {string} [link] - 관련 링크 URL
  * @property {string|number} [expectedRevenue] - 예상 수익 (원)
  * @property {string} [description] - 작업 설명/메모
- * @property {'none'|'daily'|'weekdays'|'weekends'|'weekly'|'custom'|'monthly'} [repeatType] - 반복 유형
+ * @property {'none'|'daily'|'weekdays'|'weekends'|'weekly'|'custom'|'monthly'|'interval'} [repeatType] - 반복 유형
  * @property {number[]} [repeatDays] - 특정 요일 반복 시 요일 배열 (0=일 ~ 6=토)
  * @property {number|null} [repeatMonthDay] - 매월 반복 시 날짜 (1~31)
+ * @property {number|null} [repeatInterval] - N일에 한 번 반복 시 간격 (2~)
  * @property {string} [organizer] - 주최자 (부업용)
  * @property {string} [eventType] - 이벤트 종류 (부업용)
  * @property {string[]} [tags] - 태그 목록
@@ -157,6 +158,7 @@ const _collapsedEventGroups = new Set(); // 접힌 그룹 ID
  * @property {string} detailedTask.repeatType
  * @property {number[]} detailedTask.repeatDays
  * @property {number|null} detailedTask.repeatMonthDay
+ * @property {number|null} detailedTask.repeatInterval
  * @property {string} detailedTask.organizer
  * @property {string} detailedTask.eventType
  * @property {string[]} detailedTask.tags
@@ -303,9 +305,10 @@ const appState = {
     link: '',
     expectedRevenue: '',
     description: '',              // 작업 설명/메모
-    repeatType: 'none',           // 반복 유형: none/daily/weekdays/weekends/weekly/custom/monthly
+    repeatType: 'none',           // 반복 유형: none/daily/weekdays/weekends/weekly/custom/monthly/interval
     repeatDays: [],               // 특정 요일 반복 시 요일 배열 (0=일, 1=월, ... 6=토)
     repeatMonthDay: null,         // 매월 반복 시 날짜 (1~31)
+    repeatInterval: null,         // N일에 한 번 반복 시 간격 (2~)
     organizer: '',                // 주최자 (부업용): 불개미, 코같투, 맨틀 등
     eventType: '',                // 이벤트 종류 (부업용): 의견작성, 리캡, AMA 등
     tags: [],                     // 태그 목록

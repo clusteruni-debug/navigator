@@ -135,12 +135,18 @@
     .life-item {
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
       gap: 12px;
       padding: 12px;
       background: var(--bg-secondary);
       border-radius: var(--radius-md);
       border: 1px solid var(--border-color);
       border-left: 4px solid var(--task-cat-color, var(--border-color));
+    }
+
+    .life-item .subtask-chips {
+      width: 100%;
+      padding-top: 4px;
     }
 
     .life-item-content {

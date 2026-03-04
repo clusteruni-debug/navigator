@@ -216,6 +216,7 @@ function resetCompletedRepeatTasks() {
         ...t,
         completed: false,
         completedAt: null,
+        subtasks: (t.subtasks || []).map(st => ({ ...st, completed: false, completedAt: null })),
         updatedAt: new Date().toISOString()
       };
     }
@@ -332,6 +333,7 @@ function addNewEvent() {
     repeatType: 'none',
     repeatDays: [],
     repeatMonthDay: null,
+    repeatInterval: null,
     organizer: '',
     eventType: '',
     tags: [],
@@ -339,6 +341,7 @@ function addNewEvent() {
   };
   appState.showDetailedAdd = true;
   appState.editingTaskId = null;
+  appState._detailedShowDeadline = undefined;
   appState.currentTab = 'action';
   renderStatic();
   // 폼으로 스크롤
@@ -619,6 +622,7 @@ function detailedAdd() {
           repeatType: 'none',
           repeatDays: [],
           repeatMonthDay: null,
+          repeatInterval: null,
           organizer: '',
           eventType: '',
           tags: [],
@@ -628,6 +632,7 @@ function detailedAdd() {
           workSubcatIdx: null
         };
         appState.showDetailedAdd = false;
+        appState._detailedShowDeadline = undefined;
         renderStatic();
         return;
       }
@@ -678,6 +683,7 @@ function detailedAdd() {
     repeatType: 'none',
     repeatDays: [],
     repeatMonthDay: null,
+    repeatInterval: null,
     organizer: '',
     eventType: '',
     tags: [],
@@ -688,6 +694,7 @@ function detailedAdd() {
   };
   appState.showDetailedAdd = false;
   appState.editingTaskId = null;
+  appState._detailedShowDeadline = undefined;
 
   saveState();
   renderStatic();

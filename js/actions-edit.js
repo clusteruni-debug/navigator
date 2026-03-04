@@ -393,6 +393,7 @@ function openFullEdit() {
   closeQuickEditModal();
 
   appState.detailedTask = { ...task };
+  appState._detailedShowDeadline = !!(task.startDate || task.deadline);
   appState.showDetailedAdd = true;
   appState.editingTaskId = id;
   appState.currentTab = 'action';
@@ -439,6 +440,7 @@ function cancelEdit() {
     repeatType: 'none',
     repeatDays: [],
     repeatMonthDay: null,
+    repeatInterval: null,
     organizer: '',
     eventType: '',
     tags: [],
@@ -446,6 +448,7 @@ function cancelEdit() {
   };
   appState.showDetailedAdd = false;
   appState.editingTaskId = null;
+  appState._detailedShowDeadline = undefined;
   renderStatic();
 }
 

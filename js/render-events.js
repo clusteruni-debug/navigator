@@ -126,12 +126,15 @@ function renderEventsTab() {
                 if (task.expectedRevenue) metaItems.push('₩' + Number(task.expectedRevenue).toLocaleString());
                 const metaStr = metaItems.join(' · ');
                 const telegramBadge = task.source && task.source.type === 'telegram-event' ? '<span class="event-tg-badge" title="텔레그램 연동">📱</span>' : '';
+                const hasSubtasks = task.subtasks && task.subtasks.length > 0;
+                const stDone = hasSubtasks ? task.subtasks.filter(s => s.completed).length : 0;
+                const stTotal = hasSubtasks ? task.subtasks.length : 0;
                 return `
                   <div class="event-card ${days !== null && days <= 1 ? 'urgent' : (days !== null && days <= 3 ? 'warning' : '')}" style="${_eventBulkSelectMode ? 'display:flex;align-items:center' : ''}">
                     ${_eventBulkSelectMode ? '<div class="event-check-col"><input type="checkbox" ' + (_eventBulkSelectedIds.has(task.id) ? 'checked' : '') + ' onchange="toggleEventSelection(\'' + escapeAttr(task.id) + '\')" aria-label="' + escapeHtml(task.title) + ' 선택"></div>' : ''}
                     <div style="flex:1;min-width:0">
                       <div class="event-card-main">
-                        <div class="event-title">${telegramBadge}${escapeHtml(task.title)}</div>
+                        <div class="event-title">${telegramBadge}${escapeHtml(task.title)}${hasSubtasks ? ' <span class="event-subtask-badge">' + stDone + '/' + stTotal + '</span>' : ''}</div>
                         ${metaStr ? '<div class="event-meta-info">' + escapeHtml(metaStr) + '</div>' : ''}
                         ${task.description ? '<div class="event-description">' + escapeHtml(task.description.slice(0, 60)) + (task.description.length > 60 ? '...' : '') + '</div>' : ''}
                       </div>
@@ -143,6 +146,15 @@ function renderEventsTab() {
                         <button class="btn btn-small btn-delete" onclick="deleteTask('${escapeAttr(task.id)}')" aria-label="작업 삭제">${svgIcon('trash', 14)}</button>
                       </div>`}
                       <div class="event-dday">${days !== null ? (days < 0 ? 'D+' + Math.abs(days) : (days === 0 ? 'D-Day' : 'D-' + days)) : ''}</div>
+                      ${hasSubtasks ? `
+                      <div class="subtask-chips event-subtask-chips" onclick="event.stopPropagation();">
+                        ${task.subtasks.map((st, idx) => `
+                          <span class="subtask-chip ${st.completed ? 'done' : ''}" onclick="toggleSubtaskComplete('${escapeAttr(task.id)}', ${idx})">
+                            <span class="subtask-chip-check">${st.completed ? '✓' : '○'}</span>${escapeHtml(st.text)}
+                          </span>
+                        `).join('')}
+                      </div>
+                      ` : ''}
                     </div>
                   </div>
                 `;

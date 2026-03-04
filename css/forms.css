@@ -269,3 +269,11 @@
     .repeat-monthly .form-input {
       max-width: 120px;
     }
+
+    .repeat-interval {
+      margin-top: 10px;
+    }
+
+    .repeat-interval .form-input {
+      max-width: 120px;
+    }
