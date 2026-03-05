@@ -185,6 +185,7 @@ function _renderAllView() {
                     <div class="all-task-title completed">${escapeHtml(task.title)}</div>
                   </div>
                   <div class="all-task-actions">
+                    <button class="btn-small edit" onclick="editTask('${escapeAttr(task.id)}')" aria-label="작업 수정">${svgIcon('edit', 14)}</button>
                     <button class="btn-small uncomplete" onclick="uncompleteTask('${escapeAttr(task.id)}')" aria-label="완료 되돌리기">↩️</button>
                     <button class="btn-small delete" onclick="deleteTask('${escapeAttr(task.id)}')" aria-label="작업 삭제">×</button>
                   </div>
@@ -298,7 +299,10 @@ function renderHistoryTab() {
 
           return `
             <div class="history-header">
-              <h2>📅 활동 히스토리</h2>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <h2 style="margin:0;">📅 활동 히스토리</h2>
+                <button class="btn btn-secondary" onclick="showClearLogRangeModal()" style="font-size:14px;padding:4px 10px;">🗑️ 기간 삭제</button>
+              </div>
               <div class="history-summary">총 ${totalCompleted}개 완료</div>
             </div>
 
