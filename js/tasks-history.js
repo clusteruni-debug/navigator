@@ -32,11 +32,15 @@ function getCompletedTasksByDate(dateStr) {
   });
 
   // 2. appState.tasks에서 보완 (completionLog에 없는 항목)
+  const deletedLog = (appState.deletedIds && appState.deletedIds.completionLog) || {};
   appState.tasks.forEach(t => {
     if (!t.completed || !t.completedAt) return;
     const completedDate = getLocalDateStr(new Date(t.completedAt));
     if (completedDate !== dateStr) return;
     const timeStr = new Date(t.completedAt).toTimeString().slice(0, 5);
+    // Soft-Delete: completionLog에서 삭제된 항목이면 tasks에서도 표시하지 않음
+    const delKey = dateStr + '|' + (t.title || '') + '|' + timeStr;
+    if (deletedLog[delKey]) return;
     const key = t.title + '|' + timeStr;
     if (!seen.has(key)) {
       seen.add(key);
@@ -65,11 +69,15 @@ function getCompletionMap(habitTitle) {
     });
   }
   // appState.tasks 현재 데이터로 보완 (completionLog와 중복되지 않는 항목만 추가)
+  const deletedLog = (appState.deletedIds && appState.deletedIds.completionLog) || {};
   appState.tasks.forEach(t => {
     if (habitTitle && t.title !== habitTitle) return;
     if (t.completed && t.completedAt) {
       const dateKey = getLocalDateStr(new Date(t.completedAt));
       const timeStr = new Date(t.completedAt).toTimeString().slice(0, 5);
+      // Soft-Delete: completionLog에서 삭제된 항목이면 카운트하지 않음
+      const delKey = dateKey + '|' + (t.title || '') + '|' + timeStr;
+      if (deletedLog[delKey]) return;
       const logEntries = (appState.completionLog || {})[dateKey] || [];
       // completionLog에 같은 제목+시간 항목이 없는 경우만 카운트
       const isDuplicate = logEntries.some(e => e.t === t.title && e.at === timeStr);
@@ -535,6 +543,41 @@ function applyClearLogRange() {
 window.applyClearLogRange = applyClearLogRange;
 
 /**
+ * completionLog 전체 삭제
+ */
+function clearAllCompletionLog() {
+  const allDates = Object.keys(appState.completionLog || {});
+  if (allDates.length === 0) { showToast('삭제할 기록이 없습니다', 'warning'); return; }
+
+  let count = 0;
+  allDates.forEach(d => {
+    const entries = appState.completionLog[d];
+    if (Array.isArray(entries)) count += entries.filter(e => !e._summary).length;
+  });
+
+  if (count === 0) { showToast('삭제할 기록이 없습니다', 'warning'); return; }
+  if (!confirm(`완료 기록 ${count}개를 전부 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) return;
+
+  // Soft-Delete: 모든 항목 삭제 기록 추가
+  if (!appState.deletedIds.completionLog) appState.deletedIds.completionLog = {};
+  const now = new Date().toISOString();
+  allDates.forEach(d => {
+    (appState.completionLog[d] || []).forEach(e => {
+      if (e._summary) return;
+      const delKey = d + '|' + (e.t || '') + '|' + (e.at || '');
+      appState.deletedIds.completionLog[delKey] = now;
+    });
+  });
+
+  appState.completionLog = {};
+  saveState();
+  recomputeTodayStats();
+  renderStatic();
+  showToast(`${count}개 기록 전체 삭제됨`, 'success');
+}
+window.clearAllCompletionLog = clearAllCompletionLog;
+
+/**
  * 선택된 날짜의 상세 정보 렌더링
  */
 function renderDayDetail() {
@@ -671,11 +714,15 @@ function renderRecentHistory() {
   }
 
   // 2. appState.tasks 보완 (completionLog에 없는 항목)
+  const deletedLog = (appState.deletedIds && appState.deletedIds.completionLog) || {};
   appState.tasks.forEach(t => {
     if (!t.completed || !t.completedAt) return;
     const dateKey = getLocalDateStr(new Date(t.completedAt));
-    if (!grouped[dateKey]) grouped[dateKey] = [];
     const timeStr = new Date(t.completedAt).toTimeString().slice(0, 5);
+    // Soft-Delete: completionLog에서 삭제된 항목이면 tasks에서도 표시하지 않음
+    const delKey = dateKey + '|' + (t.title || '') + '|' + timeStr;
+    if (deletedLog[delKey]) return;
+    if (!grouped[dateKey]) grouped[dateKey] = [];
     const exists = grouped[dateKey].some(e => {
       const eTime = new Date(e.completedAt).toTimeString().slice(0, 5);
       return e.title === t.title && eTime === timeStr;

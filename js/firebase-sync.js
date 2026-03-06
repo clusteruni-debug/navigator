@@ -539,11 +539,13 @@ async function loadFromFirebase() {
       // Soft-Delete: 삭제 기록 병합 (merge 전에 수행해야 삭제된 항목 필터링 가능)
       appState.deletedIds = mergeDeletedIds(appState.deletedIds, data.deletedIds);
 
-      // 휴지통 병합 (ID 기준 합집합, 더 최근 deletedAt 우선)
+      // 휴지통 병합 (ID 기준 합집합, 더 최근 deletedAt 우선, 영구삭제 항목 제외)
       if (Array.isArray(data.trash)) {
+        const deletedTrash = appState.deletedIds.trash || {};
         const trashMap = new Map();
-        (appState.trash || []).forEach(t => trashMap.set(t.id, t));
+        (appState.trash || []).forEach(t => { if (!deletedTrash[t.id]) trashMap.set(t.id, t); });
         data.trash.forEach(t => {
+          if (deletedTrash[t.id]) return; // 영구삭제된 항목은 병합에서 제외
           const existing = trashMap.get(t.id);
           if (!existing || (t.deletedAt && (!existing.deletedAt || t.deletedAt > existing.deletedAt))) {
             trashMap.set(t.id, t);
@@ -762,11 +764,13 @@ function startRealtimeSync() {
         if (data.deletedIds) {
           appState.deletedIds = mergeDeletedIds(appState.deletedIds, data.deletedIds);
         }
-        // 휴지통 실시간 병합
+        // 휴지통 실시간 병합 (영구삭제 항목 제외)
         if (Array.isArray(data.trash)) {
+          const deletedTrash = appState.deletedIds.trash || {};
           const trashMap = new Map();
-          (appState.trash || []).forEach(t => trashMap.set(t.id, t));
+          (appState.trash || []).forEach(t => { if (!deletedTrash[t.id]) trashMap.set(t.id, t); });
           data.trash.forEach(t => {
+            if (deletedTrash[t.id]) return;
             const existing = trashMap.get(t.id);
             if (!existing || (t.deletedAt && (!existing.deletedAt || t.deletedAt > existing.deletedAt))) {
               trashMap.set(t.id, t);

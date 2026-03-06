@@ -567,6 +567,7 @@ function restoreFromTrash(id) {
 
   // deletedIds에서도 제거 (동기화 시 다시 삭제되지 않도록)
   delete appState.deletedIds.tasks[id];
+  if (appState.deletedIds.trash) delete appState.deletedIds.trash[id];
 
   appState.tasks.push(task);
   appState.trash.splice(idx, 1);
@@ -580,6 +581,9 @@ function restoreFromTrash(id) {
  */
 function permanentDeleteFromTrash(id) {
   if (!confirm('영구 삭제하면 복원할 수 없습니다. 진행하시겠습니까?')) return;
+  // Soft-Delete: 동기화 시 부활 방지
+  if (!appState.deletedIds.trash) appState.deletedIds.trash = {};
+  appState.deletedIds.trash[id] = new Date().toISOString();
   appState.trash = appState.trash.filter(t => t.id !== id);
   saveState();
   renderStatic();
@@ -592,6 +596,12 @@ function permanentDeleteFromTrash(id) {
 function emptyTrash() {
   if (appState.trash.length === 0) return;
   if (!confirm('휴지통을 비우면 ' + appState.trash.length + '개 항목이 영구 삭제됩니다. 진행하시겠습니까?')) return;
+  // Soft-Delete: 모든 휴지통 항목의 삭제 기록 추가 (동기화 시 부활 방지)
+  if (!appState.deletedIds.trash) appState.deletedIds.trash = {};
+  const now = new Date().toISOString();
+  appState.trash.forEach(t => {
+    appState.deletedIds.trash[t.id] = now;
+  });
   appState.trash = [];
   saveState();
   renderStatic();
@@ -604,6 +614,14 @@ function emptyTrash() {
 function cleanupOldTrash() {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const before = appState.trash.length;
+  // Soft-Delete: 만료 항목도 deletedIds에 기록 (동기화 시 부활 방지)
+  if (!appState.deletedIds.trash) appState.deletedIds.trash = {};
+  const now = new Date().toISOString();
+  appState.trash.forEach(t => {
+    if (!t.deletedAt || t.deletedAt <= thirtyDaysAgo) {
+      appState.deletedIds.trash[t.id] = now;
+    }
+  });
   appState.trash = appState.trash.filter(t => t.deletedAt && t.deletedAt > thirtyDaysAgo);
   if (appState.trash.length < before) {
     console.log('[trash] ' + (before - appState.trash.length) + '개 만료 항목 정리');

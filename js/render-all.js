@@ -301,7 +301,10 @@ function renderHistoryTab() {
             <div class="history-header">
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <h2 style="margin:0;">📅 활동 히스토리</h2>
-                <button class="btn btn-secondary" onclick="showClearLogRangeModal()" style="font-size:14px;padding:4px 10px;">🗑️ 기간 삭제</button>
+                <span style="display:flex;gap:6px">
+                  <button class="btn btn-secondary" onclick="showClearLogRangeModal()" style="font-size:14px;padding:4px 10px;">🗑️ 기간 삭제</button>
+                  <button class="btn btn-secondary" onclick="clearAllCompletionLog()" style="font-size:14px;padding:4px 10px;color:var(--accent-danger,#ff6b6b)">🗑️ 전체 삭제</button>
+                </span>
               </div>
               <div class="history-summary">총 ${totalCompleted}개 완료</div>
             </div>
