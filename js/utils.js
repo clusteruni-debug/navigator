@@ -169,10 +169,14 @@ function sanitizeUrl(url) {
   return '';
 }
 
-/** onclick 속성 내 JS 문자열 이스케이프 — 백슬래시+따옴표를 JS 레벨로 이스케이프 후 HTML 속성용 이스케이프 */
+/** onclick 속성 내 JS 문자열 이스케이프 — JS 레벨 이스케이프 먼저, 그 다음 HTML 속성용 이스케이프 */
 function escapeAttr(text) {
   if (text === null || text === undefined) return '';
-  return escapeHtml(String(text)).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  // 1) JS string escape (backslash → \\, single quote → \')
+  // 2) HTML attribute escape (& < > " ' → entities)
+  // 순서 중요: JS 먼저 해야 HTML 디코딩 후에도 \' 가 유지됨
+  const jsEscaped = String(text).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  return escapeHtml(jsEscaped);
 }
 
 /**

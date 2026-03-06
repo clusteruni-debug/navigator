@@ -469,10 +469,21 @@ function clearCompletionLogDate(dateStr) {
 
   // Soft-Delete: 모든 항목 삭제 기록 추가
   if (!appState.deletedIds.completionLog) appState.deletedIds.completionLog = {};
+  const now = new Date().toISOString();
+  // 1) completionLog 항목
   entries.forEach(e => {
     if (e._summary) return;
     const delKey = dateStr + '|' + (e.t || '') + '|' + (e.at || '');
-    appState.deletedIds.completionLog[delKey] = new Date().toISOString();
+    appState.deletedIds.completionLog[delKey] = now;
+  });
+  // 2) tasks 완료 항목 (해당 날짜, completionLog에 없는 것도 히스토리에서 숨기기)
+  appState.tasks.forEach(t => {
+    if (!t.completed || !t.completedAt) return;
+    const completedDate = getLocalDateStr(new Date(t.completedAt));
+    if (completedDate !== dateStr) return;
+    const timeStr = new Date(t.completedAt).toTimeString().slice(0, 5);
+    const delKey = dateStr + '|' + (t.title || '') + '|' + timeStr;
+    appState.deletedIds.completionLog[delKey] = now;
   });
 
   delete appState.completionLog[dateStr];
@@ -541,12 +552,23 @@ function applyClearLogRange() {
 
   // Soft-Delete: 모든 대상 항목 삭제 기록 추가
   if (!appState.deletedIds.completionLog) appState.deletedIds.completionLog = {};
+  const now = new Date().toISOString();
+  // 1) completionLog 항목
   targetDates.forEach(d => {
     (appState.completionLog[d] || []).forEach(e => {
       if (e._summary) return;
       const delKey = d + '|' + (e.t || '') + '|' + (e.at || '');
-      appState.deletedIds.completionLog[delKey] = new Date().toISOString();
+      appState.deletedIds.completionLog[delKey] = now;
     });
+  });
+  // 2) tasks 완료 항목 (해당 기간 내, completionLog에 없는 것도 히스토리에서 숨기기)
+  appState.tasks.forEach(t => {
+    if (!t.completed || !t.completedAt) return;
+    const dateKey = getLocalDateStr(new Date(t.completedAt));
+    if (dateKey < from || dateKey > to) return;
+    const timeStr = new Date(t.completedAt).toTimeString().slice(0, 5);
+    const delKey = dateKey + '|' + (t.title || '') + '|' + timeStr;
+    appState.deletedIds.completionLog[delKey] = now;
   });
 
   // 확인 후 삭제
@@ -564,14 +586,22 @@ window.applyClearLogRange = applyClearLogRange;
  * completionLog 전체 삭제
  */
 function clearAllCompletionLog() {
-  const allDates = Object.keys(appState.completionLog || {});
-  if (allDates.length === 0) { showToast('삭제할 기록이 없습니다', 'warning'); return; }
-
+  // completionLog + tasks 완료 항목 모두 카운트
   let count = 0;
+  const allDates = Object.keys(appState.completionLog || {});
   allDates.forEach(d => {
     const entries = appState.completionLog[d];
     if (Array.isArray(entries)) count += entries.filter(e => !e._summary).length;
   });
+  // tasks에서 완료된 항목도 카운트 (completionLog와 중복 제외)
+  const taskOnlyCount = appState.tasks.filter(t => {
+    if (!t.completed || !t.completedAt) return false;
+    const dateKey = getLocalDateStr(new Date(t.completedAt));
+    const timeStr = new Date(t.completedAt).toTimeString().slice(0, 5);
+    const logEntries = (appState.completionLog || {})[dateKey] || [];
+    return !logEntries.some(e => e.t === t.title && e.at === timeStr);
+  }).length;
+  count += taskOnlyCount;
 
   if (count === 0) { showToast('삭제할 기록이 없습니다', 'warning'); return; }
   if (!confirm(`완료 기록 ${count}개를 전부 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) return;
@@ -579,12 +609,21 @@ function clearAllCompletionLog() {
   // Soft-Delete: 모든 항목 삭제 기록 추가
   if (!appState.deletedIds.completionLog) appState.deletedIds.completionLog = {};
   const now = new Date().toISOString();
+  // 1) completionLog 항목
   allDates.forEach(d => {
     (appState.completionLog[d] || []).forEach(e => {
       if (e._summary) return;
       const delKey = d + '|' + (e.t || '') + '|' + (e.at || '');
       appState.deletedIds.completionLog[delKey] = now;
     });
+  });
+  // 2) tasks 완료 항목 (completionLog에 없는 것도 히스토리에서 숨기기)
+  appState.tasks.forEach(t => {
+    if (!t.completed || !t.completedAt) return;
+    const dateKey = getLocalDateStr(new Date(t.completedAt));
+    const timeStr = new Date(t.completedAt).toTimeString().slice(0, 5);
+    const delKey = dateKey + '|' + (t.title || '') + '|' + timeStr;
+    appState.deletedIds.completionLog[delKey] = now;
   });
 
   appState.completionLog = {};
