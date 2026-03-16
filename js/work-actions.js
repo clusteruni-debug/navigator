@@ -20,6 +20,7 @@ function addWorkProject(name, deadline = null) {
     name: name,
     currentStage: 0,
     deadline: deadline,
+    meta: {},
     stages: defaultStages,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -202,7 +203,15 @@ function promptTaskDeadline(projectId, stageIdx, subcatIdx, taskIdx) {
   input.style.left = '50%';
   document.body.appendChild(input);
 
+  // 고아 DOM 방지: 5초 후 자동 정리
+  const cleanupTimer = setTimeout(function() {
+    if (document.body.contains(input)) {
+      document.body.removeChild(input);
+    }
+  }, 5000);
+
   input.addEventListener('change', function() {
+    clearTimeout(cleanupTimer);
     task.deadline = this.value || null;
     project.updatedAt = new Date().toISOString();
     saveWorkProjects();
@@ -213,10 +222,13 @@ function promptTaskDeadline(projectId, stageIdx, subcatIdx, taskIdx) {
     } else {
       showToast('마감일 삭제됨', 'success');
     }
-    document.body.removeChild(input);
+    if (document.body.contains(input)) {
+      document.body.removeChild(input);
+    }
   });
 
   input.addEventListener('blur', function() {
+    clearTimeout(cleanupTimer);
     // 변경 없이 닫힌 경우 정리
     if (document.body.contains(input)) {
       document.body.removeChild(input);
@@ -307,7 +319,7 @@ window.deleteWorkProject = deleteWorkProject;
 /**
  * 작업 항목 추가
  */
-function addWorkTask(projectId, stageIdx, subcatIdx, title, status) {
+function addWorkTask(projectId, stageIdx, subcatIdx, title, status, canStartEarly = false) {
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
 
@@ -319,6 +331,7 @@ function addWorkTask(projectId, stageIdx, subcatIdx, title, status) {
     estimatedTime: 30,
     actualTime: null,
     completedAt: status === 'completed' ? getLocalDateTimeStr() : null,
+    canStartEarly: canStartEarly,
     logs: []
   });
 
@@ -485,6 +498,24 @@ function deleteWorkLog(projectId, stageIdx, subcatIdx, taskIdx, logIdx) {
   renderStatic();
 }
 window.deleteWorkLog = deleteWorkLog;
+
+/**
+ * canStartEarly 토글
+ */
+function toggleCanStartEarly(projectId, stageIdx, subcatIdx, taskIdx) {
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project) return;
+
+  const task = project.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  if (!task) return;
+
+  task.canStartEarly = !task.canStartEarly;
+  project.updatedAt = new Date().toISOString();
+  saveWorkProjects();
+  renderStatic();
+  showToast(task.canStartEarly ? '선제적 시작 가능으로 설정됨' : '선제적 시작 해제됨', 'success');
+}
+window.toggleCanStartEarly = toggleCanStartEarly;
 
 /**
  * 노션/슬랙용 복사

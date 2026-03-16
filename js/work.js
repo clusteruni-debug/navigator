@@ -68,26 +68,51 @@ function renderWorkProjects() {
       </div>
 
       ${(() => {
-        const focus = getWorkFocus();
-        if (!focus) {
-          const hasAnyTask = appState.workProjects.some(p => !p.archived && getAllProjectTasks(p).length > 0);
-          if (hasAnyTask) {
-            return '<div class="work-focus-card" style="background: linear-gradient(135deg, rgba(72,187,120,0.15), rgba(72,187,120,0.05)); border: 1px solid rgba(72,187,120,0.3); border-radius: 12px; padding: 16px; margin-bottom: 12px; text-align: center;">' +
-              '<span style="font-size: 16px;">🎉 모든 본업 태스크 완료!</span>' +
-            '</div>';
-          }
-          return '';
+        const focusResult = getWorkFocus();
+        const { task: focus, mode: focusMode } = focusResult;
+
+        if (focusMode === 'empty') return '';
+
+        if (focusMode === 'all-done') {
+          return '<div class="work-focus-card" style="background: linear-gradient(135deg, rgba(72,187,120,0.15), rgba(72,187,120,0.05)); border: 1px solid rgba(72,187,120,0.3); border-radius: 12px; padding: 16px; margin-bottom: 12px; text-align: center;">' +
+            '<span style="font-size: 16px;">🎉 모든 본업 태스크 완료!</span>' +
+          '</div>';
         }
+
+        if (!focus) return '';
+
+        // 모드별 라벨/색상
+        const modeConfig = {
+          urgent: { label: '🎯 지금 집중:', color: null }, // pulse 색상 사용
+          normal: { label: '🎯 지금 집중:', color: '#48bb78' },
+          proactive: { label: '💡 미리 해두면 좋은 것:', color: '#667eea' },
+          general: { label: '📋 여유 시간에:', color: '#a0a0a0' }
+        };
+        const cfg = modeConfig[focusMode] || modeConfig.normal;
         const focusPulse = calculateTaskPulse(focus);
-        const focusColor = PULSE_COLORS[focusPulse] || '#667eea';
+        const focusColor = cfg.color || PULSE_COLORS[focusPulse] || '#667eea';
         const timeLabel = focus.estimatedTime ? '~' + focus.estimatedTime + '분' : '';
+
+        // 일반 업무 (프로젝트 미연결) 완료 버튼
+        const isGeneral = focusMode === 'general';
+        const completeBtn = isGeneral
+          ? '<button onclick="completeTask(\'' + escapeAttr(focus.id) + '\')" style="padding: 8px 16px; background: ' + focusColor + '; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; min-height: 44px;">완료 ✓</button>'
+          : '<button onclick="toggleWorkTaskComplete(\'' + escapeAttr(focus._projectId) + '\', ' + focus._stageIdx + ', ' + focus._subcatIdx + ', ' + focus._taskIdx + ')" style="padding: 8px 16px; background: ' + focusColor + '; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; min-height: 44px;">완료 ✓</button>';
+        const contextLine = isGeneral
+          ? ''
+          : '<div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">' + escapeHtml(focus._projectName) + ' &gt; ' + escapeHtml(focus._stageName) + (timeLabel ? ' · ' + timeLabel : '') + '</div>';
+        const proactiveHint = focusMode === 'proactive'
+          ? '<div style="font-size: 12px; color: ' + focusColor + '; margin-top: 4px; opacity: 0.8;">이 태스크는 다음 단계이지만 미리 시작할 수 있습니다</div>'
+          : '';
+
         return '<div class="work-focus-card" style="background: linear-gradient(135deg, ' + focusColor + '15, ' + focusColor + '08); border: 1px solid ' + focusColor + '40; border-left: 4px solid ' + focusColor + '; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">' +
           '<div style="flex: 1; min-width: 0;">' +
-            '<div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">🎯 지금 집중</div>' +
+            '<div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">' + cfg.label + '</div>' +
             '<div style="font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + escapeHtml(focus.title) + '</div>' +
-            '<div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">' + escapeHtml(focus._projectName) + ' &gt; ' + escapeHtml(focus._stageName) + (timeLabel ? ' · ' + timeLabel : '') + '</div>' +
+            contextLine +
+            proactiveHint +
           '</div>' +
-          '<button onclick="toggleWorkTaskComplete(\'' + escapeAttr(focus._projectId) + '\', ' + focus._stageIdx + ', ' + focus._subcatIdx + ', ' + focus._taskIdx + ')" style="padding: 8px 16px; background: ' + focusColor + '; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; min-height: 44px;">완료 ✓</button>' +
+          completeBtn +
         '</div>';
       })()}
 
@@ -999,7 +1024,7 @@ function renderWorkProjectDetail(project) {
         <!-- 프로젝트 개요 -->
         <div class="work-project-description" style="margin: 8px 0;">
           ${project.description
-            ? '<div style="font-size: 14px; color: var(--text-secondary); padding: 8px 12px; background: var(--bg-tertiary); border-radius: 8px; cursor: pointer; white-space: pre-wrap;" onclick="editProjectDescription(\'${escapeAttr(project.id)}\')" title="클릭하여 개요 수정">' + escapeHtml(project.description) + '</div>'.replace("'${escapeAttr(project.id)}'", "'" + escapeAttr(project.id) + "'")
+            ? '<div style="font-size: 14px; color: var(--text-secondary); padding: 8px 12px; background: var(--bg-tertiary); border-radius: 8px; cursor: pointer; white-space: pre-wrap;" onclick="editProjectDescription(\'' + escapeAttr(project.id) + '\')" title="클릭하여 개요 수정">' + escapeHtml(project.description) + '</div>'
             : '<button class="work-stage-add-task" style="font-size: 13px; opacity: 0.7;" onclick="editProjectDescription(\'' + escapeAttr(project.id) + '\')">+ 프로젝트 개요 추가</button>'
           }
         </div>
@@ -1139,11 +1164,42 @@ function renderWorkProjectDetail(project) {
         </div>
       </div>
 
-      <div style="display: flex; gap: 10px; margin-top: 16px;">
+      <div style="display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap;">
         <button class="work-copy-btn" onclick="copyWorkProjectToClipboard('${escapeAttr(project.id)}')">
           📋 노션/슬랙용 복사
         </button>
+        <button class="work-copy-btn" onclick="showFormExportMenu(event, '${escapeAttr(project.id)}')">
+          📝 양식 출력
+        </button>
+        <button class="work-copy-btn" onclick="showMetaEditor('${escapeAttr(project.id)}')">
+          ℹ️ 프로젝트 정보
+        </button>
       </div>
+
+      <!-- 프로젝트 정보 요약 (meta가 있을 때) -->
+      ${(() => {
+        const m = project.meta || {};
+        const hasAnyMeta = Object.values(m).some(v => v !== null && v !== undefined && v !== '' && v !== 0);
+        if (!hasAnyMeta) return '';
+
+        const items = [];
+        if (m.methodology) items.push('방법론: ' + escapeHtml(m.methodology));
+        if (m.targetPlatform) items.push('플랫폼: ' + escapeHtml(m.targetPlatform));
+        if (m.participantCount) {
+          let pText = '인원: ' + m.participantCount + '명';
+          if (m.bufferCount) pText += ' (버퍼 ' + m.bufferCount + '명)';
+          items.push(pText);
+        }
+        if (m.testDate) items.push('테스트일: ' + escapeHtml(m.testDate));
+        if (m.location) items.push('장소: ' + escapeHtml(m.location));
+        if (m.outsourcingCompany) items.push('외주: ' + escapeHtml(m.outsourcingCompany));
+        if (items.length === 0) return '';
+
+        return '<div style="background: var(--bg-tertiary); border-radius: 8px; padding: 10px 14px; margin-top: 12px; font-size: 13px; color: var(--text-secondary); cursor: pointer;" onclick="showMetaEditor(\'' + escapeAttr(project.id) + '\')" title="클릭하여 편집">' +
+          '<div style="font-weight: 600; margin-bottom: 4px; color: var(--text-muted);">ℹ️ 프로젝트 정보</div>' +
+          items.join(' · ') +
+        '</div>';
+      })()}
     </div>
   `;
 }
@@ -1182,11 +1238,13 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
         <span class="work-task-title ${task.status === 'completed' ? 'completed' : ''}"
               onclick="promptRenameWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, '${escapeAttr(task.title)}')"
               title="클릭하여 이름 변경">${escapeHtml(task.title)}</span>
+        ${task.canStartEarly ? '<span style="font-size: 11px; background: rgba(102,126,234,0.15); color: #667eea; padding: 1px 6px; border-radius: 4px; white-space: nowrap;" title="미리 시작 가능">선제</span>' : ''}
         ${deadlineHtml}
         <div class="work-task-actions">
           <button class="work-task-action" onclick="promptRenameWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, '${escapeAttr(task.title)}')">${svgIcon('edit', 14)}</button>
           <button class="work-task-action" onclick="promptTaskDeadline('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="마감일 설정" aria-label="마감일 설정">📅</button>
           <button class="work-task-action" onclick="showWorkModal('log', '${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" aria-label="기록 추가">+ 기록</button>
+          <button class="work-task-action" onclick="event.stopPropagation(); toggleCanStartEarly('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="${task.canStartEarly ? '선제적 시작 해제' : '선제적 시작 설정'}" aria-label="선제적 시작 토글" style="${task.canStartEarly ? 'color: #667eea;' : ''}">💡</button>
           <button class="work-task-action" onclick="event.stopPropagation(); copyWorkTaskToSlack('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="슬랙 복사" aria-label="슬랙 복사">📋</button>
           <button class="work-task-action" onclick="deleteWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="항목 삭제" aria-label="항목 삭제" style="color: var(--danger);">${svgIcon('trash', 14)}</button>
         </div>

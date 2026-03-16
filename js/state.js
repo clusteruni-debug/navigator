@@ -56,6 +56,7 @@ const _collapsedEventGroups = new Set(); // 접힌 그룹 ID
  * @property {number} estimatedTime - 예상 소요시간 (분, 기본 30)
  * @property {number|null} actualTime - 실제 소요시간 (분)
  * @property {string|null} completedAt - 완료 시각 (YYYY-MM-DDTHH:MM)
+ * @property {boolean} [canStartEarly] - 이전 단계 완료 전에도 시작 가능 (기본: false)
  * @property {Array<{date: string, content: string}>} logs - 작업 로그
  * @property {string} [createdAt] - 생성 시각 (ISO 8601)
  * @property {number} [goal] - 목표 수량
@@ -79,12 +80,28 @@ const _collapsedEventGroups = new Set(); // 접힌 그룹 ID
  */
 
 /**
+ * @typedef {Object} WorkProjectMeta
+ * @property {string} [methodology] - 방법론 (예: "사용성 테스트", "FGI")
+ * @property {string} [targetPlatform] - 플랫폼 (예: "PC", "모바일", "크로스")
+ * @property {string} [recruitChannel] - 모객 채널
+ * @property {string} [rewardType] - 보상 유형
+ * @property {string} [rewardAmount] - 보상 규모
+ * @property {number} [participantCount] - 참여 인원
+ * @property {number} [bufferCount] - 버퍼 인원
+ * @property {number} [groupCount] - 그룹 수
+ * @property {string} [testDuration] - 테스트 소요시간
+ * @property {string} [testDate] - 테스트 예정일
+ * @property {string} [location] - 테스트 장소
+ * @property {string} [outsourcingCompany] - 외주업체명
+ * @property {string} [notes] - 기타 메모
+ *
  * @typedef {Object} WorkProject
  * @property {string} id - 고유 ID
  * @property {string} name - 프로젝트 이름
  * @property {number} currentStage - 현재 단계 인덱스
  * @property {string|null} deadline - 마감일 (YYYY-MM-DD)
  * @property {WorkStage[]} stages - 단계 목록
+ * @property {WorkProjectMeta} [meta] - 프로젝트 메타 데이터
  * @property {string} createdAt - 생성 시각 (ISO 8601)
  * @property {string} updatedAt - 수정 시각 (ISO 8601)
  * @property {boolean} [archived] - 아카이브 여부

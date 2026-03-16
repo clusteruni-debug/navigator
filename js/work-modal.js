@@ -56,6 +56,12 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
             <button type="button" class="work-status-option" data-status="blocked">보류</button>
           </div>
         </div>
+        <div class="work-modal-field">
+          <label class="work-modal-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" id="work-input-canStartEarly" style="width: 18px; height: 18px; cursor: pointer;">
+            <span>미리 시작 가능 (선제적 추천 대상)</span>
+          </label>
+        </div>
       `;
       break;
     case 'log':
@@ -72,11 +78,11 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
       bodyHtml = `
         <div class="work-modal-field">
           <label class="work-modal-label">시작일</label>
-          <input type="date" class="work-modal-input" id="work-input-startdate" value="${project?.startDate || ''}">
+          <input type="date" class="work-modal-input" id="work-input-startdate" value="${escapeAttr(project?.startDate || '')}">
         </div>
         <div class="work-modal-field">
           <label class="work-modal-label">마감일</label>
-          <input type="date" class="work-modal-input" id="work-input-deadline" value="${project?.deadline || ''}">
+          <input type="date" class="work-modal-input" id="work-input-deadline" value="${escapeAttr(project?.deadline || '')}">
         </div>
         ${project?.startDate && project?.deadline ? `
           <div style="color: var(--text-muted); font-size: 14px; margin-top: 8px;">
@@ -92,11 +98,11 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
       bodyHtml = `
         <div class="work-modal-field">
           <label class="work-modal-label">${escapeHtml(stageNameForModal)} 시작일</label>
-          <input type="date" class="work-modal-input" id="work-input-startdate" value="${stageData.startDate || ''}">
+          <input type="date" class="work-modal-input" id="work-input-startdate" value="${escapeAttr(stageData.startDate || '')}">
         </div>
         <div class="work-modal-field">
           <label class="work-modal-label">${escapeHtml(stageNameForModal)} 마감일</label>
-          <input type="date" class="work-modal-input" id="work-input-deadline" value="${stageData.deadline || ''}">
+          <input type="date" class="work-modal-input" id="work-input-deadline" value="${escapeAttr(stageData.endDate || '')}">
         </div>
       `;
       break;
@@ -106,11 +112,11 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
       bodyHtml = `
         <div class="work-modal-field">
           <label class="work-modal-label">${escapeHtml(subcatData.name) || '중분류'} 시작일</label>
-          <input type="date" class="work-modal-input" id="work-input-startdate" value="${subcatData.startDate || ''}">
+          <input type="date" class="work-modal-input" id="work-input-startdate" value="${escapeAttr(subcatData.startDate || '')}">
         </div>
         <div class="work-modal-field">
           <label class="work-modal-label">${escapeHtml(subcatData.name) || '중분류'} 종료일</label>
-          <input type="date" class="work-modal-input" id="work-input-deadline" value="${subcatData.endDate || ''}">
+          <input type="date" class="work-modal-input" id="work-input-deadline" value="${escapeAttr(subcatData.endDate || '')}">
         </div>
       `;
       break;
@@ -119,11 +125,11 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
       bodyHtml = `
         <div class="work-modal-field">
           <label class="work-modal-label">목표 참여자 수</label>
-          <input type="number" class="work-modal-input" id="work-input-goal" placeholder="예: 10" min="1" value="${project?.participantGoal || ''}">
+          <input type="number" class="work-modal-input" id="work-input-goal" placeholder="예: 10" min="1" value="${escapeAttr(project?.participantGoal || '')}">
         </div>
         <div class="work-modal-field">
           <label class="work-modal-label">현재 참여자 수</label>
-          <input type="number" class="work-modal-input" id="work-input-count" placeholder="예: 0" min="0" value="${project?.participantCount || 0}">
+          <input type="number" class="work-modal-input" id="work-input-count" placeholder="예: 0" min="0" value="${escapeAttr(project?.participantCount || 0)}">
         </div>
       `;
       break;
@@ -144,7 +150,7 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
             <div style="display: flex; flex-direction: column; gap: 8px;">
               ${allTemplates.map(t => `
                 <div style="display: flex; align-items: stretch; gap: 4px;">
-                  <button type="button" class="work-status-option template-option" data-template-id="${t.id}" style="text-align: left; padding: 12px; flex: 1;">
+                  <button type="button" class="work-status-option template-option" data-template-id="${escapeAttr(t.id)}" style="text-align: left; padding: 12px; flex: 1;">
                     <div style="font-weight: 500;">${escapeHtml(t.name)}</div>
                     <div style="font-size: 15px; color: var(--text-muted); margin-top: 4px;">
                       ${escapeHtml((t.stageNames || t.stages.map((_, i) => appState.workProjectStages[i])).filter(Boolean).join(' → '))}
@@ -153,7 +159,7 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
                       ${totalTaskCount(t)}개 항목
                     </div>
                   </button>
-                  <button type="button" class="work-project-action-btn" onclick="exportTemplate('${t.id}')" title="JSON 내보내기" style="padding: 8px; font-size: 16px;">📤</button>
+                  <button type="button" class="work-project-action-btn" onclick="exportTemplate('${escapeAttr(t.id)}')" title="JSON 내보내기" style="padding: 8px; font-size: 16px;">📤</button>
                 </div>
               `).join('')}
             </div>
@@ -256,7 +262,8 @@ function confirmWorkModal() {
       const name = document.getElementById('work-input-name').value.trim();
       if (!name) { showToast('이름을 입력하세요', 'error'); return; }
       const status = document.querySelector('.work-status-option.selected')?.dataset.status || 'not-started';
-      addWorkTask(projectId, stageIdx, subcategoryIdx, name, status);
+      const canStartEarly = document.getElementById('work-input-canStartEarly')?.checked || false;
+      addWorkTask(projectId, stageIdx, subcategoryIdx, name, status, canStartEarly);
       break;
     }
     case 'log': {
@@ -285,7 +292,7 @@ function confirmWorkModal() {
       const project = appState.workProjects.find(p => p.id === projectId);
       if (project) {
         project.stages[stageIdx].startDate = startDate;
-        project.stages[stageIdx].deadline = deadline;
+        project.stages[stageIdx].endDate = deadline;
         project.updatedAt = new Date().toISOString();
         saveWorkProjects();
         renderStatic();
@@ -373,7 +380,8 @@ function confirmWorkModal() {
               tasks: sub.tasks.map(t => ({
                 title: t.title,
                 ...(t.owner && { owner: t.owner }),
-                ...(t.estimatedTime && { estimatedTime: t.estimatedTime })
+                ...(t.estimatedTime && { estimatedTime: t.estimatedTime }),
+                ...(t.canStartEarly && { canStartEarly: true })
               }))
             }))
           })),
@@ -421,6 +429,7 @@ function applyTemplate(templateId) {
     id: generateId(),
     name: projectName,
     currentStage: 0,
+    meta: {},
     stages: Array.from({ length: stageCount }, (_, idx) => ({
       name: stageSource[idx] || ('단계 ' + (idx + 1)),
       completed: false,
@@ -439,6 +448,7 @@ function applyTemplate(templateId) {
           estimatedTime: t.estimatedTime || 30,
           actualTime: null,
           completedAt: null,
+          canStartEarly: t.canStartEarly || false,
           logs: []
         }))
       })) || []
@@ -474,6 +484,7 @@ function exportTemplate(templateId) {
           const task = { title: t.title };
           if (t.owner && t.owner !== 'me') task.owner = t.owner;
           if (t.estimatedTime && t.estimatedTime !== 30) task.estimatedTime = t.estimatedTime;
+          if (t.canStartEarly) task.canStartEarly = true;
           return task;
         })
       }))

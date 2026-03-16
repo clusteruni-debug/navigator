@@ -20,7 +20,7 @@ const WORK_STATUS = {
 };
 
 /**
- * WorkTask 필드 마이그레이션: owner, estimatedTime, actualTime, completedAt 기본값 적용
+ * WorkTask 필드 마이그레이션: owner, estimatedTime, actualTime, completedAt, canStartEarly 기본값 적용
  * @returns {boolean} 마이그레이션이 수행되었으면 true
  */
 function migrateWorkTaskFields() {
@@ -55,12 +55,16 @@ function migrateWorkTaskFields() {
             }
             migrated = true;
           }
+          if (task.canStartEarly === undefined) {
+            task.canStartEarly = false;
+            migrated = true;
+          }
         });
       });
     });
   });
   if (migrated) {
-    console.log('[migration] WorkTask 필드 마이그레이션 완료 (owner, estimatedTime, actualTime, completedAt)');
+    console.log('[migration] WorkTask 필드 마이그레이션 완료 (owner, estimatedTime, actualTime, completedAt, canStartEarly)');
   }
   return migrated;
 }
@@ -126,11 +130,11 @@ const DEFAULT_WORK_TEMPLATES = [
       { // 3: 테스트 준비
         subcategories: [
           { name: '기본', tasks: [
-            { title: '넥슨 스페이스 공유 (2주 전)', estimatedTime: 30, owner: 'me' },
-            { title: '다과/생수 확인', estimatedTime: 15, owner: 'me' },
-            { title: '서약서 준비', estimatedTime: 20, owner: 'me' },
-            { title: '출석 동선 세팅', estimatedTime: 30, owner: 'me' },
-            { title: '목걸이 번호 지정/세팅', estimatedTime: 20, owner: 'me' },
+            { title: '넥슨 스페이스 공유 (2주 전)', estimatedTime: 30, owner: 'me', canStartEarly: true },
+            { title: '다과/생수 확인', estimatedTime: 15, owner: 'me', canStartEarly: true },
+            { title: '서약서 준비', estimatedTime: 20, owner: 'me', canStartEarly: true },
+            { title: '출석 동선 세팅', estimatedTime: 30, owner: 'me', canStartEarly: true },
+            { title: '목걸이 번호 지정/세팅', estimatedTime: 20, owner: 'me', canStartEarly: true },
             { title: 'UX표준프로파일 수집', estimatedTime: 30, owner: 'me' }
           ]}
         ]
@@ -144,7 +148,7 @@ const DEFAULT_WORK_TEMPLATES = [
             { title: '휴대폰 수거', estimatedTime: 10, owner: 'me' }
           ]},
           { name: '기본', tasks: [
-            { title: 'X배너 세팅', estimatedTime: 15, owner: 'me' },
+            { title: 'X배너 세팅', estimatedTime: 15, owner: 'me', canStartEarly: true },
             { title: '보안서약서 작성', estimatedTime: 10, owner: 'me' },
             { title: '버퍼인원 안내', estimatedTime: 10, owner: 'me' },
             { title: '출석 인원 최종 프로파일 정리', estimatedTime: 30, owner: 'me' },
@@ -561,7 +565,8 @@ function saveAsTemplate(projectId) {
         tasks: sub.tasks.map(t => ({
           title: t.title,
           owner: t.owner || 'me',
-          estimatedTime: t.estimatedTime || 30
+          estimatedTime: t.estimatedTime || 30,
+          ...(t.canStartEarly && { canStartEarly: true })
         }))
       }))
     })),
@@ -659,8 +664,8 @@ function calculateProjectPulse(project) {
 }
 
 /**
- * 오늘의 포커스: 가장 긴급한 내 태스크 1개 반환
- * @returns {{ title, _projectName, _projectId, _stageIdx, _subcatIdx, _taskIdx, _stageName, estimatedTime, status, owner, deadline }|null}
+ * 오늘의 포커스: 모드 기반 태스크 추천
+ * @returns {{ task: object|null, mode: 'urgent'|'normal'|'proactive'|'general'|'all-done'|'empty' }}
  */
 function getWorkFocus() {
   const candidates = [];
@@ -684,21 +689,88 @@ function getWorkFocus() {
     });
   });
 
-  if (candidates.length === 0) return null;
+  if (candidates.length === 0) {
+    // 일반 업무 체크
+    const generalTasks = appState.tasks.filter(t => t.category === '본업' && !t.workProjectId && !t.completed);
+    if (generalTasks.length > 0) {
+      return { task: generalTasks[0], mode: 'general' };
+    }
+    // 프로젝트 태스크가 하나라도 있었는지 확인
+    const hasAnyTask = appState.workProjects.some(p => !p.archived && getAllProjectTasks(p).length > 0);
+    return { task: null, mode: hasAnyTask ? 'all-done' : 'empty' };
+  }
 
   const pulseOrder = { overdue: 0, critical: 1, warning: 2, attention: 3, normal: 4, 'on-track': 4 };
 
-  candidates.sort((a, b) => {
-    const pa = pulseOrder[calculateTaskPulse(a)] ?? 4;
-    const pb = pulseOrder[calculateTaskPulse(b)] ?? 4;
-    if (pa !== pb) return pa - pb;
+  // 1순위: 급한 태스크 (overdue ~ attention)
+  const urgent = candidates
+    .filter(t => {
+      const p = calculateTaskPulse(t);
+      return ['overdue', 'critical', 'warning', 'attention'].includes(p);
+    })
+    .sort((a, b) => {
+      const pa = pulseOrder[calculateTaskPulse(a)] ?? 4;
+      const pb = pulseOrder[calculateTaskPulse(b)] ?? 4;
+      if (pa !== pb) return pa - pb;
+      return (a.estimatedTime || 30) - (b.estimatedTime || 30);
+    });
 
-    if (a._stageIdx !== b._stageIdx) return a._stageIdx - b._stageIdx;
+  if (urgent.length > 0) {
+    return { task: urgent[0], mode: 'urgent' };
+  }
 
+  // 프로젝트별 현재 단계 이하의 태스크 vs 다음 단계 canStartEarly 분리
+  const currentStageTasks = [];
+  const earlyStartTasks = [];
+
+  candidates.forEach(t => {
+    const pulse = calculateTaskPulse(t);
+    if (pulse === 'waiting' || t.status === 'blocked') return;
+
+    // 해당 태스크가 속한 프로젝트의 currentStage 확인
+    const proj = appState.workProjects.find(p => p.id === t._projectId);
+    const projCurrentStage = proj ? (proj.currentStage || 0) : 0;
+
+    if (t._stageIdx <= projCurrentStage) {
+      // 현재 단계 이하 → 일반 작업
+      currentStageTasks.push(t);
+    } else if (t.canStartEarly) {
+      // 다음 단계 + canStartEarly → 선제적 추천 후보
+      earlyStartTasks.push(t);
+    }
+  });
+
+  // 2순위: 현재 단계의 일반 태스크
+  currentStageTasks.sort((a, b) => {
+    const sa = a._stageIdx ?? 99;
+    const sb = b._stageIdx ?? 99;
+    if (sa !== sb) return sa - sb;
     return (a.estimatedTime || 30) - (b.estimatedTime || 30);
   });
 
-  return candidates[0];
+  if (currentStageTasks.length > 0) {
+    return { task: currentStageTasks[0], mode: 'normal' };
+  }
+
+  // 3순위: 다음 단계의 canStartEarly 태스크 (선제적 추천)
+  earlyStartTasks.sort((a, b) => {
+    const sa = a._stageIdx ?? 99;
+    const sb = b._stageIdx ?? 99;
+    if (sa !== sb) return sa - sb;
+    return (a.estimatedTime || 30) - (b.estimatedTime || 30);
+  });
+
+  if (earlyStartTasks.length > 0) {
+    return { task: earlyStartTasks[0], mode: 'proactive' };
+  }
+
+  // 4순위: 일반 업무 (비프로젝트)
+  const generalTasks = appState.tasks.filter(t => t.category === '본업' && !t.workProjectId && !t.completed);
+  if (generalTasks.length > 0) {
+    return { task: generalTasks[0], mode: 'general' };
+  }
+
+  return { task: null, mode: 'all-done' };
 }
 
 /**
@@ -760,9 +832,7 @@ function generateMMReport(year, month) {
   const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
   const lastDate = new Date(year, month, 0).getDate();
   const endDate = `${year}-${String(month).padStart(2, '0')}-${lastDate}`;
-  // endDate for getCompletionLogEntries is exclusive, so go one day after
-  const endDateExclusive = `${year}-${String(month).padStart(2, '0')}-${String(lastDate + 1).padStart(2, '0')}`;
-  // Handle month overflow: if lastDate+1 > days in month, use next month
+  // Handle month overflow: use first day of next month as exclusive end
   const endExcl = new Date(year, month, 1); // first day of next month
   const endExclStr = getLocalDateStr(endExcl);
 
