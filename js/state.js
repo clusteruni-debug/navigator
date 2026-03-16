@@ -49,10 +49,15 @@ const _collapsedEventGroups = new Set(); // 접힌 그룹 ID
 
 /**
  * @typedef {Object} WorkTask
+ * @property {string} id - 고유 ID
  * @property {string} title - 작업 제목
- * @property {'not-started'|'in-progress'|'done'} status - 진행 상태
- * @property {Array<{date: string, text: string}>} logs - 작업 로그
- * @property {string} createdAt - 생성 시각 (ISO 8601)
+ * @property {'not-started'|'in-progress'|'completed'|'blocked'} status - 진행 상태
+ * @property {'me'|string} owner - 담당자 ('me' = 본인)
+ * @property {number} estimatedTime - 예상 소요시간 (분, 기본 30)
+ * @property {number|null} actualTime - 실제 소요시간 (분)
+ * @property {string|null} completedAt - 완료 시각 (YYYY-MM-DDTHH:MM)
+ * @property {Array<{date: string, content: string}>} logs - 작업 로그
+ * @property {string} [createdAt] - 생성 시각 (ISO 8601)
  * @property {number} [goal] - 목표 수량
  * @property {number} [count] - 현재 수량
  */
@@ -414,7 +419,8 @@ const appState = {
     weeklyGoal: 25,               // 주간 목표 (완료 작업 수)
     bedtimeReminder: true,        // 취침 알림 활성화
     bedtimeReminderMinutes: 30,   // 취침 몇 분 전 알림
-    dayStartHour: 5               // 하루 시작 시각 (이 시각 이후 반복 태스크 리셋, 기본 05:00)
+    dayStartHour: 5,              // 하루 시작 시각 (이 시각 이후 반복 태스크 리셋, 기본 05:00)
+    dailyAvailableMinutes: 360    // 하루 본업 가용 시간 (분, 기본 6시간)
   },
   templates: [],                    // 작업 템플릿 목록
   showSettings: false,             // 설정 모달 표시
@@ -443,6 +449,7 @@ const appState = {
   activeWorkProject: null,            // 현재 선택된 프로젝트 ID
   workProjectStages: ['준비', '설계', '진행', '점검', '실행', '마무리'],
   workView: 'dashboard',              // 뷰 모드: 'dashboard' | 'detail'
+  workQuickAddOwner: 'me',            // 빠른 추가 담당자: 'me' | 'other'
   workTemplates: [],                  // 저장된 템플릿 목록
   showArchivedProjects: false,        // 아카이브 프로젝트 표시 여부
   scheduleShowAll: false,             // 스케줄 뷰: 완료/보류 포함 여부

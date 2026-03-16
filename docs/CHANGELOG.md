@@ -20,6 +20,58 @@ hash type: message
 - Item
 -->
 
+## [2026-03-16] (Session 30 — Work Tab Phase 2, Sessions 1-8)
+> `js/work-data.js`, `js/work.js`, `js/work-modal.js`, `js/work-actions.js`, `js/state.js`, `js/actions.js`, `js/render-settings.js`, `css/work.css`, `sw.js` | DB: none
+
+### Changes
+- **WorkTask field expansion** (Session 1)
+  - Added `id`, `owner`, `estimatedTime`, `actualTime`, `completedAt` to WorkTask
+  - Migration function `migrateWorkTaskFields()` for existing data
+  - Template import/export updated to preserve new fields
+
+- **Default UXR RO template** (Session 2)
+  - `DEFAULT_WORK_TEMPLATES` with 46 tasks across 6 stages
+  - `seedDefaultTemplates()` auto-adds when workTemplates is empty
+
+- **Context-sensitive quick add + general work** (Session 3)
+  - Quick add creates WorkTask in project detail view, general Task otherwise
+  - Owner toggle button (나/기타) for quick add
+  - "일반 업무" option in project selector dropdown
+  - `renderWorkGeneralView()` for non-project work tasks
+
+- **Task Pulse + Project Pulse** (Session 4)
+  - `calculateTaskPulse()` / `calculateProjectPulse()` health indicators
+  - Task card left border color by pulse status
+  - Project dashboard card pulse border
+  - Emoji indicators in dropdown + alert summary bar
+
+- **Today's Focus (Work Next-Action)** (Session 5)
+  - `getWorkFocus()` — prioritized by pulse → stage → estimatedTime
+  - Focus card at Work tab top with one-click completion
+
+- **Workload Gauge** (Session 6)
+  - `calculateWorkload()` with remaining workdays calculation
+  - Gauge bar UI: comfortable/moderate/tight/overloaded
+  - `dailyAvailableMinutes` setting (default 6h)
+
+- **MM (Monthly Report) auto-generation** (Session 7)
+  - `generateMMReport(year, month)` — completionLog + Work project data
+  - Report modal with month selector + clipboard copy
+
+- **Notion Progress Copy** (Session 7)
+  - `copyNotionProgress()` — subcategory tasks → Notion format
+  - Date range: today / this week via popup menu
+  - Format: `YYYY년 M월 D일 + * [title] + * ` (blank detail line)
+
+- **Integration test + cleanup** (Session 8)
+  - XSS audit: fixed 8 missing `escapeAttr()` in renderWorkTask onclick handlers
+  - `workQuickAddOwner` state initialization added
+  - SW v6.5 → v6.6 cache version bump
+
+### Next Tasks
+- Browser manual testing (pulse colors, focus card, workload gauge, MM report, Notion copy)
+- Firebase cross-device sync verification
+
 ## [2026-02-11] (Session 29)
 > `js/rhythm.js`, `navigator-v5.html`, `sw.js` | +162/-137 | DB: none
 

@@ -20,6 +20,173 @@ const WORK_STATUS = {
 };
 
 /**
+ * WorkTask 필드 마이그레이션: owner, estimatedTime, actualTime, completedAt 기본값 적용
+ * @returns {boolean} 마이그레이션이 수행되었으면 true
+ */
+function migrateWorkTaskFields() {
+  let migrated = false;
+  appState.workProjects.forEach(project => {
+    (project.stages || []).forEach(stage => {
+      (stage.subcategories || []).forEach(sub => {
+        (sub.tasks || []).forEach(task => {
+          if (task.owner === undefined) {
+            task.owner = 'me';
+            migrated = true;
+          }
+          if (task.estimatedTime === undefined) {
+            task.estimatedTime = 30;
+            migrated = true;
+          }
+          if (task.actualTime === undefined) {
+            task.actualTime = null;
+            migrated = true;
+          }
+          if (task.completedAt === undefined) {
+            // 이미 완료된 태스크: 로그에서 최신 완료 날짜를 추출
+            if (task.status === 'completed') {
+              const completionLog = (task.logs || []).filter(l => l.content === '✓ 완료');
+              if (completionLog.length > 0) {
+                task.completedAt = completionLog[completionLog.length - 1].date + 'T00:00';
+              } else {
+                task.completedAt = null;
+              }
+            } else {
+              task.completedAt = null;
+            }
+            migrated = true;
+          }
+        });
+      });
+    });
+  });
+  if (migrated) {
+    console.log('[migration] WorkTask 필드 마이그레이션 완료 (owner, estimatedTime, actualTime, completedAt)');
+  }
+  return migrated;
+}
+
+/**
+ * 기본 템플릿: 빈 workTemplates에 자동 추가
+ */
+const DEFAULT_WORK_TEMPLATES = [
+  {
+    id: 'default-uxr-ro',
+    name: 'UXR RO (모객) 프로젝트',
+    isDefault: true,
+    stageNames: ['킥오프', '모객 준비', '모객 진행', '테스트 준비', '테스트 진행', '테스트 종료 후'],
+    stages: [
+      { // 0: 킥오프
+        subcategories: [
+          { name: '타겟 유저', tasks: [
+            { title: '타겟 게임 리스트', estimatedTime: 30, owner: 'me' },
+            { title: '타겟 게임 경험 수준', estimatedTime: 20, owner: 'me' },
+            { title: '그룹 구분', estimatedTime: 30, owner: 'me' },
+            { title: '인원 (버퍼 포함)', estimatedTime: 15, owner: 'me' }
+          ]},
+          { name: '기본', tasks: [
+            { title: '방법론 결정', estimatedTime: 60, owner: 'me' },
+            { title: '테스트 플랫폼 결정 (PC/모바일)', estimatedTime: 10, owner: 'me' },
+            { title: '모객 채널 결정', estimatedTime: 20, owner: 'me' },
+            { title: '보상 규모 결정', estimatedTime: 30, owner: 'me' },
+            { title: '일정 수립', estimatedTime: 30, owner: 'me' },
+            { title: '소요 시간 산정', estimatedTime: 15, owner: 'me' },
+            { title: '데이터 검증 기준 설정', estimatedTime: 30, owner: 'me' },
+            { title: '테스트용 계정 발급', estimatedTime: 20, owner: 'other' }
+          ]}
+        ]
+      },
+      { // 1: 모객 준비
+        subcategories: [
+          { name: '넥슨퍼스트 세팅', tasks: [
+            { title: '계정 수집 설정', estimatedTime: 30, owner: 'me' },
+            { title: '개인정보 수집 설정', estimatedTime: 20, owner: 'me' },
+            { title: '스크린샷 수집 설정', estimatedTime: 15, owner: 'me' }
+          ]},
+          { name: '기본', tasks: [
+            { title: '아웃소싱팀 외주 발주', estimatedTime: 30, owner: 'me' },
+            { title: '스크리너 설계', estimatedTime: 120, owner: 'me' },
+            { title: '게시용 배너 제작', estimatedTime: 15, owner: 'other' },
+            { title: '넥슨플레이 게시/푸시 요청', estimatedTime: 15, owner: 'me' }
+          ]}
+        ]
+      },
+      { // 2: 모객 진행
+        subcategories: [
+          { name: '기본', tasks: [
+            { title: '신청 현황 모니터링', estimatedTime: 15, owner: 'me' },
+            { title: '모객 채널 추가 오픈 (현황에 따라)', estimatedTime: 30, owner: 'me' },
+            { title: '유관 커뮤니티 동향 체크', estimatedTime: 15, owner: 'me' },
+            { title: '데이터 검증', estimatedTime: 60, owner: 'me' },
+            { title: '컨택 대상 리스트업', estimatedTime: 60, owner: 'me' },
+            { title: '섭외 진행', estimatedTime: 120, owner: 'me' },
+            { title: '테스트 참여 안내', estimatedTime: 30, owner: 'me' }
+          ]}
+        ]
+      },
+      { // 3: 테스트 준비
+        subcategories: [
+          { name: '기본', tasks: [
+            { title: '넥슨 스페이스 공유 (2주 전)', estimatedTime: 30, owner: 'me' },
+            { title: '다과/생수 확인', estimatedTime: 15, owner: 'me' },
+            { title: '서약서 준비', estimatedTime: 20, owner: 'me' },
+            { title: '출석 동선 세팅', estimatedTime: 30, owner: 'me' },
+            { title: '목걸이 번호 지정/세팅', estimatedTime: 20, owner: 'me' },
+            { title: 'UX표준프로파일 수집', estimatedTime: 30, owner: 'me' }
+          ]}
+        ]
+      },
+      { // 4: 테스트 진행
+        subcategories: [
+          { name: '출석 관리', tasks: [
+            { title: '본인 확인', estimatedTime: 5, owner: 'me' },
+            { title: '목걸이 배포', estimatedTime: 5, owner: 'me' },
+            { title: '보안스티커 부착', estimatedTime: 5, owner: 'me' },
+            { title: '휴대폰 수거', estimatedTime: 10, owner: 'me' }
+          ]},
+          { name: '기본', tasks: [
+            { title: 'X배너 세팅', estimatedTime: 15, owner: 'me' },
+            { title: '보안서약서 작성', estimatedTime: 10, owner: 'me' },
+            { title: '버퍼인원 안내', estimatedTime: 10, owner: 'me' },
+            { title: '출석 인원 최종 프로파일 정리', estimatedTime: 30, owner: 'me' },
+            { title: '종료 후 현장 정리', estimatedTime: 30, owner: 'me' }
+          ]}
+        ]
+      },
+      { // 5: 테스트 종료 후
+        subcategories: [
+          { name: '보상 지급', tasks: [
+            { title: '무료캐시 지급신청', estimatedTime: 30, owner: 'me' },
+            { title: '이벤트 보상구매 신청', estimatedTime: 20, owner: 'me' },
+            { title: '외주업체를 통한 지급', estimatedTime: 15, owner: 'other' }
+          ]},
+          { name: '기본', tasks: [
+            { title: '외주업체 비용 처리', estimatedTime: 20, owner: 'me' },
+            { title: '보고서 모객 페이지 작성', estimatedTime: 120, owner: 'me' }
+          ]}
+        ]
+      }
+    ],
+    participantGoal: null,
+    createdAt: '2026-03-16T00:00:00.000Z'
+  }
+];
+
+/**
+ * workTemplates가 비어있으면 기본 템플릿 추가
+ */
+function seedDefaultTemplates() {
+  if (appState.workTemplates.length === 0) {
+    const defaults = DEFAULT_WORK_TEMPLATES.map(t => ({ ...t }));
+    appState.workTemplates.push(...defaults);
+    if (!appState.user) {
+      localStorage.setItem('navigator-work-templates', JSON.stringify(appState.workTemplates));
+    }
+    if (appState.user) { syncToFirebase(); }
+    console.log('[seed] 기본 템플릿 추가:', defaults.map(t => t.name).join(', '));
+  }
+}
+
+/**
  * 프로젝트 저장
  */
 function saveWorkProjects() {
@@ -54,9 +221,13 @@ function loadWorkProjects() {
           });
         }
       });
+
+      // 마이그레이션: WorkTask에 owner/estimatedTime/completedAt 필드 추가
+      needsSave = migrateWorkTaskFields() || needsSave;
+
       if (needsSave) {
         saveWorkProjects();
-        console.log('프로젝트 단계 마이그레이션 완료');
+        console.log('프로젝트 마이그레이션 완료');
       }
 
       // 첫 프로젝트 자동 선택
@@ -68,6 +239,9 @@ function loadWorkProjects() {
       appState.workProjects = [];
     }
   }
+
+  // 기본 템플릿 시딩 (비어있을 때만)
+  seedDefaultTemplates();
 }
 
 /**
@@ -110,6 +284,8 @@ function duplicateWorkProject(projectId) {
     (stage.subcategories || []).forEach(sub => {
       sub.tasks.forEach(task => {
         task.status = 'not-started';
+        task.completedAt = null;
+        task.actualTime = null;
         task.logs = [];
       });
     });
@@ -382,7 +558,11 @@ function saveAsTemplate(projectId) {
     stages: project.stages.map(stage => ({
       subcategories: (stage.subcategories || []).map(sub => ({
         name: sub.name,
-        tasks: sub.tasks.map(t => ({ title: t.title }))
+        tasks: sub.tasks.map(t => ({
+          title: t.title,
+          owner: t.owner || 'me',
+          estimatedTime: t.estimatedTime || 30
+        }))
       }))
     })),
     participantGoal: project.participantGoal,
@@ -414,3 +594,405 @@ function updateParticipantCount(projectId) {
   renderStatic();
 }
 window.updateParticipantCount = updateParticipantCount;
+
+// ============================================
+// 펄스 (건강 상태) 계산
+// ============================================
+
+const PULSE_COLORS = {
+  overdue:   '#f5576c',
+  critical:  '#f5576c',
+  warning:   '#ff9500',
+  attention: '#ff9500',
+  'on-track': '#48bb78',
+  waiting:   '#667eea',
+  done:      'transparent',
+  normal:    'transparent'
+};
+
+/**
+ * 태스크 펄스 계산
+ */
+function calculateTaskPulse(task) {
+  if (task.completed || task.status === 'completed') return 'done';
+  if (task.status === 'blocked' || task.owner === 'waiting') return 'waiting';
+  if (!task.deadline) return 'normal';
+
+  const now = new Date();
+  const deadline = new Date(task.deadline);
+  const daysLeft = (deadline - now) / (1000 * 60 * 60 * 24);
+
+  if (daysLeft < 0) return 'overdue';
+  if (daysLeft < 1) return 'critical';
+  if (daysLeft < 3 && task.status !== 'in-progress') return 'warning';
+  if (daysLeft < 7 && task.status === 'not-started') return 'attention';
+  return 'on-track';
+}
+
+/**
+ * 프로젝트의 모든 태스크 수집
+ */
+function getAllProjectTasks(project) {
+  const tasks = [];
+  (project.stages || []).forEach(stage => {
+    (stage.subcategories || []).forEach(sub => {
+      (sub.tasks || []).forEach(t => tasks.push(t));
+    });
+  });
+  return tasks;
+}
+
+/**
+ * 프로젝트 펄스 계산
+ */
+function calculateProjectPulse(project) {
+  if (project.onHold) return 'waiting';
+  const allTasks = getAllProjectTasks(project);
+  const myTasks = allTasks.filter(t => t.owner === 'me' && t.status !== 'completed');
+  if (myTasks.length === 0) return 'done';
+
+  const pulses = myTasks.map(t => calculateTaskPulse(t));
+  if (pulses.includes('overdue') || pulses.includes('critical')) return 'critical';
+  if (pulses.includes('warning')) return 'warning';
+  if (pulses.includes('attention')) return 'attention';
+  return 'on-track';
+}
+
+/**
+ * 오늘의 포커스: 가장 긴급한 내 태스크 1개 반환
+ * @returns {{ title, _projectName, _projectId, _stageIdx, _subcatIdx, _taskIdx, _stageName, estimatedTime, status, owner, deadline }|null}
+ */
+function getWorkFocus() {
+  const candidates = [];
+  appState.workProjects.filter(p => !p.archived && !p.onHold).forEach(p => {
+    (p.stages || []).forEach((stage, si) => {
+      (stage.subcategories || []).forEach((sub, sci) => {
+        (sub.tasks || []).forEach((task, ti) => {
+          if (task.status !== 'completed' && task.owner === 'me') {
+            candidates.push({
+              ...task,
+              _projectName: p.name,
+              _projectId: p.id,
+              _stageIdx: si,
+              _subcatIdx: sci,
+              _taskIdx: ti,
+              _stageName: stage.name || ('단계 ' + (si + 1))
+            });
+          }
+        });
+      });
+    });
+  });
+
+  if (candidates.length === 0) return null;
+
+  const pulseOrder = { overdue: 0, critical: 1, warning: 2, attention: 3, normal: 4, 'on-track': 4 };
+
+  candidates.sort((a, b) => {
+    const pa = pulseOrder[calculateTaskPulse(a)] ?? 4;
+    const pb = pulseOrder[calculateTaskPulse(b)] ?? 4;
+    if (pa !== pb) return pa - pb;
+
+    if (a._stageIdx !== b._stageIdx) return a._stageIdx - b._stageIdx;
+
+    return (a.estimatedTime || 30) - (b.estimatedTime || 30);
+  });
+
+  return candidates[0];
+}
+
+/**
+ * 이번 달 남은 근무일 수 (주말 제외, 오늘 포함)
+ */
+function getRemainingWorkdays() {
+  const now = new Date();
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  let count = 0;
+  for (let d = new Date(now.getFullYear(), now.getMonth(), now.getDate()); d <= lastDay; d.setDate(d.getDate() + 1)) {
+    const day = d.getDay();
+    if (day !== 0 && day !== 6) count++;
+  }
+  return count;
+}
+
+/**
+ * 부하 게이지 계산
+ */
+function calculateWorkload() {
+  const myTasks = appState.workProjects
+    .filter(p => !p.archived && !p.onHold)
+    .flatMap(p => getAllProjectTasks(p))
+    .filter(t => t.owner === 'me' && t.status !== 'completed');
+
+  const totalRemainingMinutes = myTasks.reduce((sum, t) => sum + (t.estimatedTime || 30), 0);
+  const remainingWorkdays = getRemainingWorkdays();
+  const dailyAvailableMinutes = (appState.settings && appState.settings.dailyAvailableMinutes) || 360;
+  const totalAvailableMinutes = remainingWorkdays * dailyAvailableMinutes;
+
+  const loadPercentage = totalAvailableMinutes > 0
+    ? Math.round((totalRemainingMinutes / totalAvailableMinutes) * 100)
+    : 0;
+
+  return {
+    totalRemainingMinutes,
+    remainingWorkdays,
+    totalAvailableMinutes,
+    loadPercentage,
+    taskCount: myTasks.length,
+    status: loadPercentage > 120 ? 'overloaded'
+          : loadPercentage > 90  ? 'tight'
+          : loadPercentage > 60  ? 'moderate'
+          : 'comfortable'
+  };
+}
+
+// ============================================
+// MM (Monthly Report) Auto-Generation
+// ============================================
+
+/**
+ * Generate monthly work report combining completionLog + Work project data.
+ * @param {number} year - e.g. 2026
+ * @param {number} month - 1-12
+ * @returns {string} formatted report text
+ */
+function generateMMReport(year, month) {
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+  const lastDate = new Date(year, month, 0).getDate();
+  const endDate = `${year}-${String(month).padStart(2, '0')}-${lastDate}`;
+  // endDate for getCompletionLogEntries is exclusive, so go one day after
+  const endDateExclusive = `${year}-${String(month).padStart(2, '0')}-${String(lastDate + 1).padStart(2, '0')}`;
+  // Handle month overflow: if lastDate+1 > days in month, use next month
+  const endExcl = new Date(year, month, 1); // first day of next month
+  const endExclStr = getLocalDateStr(endExcl);
+
+  // 1. Completion log entries filtered to 'Main Job' category (본업)
+  const entries = getCompletionLogEntries(startDate, endExclStr)
+    .filter(e => e.c === '본업' || e.c === 'Main Job');
+
+  // 2. Work project task completions in the date range
+  const workCompletions = [];
+  appState.workProjects.forEach(project => {
+    (project.stages || []).forEach((stage, si) => {
+      (stage.subcategories || []).forEach((sub, sci) => {
+        (sub.tasks || []).forEach((task, ti) => {
+          if (task.status === 'completed' && task.completedAt) {
+            const completedDate = task.completedAt.slice(0, 10); // YYYY-MM-DD
+            if (completedDate >= startDate && completedDate <= endDate) {
+              workCompletions.push({
+                title: task.title,
+                projectName: project.name,
+                projectId: project.id,
+                stageName: stage.name || ('단계 ' + (si + 1)),
+                estimatedTime: task.estimatedTime || 30,
+                actualTime: task.actualTime || null,
+                completedAt: task.completedAt
+              });
+            }
+          }
+        });
+      });
+    });
+  });
+
+  // Check if there's any data
+  if (workCompletions.length === 0 && entries.length === 0) {
+    return null; // Signal: no data
+  }
+
+  let report = `${year}년 ${month}월 업무 보고\n`;
+  report += `${'─'.repeat(30)}\n\n`;
+
+  // 3. Group work completions by project
+  const projects = {};
+  workCompletions.forEach(t => {
+    if (!projects[t.projectName]) {
+      projects[t.projectName] = [];
+    }
+    projects[t.projectName].push(t);
+  });
+
+  if (Object.keys(projects).length > 0) {
+    for (const [name, tasks] of Object.entries(projects)) {
+      const totalMinutes = tasks.reduce((s, t) => s + (t.actualTime || t.estimatedTime || 30), 0);
+      const hours = Math.round(totalMinutes / 60 * 10) / 10;
+      report += `[${name}] (${hours}h)\n`;
+      tasks.forEach(t => {
+        const time = t.actualTime || t.estimatedTime || 30;
+        report += `- ${t.title} (${time}분)\n`;
+      });
+      report += '\n';
+    }
+  }
+
+  // 4. General completion log entries (not linked to work projects)
+  // Filter out entries whose titles already appear in workCompletions
+  const workTitles = new Set(workCompletions.map(t => t.title));
+  const general = entries.filter(e => !workTitles.has(e.t) && e.t !== '(요약)');
+  if (general.length > 0) {
+    report += `[일반 업무]\n`;
+    general.forEach(t => report += `- ${t.t}\n`);
+    report += '\n';
+  }
+
+  // 5. Summary stats
+  const totalTasks = workCompletions.length + general.length;
+  const totalMinutes = workCompletions.reduce((s, t) => s + (t.actualTime || t.estimatedTime || 30), 0);
+  const totalHours = Math.round(totalMinutes / 60 * 10) / 10;
+  report += `${'─'.repeat(30)}\n`;
+  report += `총 완료: ${totalTasks}건`;
+  if (totalHours > 0) report += ` / 총 ${totalHours}h`;
+  report += '\n';
+
+  return report;
+}
+
+// ============================================
+// Notion Progress Copy (진행상황 복사)
+// ============================================
+
+/**
+ * Copy completed tasks from a subcategory in Notion-compatible format.
+ * Format:
+ *   YYYY년 M월 D일
+ *   * [task title]
+ *      *
+ * @param {string} projectId
+ * @param {number} stageIdx
+ * @param {number} subcatIdx
+ * @param {'today'|'week'} range
+ */
+function copyNotionProgress(projectId, stageIdx, subcatIdx, range) {
+  range = range || 'today';
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project) return;
+
+  const subcat = project.stages[stageIdx]?.subcategories[subcatIdx];
+  if (!subcat) return;
+
+  // Determine date range
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  let startDate;
+  if (range === 'week') {
+    const dayOfWeek = today.getDay();
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    startDate = new Date(today);
+    startDate.setDate(startDate.getDate() + mondayOffset);
+  } else {
+    startDate = new Date(today);
+  }
+  const endDate = new Date(today);
+  endDate.setDate(endDate.getDate() + 1); // end of today (exclusive)
+
+  // Filter completed tasks within date range
+  const completedTasks = subcat.tasks.filter(t => {
+    if (t.status !== 'completed' || !t.completedAt) return false;
+    const completedDate = new Date(t.completedAt);
+    return completedDate >= startDate && completedDate < endDate;
+  });
+
+  let lines = [];
+
+  if (range === 'today') {
+    const y = now.getFullYear();
+    const m = now.getMonth() + 1;
+    const d = now.getDate();
+    lines.push(y + '년 ' + m + '월 ' + d + '일');
+
+    completedTasks.forEach(t => {
+      lines.push('* ' + t.title);
+      lines.push('   * ');
+    });
+  } else {
+    // Week mode: group by date
+    const byDate = {};
+    completedTasks.forEach(t => {
+      const dateStr = t.completedAt.slice(0, 10);
+      if (!byDate[dateStr]) byDate[dateStr] = [];
+      byDate[dateStr].push(t);
+    });
+
+    const dates = Object.keys(byDate).sort();
+
+    if (dates.length === 0) {
+      // No completions this week - still output today's date
+      const y = now.getFullYear();
+      const m = now.getMonth() + 1;
+      const d = now.getDate();
+      lines.push(y + '년 ' + m + '월 ' + d + '일');
+    } else {
+      dates.forEach(dateStr => {
+        const dt = new Date(dateStr + 'T00:00:00');
+        const y = dt.getFullYear();
+        const m = dt.getMonth() + 1;
+        const d = dt.getDate();
+        lines.push(y + '년 ' + m + '월 ' + d + '일');
+
+        byDate[dateStr].forEach(t => {
+          lines.push('* ' + t.title);
+          lines.push('   * ');
+        });
+      });
+    }
+  }
+
+  const text = lines.join('\n');
+  const label = range === 'today' ? '오늘' : '이번 주';
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Notion 진행상황 복사됨 (' + label + ')', 'success');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Notion 진행상황 복사됨 (' + label + ')', 'success');
+  });
+
+  // Close popup menu if open
+  const menu = document.getElementById('notion-copy-menu');
+  if (menu) menu.remove();
+}
+window.copyNotionProgress = copyNotionProgress;
+
+/**
+ * Show a small popup menu for Notion progress copy range selection.
+ */
+function showNotionCopyMenu(event, projectId, stageIdx, subcatIdx) {
+  event.stopPropagation();
+
+  // Remove existing menu
+  const existing = document.getElementById('notion-copy-menu');
+  if (existing) existing.remove();
+
+  const menu = document.createElement('div');
+  menu.id = 'notion-copy-menu';
+  menu.style.cssText = 'position: fixed; z-index: 9999; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 2px; min-width: 140px;';
+
+  const rect = event.target.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 4) + 'px';
+  menu.style.left = Math.min(rect.left, window.innerWidth - 160) + 'px';
+
+  const btnStyle = 'display: block; width: 100%; padding: 10px 12px; background: transparent; border: none; border-radius: 6px; color: var(--text-primary); font-size: 14px; cursor: pointer; text-align: left; min-height: 44px;';
+
+  menu.innerHTML =
+    '<button style="' + btnStyle + '" onmouseenter="this.style.background=\'var(--bg-tertiary)\'" onmouseleave="this.style.background=\'transparent\'" ' +
+      'onclick="copyNotionProgress(\'' + escapeAttr(projectId) + '\', ' + stageIdx + ', ' + subcatIdx + ', \'today\')">📋 오늘</button>' +
+    '<button style="' + btnStyle + '" onmouseenter="this.style.background=\'var(--bg-tertiary)\'" onmouseleave="this.style.background=\'transparent\'" ' +
+      'onclick="copyNotionProgress(\'' + escapeAttr(projectId) + '\', ' + stageIdx + ', ' + subcatIdx + ', \'week\')">📋 이번 주</button>';
+
+  document.body.appendChild(menu);
+
+  // Auto-close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', function handler() {
+      const m = document.getElementById('notion-copy-menu');
+      if (m) m.remove();
+      document.removeEventListener('click', handler);
+    }, { once: true });
+  }, 0);
+}
+window.showNotionCopyMenu = showNotionCopyMenu;

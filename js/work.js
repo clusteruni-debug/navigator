@@ -63,18 +63,81 @@ function renderWorkProjects() {
           <button class="work-project-add-btn" onclick="showWorkModal('project')">+ 새 프로젝트</button>
           <button class="work-project-action-btn" onclick="showWorkModal('template-select')">📋 템플릿</button>
           <button class="work-project-action-btn" onclick="showWorkModal('template-import')">📥 가져오기</button>
+          <button class="work-project-action-btn" onclick="showMMReportModal()">📊 MM 리포트</button>
         </div>
       </div>
 
-      <!-- 본업 빠른 추가 (프로젝트 없이) -->
+      ${(() => {
+        const focus = getWorkFocus();
+        if (!focus) {
+          const hasAnyTask = appState.workProjects.some(p => !p.archived && getAllProjectTasks(p).length > 0);
+          if (hasAnyTask) {
+            return '<div class="work-focus-card" style="background: linear-gradient(135deg, rgba(72,187,120,0.15), rgba(72,187,120,0.05)); border: 1px solid rgba(72,187,120,0.3); border-radius: 12px; padding: 16px; margin-bottom: 12px; text-align: center;">' +
+              '<span style="font-size: 16px;">🎉 모든 본업 태스크 완료!</span>' +
+            '</div>';
+          }
+          return '';
+        }
+        const focusPulse = calculateTaskPulse(focus);
+        const focusColor = PULSE_COLORS[focusPulse] || '#667eea';
+        const timeLabel = focus.estimatedTime ? '~' + focus.estimatedTime + '분' : '';
+        return '<div class="work-focus-card" style="background: linear-gradient(135deg, ' + focusColor + '15, ' + focusColor + '08); border: 1px solid ' + focusColor + '40; border-left: 4px solid ' + focusColor + '; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">' +
+          '<div style="flex: 1; min-width: 0;">' +
+            '<div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">🎯 지금 집중</div>' +
+            '<div style="font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + escapeHtml(focus.title) + '</div>' +
+            '<div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">' + escapeHtml(focus._projectName) + ' &gt; ' + escapeHtml(focus._stageName) + (timeLabel ? ' · ' + timeLabel : '') + '</div>' +
+          '</div>' +
+          '<button onclick="toggleWorkTaskComplete(\'' + escapeAttr(focus._projectId) + '\', ' + focus._stageIdx + ', ' + focus._subcatIdx + ', ' + focus._taskIdx + ')" style="padding: 8px 16px; background: ' + focusColor + '; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; min-height: 44px;">완료 ✓</button>' +
+        '</div>';
+      })()}
+
+      ${(() => {
+        const wl = calculateWorkload();
+        if (wl.taskCount === 0) return '';
+        const statusColors = { overloaded: '#f5576c', tight: '#ff9500', moderate: '#EAB308', comfortable: '#48bb78' };
+        const statusLabels = { overloaded: '과부하', tight: '빡빡함', moderate: '보통', comfortable: '여유' };
+        const barColor = statusColors[wl.status] || '#48bb78';
+        const barWidth = Math.min(100, wl.loadPercentage);
+        const hoursRemaining = (wl.totalRemainingMinutes / 60).toFixed(1);
+        const hoursAvailable = (wl.totalAvailableMinutes / 60).toFixed(0);
+        return '<div style="background: var(--bg-secondary); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; border: 1px solid var(--border-color);">' +
+          '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">' +
+            '<span style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">📊 부하 게이지</span>' +
+            '<span style="font-size: 13px; color: ' + barColor + '; font-weight: 600;">' + statusLabels[wl.status] + ' ' + wl.loadPercentage + '%</span>' +
+          '</div>' +
+          '<div style="height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;">' +
+            '<div style="height: 100%; width: ' + barWidth + '%; background: ' + barColor + '; border-radius: 4px; transition: width 0.3s;"></div>' +
+          '</div>' +
+          '<div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: var(--text-muted);">' +
+            '<span>남은 공수 ' + hoursRemaining + 'h / 가용 ' + hoursAvailable + 'h</span>' +
+            '<span>' + wl.taskCount + '개 태스크 · ' + wl.remainingWorkdays + '근무일</span>' +
+          '</div>' +
+        '</div>';
+      })()}
+
+      ${(() => {
+        const alertProjects = appState.workProjects.filter(p => !p.archived && !p.onHold && ['critical', 'warning', 'attention'].includes(calculateProjectPulse(p)));
+        if (alertProjects.length === 0) return '';
+        const critCount = alertProjects.filter(p => calculateProjectPulse(p) === 'critical').length;
+        return '<div class="work-pulse-alert" style="background: ' + (critCount > 0 ? 'rgba(245,87,108,0.1); border: 1px solid rgba(245,87,108,0.3)' : 'rgba(255,149,0,0.1); border: 1px solid rgba(255,149,0,0.3)') + '; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; font-size: 14px; display: flex; align-items: center; gap: 8px;">' +
+          '<span>' + (critCount > 0 ? '🔴' : '🟠') + '</span>' +
+          '<span style="font-weight: 600;">' + alertProjects.length + '개 프로젝트 주의 필요</span>' +
+          '<span style="color: var(--text-muted);">' + alertProjects.map(p => escapeHtml(p.name)).join(', ') + '</span>' +
+        '</div>';
+      })()}
+
+      <!-- 본업 빠른 추가 -->
       <div class="work-quick-add">
         <input
           type="text"
           class="work-quick-input"
-          placeholder="프로젝트 없이 본업 작업 추가 (Enter)"
+          placeholder="${appState.workView === 'detail' && activeProject ? escapeAttr(activeProject.name) + ' — ' + escapeAttr(getStageName(activeProject, activeProject.currentStage || 0)) + '에 추가 (Enter)' : '프로젝트 없이 본업 작업 추가 (Enter)'}"
           id="work-quick-input"
           onkeypress="if(event.key==='Enter') quickAddWorkTask()"
         >
+        <button class="work-owner-toggle ${appState.workQuickAddOwner === 'other' ? 'other' : ''}" onclick="toggleWorkQuickOwner()" title="담당자 전환">
+          ${appState.workQuickAddOwner === 'other' ? '👤타' : '👤나'}
+        </button>
         <button class="work-quick-btn" onclick="quickAddWorkTask()">+</button>
       </div>
 
@@ -227,11 +290,14 @@ function renderWorkProjects() {
           <label class="work-project-selector-label">프로젝트 선택</label>
           <select class="work-project-select" onchange="selectWorkProject(this.value)">
             <option value="" ${!appState.activeWorkProject ? 'selected' : ''}>-- 프로젝트 선택 --</option>
+            <option value="general" ${appState.activeWorkProject === 'general' ? 'selected' : ''}>📋 일반 업무</option>
             ${inProgressProjects.length > 0 ? `
               <optgroup label="🚀 진행중">
-                ${inProgressProjects.map(p => `
-                  <option value="${p.id}" ${p.id === appState.activeWorkProject ? 'selected' : ''}>${escapeHtml(p.name)}</option>
-                `).join('')}
+                ${inProgressProjects.map(p => {
+                  const pp = calculateProjectPulse(p);
+                  const dot = pp === 'critical' || pp === 'overdue' ? '🔴 ' : pp === 'warning' || pp === 'attention' ? '🟠 ' : pp === 'on-track' ? '🟢 ' : '';
+                  return '<option value="' + p.id + '" ' + (p.id === appState.activeWorkProject ? 'selected' : '') + '>' + dot + escapeHtml(p.name) + '</option>';
+                }).join('')}
               </optgroup>
             ` : ''}
             ${noDeadlineProjects.length > 0 ? `
@@ -264,7 +330,8 @@ function renderWorkProjects() {
             ` : ''}
           </select>
         </div>
-        ${activeProject ? renderWorkProjectDetail(activeProject) : `
+        ${appState.activeWorkProject === 'general' ? renderWorkGeneralView() :
+          activeProject ? renderWorkProjectDetail(activeProject) : `
           <div style="text-align: center; padding: 40px; color: var(--text-muted);">
             프로젝트를 선택하세요
           </div>
@@ -778,6 +845,20 @@ function getLocalDateTimeStr(d) {
 // getTimeDiffMessage ~ loadLifeRhythm: js/rhythm.js로 분리됨
 
 
+/**
+ * 빠른 추가 owner 토글 (나 ↔ 기타)
+ */
+function toggleWorkQuickOwner() {
+  appState.workQuickAddOwner = appState.workQuickAddOwner === 'other' ? 'me' : 'other';
+  renderStatic();
+  // 포커스 복원
+  setTimeout(() => {
+    const input = document.getElementById('work-quick-input');
+    if (input) input.focus();
+  }, 50);
+}
+window.toggleWorkQuickOwner = toggleWorkQuickOwner;
+
 function toggleWorkSection(section) {
   if (!appState.workSectionExpanded) {
     appState.workSectionExpanded = {};
@@ -817,8 +898,12 @@ function renderWorkDashboardCard(project) {
     }
   }
 
+  const projectPulse = calculateProjectPulse(project);
+  const projectPulseColor = PULSE_COLORS[projectPulse] || 'transparent';
+
   return `
     <div class="work-dashboard-card ${project.id === appState.activeWorkProject ? 'active' : ''} ${project.archived ? 'archived' : ''}"
+         style="${projectPulseColor !== 'transparent' ? 'border-left: 4px solid ' + projectPulseColor + ';' : ''}"
          onclick="selectWorkProject('${escapeAttr(project.id)}'); setWorkView('detail');">
       <div class="work-dashboard-header">
         <div class="work-dashboard-name">
@@ -1028,6 +1113,7 @@ function renderWorkProjectDetail(project) {
                       </div>
                       <div class="work-subcategory-actions">
                         <button class="work-task-action" onclick="promptRenameSubcategory('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx}, '${escapeAttr(subcat.name)}')" title="중분류 이름 변경">${svgIcon('edit', 14)}</button>
+                        <button class="work-task-action" onclick="showNotionCopyMenu(event, '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="Notion 진행상황 복사">📋</button>
                         <button class="work-task-action" onclick="showWorkModal('subcat-deadline', '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="중분류 일정" aria-label="중분류 일정 설정">📅</button>
                         <button class="work-task-action" onclick="deleteSubcategory('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="중분류 삭제" style="color: var(--danger);">${svgIcon('trash', 14)}</button>
                         <button class="work-task-action" onclick="showWorkModal('task', '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})">+ 항목</button>
@@ -1075,31 +1161,34 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
     const daysLeft = Math.ceil((d - new Date()) / (1000 * 60 * 60 * 24));
     const deadlineClass = daysLeft < 0 ? 'overdue' : daysLeft <= 2 ? 'soon' : '';
     const dateStr = (d.getMonth() + 1) + '/' + d.getDate();
-    deadlineHtml = `<span class="work-task-deadline ${deadlineClass}" onclick="event.stopPropagation(); promptTaskDeadline('${projectId}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="클릭하여 마감일 변경">~${dateStr}</span>`;
+    deadlineHtml = `<span class="work-task-deadline ${deadlineClass}" onclick="event.stopPropagation(); promptTaskDeadline('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="클릭하여 마감일 변경">~${dateStr}</span>`;
   }
 
+  const taskPulse = calculateTaskPulse(task);
+  const pulseColor = PULSE_COLORS[taskPulse] || 'transparent';
+
   return `
-    <div class="work-task-item">
+    <div class="work-task-item" style="${pulseColor !== 'transparent' ? 'border-left: 3px solid ' + pulseColor + ';' : ''}">
       <div class="work-task-header">
         <div class="work-task-checkbox ${task.status === 'completed' ? 'checked' : ''}"
-             onclick="toggleWorkTaskComplete('${projectId}', ${stageIdx}, ${subcatIdx}, ${taskIdx})"
+             onclick="toggleWorkTaskComplete('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})"
              title="완료 체크">
           ${task.status === 'completed' ? '✓' : ''}
         </div>
-        <span class="work-status-badge ${task.status}" onclick="cycleWorkTaskStatus('${projectId}', ${stageIdx}, ${subcatIdx}, ${taskIdx})"
+        <span class="work-status-badge ${task.status}" onclick="cycleWorkTaskStatus('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})"
               title="클릭하여 상태 변경">
           ${statusInfo.label}
         </span>
         <span class="work-task-title ${task.status === 'completed' ? 'completed' : ''}"
-              onclick="promptRenameWorkTask('${projectId}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, '${escapeAttr(task.title)}')"
+              onclick="promptRenameWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, '${escapeAttr(task.title)}')"
               title="클릭하여 이름 변경">${escapeHtml(task.title)}</span>
         ${deadlineHtml}
         <div class="work-task-actions">
-          <button class="work-task-action" onclick="promptRenameWorkTask('${projectId}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, '${escapeAttr(task.title)}')">${svgIcon('edit', 14)}</button>
-          <button class="work-task-action" onclick="promptTaskDeadline('${projectId}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="마감일 설정" aria-label="마감일 설정">📅</button>
-          <button class="work-task-action" onclick="showWorkModal('log', '${projectId}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" aria-label="기록 추가">+ 기록</button>
+          <button class="work-task-action" onclick="promptRenameWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, '${escapeAttr(task.title)}')">${svgIcon('edit', 14)}</button>
+          <button class="work-task-action" onclick="promptTaskDeadline('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="마감일 설정" aria-label="마감일 설정">📅</button>
+          <button class="work-task-action" onclick="showWorkModal('log', '${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" aria-label="기록 추가">+ 기록</button>
           <button class="work-task-action" onclick="event.stopPropagation(); copyWorkTaskToSlack('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="슬랙 복사" aria-label="슬랙 복사">📋</button>
-          <button class="work-task-action" onclick="deleteWorkTask('${projectId}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="항목 삭제" aria-label="항목 삭제" style="color: var(--danger);">${svgIcon('trash', 14)}</button>
+          <button class="work-task-action" onclick="deleteWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="항목 삭제" aria-label="항목 삭제" style="color: var(--danger);">${svgIcon('trash', 14)}</button>
         </div>
       </div>
       ${task.logs && task.logs.length > 0 ? `
@@ -1123,6 +1212,76 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
             });
             return html;
           })()}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+/**
+ * 일반 업무 뷰 렌더링 (프로젝트 미연결 본업 작업)
+ */
+function renderWorkGeneralView() {
+  const generalTasks = appState.tasks.filter(t => t.category === '본업' && !t.workProjectId && !t.completed);
+  const completedGeneral = appState.tasks.filter(t => t.category === '본업' && !t.workProjectId && t.completed);
+
+  return `
+    <div class="work-general-view">
+      <div style="font-size: 17px; font-weight: 700; margin-bottom: 16px;">📋 일반 업무</div>
+      <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">프로젝트에 속하지 않는 본업 작업입니다. 완료 시 기록에 자동 저장됩니다.</div>
+
+      ${generalTasks.length > 0 ? `
+        <div class="work-general-task-list">
+          ${generalTasks.map(task => `
+            <div class="work-task-item">
+              <div class="work-task-header">
+                <div class="work-task-checkbox" onclick="completeTask('${escapeAttr(task.id)}')" title="완료 체크"></div>
+                <span class="work-task-title" onclick="editTask('${escapeAttr(task.id)}')">${escapeHtml(task.title)}</span>
+                ${task.estimatedTime ? '<span style="font-size: 13px; color: var(--text-muted);">' + task.estimatedTime + '분</span>' : ''}
+                ${task.deadline ? '<span class="work-task-deadline" onclick="editTask(\'' + escapeAttr(task.id) + '\')">' + escapeHtml(task.deadline.substring(5).replace('-', '/')) + '</span>' : ''}
+                <div class="work-task-actions">
+                  <button class="work-task-action" onclick="editTask('${escapeAttr(task.id)}')">${svgIcon('edit', 14)}</button>
+                  <button class="work-task-action" onclick="deleteTask('${escapeAttr(task.id)}')" style="color: var(--danger);">${svgIcon('trash', 14)}</button>
+                </div>
+              </div>
+              ${task.subtasks && task.subtasks.length > 0 ? `
+                <div style="padding-left: 32px; margin-top: 4px;">
+                  ${task.subtasks.map((st, idx) => `
+                    <div style="display: flex; align-items: center; gap: 6px; padding: 3px 0; font-size: 14px; color: ${st.completed ? 'var(--text-muted)' : 'var(--text-primary)'}; ${st.completed ? 'text-decoration: line-through;' : ''} cursor: pointer;" onclick="toggleSubtaskComplete('${escapeAttr(task.id)}', ${idx})">
+                      <span>${st.completed ? '✓' : '○'}</span>
+                      <span>${escapeHtml(st.text)}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+          `).join('')}
+        </div>
+      ` : `
+        <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+          일반 업무가 없습니다. 위 입력란에서 추가하세요.
+        </div>
+      `}
+
+      ${completedGeneral.length > 0 ? `
+        <div style="margin-top: 20px;">
+          <div style="font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; cursor: pointer;" onclick="appState.showCompletedGeneral=!appState.showCompletedGeneral; renderStatic();">
+            ${appState.showCompletedGeneral ? '▼' : '▶'} ✅ 완료됨 (${completedGeneral.length})
+          </div>
+          ${appState.showCompletedGeneral ? `
+            <div class="work-general-task-list">
+              ${completedGeneral.slice(0, 10).map(task => `
+                <div class="work-task-item" style="opacity: 0.6;">
+                  <div class="work-task-header">
+                    <div class="work-task-checkbox checked" onclick="uncompleteTask('${escapeAttr(task.id)}')" title="완료 취소">✓</div>
+                    <span class="work-task-title completed">${escapeHtml(task.title)}</span>
+                    ${task.completedAt ? '<span style="font-size: 13px; color: var(--text-muted);">' + task.completedAt.substring(5, 10).replace('-', '/') + '</span>' : ''}
+                  </div>
+                </div>
+              `).join('')}
+              ${completedGeneral.length > 10 ? '<div style="text-align: center; font-size: 13px; color: var(--text-muted); padding: 8px;">+ ' + (completedGeneral.length - 10) + '개 더</div>' : ''}
+            </div>
+          ` : ''}
         </div>
       ` : ''}
     </div>

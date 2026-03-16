@@ -315,6 +315,10 @@ function addWorkTask(projectId, stageIdx, subcatIdx, title, status) {
     id: generateId(),
     title: title,
     status: status,
+    owner: 'me',
+    estimatedTime: 30,
+    actualTime: null,
+    completedAt: status === 'completed' ? getLocalDateTimeStr() : null,
     logs: []
   });
 
@@ -336,13 +340,17 @@ function cycleWorkTaskStatus(projectId, stageIdx, subcatIdx, taskIdx) {
   const currentIdx = statuses.indexOf(task.status);
   task.status = statuses[(currentIdx + 1) % statuses.length];
 
-  // 완료로 변경 시 자동 로그 (중복 방지)
+  // 완료로 변경 시 completedAt + 자동 로그
   if (task.status === 'completed') {
+    task.completedAt = getLocalDateTimeStr();
     const today = getLocalDateStr();
     const alreadyLogged = task.logs.some(l => l.date === today && l.content === '✓ 완료');
     if (!alreadyLogged) {
       task.logs.push({ date: today, content: '✓ 완료' });
     }
+  } else {
+    // 완료에서 벗어나면 completedAt 제거
+    if (task.completedAt) task.completedAt = null;
   }
 
   project.updatedAt = new Date().toISOString();
@@ -362,13 +370,16 @@ function toggleWorkTaskComplete(projectId, stageIdx, subcatIdx, taskIdx) {
   const wasCompleted = task.status === 'completed';
   task.status = wasCompleted ? 'not-started' : 'completed';
 
-  // 완료로 변경 시 자동 로그 (중복 방지)
+  // 완료/해제 시 completedAt 자동 기록
   if (!wasCompleted) {
+    task.completedAt = getLocalDateTimeStr();
     const today = getLocalDateStr();
     const alreadyLogged = task.logs.some(l => l.date === today && l.content === '✓ 완료');
     if (!alreadyLogged) {
       task.logs.push({ date: today, content: '✓ 완료' });
     }
+  } else {
+    task.completedAt = null;
   }
 
   project.updatedAt = new Date().toISOString();
@@ -406,9 +417,11 @@ function toggleSubcategoryComplete(projectId, stageIdx, subcatIdx) {
   subcat.tasks.forEach(task => {
     if (allCompleted) {
       task.status = 'not-started';
+      task.completedAt = null;
     } else {
       if (task.status !== 'completed') {
         task.status = 'completed';
+        task.completedAt = getLocalDateTimeStr();
         task.logs.push({ date: today, content: '✓ 완료' });
       }
     }

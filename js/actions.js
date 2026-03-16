@@ -236,9 +236,45 @@ function quickAddWorkTask() {
   const input = document.getElementById('work-quick-input');
   if (!input || !input.value.trim()) return;
 
+  const title = input.value.trim();
+  const owner = appState.workQuickAddOwner === 'other' ? 'other' : 'me';
+
+  // Context: detail view + active project → add WorkTask to project
+  if (appState.workView === 'detail' && appState.activeWorkProject && appState.activeWorkProject !== 'general') {
+    const project = appState.workProjects.find(p => p.id === appState.activeWorkProject);
+    if (project) {
+      const stageIdx = project.currentStage || 0;
+      const stage = project.stages[stageIdx];
+      if (stage) {
+        // 첫 번째 중분류에 추가, 없으면 "기본" 생성
+        if (!stage.subcategories || stage.subcategories.length === 0) {
+          stage.subcategories = [{ id: generateId(), name: '기본', tasks: [] }];
+        }
+        stage.subcategories[0].tasks.push({
+          id: generateId(),
+          title: title,
+          status: 'not-started',
+          owner: owner,
+          estimatedTime: 30,
+          actualTime: null,
+          completedAt: null,
+          logs: []
+        });
+        project.updatedAt = new Date().toISOString();
+        saveWorkProjects();
+        input.value = '';
+        input.focus();
+        renderStatic();
+        showToast(escapeHtml(title) + ' 추가됨', 'success');
+        return;
+      }
+    }
+  }
+
+  // Default: 일반 본업 작업 추가
   const newTask = {
     id: generateId(),
-    title: input.value.trim(),
+    title: title,
     category: '본업',
     completed: false,
     deadline: '',
@@ -258,13 +294,9 @@ function quickAddWorkTask() {
   appState.tasks.push(newTask);
   saveState();
   input.value = '';
+  input.focus();
   renderStatic();
-
-  // 바로 수정 모달 열기 (상세 설정 기회 제공)
-  setTimeout(() => {
-    appState.quickEditTaskId = newTask.id;
-    showQuickEditModal(newTask);
-  }, 100);
+  showToast(escapeHtml(title) + ' 추가됨', 'success');
 }
 window.quickAddWorkTask = quickAddWorkTask;
 

@@ -179,6 +179,27 @@ function renderSettingsModal() {
 
                 <div class="settings-row">
                   <div class="settings-label">
+                    <span class="settings-label-icon">📊</span>
+                    <div class="settings-label-text">
+                      <span class="settings-label-title">하루 가용 시간</span>
+                      <span class="settings-label-desc">본업 부하 게이지 계산 기준</span>
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <input
+                      type="number"
+                      class="settings-input"
+                      style="width: 70px;"
+                      value="${Math.round((appState.settings.dailyAvailableMinutes || 360) / 60)}"
+                      min="1" max="12"
+                      onchange="updateSetting('dailyAvailableMinutes', parseInt(this.value) * 60 || 360)"
+                    >
+                    <span style="font-size: 14px; color: var(--text-muted);">시간</span>
+                  </div>
+                </div>
+
+                <div class="settings-row">
+                  <div class="settings-label">
                     <span class="settings-label-icon">🌙</span>
                     <div class="settings-label-text">
                       <span class="settings-label-title">목표 취침 시간</span>
