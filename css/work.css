@@ -81,7 +81,7 @@
     }
 
     .work-project-tab.active {
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: var(--accent-primary);
       border-color: transparent;
       color: white;
     }
@@ -98,8 +98,8 @@
     }
 
     .work-project-tab-add:hover {
-      border-color: #667eea;
-      color: #667eea;
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
     }
 
     .work-projects-header {
@@ -133,7 +133,7 @@
       color: var(--text-primary);
       margin-bottom: 12px;
       padding-left: 12px;
-      border-left: 3px solid #667eea;
+      border-left: 3px solid var(--accent-primary);
       display: flex;
       align-items: center;
       gap: 6px;
@@ -160,7 +160,7 @@
 
     .work-project-add-btn {
       padding: 8px 16px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: var(--accent-primary);
       border: none;
       border-radius: 8px;
       color: white;
@@ -170,7 +170,6 @@
     }
 
     .work-project-add-btn:hover {
-      transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
 
@@ -202,7 +201,7 @@
     .work-quick-btn {
       width: 40px;
       height: 40px;
-      background: #667eea;
+      background: var(--accent-primary);
       border: none;
       border-radius: var(--radius-sm);
       color: white;
@@ -213,7 +212,6 @@
     }
 
     .work-quick-btn:hover {
-      transform: scale(1.05);
     }
 
     /* Owner 토글 버튼 */
@@ -347,7 +345,7 @@
     }
 
     .work-general-item-title:hover {
-      color: #667eea;
+      color: var(--accent-primary);
     }
 
     .work-general-more {

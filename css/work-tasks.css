@@ -31,12 +31,12 @@
     }
 
     .work-task-checkbox:hover {
-      border-color: #667eea;
+      border-color: var(--accent-primary);
     }
 
     .work-task-checkbox.checked {
-      background: #48bb78;
-      border-color: #48bb78;
+      background: var(--accent-success);
+      border-color: var(--accent-success);
       color: white;
     }
 
@@ -125,7 +125,7 @@
     }
 
     .work-task-log-date {
-      color: #667eea;
+      color: var(--accent-primary);
       font-weight: 500;
       white-space: nowrap;
       min-width: 70px;
@@ -175,12 +175,12 @@
 
     .work-log-add input:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--accent-primary);
     }
 
     .work-log-add button {
       padding: 8px 14px;
-      background: #667eea;
+      background: var(--accent-primary);
       border: none;
       border-radius: 6px;
       color: white;
@@ -194,7 +194,7 @@
       align-items: center;
       gap: 6px;
       padding: 10px 16px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: var(--accent-primary);
       border: none;
       border-radius: 8px;
       color: white;
@@ -205,11 +205,10 @@
     }
 
     .work-copy-btn:hover {
-      transform: translateY(-2px);
     }
 
     .work-copy-btn.copied {
-      background: #48bb78;
+      background: var(--accent-success);
     }
 
     /* 빈 상태 */

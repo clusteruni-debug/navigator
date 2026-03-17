@@ -1,7 +1,7 @@
 /* history.css - PWA 배너, 히스토리, 미니 캘린더, 본업 달력, 일별 상세 */
     /* PWA 설치 배너 */
     .install-banner {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--accent-primary);
       padding: 15px;
       border-radius: 12px;
       margin-bottom: 20px;
@@ -28,7 +28,7 @@
       background: white;
       border: none;
       border-radius: 8px;
-      color: #667eea;
+      color: var(--accent-primary);
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
@@ -393,7 +393,7 @@
 
     /* 주간 요약 카드 */
     .week-summary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--accent-primary);
       border-radius: 16px;
       padding: 20px;
       margin-bottom: 20px;
@@ -470,8 +470,8 @@
     }
 
     .calendar-nav-btn:hover {
-      background: #667eea;
-      border-color: #667eea;
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
     }
 
     .calendar-weekdays {
@@ -493,7 +493,7 @@
     }
 
     .calendar-weekday:last-child {
-      color: #667eea;
+      color: var(--accent-primary);
     }
 
     .calendar-days {
@@ -520,7 +520,7 @@
     }
 
     .calendar-day:hover {
-      border-color: #667eea;
+      border-color: var(--accent-primary);
     }
 
     .calendar-day.empty {
@@ -529,12 +529,12 @@
     }
 
     .calendar-day.today {
-      border: 2px solid #667eea;
+      border: 2px solid var(--accent-primary);
       font-weight: bold;
     }
 
     .calendar-day.selected {
-      background: #667eea;
+      background: var(--accent-primary);
       color: white;
     }
 
@@ -567,7 +567,7 @@
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #48bb78;
+      background: var(--accent-success);
       position: absolute;
       bottom: 4px;
     }
@@ -612,7 +612,7 @@
     }
 
     .work-calendar .calendar-day.today .calendar-day-number {
-      color: #667eea;
+      color: var(--accent-primary);
       font-weight: 700;
     }
 
@@ -718,7 +718,7 @@
     }
 
     .day-detail-stat.completed {
-      color: #48bb78;
+      color: var(--accent-success);
     }
 
     .day-detail-list {
@@ -753,7 +753,7 @@
     }
 
     .day-task-title.completed {
-      color: #48bb78;
+      color: var(--accent-success);
     }
 
     .day-task-title.incomplete {
@@ -806,7 +806,7 @@
     }
 
     .history-date-header:hover {
-      background: rgba(102, 126, 234, 0.1);
+      background: var(--accent-primary-alpha);
     }
 
     .history-date-title {
@@ -840,7 +840,7 @@
     }
 
     .history-task-check {
-      color: #48bb78;
+      color: var(--accent-success);
       font-size: 16px;
     }
 

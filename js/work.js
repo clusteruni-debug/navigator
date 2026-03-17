@@ -74,7 +74,7 @@ function renderWorkProjects() {
         if (focusMode === 'empty') return '';
 
         if (focusMode === 'all-done') {
-          return '<div class="work-focus-card" style="background: linear-gradient(135deg, rgba(72,187,120,0.15), rgba(72,187,120,0.05)); border: 1px solid rgba(72,187,120,0.3); border-radius: 12px; padding: 16px; margin-bottom: 12px; text-align: center;">' +
+          return '<div class="work-focus-card" style="background: var(--accent-success-alpha); border: 1px solid rgba(72,187,120,0.3); border-radius: 12px; padding: 16px; margin-bottom: 12px; text-align: center;">' +
             '<span style="font-size: 16px;">🎉 모든 본업 태스크 완료!</span>' +
           '</div>';
         }
@@ -105,7 +105,7 @@ function renderWorkProjects() {
           ? '<div style="font-size: 12px; color: ' + focusColor + '; margin-top: 4px; opacity: 0.8;">이 태스크는 다음 단계이지만 미리 시작할 수 있습니다</div>'
           : '';
 
-        return '<div class="work-focus-card" style="background: linear-gradient(135deg, ' + focusColor + '15, ' + focusColor + '08); border: 1px solid ' + focusColor + '40; border-left: 4px solid ' + focusColor + '; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">' +
+        return '<div class="work-focus-card" style="background: ' + focusColor + '15; border: 1px solid ' + focusColor + '40; border-left: 4px solid ' + focusColor + '; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">' +
           '<div style="flex: 1; min-width: 0;">' +
             '<div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">' + cfg.label + '</div>' +
             '<div style="font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + escapeHtml(focus.title) + '</div>' +
@@ -119,9 +119,9 @@ function renderWorkProjects() {
       ${(() => {
         const wl = calculateWorkload();
         if (wl.taskCount === 0) return '';
-        const statusColors = { overloaded: '#f5576c', tight: '#ff9500', moderate: '#EAB308', comfortable: '#48bb78' };
+        const statusColors = { overloaded: 'var(--accent-danger)', tight: 'var(--accent-warning)', moderate: '#EAB308', comfortable: 'var(--accent-success)' };
         const statusLabels = { overloaded: '과부하', tight: '빡빡함', moderate: '보통', comfortable: '여유' };
-        const barColor = statusColors[wl.status] || '#48bb78';
+        const barColor = statusColors[wl.status] || 'var(--accent-success)';
         const barWidth = Math.min(100, wl.loadPercentage);
         const hoursRemaining = (wl.totalRemainingMinutes / 60).toFixed(1);
         const hoursAvailable = (wl.totalAvailableMinutes / 60).toFixed(0);
@@ -144,7 +144,7 @@ function renderWorkProjects() {
         const alertProjects = appState.workProjects.filter(p => !p.archived && !p.onHold && ['critical', 'warning', 'attention'].includes(calculateProjectPulse(p)));
         if (alertProjects.length === 0) return '';
         const critCount = alertProjects.filter(p => calculateProjectPulse(p) === 'critical').length;
-        return '<div class="work-pulse-alert" style="background: ' + (critCount > 0 ? 'rgba(245,87,108,0.1); border: 1px solid rgba(245,87,108,0.3)' : 'rgba(255,149,0,0.1); border: 1px solid rgba(255,149,0,0.3)') + '; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; font-size: 14px; display: flex; align-items: center; gap: 8px;">' +
+        return '<div class="work-pulse-alert" style="background: ' + (critCount > 0 ? 'var(--accent-danger-alpha); border: 1px solid rgba(245,87,108,0.3)' : 'var(--accent-warning-alpha); border: 1px solid rgba(255,149,0,0.3)') + '; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; font-size: 14px; display: flex; align-items: center; gap: 8px;">' +
           '<span>' + (critCount > 0 ? '🔴' : '🟠') + '</span>' +
           '<span style="font-weight: 600;">' + alertProjects.length + '개 프로젝트 주의 필요</span>' +
           '<span style="color: var(--text-muted);">' + alertProjects.map(p => escapeHtml(p.name)).join(', ') + '</span>' +
@@ -234,11 +234,11 @@ function renderWorkProjects() {
 
           if (inProgressTasks.length === 0 && generalWorkTasks.length === 0) return '';
 
-          return '<div class="work-focus-section" style="background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); border: 1px solid rgba(102,126,234,0.3); border-radius: 12px; padding: 16px; margin-bottom: 20px;">' +
+          return '<div class="work-focus-section" style="background: var(--accent-primary-alpha); border: 1px solid rgba(102,126,234,0.3); border-radius: 12px; padding: 16px; margin-bottom: 20px;">' +
             '<div style="font-size: 16px; font-weight: 700; color: var(--accent-blue); margin-bottom: 12px;">🎯 지금 할 것</div>' +
             inProgressTasks.slice(0, 3).map(t =>
               '<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg-primary); border-radius: 8px; margin-bottom: 6px; cursor: pointer;" onclick="selectWorkProject(\'' + escapeAttr(t.projectId) + '\'); setWorkView(\'detail\');">' +
-                '<span style="color: #667eea; font-weight: 600;">\u2192</span>' +
+                '<span style="color: var(--accent-primary); font-weight: 600;">\u2192</span>' +
                 '<span style="flex: 1; font-size: 16px;">' + escapeHtml(t.title) + '</span>' +
                 '<span style="font-size: 15px; color: var(--text-muted); background: var(--bg-secondary); padding: 2px 8px; border-radius: 4px;">' + escapeHtml(t.projectName) + '</span>' +
                 (t.deadline ? '<span style="font-size: 15px; color: var(--accent-warning);">' + (new Date(t.deadline).getMonth()+1) + '/' + new Date(t.deadline).getDate() + '</span>' : '') +
@@ -276,7 +276,7 @@ function renderWorkProjects() {
         ` : ''}
         ${onHoldProjects.length > 0 ? `
           <div class="work-section collapsible" style="margin-top: 20px;">
-            <div class="work-section-title clickable" style="color: #f5576c;" onclick="toggleWorkSection('onHold')">
+            <div class="work-section-title clickable" style="color: var(--accent-danger);" onclick="toggleWorkSection('onHold')">
               <span class="work-section-toggle">${appState.workSectionExpanded?.onHold ? '▼' : '▶'}</span>
               ⏸ 보류 (${onHoldProjects.length})
             </div>
@@ -486,7 +486,7 @@ function renderWorkProjects() {
             // 타임라인 영역
             rowsHtml += '<div style="flex: 1; position: relative; height: 32px; overflow: hidden;">';
             // 오늘 세로선
-            rowsHtml += '<div style="position: absolute; left: ' + todayPct + '%; top: 0; bottom: 0; width: 2px; background: #f5576c; z-index: 2; opacity: 0.7;"></div>';
+            rowsHtml += '<div style="position: absolute; left: ' + todayPct + '%; top: 0; bottom: 0; width: 2px; background: var(--accent-danger); z-index: 2; opacity: 0.7;"></div>';
             // 주 구분선
             for (var wli = 0; wli < weekLabels.length; wli++) {
               rowsHtml += '<div style="position: absolute; left: ' + weekLabels[wli].left + '%; top: 0; bottom: 0; width: 1px; background: var(--border-color); opacity: 0.3;"></div>';
@@ -519,7 +519,7 @@ function renderWorkProjects() {
             // 작업 마감일 점
             for (var di = 0; di < taskDots.length; di++) {
               var dot = taskDots[di];
-              rowsHtml += '<div style="position: absolute; left: ' + dot.pct + '%; bottom: 2px; width: 5px; height: 5px; border-radius: 50%; background: ' + (dot.overdue ? '#f5576c' : barColor) + '; transform: translateX(-50%); opacity: 0.8;" title="' + escapeAttr(dot.title) + '"></div>';
+              rowsHtml += '<div style="position: absolute; left: ' + dot.pct + '%; bottom: 2px; width: 5px; height: 5px; border-radius: 50%; background: ' + (dot.overdue ? 'var(--accent-danger)' : barColor) + '; transform: translateX(-50%); opacity: 0.8;" title="' + escapeAttr(dot.title) + '"></div>';
             }
 
             rowsHtml += '</div>'; // 타임라인 영역 닫기
@@ -533,17 +533,17 @@ function renderWorkProjects() {
           scheduleHtml += '<span style="font-size: 15px; color: var(--text-muted); font-weight: 400;">' + projects.length + '개 · -2주~+8주</span>';
           scheduleHtml += '<span style="flex: 1;"></span>';
           if (hiddenCount > 0) {
-            scheduleHtml += '<button onclick="appState.scheduleShowAll=!appState.scheduleShowAll; renderStatic();" style="background: ' + (showAll ? 'rgba(102,126,234,0.15)' : 'var(--bg-tertiary)') + '; border: 1px solid ' + (showAll ? 'rgba(102,126,234,0.3)' : 'var(--border-color)') + '; border-radius: 6px; padding: 4px 10px; font-size: 15px; color: ' + (showAll ? '#93BBFF' : 'var(--text-muted)') + '; cursor: pointer;">' + (showAll ? '활성만' : '완료/보류 +' + hiddenCount) + '</button>';
+            scheduleHtml += '<button onclick="appState.scheduleShowAll=!appState.scheduleShowAll; renderStatic();" style="background: ' + (showAll ? 'var(--accent-primary-alpha)' : 'var(--bg-tertiary)') + '; border: 1px solid ' + (showAll ? 'rgba(102,126,234,0.3)' : 'var(--border-color)') + '; border-radius: 6px; padding: 4px 10px; font-size: 15px; color: ' + (showAll ? 'var(--accent-primary)' : 'var(--text-muted)') + '; cursor: pointer;">' + (showAll ? '활성만' : '완료/보류 +' + hiddenCount) + '</button>';
           }
           scheduleHtml += '</div>';
           scheduleHtml += weeksHtml;
           scheduleHtml += rowsHtml;
           // 범례
           scheduleHtml += '<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 10px; font-size: 14px; color: var(--text-muted);">';
-          scheduleHtml += '<span style="display: inline-flex; align-items: center; gap: 3px;"><span style="display: inline-block; width: 2px; height: 10px; background: #f5576c;"></span> 오늘</span>';
-          scheduleHtml += '<span style="display: inline-flex; align-items: center; gap: 3px;"><span style="display: inline-block; width: 16px; height: 6px; background: rgba(102,126,234,0.3); border: 1px solid #667eea; border-radius: 3px;"></span> 프로젝트 기간</span>';
-          scheduleHtml += '<span style="display: inline-flex; align-items: center; gap: 3px;"><span style="display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #667eea;"></span> 작업 마감일</span>';
-          scheduleHtml += '<span style="display: inline-flex; align-items: center; gap: 3px;"><span style="display: inline-block; width: 16px; height: 6px; background: rgba(245,87,108,0.15); border: 1px solid #f5576c; border-radius: 3px;"></span> 기한 초과</span>';
+          scheduleHtml += '<span style="display: inline-flex; align-items: center; gap: 3px;"><span style="display: inline-block; width: 2px; height: 10px; background: var(--accent-danger);"></span> 오늘</span>';
+          scheduleHtml += '<span style="display: inline-flex; align-items: center; gap: 3px;"><span style="display: inline-block; width: 16px; height: 6px; background: var(--accent-primary-alpha); border: 1px solid var(--accent-primary); border-radius: 3px;"></span> 프로젝트 기간</span>';
+          scheduleHtml += '<span style="display: inline-flex; align-items: center; gap: 3px;"><span style="display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--accent-primary);"></span> 작업 마감일</span>';
+          scheduleHtml += '<span style="display: inline-flex; align-items: center; gap: 3px;"><span style="display: inline-block; width: 16px; height: 6px; background: var(--accent-danger-alpha); border: 1px solid var(--accent-danger); border-radius: 3px;"></span> 기한 초과</span>';
           scheduleHtml += '</div>';
           scheduleHtml += '</div>';
 
@@ -610,7 +610,7 @@ function renderWorkProjects() {
               var visibleTasks = tasks.slice(0, maxVisible);
               for (var ti = 0; ti < visibleTasks.length; ti++) {
                 var t = visibleTasks[ti];
-                var taskColor = t.status === 'project' ? (t.color || '#667eea') : t.status === 'in-progress' ? '#667eea' : t.status === 'blocked' ? '#f5576c' : '#48bb78';
+                var taskColor = t.status === 'project' ? (t.color || 'var(--accent-primary)') : t.status === 'in-progress' ? 'var(--accent-primary)' : t.status === 'blocked' ? 'var(--accent-danger)' : 'var(--accent-success)';
                 daysHtml += '<div class="calendar-day-task" style="background: ' + taskColor + '22; border-left: 2px solid ' + taskColor + ';" title="' + escapeAttr(t.title) + (t.project ? ' (' + escapeAttr(t.project) + ')' : '') + '">' + escapeHtml(t.title) + '</div>';
               }
               if (tasks.length > maxVisible) {
@@ -641,7 +641,7 @@ function renderWorkProjects() {
               '<div style="font-weight: 600; margin-bottom: 10px;">' + appState.workCalendarSelected + ' 마감 작업</div>';
             selectedTasks.forEach(function(t) {
               calendarHtml += '<div style="padding: 8px 12px; background: var(--bg-primary); border-radius: 8px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">' +
-                '<span style="color: ' + (t.status === 'in-progress' ? '#667eea' : t.status === 'blocked' ? '#f5576c' : t.status === 'project' ? (t.color || '#667eea') : '#a0a0a0') + ';">&#9679;</span>' +
+                '<span style="color: ' + (t.status === 'in-progress' ? 'var(--accent-primary)' : t.status === 'blocked' ? 'var(--accent-danger)' : t.status === 'project' ? (t.color || 'var(--accent-primary)') : '#a0a0a0') + ';">&#9679;</span>' +
                 '<span style="flex:1;">' + escapeHtml(t.title) + '</span>' +
                 (t.project ? '<span style="font-size: 15px; color: var(--text-muted);">' + escapeHtml(t.project) + '</span>' : '') +
               '</div>';
@@ -686,14 +686,14 @@ function renderWorkProjects() {
                   (p.description ? '<div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; white-space: pre-wrap;">' + escapeHtml(p.description) + '</div>' : '') +
                   '<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">' +
                     '<div style="flex: 1; height: 6px; background: var(--bg-tertiary); border-radius: 3px; overflow: hidden;">' +
-                      '<div style="height: 100%; width: ' + progress + '%; background: ' + (isComplete ? '#48bb78' : '#667eea') + '; border-radius: 3px;"></div>' +
+                      '<div style="height: 100%; width: ' + progress + '%; background: ' + (isComplete ? 'var(--accent-success)' : 'var(--accent-primary)') + '; border-radius: 3px;"></div>' +
                     '</div>' +
                     '<span style="font-size: 13px; font-weight: 600; color: var(--text-muted);">' + progress + '%</span>' +
                   '</div>' +
                   '<div style="font-size: 13px; color: var(--text-muted); display: flex; gap: 12px;">' +
                     '<span>📋 ' + completedTasks + '/' + totalTasks + ' 항목</span>' +
                     '<span>✓ ' + completedStages + '/' + p.stages.length + ' 단계</span>' +
-                    (p.onHold ? '<span style="color: #f5576c;">⏸ 보류</span>' : '') +
+                    (p.onHold ? '<span style="color: var(--accent-danger);">⏸ 보류</span>' : '') +
                   '</div>' +
                 '</div>';
               }).join('');
@@ -777,7 +777,7 @@ function renderWorkProjects() {
                   '<div style="font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border-color);">' + date + ' (' + byDate[date].length + '건)</div>' +
                   byDate[date].map(log =>
                     '<div style="padding: 6px 12px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">' +
-                      '<span style="width: 6px; height: 6px; border-radius: 50%; background: ' + (log.status === 'completed' ? '#48bb78' : log.status === 'in-progress' ? '#667eea' : '#a0a0a0') + '; flex-shrink: 0;"></span>' +
+                      '<span style="width: 6px; height: 6px; border-radius: 50%; background: ' + (log.status === 'completed' ? 'var(--accent-success)' : log.status === 'in-progress' ? 'var(--accent-primary)' : '#a0a0a0') + '; flex-shrink: 0;"></span>' +
                       '<span style="flex: 1; font-size: 15px;">' + escapeHtml(log.taskTitle) + '</span>' +
                       '<span style="font-size: 14px; color: var(--text-secondary);">' + escapeHtml(log.content) + '</span>' +
                       '<span style="font-size: 13px; color: var(--text-muted); background: var(--bg-secondary); padding: 1px 6px; border-radius: 4px;">' + escapeHtml(log.projectName) + '</span>' +
@@ -1045,20 +1045,11 @@ function renderWorkProjectDetail(project) {
           </div>
           <span class="work-project-progress-text">${completedTasks}/${totalTasks} 항목 · ${completedStages}/${project.stages.length} 단계</span>
         </div>
-        <!-- 주요 액션: 노션/슬랙, 양식, 정보 -->
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button class="work-project-action-btn" onclick="copyWorkProjectToClipboard('${escapeAttr(project.id)}')">📋 노션/슬랙 복사</button>
+        <!-- 주요 액션 + 더보기 -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
           <button class="work-project-action-btn" onclick="showFormExportMenu(event, '${escapeAttr(project.id)}')">📝 양식 출력</button>
           <button class="work-project-action-btn" onclick="showMetaEditor('${escapeAttr(project.id)}')">ℹ️ 프로젝트 정보</button>
-        </div>
-        <!-- 관리 액션: 복제, 보류, 템플릿, 보관 -->
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; align-items: center;">
-          <button class="work-project-action-btn" style="font-size: 13px;" onclick="duplicateWorkProject('${escapeAttr(project.id)}')" aria-label="프로젝트 복제">📋 복제</button>
-          <button class="work-project-action-btn" style="font-size: 13px;" onclick="holdWorkProject('${escapeAttr(project.id)}')" aria-label="${project.onHold ? '프로젝트 재개' : '프로젝트 보류'}">${project.onHold ? '▶ 재개' : '⏸ 보류'}</button>
-          <button class="work-project-action-btn" style="font-size: 13px;" onclick="saveAsTemplate('${escapeAttr(project.id)}')" aria-label="템플릿으로 저장">💾 템플릿</button>
-          <button class="work-project-action-btn" style="font-size: 13px; opacity: 0.7;" onclick="archiveWorkProject('${escapeAttr(project.id)}')" aria-label="${project.archived ? '프로젝트 복원' : '프로젝트 보관'}">${project.archived ? '📤 복원' : '📦 보관'}</button>
-          <span style="flex: 1;"></span>
-          <button class="work-project-action-btn delete" style="font-size: 12px; opacity: 0.6;" onclick="deleteWorkProject('${escapeAttr(project.id)}')" aria-label="프로젝트 삭제">${svgIcon('trash', 14)} 삭제</button>
+          <button class="work-project-action-btn" onclick="showProjectMoreMenu(event, '${escapeAttr(project.id)}')">⋯ 더보기</button>
         </div>
       </div>
 
@@ -1079,11 +1070,44 @@ function renderWorkProjectDetail(project) {
         </div>
       `}
 
+      <!-- 프로젝트 정보 요약 (접기/펼치기) -->
+      ${(() => {
+        const m = project.meta || {};
+        const hasAnyMeta = Object.values(m).some(v => v !== null && v !== undefined && v !== '' && v !== 0);
+        if (!hasAnyMeta) return '';
+
+        const items = [];
+        if (m.methodology) items.push('방법론: ' + escapeHtml(m.methodology));
+        if (m.targetPlatform) items.push('플랫폼: ' + escapeHtml(m.targetPlatform));
+        if (m.participantCount) {
+          let pText = '인원: ' + m.participantCount + '명';
+          if (m.bufferCount) pText += ' (버퍼 ' + m.bufferCount + '명)';
+          items.push(pText);
+        }
+        if (m.testDate) items.push('테스트일: ' + escapeHtml(m.testDate));
+        if (m.location) items.push('장소: ' + escapeHtml(m.location));
+        if (m.outsourcingCompany) items.push('외주: ' + escapeHtml(m.outsourcingCompany));
+        if (items.length === 0) return '';
+
+        const isCollapsed = !appState.workMetaExpanded || !appState.workMetaExpanded[project.id];
+        return '<div class="work-meta-collapse">' +
+          '<div class="work-meta-collapse-header" onclick="toggleWorkMetaCollapse(\'' + escapeAttr(project.id) + '\')">' +
+            '<span style="font-size: 12px; width: 12px;">' + (isCollapsed ? '▶' : '▼') + '</span>' +
+            'ℹ️ 프로젝트 정보' +
+          '</div>' +
+          '<div class="work-meta-collapse-body' + (isCollapsed ? ' collapsed' : '') + '" onclick="showMetaEditor(\'' + escapeAttr(project.id) + '\')" style="cursor: pointer;" title="클릭하여 편집">' +
+            items.join(' · ') +
+          '</div>' +
+        '</div>';
+      })()}
+
       <!-- 단계별 내용 -->
       <div class="work-stages">
-        ${project.stages.map((stage, stageIdx) => {
+        ${(() => {
+          const currentIdx = project.stages.findIndex(s => !s.completed);
+          return project.stages.map((stage, stageIdx) => {
           const stageName = getStageName(project, stageIdx);
-          const stageClass = stage.completed ? 'completed' : '';
+          const stageClass = stage.completed ? 'completed' : stageIdx === currentIdx ? 'current' : 'future';
           const subcategories = stage.subcategories || [];
           const isCollapsed = appState.collapsedStages && appState.collapsedStages[project.id + '-' + stageIdx];
           const stageTotalTasks = subcategories.reduce((s, sub) => s + sub.tasks.length, 0);
@@ -1121,13 +1145,15 @@ function renderWorkProjectDetail(project) {
                     return html;
                   })() : ''}
                 </div>
-                <div style="display: flex; gap: 6px;">
-                  ${stageIdx > 0 ? `<button class="work-stage-add-task" onclick="moveStage('${escapeAttr(project.id)}', ${stageIdx}, 'up')" title="위로 이동" aria-label="위로 이동">▲</button>` : ''}
-                  ${stageIdx < project.stages.length - 1 ? `<button class="work-stage-add-task" onclick="moveStage('${escapeAttr(project.id)}', ${stageIdx}, 'down')" title="아래로 이동" aria-label="아래로 이동">▼</button>` : ''}
-                  <button class="work-stage-add-task" onclick="copyStageToSlack('${escapeAttr(project.id)}', ${stageIdx})" title="슬랙용 복사" aria-label="슬랙용 복사">💬</button>
-                  <button class="work-stage-add-task" onclick="promptRenameStage('${escapeAttr(project.id)}', ${stageIdx}, '${escapeAttr(stageName)}')" title="단계 이름 변경" aria-label="단계 이름 변경">${svgIcon('edit', 14)}</button>
-                  <button class="work-stage-add-task" onclick="showWorkModal('stage-deadline', '${escapeAttr(project.id)}', ${stageIdx})" title="단계 일정 설정" aria-label="단계 일정 설정">📅</button>
-                  <button class="work-stage-add-task" onclick="deleteProjectStage('${escapeAttr(project.id)}', ${stageIdx})" title="단계 삭제" aria-label="단계 삭제" style="color: var(--danger);">${svgIcon('trash', 14)}</button>
+                <div style="display: flex; gap: 6px; flex-shrink: 0; align-items: center;">
+                  <div class="work-stage-actions">
+                    ${stageIdx > 0 ? `<button class="work-stage-add-task" onclick="moveStage('${escapeAttr(project.id)}', ${stageIdx}, 'up')" title="위로 이동" aria-label="위로 이동">▲</button>` : ''}
+                    ${stageIdx < project.stages.length - 1 ? `<button class="work-stage-add-task" onclick="moveStage('${escapeAttr(project.id)}', ${stageIdx}, 'down')" title="아래로 이동" aria-label="아래로 이동">▼</button>` : ''}
+                    <button class="work-stage-add-task" onclick="copyStageToSlack('${escapeAttr(project.id)}', ${stageIdx})" title="슬랙용 복사" aria-label="슬랙용 복사">💬</button>
+                    <button class="work-stage-add-task" onclick="promptRenameStage('${escapeAttr(project.id)}', ${stageIdx}, '${escapeAttr(stageName)}')" title="단계 이름 변경" aria-label="단계 이름 변경">${svgIcon('edit', 14)}</button>
+                    <button class="work-stage-add-task" onclick="showWorkModal('stage-deadline', '${escapeAttr(project.id)}', ${stageIdx})" title="단계 일정 설정" aria-label="단계 일정 설정">📅</button>
+                    <button class="work-stage-add-task" onclick="deleteProjectStage('${escapeAttr(project.id)}', ${stageIdx})" title="단계 삭제" aria-label="단계 삭제" style="color: var(--danger);">${svgIcon('trash', 14)}</button>
+                  </div>
                   <button class="work-stage-add-task" onclick="showWorkModal('subcategory', '${escapeAttr(project.id)}', ${stageIdx})">+ 중분류</button>
                 </div>
               </div>
@@ -1175,7 +1201,8 @@ function renderWorkProjectDetail(project) {
               ` : !isCollapsed ? '<div style="color: var(--text-muted); font-size: 15px; padding: 10px;">중분류를 추가하세요</div>' : ''}
             </div>
           `;
-        }).join('')}
+        }).join('');
+        })()}
 
         <!-- 새 단계 추가 버튼 -->
         <div class="work-stage-add-new" style="margin-top: 12px; padding: 12px; border: 2px dashed var(--border); border-radius: var(--radius-md); text-align: center;">
@@ -1185,30 +1212,6 @@ function renderWorkProjectDetail(project) {
         </div>
       </div>
 
-      <!-- 프로젝트 정보 요약 (meta가 있을 때) -->
-      ${(() => {
-        const m = project.meta || {};
-        const hasAnyMeta = Object.values(m).some(v => v !== null && v !== undefined && v !== '' && v !== 0);
-        if (!hasAnyMeta) return '';
-
-        const items = [];
-        if (m.methodology) items.push('방법론: ' + escapeHtml(m.methodology));
-        if (m.targetPlatform) items.push('플랫폼: ' + escapeHtml(m.targetPlatform));
-        if (m.participantCount) {
-          let pText = '인원: ' + m.participantCount + '명';
-          if (m.bufferCount) pText += ' (버퍼 ' + m.bufferCount + '명)';
-          items.push(pText);
-        }
-        if (m.testDate) items.push('테스트일: ' + escapeHtml(m.testDate));
-        if (m.location) items.push('장소: ' + escapeHtml(m.location));
-        if (m.outsourcingCompany) items.push('외주: ' + escapeHtml(m.outsourcingCompany));
-        if (items.length === 0) return '';
-
-        return '<div style="background: var(--bg-tertiary); border-radius: 8px; padding: 10px 14px; margin-top: 12px; font-size: 13px; color: var(--text-secondary); cursor: pointer;" onclick="showMetaEditor(\'' + escapeAttr(project.id) + '\')" title="클릭하여 편집">' +
-          '<div style="font-weight: 600; margin-bottom: 4px; color: var(--text-muted);">ℹ️ 프로젝트 정보</div>' +
-          items.join(' · ') +
-        '</div>';
-      })()}
     </div>
   `;
 }
@@ -1247,14 +1250,14 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
         <span class="work-task-title ${task.status === 'completed' ? 'completed' : ''}"
               onclick="promptRenameWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, '${escapeAttr(task.title)}')"
               title="클릭하여 이름 변경">${escapeHtml(task.title)}</span>
-        ${task.canStartEarly ? '<span style="font-size: 11px; background: rgba(102,126,234,0.15); color: #667eea; padding: 1px 6px; border-radius: 4px; white-space: nowrap;" title="미리 시작 가능">선제</span>' : ''}
-        ${task.status === 'completed' && task.completedAt ? `<span class="work-task-completed-at" onclick="event.stopPropagation(); editWorkTaskCompletedAt('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="클릭하여 완료일 수정" style="font-size: 12px; color: #48bb78; cursor: pointer; white-space: nowrap; padding: 1px 6px; background: rgba(72,187,120,0.1); border-radius: 4px;">✓ ${escapeHtml(task.completedAt.substring(5, 10).replace('-', '/'))}</span>` : ''}
+        ${task.canStartEarly ? '<span style="font-size: 11px; background: var(--accent-primary-alpha); color: var(--accent-primary); padding: 1px 6px; border-radius: 4px; white-space: nowrap;" title="미리 시작 가능">선제</span>' : ''}
+        ${task.status === 'completed' && task.completedAt ? `<span class="work-task-completed-at" onclick="event.stopPropagation(); editWorkTaskCompletedAt('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="클릭하여 완료일 수정" style="font-size: 12px; color: var(--accent-success); cursor: pointer; white-space: nowrap; padding: 1px 6px; background: var(--accent-success-alpha); border-radius: 4px;">✓ ${escapeHtml(task.completedAt.substring(5, 10).replace('-', '/'))}</span>` : ''}
         ${deadlineHtml}
         <div class="work-task-actions">
           <button class="work-task-action" onclick="promptRenameWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, '${escapeAttr(task.title)}')">${svgIcon('edit', 14)}</button>
           <button class="work-task-action" onclick="promptTaskDeadline('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="마감일 설정" aria-label="마감일 설정">📅</button>
           <button class="work-task-action" onclick="showWorkModal('log', '${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" aria-label="기록 추가">+ 기록</button>
-          <button class="work-task-action" onclick="event.stopPropagation(); toggleCanStartEarly('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="${task.canStartEarly ? '선제적 시작 해제' : '선제적 시작 설정'}" aria-label="선제적 시작 토글" style="${task.canStartEarly ? 'color: #667eea;' : ''}">💡</button>
+          <button class="work-task-action" onclick="event.stopPropagation(); toggleCanStartEarly('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="${task.canStartEarly ? '선제적 시작 해제' : '선제적 시작 설정'}" aria-label="선제적 시작 토글" style="${task.canStartEarly ? 'color: var(--accent-primary);' : ''}">💡</button>
           <button class="work-task-action" onclick="event.stopPropagation(); copyWorkTaskToSlack('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="슬랙 복사" aria-label="슬랙 복사">📋</button>
           <button class="work-task-action" onclick="deleteWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="항목 삭제" aria-label="항목 삭제" style="color: var(--danger);">${svgIcon('trash', 14)}</button>
         </div>
@@ -1265,18 +1268,28 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
             // 완료 로그 압축: "✓ 완료" 로그는 하나로 요약
             const completionLogs = task.logs.filter(l => l.content === '✓ 완료');
             const otherLogs = task.logs.filter(l => l.content !== '✓ 완료');
+            const pid = escapeAttr(projectId);
+            const si = Number(stageIdx), sci = Number(subcatIdx), ti = Number(taskIdx);
             let html = '';
             if (completionLogs.length > 0) {
+              const lastIdx = task.logs.lastIndexOf(completionLogs[completionLogs.length - 1]);
               const lastDate = completionLogs[completionLogs.length - 1].date;
-              if (completionLogs.length === 1) {
-                html += '<div class="work-task-log"><span class="work-task-log-date" style="color: #48bb78;">✓ 완료 (' + lastDate + ')</span></div>';
-              } else {
-                html += '<div class="work-task-log"><span class="work-task-log-date" style="color: #48bb78;">✓ ' + completionLogs.length + '회 완료 (최근: ' + lastDate + ')</span></div>';
-              }
+              const label = completionLogs.length === 1
+                ? '✓ 완료 (' + lastDate + ')'
+                : '✓ ' + completionLogs.length + '회 완료 (최근: ' + lastDate + ')';
+              html += '<div class="work-task-log"><span class="work-task-log-date" style="color: var(--accent-success);">' + label + '</span>' +
+                '<div class="work-task-log-actions">' +
+                  '<button class="work-task-log-action" onclick="editWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + lastIdx + ')" aria-label="기록 편집">✏️</button>' +
+                  '<button class="work-task-log-action" onclick="deleteWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + lastIdx + ')" aria-label="기록 삭제">×</button>' +
+                '</div></div>';
             }
             otherLogs.forEach(log => {
               const actualIdx = task.logs.indexOf(log);
-              html += '<div class="work-task-log"><span class="work-task-log-date">' + escapeHtml(log.date) + '</span><span class="work-task-log-content">' + escapeHtml(log.content) + '</span><div class="work-task-log-actions"><button class="work-task-log-action" onclick="deleteWorkLog(\'' + escapeAttr(projectId) + '\', ' + Number(stageIdx) + ', ' + Number(subcatIdx) + ', ' + Number(taskIdx) + ', ' + Number(actualIdx) + ')" aria-label="기록 삭제">×</button></div></div>';
+              html += '<div class="work-task-log"><span class="work-task-log-date">' + escapeHtml(log.date) + '</span><span class="work-task-log-content">' + escapeHtml(log.content) + '</span>' +
+                '<div class="work-task-log-actions">' +
+                  '<button class="work-task-log-action" onclick="editWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" aria-label="기록 편집">✏️</button>' +
+                  '<button class="work-task-log-action" onclick="deleteWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" aria-label="기록 삭제">×</button>' +
+                '</div></div>';
             });
             return html;
           })()}
@@ -1355,3 +1368,58 @@ function renderWorkGeneralView() {
     </div>
   `;
 }
+
+/**
+ * Task 2-1: 프로젝트 관리 "더보기" 드롭다운
+ */
+function showProjectMoreMenu(event, projectId) {
+  event.stopPropagation();
+
+  const existing = document.getElementById('project-more-menu');
+  if (existing) existing.remove();
+
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project) return;
+
+  const menu = document.createElement('div');
+  menu.id = 'project-more-menu';
+  menu.className = 'work-more-menu';
+
+  const rect = event.target.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 4) + 'px';
+  menu.style.left = Math.min(rect.left, window.innerWidth - 180) + 'px';
+
+  const items = [
+    { label: '📋 노션/슬랙 복사', fn: `copyWorkProjectToClipboard('${escapeAttr(projectId)}')` },
+    { label: '📋 복제', fn: `duplicateWorkProject('${escapeAttr(projectId)}')` },
+    { label: project.onHold ? '▶ 재개' : '⏸ 보류', fn: `holdWorkProject('${escapeAttr(projectId)}')` },
+    { label: '💾 템플릿', fn: `saveAsTemplate('${escapeAttr(projectId)}')` },
+    { label: project.archived ? '📤 복원' : '📦 보관', fn: `archiveWorkProject('${escapeAttr(projectId)}')` },
+    { label: '🗑 삭제', fn: `deleteWorkProject('${escapeAttr(projectId)}')`, danger: true }
+  ];
+
+  menu.innerHTML = items.map(item =>
+    `<button class="${item.danger ? 'danger' : ''}" onclick="${item.fn}; document.getElementById('project-more-menu')?.remove();">${escapeHtml(item.label)}</button>`
+  ).join('');
+
+  document.body.appendChild(menu);
+
+  setTimeout(() => {
+    document.addEventListener('click', function handler() {
+      const m = document.getElementById('project-more-menu');
+      if (m) m.remove();
+      document.removeEventListener('click', handler);
+    }, { once: true });
+  }, 0);
+}
+window.showProjectMoreMenu = showProjectMoreMenu;
+
+/**
+ * Task 2-3: 프로젝트 메타 정보 접기/펼치기 토글
+ */
+function toggleWorkMetaCollapse(projectId) {
+  if (!appState.workMetaExpanded) appState.workMetaExpanded = {};
+  appState.workMetaExpanded[projectId] = !appState.workMetaExpanded[projectId];
+  renderStatic();
+}
+window.toggleWorkMetaCollapse = toggleWorkMetaCollapse;

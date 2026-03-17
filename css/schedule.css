@@ -68,7 +68,7 @@
 
     /* 주간 리뷰 요약 */
     .review-summary {
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+      background: var(--accent-primary-alpha);
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 20px;
@@ -78,7 +78,7 @@
     .review-summary-value {
       font-size: 48px;
       font-weight: 700;
-      color: #667eea;
+      color: var(--accent-primary);
     }
 
     .review-summary-label {
@@ -134,7 +134,7 @@
     }
 
     .weekly-plan-item.selected {
-      border-color: #667eea;
+      border-color: var(--accent-primary);
       background: rgba(102, 126, 234, 0.1);
     }
 
@@ -151,8 +151,8 @@
     }
 
     .weekly-plan-item.selected .weekly-plan-check {
-      background: #667eea;
-      border-color: #667eea;
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
       color: white;
     }
 
@@ -166,12 +166,12 @@
       padding: 2px 8px;
       border-radius: 10px;
       background: rgba(102, 126, 234, 0.2);
-      color: #667eea;
+      color: var(--accent-primary);
     }
 
     /* 월요일 리마인더 배너 */
     .monday-reminder {
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: var(--accent-primary);
       border-radius: 12px;
       padding: 16px 20px;
       margin-bottom: 16px;
@@ -290,12 +290,12 @@
 
     .quick-filter-btn:hover {
       background: var(--bg-secondary);
-      border-color: #667eea;
+      border-color: var(--accent-primary);
       color: var(--text-primary);
     }
 
     .quick-filter-btn.active {
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: var(--accent-primary);
       border-color: transparent;
       color: white;
     }
@@ -382,11 +382,11 @@
     }
 
     .time-option-btn:hover {
-      border-color: #667eea;
+      border-color: var(--accent-primary);
     }
 
     .time-option-btn.selected {
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: var(--accent-primary);
       border-color: transparent;
       color: white;
     }

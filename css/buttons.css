@@ -19,14 +19,13 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--accent-primary) 0%, #764ba2 100%);
+      background: var(--accent-primary);
       color: white;
       box-shadow: var(--shadow-md);
     }
 
     .btn-primary:hover {
       box-shadow: var(--shadow-lg);
-      transform: translateY(-1px);
     }
 
     .btn-success {

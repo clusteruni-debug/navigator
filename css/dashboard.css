@@ -2,7 +2,7 @@
 
     /* ── 대시보드 히어로: "지금 이 순간" ── */
     .dash-hero {
-      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+      background: var(--bg-secondary);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg, 16px);
       padding: 20px;
@@ -33,14 +33,14 @@
       font-weight: 600;
       padding: 4px 10px;
       border-radius: 20px;
-      background: rgba(102, 126, 234, 0.15);
-      color: #667eea;
+      background: var(--accent-primary-alpha);
+      color: var(--accent-primary);
     }
 
-    .dash-hero-mode.회사 { background: rgba(102, 126, 234, 0.15); color: #667eea; }
-    .dash-hero-mode.생존 { background: rgba(245, 87, 108, 0.15); color: #f5576c; }
-    .dash-hero-mode.여유 { background: rgba(72, 187, 120, 0.15); color: #48bb78; }
-    .dash-hero-mode.출근 { background: rgba(246, 173, 85, 0.15); color: #f6ad55; }
+    .dash-hero-mode.회사 { background: var(--accent-primary-alpha); color: var(--accent-primary); }
+    .dash-hero-mode.생존 { background: var(--accent-danger-alpha); color: var(--accent-danger); }
+    .dash-hero-mode.여유 { background: var(--accent-success-alpha); color: var(--accent-success); }
+    .dash-hero-mode.출근 { background: var(--accent-warning-alpha); color: var(--accent-warning); }
     .dash-hero-mode.주말 { background: rgba(240, 147, 251, 0.15); color: #f093fb; }
     .dash-hero-mode.휴식 { background: rgba(100, 116, 139, 0.15); color: var(--text-secondary); }
 
@@ -63,7 +63,7 @@
 
     /* ── 지금 할 것 (Next Action 미니) ── */
     .dash-next-action {
-      border: 1px solid rgba(102, 126, 234, 0.2);
+      border: 1px solid var(--border-color);
       border-radius: var(--radius-lg, 16px);
       background: var(--bg-secondary);
     }
@@ -111,22 +111,22 @@
 
     .dashboard-section.revenue-dashboard {
       border-left-color: var(--cat-부업);
-      background: linear-gradient(135deg, var(--bg-secondary), rgba(240, 147, 251, 0.03));
+      background: var(--bg-secondary);
     }
 
     .dashboard-section.life-rhythm-stats {
       border-left-color: var(--accent-primary);
-      background: linear-gradient(135deg, var(--bg-secondary), rgba(102, 126, 234, 0.03));
+      background: var(--bg-secondary);
     }
 
     .dashboard-section.weekly-report {
       border-left-color: var(--accent-success);
-      background: linear-gradient(135deg, var(--bg-secondary), rgba(72, 187, 120, 0.03));
+      background: var(--bg-secondary);
     }
 
     .dashboard-section.habit-tracker {
       border-left-color: var(--accent-warning);
-      background: linear-gradient(135deg, var(--bg-secondary), rgba(246, 173, 85, 0.03));
+      background: var(--bg-secondary);
     }
 
     .dashboard-section.insights-section {
@@ -200,7 +200,7 @@
 
     .insight-bar.peak {
       opacity: 1;
-      background: linear-gradient(180deg, #667eea, #764ba2);
+      background: var(--accent-primary);
     }
 
     .insight-bar-labels {
@@ -268,7 +268,7 @@
       align-items: center;
       gap: 6px;
       padding: 8px 14px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: var(--accent-primary);
       color: white;
       border: none;
       border-radius: 20px;
@@ -279,18 +279,11 @@
     }
 
     .quick-timer-btn:hover {
-      transform: scale(1.05);
       box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     }
 
     .quick-timer-btn.running {
-      background: linear-gradient(135deg, #f5576c, #f093fb);
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
+      background: var(--accent-danger);
     }
 
     .quick-timer-display {
@@ -361,7 +354,7 @@
       bottom: 100px;
       left: 50%;
       transform: translateX(-50%);
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: var(--accent-primary);
       color: white;
       padding: 12px 24px;
       border-radius: 25px;
@@ -389,7 +382,7 @@
       align-items: center;
       gap: 6px;
       padding: 6px 12px;
-      background: linear-gradient(135deg, #48bb78, #38a169);
+      background: var(--accent-success);
       color: white;
       border: none;
       border-radius: 15px;
@@ -399,18 +392,11 @@
     }
 
     .start-now-btn:hover {
-      transform: scale(1.05);
     }
 
     /* 스트릭 불꽃 효과 */
     .streak-fire {
       display: inline-block;
-      animation: fire-flicker 0.5s ease-in-out infinite alternate;
-    }
-
-    @keyframes fire-flicker {
-      from { transform: scale(1); }
-      to { transform: scale(1.1); }
     }
 
     /* 오프라인 표시기 */
@@ -419,7 +405,7 @@
       top: 0;
       left: 0;
       right: 0;
-      background: linear-gradient(90deg, #f5576c, #f093fb);
+      background: var(--accent-danger);
       color: white;
       text-align: center;
       padding: 6px;

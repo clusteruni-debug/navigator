@@ -39,7 +39,7 @@
     }
 
     .tab-btn.active {
-      background: #667eea;
+      background: var(--accent-primary);
       color: white;
       box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
     }
@@ -89,8 +89,8 @@
     }
 
     .more-menu-item.active {
-      background: rgba(102, 126, 234, 0.1);
-      color: #667eea;
+      background: var(--accent-primary-alpha);
+      color: var(--accent-primary);
     }
 
     .tab-content {
@@ -141,11 +141,10 @@
 
     .theme-toggle:hover {
       background: var(--bg-tertiary);
-      transform: scale(1.05);
     }
     
     .shuttle-status {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--accent-primary);
       padding: 20px;
       border-radius: 16px;
       margin-bottom: 20px;
@@ -159,7 +158,7 @@
     }
     
     .shuttle-status.failed {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      background: var(--accent-danger);
     }
     
     .shuttle-icon {
@@ -220,15 +219,15 @@
 
     .current-time-mode-value {
       font-size: 16px;
-      color: #667eea;
+      color: var(--accent-primary);
       font-weight: bold;
     }
 
-    .current-time-mode-value.회사 { color: #667eea; }
-    .current-time-mode-value.생존 { color: #f5576c; }
-    .current-time-mode-value.여유 { color: #48bb78; }
-    .current-time-mode-value.출근 { color: #f6ad55; }
-    .current-time-mode-value.주말 { color: #f093fb; }
+    .current-time-mode-value.회사 { color: var(--accent-primary); }
+    .current-time-mode-value.생존 { color: var(--accent-danger); }
+    .current-time-mode-value.여유 { color: var(--accent-success); }
+    .current-time-mode-value.출근 { color: var(--accent-warning); }
+    .current-time-mode-value.주말 { color: var(--cat-부업); }
     .current-time-mode-value.휴식 { color: var(--text-secondary); }
 
     .current-time-right {
@@ -243,12 +242,11 @@
     .time-remaining-value {
       font-size: 18px;
       font-weight: bold;
-      color: #f093fb;
+      color: var(--cat-부업);
     }
 
     .time-remaining-value.urgent {
-      color: #f5576c;
-      animation: pulse 1s infinite;
+      color: var(--accent-danger);
     }
     
     .mode-indicator {
@@ -272,12 +270,6 @@
     
     .time-remaining.panic {
       border-color: #f5576c;
-      animation: pulse 1s infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
     }
     
     .time-label {
@@ -323,7 +315,6 @@
     }
 
     .stat-card:hover {
-      transform: translateY(-2px);
       box-shadow: 0 4px 16px var(--shadow-color);
       border-color: rgba(148, 163, 184, 0.15);
     }
@@ -396,8 +387,8 @@
       }
 
       .tab-btn.active {
-        background: rgba(102, 126, 234, 0.15);
-        color: #667eea;
+        background: var(--accent-primary-alpha);
+        color: var(--accent-primary);
         box-shadow: none;
       }
 
@@ -431,8 +422,8 @@
       }
 
       .more-menu-item.active {
-        background: rgba(102, 126, 234, 0.15);
-        color: #667eea;
+        background: var(--accent-primary-alpha);
+        color: var(--accent-primary);
       }
 
       /* 사이드바 하단 구분선 (더보기 항목 전) */

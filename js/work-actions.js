@@ -383,9 +383,22 @@ function cycleWorkTaskStatus(projectId, stageIdx, subcatIdx, taskIdx) {
 window.cycleWorkTaskStatus = cycleWorkTaskStatus;
 
 /**
- * 소분류 완료 체크박스 토글 (완료↔미시작)
+ * 소분류 완료 체크박스 토글 (완료↔미시작) — Task 2-5: 300ms 디바운스 적용
  */
+const _completionDebounceMap = new Map();
+
 function toggleWorkTaskComplete(projectId, stageIdx, subcatIdx, taskIdx) {
+  const key = `${projectId}-${stageIdx}-${subcatIdx}-${taskIdx}`;
+  if (_completionDebounceMap.has(key)) {
+    clearTimeout(_completionDebounceMap.get(key));
+  }
+  _completionDebounceMap.set(key, setTimeout(() => {
+    _completionDebounceMap.delete(key);
+    _doToggleWorkTaskComplete(projectId, stageIdx, subcatIdx, taskIdx);
+  }, 300));
+}
+
+function _doToggleWorkTaskComplete(projectId, stageIdx, subcatIdx, taskIdx) {
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
 
@@ -510,6 +523,28 @@ function deleteWorkLog(projectId, stageIdx, subcatIdx, taskIdx, logIdx) {
 window.deleteWorkLog = deleteWorkLog;
 
 /**
+ * Task 2-6: 로그 내용 편집
+ */
+function editWorkLog(projectId, stageIdx, subcatIdx, taskIdx, logIdx) {
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project) return;
+
+  const task = project.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  if (!task || !task.logs[logIdx]) return;
+
+  const log = task.logs[logIdx];
+  const newContent = prompt('기록 내용 편집:', log.content);
+  if (newContent === null || newContent.trim() === '') return;
+
+  log.content = newContent.trim();
+  project.updatedAt = new Date().toISOString();
+  saveWorkProjects();
+  renderStatic();
+  showToast('기록 수정됨', 'success');
+}
+window.editWorkLog = editWorkLog;
+
+/**
  * canStartEarly 토글
  */
 function toggleCanStartEarly(projectId, stageIdx, subcatIdx, taskIdx) {
@@ -577,7 +612,7 @@ function copyWorkProjectToClipboard(projectId) {
 window.copyWorkProjectToClipboard = copyWorkProjectToClipboard;
 
 /**
- * 완료된 작업의 completedAt 날짜 수정
+ * 완료된 작업의 completedAt 날짜 수정 (모달 방식)
  */
 function editWorkTaskCompletedAt(projectId, stageIdx, subcatIdx, taskIdx) {
   const project = appState.workProjects.find(p => p.id === projectId);
@@ -585,40 +620,60 @@ function editWorkTaskCompletedAt(projectId, stageIdx, subcatIdx, taskIdx) {
   const task = project.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
   if (!task || task.status !== 'completed') return;
 
-  const input = document.createElement('input');
-  input.type = 'datetime-local';
-  input.value = task.completedAt || '';
-  input.style.cssText = 'position: fixed; opacity: 0; top: 50%; left: 50%;';
-  document.body.appendChild(input);
+  const currentVal = task.completedAt || getLocalDateTimeStr();
+  const modalId = 'edit-work-completed-modal';
 
-  const cleanupTimer = setTimeout(function() {
-    if (document.body.contains(input)) document.body.removeChild(input);
-  }, 5000);
+  const modalHtml = `
+    <div class="work-modal-overlay" id="${modalId}" onclick="if(event.target===this) document.getElementById('${modalId}').remove()">
+      <div class="work-modal" onclick="event.stopPropagation()">
+        <div class="work-modal-header">
+          <h3>완료일 수정</h3>
+          <button class="work-modal-close" onclick="document.getElementById('${modalId}').remove()">✕</button>
+        </div>
+        <div class="work-modal-body">
+          <div class="work-modal-field">
+            <label class="work-modal-label">완료 시각</label>
+            <input type="datetime-local" class="work-modal-input" id="edit-work-completed-input" value="${escapeAttr(currentVal)}">
+          </div>
+          <div style="margin-top:8px;font-size:14px;color:var(--text-muted)">
+            작업: ${escapeHtml(task.title)}
+          </div>
+        </div>
+        <div class="work-modal-footer">
+          <button class="work-modal-btn secondary" onclick="document.getElementById('${modalId}').remove()">취소</button>
+          <button class="work-modal-btn primary" onclick="_saveWorkTaskCompletedAt('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})">저장</button>
+        </div>
+      </div>
+    </div>
+  `;
 
-  let changed = false;
-  input.addEventListener('change', function() {
-    changed = true;
-    clearTimeout(cleanupTimer);
-    task.completedAt = this.value || getLocalDateTimeStr();
-    project.updatedAt = new Date().toISOString();
-    saveWorkProjects();
-    renderStatic();
-    showToast('완료일이 수정되었습니다', 'success');
-    if (document.body.contains(input)) document.body.removeChild(input);
-  });
-
-  input.addEventListener('blur', function() {
-    setTimeout(function() {
-      if (!changed) {
-        clearTimeout(cleanupTimer);
-        if (document.body.contains(input)) document.body.removeChild(input);
-      }
-    }, 200);
-  });
-
-  input.focus();
-  input.showPicker?.();
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  document.getElementById('edit-work-completed-input').focus();
 }
+
+function _saveWorkTaskCompletedAt(projectId, stageIdx, subcatIdx, taskIdx) {
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project) return;
+  const task = project.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  if (!task) return;
+
+  const input = document.getElementById('edit-work-completed-input');
+  if (!input || !input.value) {
+    showToast('날짜를 선택해주세요', 'error');
+    return;
+  }
+
+  task.completedAt = input.value;
+  project.updatedAt = new Date().toISOString();
+  saveWorkProjects();
+
+  const modal = document.getElementById('edit-work-completed-modal');
+  if (modal) modal.remove();
+
+  renderStatic();
+  showToast('완료일이 수정되었습니다', 'success');
+}
+window._saveWorkTaskCompletedAt = _saveWorkTaskCompletedAt;
 window.editWorkTaskCompletedAt = editWorkTaskCompletedAt;
 
 /**

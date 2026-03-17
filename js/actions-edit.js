@@ -12,7 +12,9 @@ function editCompletedAt(id) {
 
   const oldDate = new Date(task.completedAt);
   if (isNaN(oldDate.getTime())) { showToast('완료 날짜가 올바르지 않습니다', 'error'); return; }
-  const oldDateStr = oldDate.toISOString().slice(0, 16); // datetime-local 형식
+  // datetime-local은 로컬 시간 기준이므로 로컬 시간으로 변환
+  const pad = (n) => String(n).padStart(2, '0');
+  const oldDateStr = oldDate.getFullYear() + '-' + pad(oldDate.getMonth() + 1) + '-' + pad(oldDate.getDate()) + 'T' + pad(oldDate.getHours()) + ':' + pad(oldDate.getMinutes());
 
   // 모달 생성
   const modalHtml = `

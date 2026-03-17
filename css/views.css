@@ -91,13 +91,13 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-left: 4px solid #667eea;
+      border-left: 4px solid var(--accent-primary);
     }
 
-    .all-category-header.본업 { border-left-color: #667eea; }
-    .all-category-header.부업 { border-left-color: #f093fb; }
-    .all-category-header.일상 { border-left-color: #48bb78; }
-    .all-category-header.가족 { border-left-color: #f6ad55; }
+    .all-category-header.본업 { border-left-color: var(--accent-primary); }
+    .all-category-header.부업 { border-left-color: var(--cat-부업); }
+    .all-category-header.일상 { border-left-color: var(--accent-success); }
+    .all-category-header.가족 { border-left-color: var(--accent-warning); }
 
     .all-category-title {
       font-size: 16px;
@@ -230,8 +230,8 @@
     }
 
     .schedule-filter-btn.active {
-      background: #667eea;
-      border-color: #667eea;
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
       color: white;
     }
 
@@ -253,11 +253,11 @@
     }
 
     .schedule-day-header.today {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--accent-primary);
     }
 
     .schedule-day-header.weekend {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      background: var(--accent-danger);
     }
 
     .schedule-day-count {
@@ -329,7 +329,7 @@
     }
 
     .timeline-task {
-      background: #667eea;
+      background: var(--accent-primary);
       border-radius: 6px;
       padding: 8px 10px;
       margin: 2px 0;

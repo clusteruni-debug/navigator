@@ -26,9 +26,9 @@ function renderEventsTab() {
 
           const formatDday = (days) => {
             if (days === null) return '';
-            if (days < 0) return '<span style="color:#f5576c">D+' + Math.abs(days) + '</span>';
-            if (days === 0) return '<span style="color:#f5576c">D-Day</span>';
-            if (days <= 3) return '<span style="color:#ff9500">D-' + days + '</span>';
+            if (days < 0) return '<span style="color:var(--accent-danger)">D+' + Math.abs(days) + '</span>';
+            if (days === 0) return '<span style="color:var(--accent-danger)">D-Day</span>';
+            if (days <= 3) return '<span style="color:var(--accent-warning)">D-' + days + '</span>';
             return 'D-' + days;
           };
 
@@ -76,15 +76,15 @@ function renderEventsTab() {
 
             <div class="events-summary">
               <div class="events-summary-item">
-                <div class="events-summary-value" style="color: ${urgentCount > 0 ? '#f5576c' : '#48bb78'}">${pendingEvents.length}</div>
+                <div class="events-summary-value" style="color: ${urgentCount > 0 ? 'var(--accent-danger)' : 'var(--accent-success)'}">${pendingEvents.length}</div>
                 <div class="events-summary-label">미제출</div>
               </div>
               <div class="events-summary-item">
-                <div class="events-summary-value" style="color: #ff9500">${urgentCount}</div>
+                <div class="events-summary-value" style="color: var(--accent-warning)">${urgentCount}</div>
                 <div class="events-summary-label">긴급 (D-1)</div>
               </div>
               <div class="events-summary-item">
-                <div class="events-summary-value" style="color: #48bb78">${submittedEvents.length}</div>
+                <div class="events-summary-value" style="color: var(--accent-success)">${submittedEvents.length}</div>
                 <div class="events-summary-label">제출완료</div>
               </div>
             </div>

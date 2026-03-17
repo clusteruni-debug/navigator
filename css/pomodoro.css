@@ -1,7 +1,7 @@
 /* pomodoro.css - 포모도로 타이머 */
     /* 포모도로 타이머 */
     .pomodoro-section {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      background: var(--bg-secondary);
       border-radius: 16px;
       padding: 20px;
       margin-bottom: 20px;
@@ -10,18 +10,12 @@
     }
 
     .pomodoro-section.active {
-      border-color: #667eea;
-      animation: pomodoro-pulse 2s infinite;
+      border-color: var(--accent-primary);
     }
 
     .pomodoro-section.break {
       border-color: #48bb78;
-      background: linear-gradient(135deg, #1a2e1a 0%, #162e16 100%);
-    }
-
-    @keyframes pomodoro-pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4); }
-      50% { box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
+      background: var(--bg-secondary);
     }
 
     .pomodoro-title {
@@ -41,12 +35,12 @@
 
     .pomodoro-status {
       font-size: 16px;
-      color: #667eea;
+      color: var(--accent-primary);
       margin-bottom: 15px;
     }
 
     .pomodoro-section.break .pomodoro-status {
-      color: #48bb78;
+      color: var(--accent-success);
     }
 
     .pomodoro-task {
@@ -80,17 +74,17 @@
     }
 
     .pomodoro-btn.start {
-      background: #667eea;
+      background: var(--accent-primary);
       color: white;
     }
 
     .pomodoro-btn.pause {
-      background: #ff9500;
+      background: var(--accent-warning);
       color: white;
     }
 
     .pomodoro-btn.stop {
-      background: #f5576c;
+      background: var(--accent-danger);
       color: white;
     }
 
@@ -115,7 +109,7 @@
     .pomodoro-stat-value {
       font-size: 24px;
       font-weight: bold;
-      color: #667eea;
+      color: var(--accent-primary);
     }
 
     .pomodoro-stat-label {
@@ -141,17 +135,17 @@
     }
 
     .filter-chip:hover {
-      border-color: #667eea;
+      border-color: var(--accent-primary);
     }
 
     .filter-chip.active {
-      background: #667eea;
-      border-color: #667eea;
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
       color: white;
     }
 
-    .filter-chip.본업.active { background: #667eea; border-color: #667eea; }
-    .filter-chip.부업.active { background: #f093fb; border-color: #f093fb; }
-    .filter-chip.일상.active { background: #48bb78; border-color: #48bb78; }
-    .filter-chip.가족.active { background: #f6ad55; border-color: #f6ad55; }
+    .filter-chip.본업.active { background: var(--accent-primary); border-color: var(--accent-primary); }
+    .filter-chip.부업.active { background: var(--cat-부업); border-color: var(--cat-부업); }
+    .filter-chip.일상.active { background: var(--accent-success); border-color: var(--accent-success); }
+    .filter-chip.가족.active { background: var(--accent-warning); border-color: var(--accent-warning); }
 

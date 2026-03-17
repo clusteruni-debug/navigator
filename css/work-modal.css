@@ -62,7 +62,7 @@
     }
 
     .work-modal-actions .confirm {
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: var(--accent-primary);
       color: white;
     }
 
@@ -101,7 +101,7 @@
 
     .work-modal-input:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--accent-primary);
     }
 
     .work-modal-textarea {
@@ -118,7 +118,7 @@
 
     .work-modal-textarea:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--accent-primary);
     }
 
     /* 상태 선택 버튼 그룹 */
@@ -140,23 +140,23 @@
     }
 
     .work-status-option:hover {
-      border-color: #667eea;
+      border-color: var(--accent-primary);
     }
 
     .work-status-option.selected {
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: var(--accent-primary);
       border-color: transparent;
       color: white;
     }
 
     .work-status-option.selected.in-progress {
-      background: #667eea;
+      background: var(--accent-primary);
     }
 
     .work-status-option.selected.completed {
-      background: #48bb78;
+      background: var(--accent-success);
     }
 
     .work-status-option.selected.blocked {
-      background: #f5576c;
+      background: var(--accent-danger);
     }

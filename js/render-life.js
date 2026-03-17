@@ -109,7 +109,7 @@ function renderLifeTab() {
                 <div class="life-summary-label">👨‍👩‍👧 가족</div>
               </div>
               <div class="life-summary-item">
-                <div class="life-summary-value" style="color: #48bb78">${completedTasks.length}</div>
+                <div class="life-summary-value" style="color: var(--accent-success)">${completedTasks.length}</div>
                 <div class="life-summary-label">✓ 완료</div>
               </div>
             </div>
@@ -163,7 +163,7 @@ function renderLifeTab() {
                 <div class="life-list">
                   ${completedTasks.slice(0, 5).map(task => `
                     <div class="life-item completed" style="opacity: 0.6; --task-cat-color: var(--cat-${task.category})">
-                      <div class="task-check-btn checked" style="color: #48bb78;">✓</div>
+                      <div class="task-check-btn checked" style="color: var(--accent-success);">✓</div>
                       <div class="life-item-content" style="text-decoration: line-through;">
                         <div class="life-item-title">${escapeHtml(task.title)}</div>
                       </div>

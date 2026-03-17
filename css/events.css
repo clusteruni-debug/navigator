@@ -208,7 +208,6 @@
     }
 
     .events-quick-btn:hover {
-      transform: scale(1.05);
     }
 
     .events-detail-btn {
@@ -245,7 +244,7 @@
     }
 
     .events-section.submitted .events-section-title {
-      color: #48bb78;
+      color: var(--accent-success);
     }
 
     .events-list {
@@ -276,12 +275,12 @@
     }
 
     .event-card.urgent {
-      border-left: 4px solid #f5576c;
+      border-left: 4px solid var(--accent-danger);
       background: linear-gradient(90deg, rgba(245,87,108,0.08) 0%, transparent 30%);
     }
 
     .event-card.warning {
-      border-left: 4px solid #ff9500;
+      border-left: 4px solid var(--accent-warning);
       background: linear-gradient(90deg, rgba(255,149,0,0.08) 0%, transparent 30%);
     }
 
@@ -381,7 +380,7 @@
 
     .event-tg-synced {
       font-size: 14px;
-      color: #48bb78;
+      color: var(--accent-success);
       background: rgba(72, 187, 120, 0.1);
       padding: 2px 6px;
       border-radius: 4px;
@@ -433,9 +432,9 @@
       min-width: 44px;
     }
     .event-bulk-actions .bulk-delete-btn {
-      background: #f5576c;
+      background: var(--accent-danger);
       color: white;
-      border-color: #f5576c;
+      border-color: var(--accent-danger);
     }
     .event-bulk-actions .bulk-delete-btn:disabled {
       opacity: 0.5;
@@ -475,12 +474,12 @@
     }
 
     .event-card.urgent .event-dday {
-      background: #f5576c;
+      background: var(--accent-danger);
       color: white;
     }
 
     .event-card.warning .event-dday {
-      background: #ff9500;
+      background: var(--accent-warning);
       color: white;
     }
 
@@ -597,7 +596,7 @@
     .events-empty {
       text-align: center;
       padding: 60px 20px;
-      background: linear-gradient(180deg, #1a1a1a 0%, #151515 100%);
+      background: var(--bg-secondary);
       border-radius: 16px;
       border: 1px solid #2a2a2a;
     }

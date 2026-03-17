@@ -126,7 +126,7 @@
 
     .settings-input:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--accent-primary);
     }
 
     /* 라이트 모드 시간 입력 */
@@ -231,7 +231,7 @@
 
     .daily-goal-fill {
       height: 100%;
-      background: linear-gradient(90deg, #667eea, #764ba2);
+      background: var(--accent-primary);
       border-radius: 6px;
       transition: width 0.5s ease;
     }
@@ -298,7 +298,7 @@
     }
 
     .daily-goal-text strong {
-      color: #667eea;
+      color: var(--accent-primary);
       font-weight: 700;
       font-size: 16px;
     }
@@ -306,17 +306,11 @@
     .daily-goal-percentage {
       font-size: 22px;
       font-weight: 700;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--accent-primary);
     }
 
     .daily-goal-percentage.complete {
-      background: linear-gradient(135deg, #48bb78, #38a169);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--accent-success);
     }
 
     .daily-goal-track {
@@ -339,7 +333,7 @@
 
     .daily-goal-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #667eea, #764ba2);
+      background: var(--accent-primary);
       border-radius: 12px;
       transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
@@ -407,7 +401,7 @@
 
     .weekly-chart-fill {
       width: 30px;
-      background: linear-gradient(180deg, #667eea, #764ba2);
+      background: var(--accent-primary);
       border-radius: 4px 4px 0 0;
       min-height: 4px;
       transition: height 0.3s ease;
@@ -451,7 +445,7 @@
 
     .settings-input-number:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--accent-primary);
     }
 
     /* ============================================
@@ -477,8 +471,8 @@
     }
 
     .templates-toggle:hover {
-      border-color: #667eea;
-      color: #667eea;
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
     }
 
     .templates-list {
@@ -505,7 +499,7 @@
     }
 
     .template-chip:hover {
-      border-color: #667eea;
+      border-color: var(--accent-primary);
       background: rgba(102, 126, 234, 0.1);
     }
 
@@ -545,8 +539,8 @@
     }
 
     .template-add-btn:hover {
-      border-color: #667eea;
-      color: #667eea;
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
     }
 
     .template-empty {
@@ -567,17 +561,11 @@
       gap: 15px;
       padding: 12px;
       margin-bottom: 15px;
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+      background: var(--accent-primary-alpha);
       border: 1px dashed rgba(102, 126, 234, 0.3);
       border-radius: 12px;
       font-size: 15px;
       color: var(--text-secondary);
-      animation: swipeHintPulse 2s ease-in-out infinite;
-    }
-
-    @keyframes swipeHintPulse {
-      0%, 100% { opacity: 0.8; }
-      50% { opacity: 1; }
     }
 
     .swipe-hint-icon {
@@ -627,7 +615,7 @@
     .motivation-message {
       text-align: center;
       padding: 20px;
-      background: linear-gradient(135deg, rgba(72, 187, 120, 0.1), rgba(56, 161, 105, 0.1));
+      background: var(--accent-success-alpha);
       border-radius: 12px;
       margin: 10px 0;
     }
@@ -679,7 +667,7 @@
     .commute-duration-badge.good { background: rgba(72, 187, 120, 0.15); color: #48bb78; }
     .commute-duration-badge.normal { background: rgba(237, 137, 54, 0.15); color: #ed8936; }
     .commute-duration-badge.bad { background: rgba(245, 101, 101, 0.15); color: #f56565; }
-    .commute-recommend-card { background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); border-radius: 16px; padding: 18px; margin-bottom: 16px; }
+    .commute-recommend-card { background: var(--accent-primary-alpha); border-radius: 16px; padding: 18px; margin-bottom: 16px; }
     .commute-recommend-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
     .commute-recommend-time { font-size: 28px; font-weight: 800; color: var(--accent-primary); }
     .commute-recommend-detail { font-size: 14px; color: var(--text-secondary); margin-top: 6px; }

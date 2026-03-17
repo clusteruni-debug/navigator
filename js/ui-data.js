@@ -8,7 +8,7 @@
 function exportData() {
   try {
     const data = {
-      version: '2.3',
+      version: '2.4',
       exportDate: new Date().toISOString(),
       tasks: appState.tasks,
       shuttleSuccess: appState.shuttleSuccess,
@@ -21,6 +21,7 @@ function exportData() {
       workProjects: appState.workProjects,
       workTemplates: appState.workTemplates,
       lifeRhythm: appState.lifeRhythm,
+      commuteTracker: appState.commuteTracker,
       weeklyPlan: appState.weeklyPlan,
       completionLog: appState.completionLog,
       trash: appState.trash
@@ -37,8 +38,9 @@ function exportData() {
 
     URL.revokeObjectURL(url);
 
-    // 백업 시간 기록
+    // 백업/아카이브 시간 기록 (프루닝 안전 게이트에 사용)
     localStorage.setItem('navigator-last-backup', new Date().toISOString());
+    localStorage.setItem('navigator-last-archive-date', new Date().toISOString());
 
     showToast('📦 백업 완료!', 'success');
   } catch (error) {
@@ -214,4 +216,82 @@ function handleFileImport(e) {
 
   // 인풋 초기화 (같은 파일 다시 선택 가능하게)
   e.target.value = '';
+}
+
+// ============================================
+// Firestore 용량 관리: 자동 프루닝
+// ============================================
+
+/**
+ * 오래된 라이프 리듬 히스토리 프루닝 (기본 2년)
+ * 안전 게이트: 최근 30일 내 백업(Export)이 있어야만 실행
+ */
+function pruneOldRhythmHistory(years = 2) {
+  if (!_isArchiveSafe()) return 0;
+  const history = appState.lifeRhythm?.history;
+  if (!history || typeof history !== 'object') return 0;
+
+  const cutoff = _getCutoffDate(years);
+  let pruned = 0;
+  for (const dateKey of Object.keys(history)) {
+    if (dateKey < cutoff) {
+      delete history[dateKey];
+      pruned++;
+    }
+  }
+  if (pruned > 0) {
+    saveLifeRhythm();
+    console.log(`[Prune] lifeRhythm.history: ${pruned} entries older than ${cutoff} removed`);
+  }
+  return pruned;
+}
+
+/**
+ * 오래된 통근 트립 프루닝 (기본 2년)
+ * 안전 게이트: 최근 30일 내 백업(Export)이 있어야만 실행
+ */
+function pruneOldCommuteTrips(years = 2) {
+  if (!_isArchiveSafe()) return 0;
+  const trips = appState.commuteTracker?.trips;
+  if (!trips || typeof trips !== 'object') return 0;
+
+  const cutoff = _getCutoffDate(years);
+  let pruned = 0;
+  for (const dateKey of Object.keys(trips)) {
+    if (dateKey < cutoff) {
+      delete trips[dateKey];
+      pruned++;
+    }
+  }
+  if (pruned > 0) {
+    localStorage.setItem('navigator-commute-tracker', JSON.stringify(appState.commuteTracker));
+    console.log(`[Prune] commuteTracker.trips: ${pruned} entries older than ${cutoff} removed`);
+  }
+  return pruned;
+}
+
+/**
+ * 앱 시작 시 호출: 안전한 경우에만 자동 프루닝
+ */
+function runStartupPruning() {
+  const rh = pruneOldRhythmHistory(2);
+  const ct = pruneOldCommuteTrips(2);
+  if (rh > 0 || ct > 0) {
+    console.log(`[Prune] Startup pruning: rhythm=${rh}, commute=${ct}`);
+  }
+}
+
+/** 안전 게이트: 최근 30일 내 아카이브(Export)가 있는지 확인 */
+function _isArchiveSafe() {
+  const lastArchive = localStorage.getItem('navigator-last-archive-date');
+  if (!lastArchive) return false;
+  const daysSince = (Date.now() - new Date(lastArchive).getTime()) / (1000 * 60 * 60 * 24);
+  return daysSince <= 30;
+}
+
+/** N년 전 날짜를 YYYY-MM-DD 문자열로 반환 */
+function _getCutoffDate(years) {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - years);
+  return d.toISOString().slice(0, 10);
 }

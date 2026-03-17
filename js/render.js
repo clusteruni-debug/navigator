@@ -148,7 +148,7 @@ function renderStatic() {
           ${appState.user ? `
             <button class="header-btn" onclick="openSettings()" title="동기화: ${appState.syncStatus}" aria-label="동기화 상태" style="position: relative;">
               ${appState.syncStatus === 'syncing' ? '🔄' : appState.syncStatus === 'synced' ? '☁️' : appState.syncStatus === 'error' ? '⚠️' : '☁️'}
-              <span style="position: absolute; bottom: 2px; right: 2px; width: 8px; height: 8px; background: ${appState.syncStatus === 'synced' ? '#48bb78' : appState.syncStatus === 'error' ? '#f5576c' : '#667eea'}; border-radius: 50%; border: 1px solid var(--bg-primary);"></span>
+              <span style="position: absolute; bottom: 2px; right: 2px; width: 8px; height: 8px; background: ${appState.syncStatus === 'synced' ? 'var(--accent-success)' : appState.syncStatus === 'error' ? 'var(--accent-danger)' : 'var(--accent-primary)'}; border-radius: 50%; border: 1px solid var(--bg-primary);"></span>
             </button>
           ` : `
             <button class="header-btn" onclick="openSettings()" title="로그인하여 동기화" aria-label="로그인하여 동기화">
@@ -158,7 +158,7 @@ function renderStatic() {
           <div class="notification-dropdown-wrapper">
             <button class="header-btn" onclick="toggleNotificationDropdown(event)" title="마감 알림" aria-label="마감 알림" style="position: relative;">
               🔔
-              ${appState.notificationPermission === 'granted' ? '<span class="notif-dot" style="background: #48bb78;"></span>' : appState.notificationPermission === 'denied' ? '<span class="notif-dot" style="background: #f5576c;"></span>' : ''}
+              ${appState.notificationPermission === 'granted' ? '<span class="notif-dot" style="background: var(--accent-success);"></span>' : appState.notificationPermission === 'denied' ? '<span class="notif-dot" style="background: var(--accent-danger);"></span>' : ''}
             </button>
             <div id="notification-dropdown" class="notification-dropdown">
               <div class="notification-title">🔔 마감 알림</div>

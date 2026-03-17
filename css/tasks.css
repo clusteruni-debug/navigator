@@ -31,14 +31,14 @@
       font-weight: 600;
       padding: 2px 8px;
       border-radius: 12px;
-      background: rgba(102, 126, 234, 0.15);
-      color: #667eea;
+      background: var(--accent-primary-alpha);
+      color: var(--accent-primary);
     }
 
-    .today-mode.회사 { background: rgba(102, 126, 234, 0.15); color: #667eea; }
-    .today-mode.생존 { background: rgba(245, 87, 108, 0.15); color: #f5576c; }
-    .today-mode.여유 { background: rgba(72, 187, 120, 0.15); color: #48bb78; }
-    .today-mode.출근 { background: rgba(246, 173, 85, 0.15); color: #f6ad55; }
+    .today-mode.회사 { background: var(--accent-primary-alpha); color: var(--accent-primary); }
+    .today-mode.생존 { background: var(--accent-danger-alpha); color: var(--accent-danger); }
+    .today-mode.여유 { background: var(--accent-success-alpha); color: var(--accent-success); }
+    .today-mode.출근 { background: var(--accent-warning-alpha); color: var(--accent-warning); }
     .today-mode.주말 { background: rgba(240, 147, 251, 0.15); color: #f093fb; }
     .today-mode.휴식 { background: rgba(100, 116, 139, 0.15); color: var(--text-secondary); }
 
@@ -377,8 +377,8 @@
     }
 
     .task-check-btn:hover {
-      border-color: #48bb78;
-      color: #48bb78;
+      border-color: var(--accent-success);
+      color: var(--accent-success);
     }
 
     .task-item-mini-title {
@@ -419,7 +419,7 @@
     }
 
     .quick-add:focus-within {
-      border-color: #667eea;
+      border-color: var(--accent-primary);
       box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
     }
 
@@ -456,13 +456,13 @@
 
     .quick-add-input:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--accent-primary);
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
     }
 
     .quick-add-btn {
       padding: 14px 22px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--accent-primary);
       border: none;
       border-radius: 10px;
       color: white;
@@ -481,7 +481,7 @@
     .quick-add-toggle {
       margin-top: 10px;
       text-align: center;
-      color: #667eea;
+      color: var(--accent-primary);
       font-size: 16px;
       cursor: pointer;
       user-select: none;
@@ -622,7 +622,6 @@
     .task-item:hover {
       border-color: rgba(148, 163, 184, 0.15);
       box-shadow: 0 4px 16px var(--shadow-color);
-      transform: translateY(-2px);
     }
 
     .task-item:active {
@@ -639,7 +638,7 @@
 
     .task-item.completed {
       opacity: 0.6;
-      background: linear-gradient(135deg, rgba(72, 187, 120, 0.05), rgba(56, 161, 105, 0.02));
+      background: rgba(72, 187, 120, 0.05);
       border-color: rgba(72, 187, 120, 0.3);
     }
 
@@ -704,7 +703,7 @@
       top: 0;
       bottom: 0;
       width: 3px;
-      background: linear-gradient(180deg, #667eea, #764ba2);
+      background: var(--accent-primary);
       opacity: 0.5;
     }
 
@@ -925,7 +924,7 @@
       padding: 20px;
       border-radius: 12px;
       margin-bottom: 20px;
-      border: 1px solid #667eea;
+      border: 1px solid var(--accent-primary);
       border-width: 2px;
     }
 

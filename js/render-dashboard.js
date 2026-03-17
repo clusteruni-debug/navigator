@@ -35,7 +35,7 @@ function renderDashboardTab(ctx) {
           </div>
           <div class="stats">
             <div class="stat-card">
-              <div class="stat-value" style="color: #48bb78">${stats.completed}</div>
+              <div class="stat-value" style="color: var(--accent-success)">${stats.completed}</div>
               <div class="stat-label">완료</div>
             </div>
             <div class="stat-card">
@@ -364,12 +364,12 @@ function renderDashboardTab(ctx) {
                 <span>${habitTitle ? '미완료' : '적음'}</span>
                 <div class="habit-legend-item"><div class="habit-legend-cell" style="background: var(--bg-tertiary)"></div></div>
                 ${habitTitle ? `
-                  <div class="habit-legend-item"><div class="habit-legend-cell level-4" style="background: #48bb78"></div></div>
+                  <div class="habit-legend-item"><div class="habit-legend-cell level-4" style="background: var(--accent-success)"></div></div>
                 ` : `
                   <div class="habit-legend-item"><div class="habit-legend-cell level-1" style="background: rgba(72, 187, 120, 0.3)"></div></div>
                   <div class="habit-legend-item"><div class="habit-legend-cell level-2" style="background: rgba(72, 187, 120, 0.5)"></div></div>
                   <div class="habit-legend-item"><div class="habit-legend-cell level-3" style="background: rgba(72, 187, 120, 0.7)"></div></div>
-                  <div class="habit-legend-item"><div class="habit-legend-cell level-4" style="background: #48bb78"></div></div>
+                  <div class="habit-legend-item"><div class="habit-legend-cell level-4" style="background: var(--accent-success)"></div></div>
                 `}
                 <span>${habitTitle ? '완료' : '많음'}</span>
               </div>
@@ -427,7 +427,7 @@ function renderDashboardTab(ctx) {
 
           // 파이 차트 그라디언트 계산
           const colors = {
-            '본업': '#667eea',
+            '본업': 'var(--accent-primary)',
             '부업': '#f093fb',
             '일상': '#4ecdc4',
             '가족': '#ffd93d',
@@ -570,11 +570,11 @@ function renderDashboardTab(ctx) {
               <div class="dashboard-title">📋 주간/월간 리포트</div>
               <div class="stats" style="margin-bottom: 12px;">
                 <div class="stat-card">
-                  <div class="stat-value" style="color: #667eea">${weekEntries.length}</div>
+                  <div class="stat-value" style="color: var(--accent-primary)">${weekEntries.length}</div>
                   <div class="stat-label">주간 완료</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value" style="color: #48bb78">${monthEntries.length}</div>
+                  <div class="stat-value" style="color: var(--accent-success)">${monthEntries.length}</div>
                   <div class="stat-label">월간 완료</div>
                 </div>
                 <div class="stat-card">
@@ -582,7 +582,7 @@ function renderDashboardTab(ctx) {
                   <div class="stat-label">주간 수익</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value" style="color: #f5576c">${monthRevenue > 0 ? formatKRW(monthRevenue) : '-'}</div>
+                  <div class="stat-value" style="color: var(--accent-danger)">${monthRevenue > 0 ? formatKRW(monthRevenue) : '-'}</div>
                   <div class="stat-label">월간 수익</div>
                 </div>
               </div>
@@ -603,7 +603,7 @@ function renderDashboardTab(ctx) {
                   <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                     <span style="width: 30px; font-size: 14px; color: var(--text-secondary);">${m.name}</span>
                     <div style="flex: 1; height: 16px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;">
-                      <div style="width: ${Math.round((m.count / maxMonthCount) * 100)}%; height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px; transition: width 0.3s;"></div>
+                      <div style="width: ${Math.round((m.count / maxMonthCount) * 100)}%; height: 100%; background: var(--accent-primary); border-radius: 4px; transition: width 0.3s;"></div>
                     </div>
                     <span style="width: 50px; font-size: 14px; text-align: right; color: var(--text-secondary);">${m.count}건</span>
                   </div>

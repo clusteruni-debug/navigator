@@ -385,8 +385,17 @@ function renderSettingsModal() {
                 <div class="settings-label-desc" style="text-align: center; margin-top: 8px; opacity: 0.6;">
                   주기적으로 백업하여 데이터를 안전하게 보관하세요
                 </div>
+                <div class="settings-label-desc" style="text-align: center; margin-top: 4px; opacity: 0.5; font-size: 13px;">
+                  ${(() => {
+                    const last = localStorage.getItem('navigator-last-archive-date');
+                    if (!last) return '⚠️ 아직 백업한 적 없음 — 오래된 데이터 자동 정리가 비활성 상태입니다';
+                    const days = Math.floor((Date.now() - new Date(last).getTime()) / 86400000);
+                    if (days > 30) return '⚠️ 마지막 백업: ' + days + '일 전 — 자동 정리가 일시 중지됨';
+                    return '✅ 마지막 백업: ' + days + '일 전';
+                  })()}
+                </div>
                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
-                  <button class="backup-btn" onclick="restoreFromSyncBackup()" style="width: 100%; background: #f5576c22; border-color: #f5576c; color: #f5576c;" aria-label="동기화 백업에서 데이터 복원">
+                  <button class="backup-btn" onclick="restoreFromSyncBackup()" style="width: 100%; background: var(--accent-danger-alpha); border-color: var(--accent-danger); color: var(--accent-danger);" aria-label="동기화 백업에서 데이터 복원">
                     🔄 동기화 백업에서 복원
                   </button>
                   <div class="settings-label-desc" style="text-align: center; margin-top: 6px; opacity: 0.5; font-size: 15px;">

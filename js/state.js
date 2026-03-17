@@ -595,6 +595,9 @@ function loadState() {
     // 오래된 완료 태스크 정리
     cleanupOldCompletedTasks();
 
+    // Firestore 용량 관리: 오래된 리듬/통근 데이터 프루닝 (최근 백업이 있을 때만)
+    runStartupPruning();
+
     // 반복 태스크 일일 초기화는 클라우드 데이터 로드 후 실행
     // (클라우드 로드 전 실행하면 updatedAt 갱신으로 다른 기기의 오늘 완료 기록이 merge에서 패배)
     // → initialCloudLoadComplete 플래그로 loadFromFirebase() 완료 후 checkDailyReset() 호출

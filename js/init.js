@@ -380,9 +380,9 @@ function formatTgDeadline(dateStr) {
   today.setHours(0, 0, 0, 0);
   const diff = Math.ceil((d - today) / (1000 * 60 * 60 * 24));
   let dday = '';
-  if (diff < 0) dday = ' <span style="color:#f5576c">D+' + Math.abs(diff) + '</span>';
-  else if (diff === 0) dday = ' <span style="color:#f5576c">D-Day</span>';
-  else if (diff <= 3) dday = ' <span style="color:#ff9500">D-' + diff + '</span>';
+  if (diff < 0) dday = ' <span style="color:var(--accent-danger)">D+' + Math.abs(diff) + '</span>';
+  else if (diff === 0) dday = ' <span style="color:var(--accent-danger)">D-Day</span>';
+  else if (diff <= 3) dday = ' <span style="color:var(--accent-warning)">D-' + diff + '</span>';
   else dday = ' D-' + diff;
   return month + '월 ' + day + '일' + dday;
 }
@@ -557,7 +557,7 @@ function showTelegramEventsModal(pendingEvents, totalCount = 0) {
       </div>
       ${pendingEvents.length > 0 ? `
         <div class="modal-footer" style="display: flex; gap: 10px; justify-content: space-between; padding: 15px 20px; border-top: 1px solid var(--border-color);">
-          <button class="btn" style="color:#f5576c;background:rgba(245,87,108,0.1);border:1px solid rgba(245,87,108,0.3)" onclick="archiveSelectedTelegramEvents()">🗑 선택 삭제</button>
+          <button class="btn" style="color:var(--accent-danger);background:var(--accent-danger-alpha);border:1px solid rgba(245,87,108,0.3)" onclick="archiveSelectedTelegramEvents()">🗑 선택 삭제</button>
           <div style="display:flex;gap:10px">
             <button class="btn btn-secondary" onclick="closeTelegramEventsModal()">닫기</button>
             <button class="btn btn-primary" onclick="importSelectedTelegramEvents()">✅ 선택 추가</button>

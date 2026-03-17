@@ -28,12 +28,12 @@
       top: 0;
       bottom: 0;
       width: 3px;
-      background: linear-gradient(180deg, #667eea, #764ba2);
+      background: var(--accent-primary);
     }
 
     .work-dashboard-card.active {
-      border-color: #667eea;
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+      border-color: var(--accent-primary);
+      background: var(--accent-primary-alpha);
     }
 
     .work-dashboard-header {
@@ -68,11 +68,11 @@
     }
 
     .work-dashboard-stage-dot.completed {
-      background: #48bb78;
+      background: var(--accent-success);
     }
 
     .work-dashboard-stage-dot.current {
-      background: #667eea;
+      background: var(--accent-primary);
     }
 
     .work-dashboard-meta {
@@ -107,7 +107,7 @@
     .work-participant-count {
       font-size: 16px;
       font-weight: 600;
-      color: #667eea;
+      color: var(--accent-primary);
     }
 
     .work-participant-goal {
@@ -125,7 +125,7 @@
 
     .work-participant-fill {
       height: 100%;
-      background: linear-gradient(90deg, #667eea, #48bb78);
+      background: var(--accent-primary);
       border-radius: 3px;
     }
 
@@ -151,7 +151,7 @@
 
     /* 주간 리포트 */
     .weekly-report {
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+      background: var(--accent-primary-alpha);
       border-radius: 12px;
       padding: 16px;
       border: 1px solid rgba(102, 126, 234, 0.2);
@@ -190,7 +190,7 @@
     .weekly-stat-value {
       font-size: 24px;
       font-weight: 700;
-      color: #667eea;
+      color: var(--accent-primary);
     }
 
     .weekly-stat-value.positive {

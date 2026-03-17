@@ -377,7 +377,12 @@ function openFormExportModal(projectId, formType) {
   const titleEl = document.getElementById('work-modal-title');
   const body = document.getElementById('work-modal-body');
 
-  workModalState = { type: 'form-export', projectId, stageIdx: null, subcategoryIdx: null, taskIdx: null };
+  workModalState = { type: 'form-export', projectId, formType, stageIdx: null, subcategoryIdx: null, taskIdx: null };
+
+  // 저장된 템플릿이 있으면 그것을 사용
+  if (project.formTemplates && project.formTemplates[formType]) {
+    text = project.formTemplates[formType];
+  }
 
   titleEl.textContent = '📋 ' + formName;
 
@@ -385,7 +390,10 @@ function openFormExportModal(projectId, formType) {
     '<div class="work-modal-field">' +
       '<textarea class="work-modal-textarea" id="form-export-text" rows="15" style="font-family: monospace; font-size: 14px; resize: vertical; min-height: 250px; line-height: 1.6;">' + escapeHtml(text) + '</textarea>' +
     '</div>' +
-    '<button type="button" onclick="copyFormExportText()" style="width: 100%; padding: 12px; background: var(--accent-blue); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; min-height: 44px;">📋 클립보드 복사</button>';
+    '<div style="display: flex; gap: 8px;">' +
+      '<button type="button" onclick="copyFormExportText()" style="flex: 1; padding: 12px; background: var(--accent-primary); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; min-height: 44px;">📋 복사</button>' +
+      '<button type="button" onclick="saveFormTemplate()" style="flex: 1; padding: 12px; background: var(--accent-success); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; min-height: 44px;">💾 저장</button>' +
+    '</div>';
 
   // Override the confirm button to act as close
   const actions = modal.querySelector('.work-modal-actions');
@@ -414,3 +422,21 @@ function copyFormExportText() {
   });
 }
 window.copyFormExportText = copyFormExportText;
+
+/**
+ * Task 2-4: 양식 템플릿 저장
+ */
+function saveFormTemplate() {
+  const textarea = document.getElementById('form-export-text');
+  if (!textarea || !workModalState || !workModalState.projectId || !workModalState.formType) return;
+
+  const project = appState.workProjects.find(p => p.id === workModalState.projectId);
+  if (!project) return;
+
+  if (!project.formTemplates) project.formTemplates = {};
+  project.formTemplates[workModalState.formType] = textarea.value;
+  project.updatedAt = new Date().toISOString();
+  saveWorkProjects();
+  showToast('템플릿 저장됨', 'success');
+}
+window.saveFormTemplate = saveFormTemplate;
