@@ -393,6 +393,7 @@ function openFormExportModal(projectId, formType) {
     '<div style="display: flex; gap: 8px;">' +
       '<button type="button" onclick="copyFormExportText()" style="flex: 1; padding: 12px; background: var(--accent-primary); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; min-height: 44px;">📋 복사</button>' +
       '<button type="button" onclick="saveFormTemplate()" style="flex: 1; padding: 12px; background: var(--accent-success); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; min-height: 44px;">💾 저장</button>' +
+      (project.formTemplates && project.formTemplates[formType] ? '<button type="button" onclick="resetFormTemplate()" style="padding: 12px 16px; background: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; cursor: pointer; min-height: 44px;" title="저장된 템플릿 삭제">↺</button>' : '') +
     '</div>';
 
   // Override the confirm button to act as close
@@ -440,3 +441,25 @@ function saveFormTemplate() {
   showToast('템플릿 저장됨', 'success');
 }
 window.saveFormTemplate = saveFormTemplate;
+
+/**
+ * 저장된 양식 템플릿 초기화 (기본 자동생성으로 복귀)
+ */
+function resetFormTemplate() {
+  if (!workModalState || !workModalState.projectId || !workModalState.formType) return;
+
+  const project = appState.workProjects.find(p => p.id === workModalState.projectId);
+  if (!project || !project.formTemplates) return;
+
+  if (!confirm('저장된 템플릿을 삭제하고 기본 양식으로 돌아갈까요?')) return;
+
+  delete project.formTemplates[workModalState.formType];
+  if (Object.keys(project.formTemplates).length === 0) {
+    delete project.formTemplates;
+  }
+  project.updatedAt = new Date().toISOString();
+  saveWorkProjects();
+  closeWorkModal();
+  showToast('템플릿 초기화됨', 'success');
+}
+window.resetFormTemplate = resetFormTemplate;

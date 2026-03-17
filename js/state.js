@@ -469,6 +469,7 @@ const appState = {
   workQuickAddOwner: 'me',            // 빠른 추가 담당자: 'me' | 'other'
   workTemplates: [],                  // 저장된 템플릿 목록
   showArchivedProjects: false,        // 아카이브 프로젝트 표시 여부
+  workMetaExpanded: {},               // 프로젝트별 메타정보 펼침 상태 { projectId: true/false }
   scheduleShowAll: false,             // 스케줄 뷰: 완료/보류 포함 여부
   // Firebase 동기화
   user: null,                       // 로그인한 사용자

@@ -289,7 +289,7 @@ function renderWorkProjects() {
         ` : ''}
         ${completedProjects.length > 0 ? `
           <div class="work-section collapsible" style="margin-top: 20px;">
-            <div class="work-section-title clickable" style="color: var(--success);" onclick="toggleWorkSection('completed')">
+            <div class="work-section-title clickable" style="color: var(--accent-success);" onclick="toggleWorkSection('completed')">
               <span class="work-section-toggle">${appState.workSectionExpanded?.completed ? '▼' : '▶'}</span>
               ✅ 완료 (${completedProjects.length})
             </div>
@@ -1152,7 +1152,7 @@ function renderWorkProjectDetail(project) {
                     <button class="work-stage-add-task" onclick="copyStageToSlack('${escapeAttr(project.id)}', ${stageIdx})" title="슬랙용 복사" aria-label="슬랙용 복사">💬</button>
                     <button class="work-stage-add-task" onclick="promptRenameStage('${escapeAttr(project.id)}', ${stageIdx}, '${escapeAttr(stageName)}')" title="단계 이름 변경" aria-label="단계 이름 변경">${svgIcon('edit', 14)}</button>
                     <button class="work-stage-add-task" onclick="showWorkModal('stage-deadline', '${escapeAttr(project.id)}', ${stageIdx})" title="단계 일정 설정" aria-label="단계 일정 설정">📅</button>
-                    <button class="work-stage-add-task" onclick="deleteProjectStage('${escapeAttr(project.id)}', ${stageIdx})" title="단계 삭제" aria-label="단계 삭제" style="color: var(--danger);">${svgIcon('trash', 14)}</button>
+                    <button class="work-stage-add-task" onclick="deleteProjectStage('${escapeAttr(project.id)}', ${stageIdx})" title="단계 삭제" aria-label="단계 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
                   </div>
                   <button class="work-stage-add-task" onclick="showWorkModal('subcategory', '${escapeAttr(project.id)}', ${stageIdx})">+ 중분류</button>
                 </div>
@@ -1187,7 +1187,7 @@ function renderWorkProjectDetail(project) {
                         <button class="work-task-action" onclick="promptRenameSubcategory('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx}, '${escapeAttr(subcat.name)}')" title="중분류 이름 변경">${svgIcon('edit', 14)}</button>
                         <button class="work-task-action" onclick="showNotionCopyMenu(event, '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="Notion 진행상황 복사">📋</button>
                         <button class="work-task-action" onclick="showWorkModal('subcat-deadline', '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="중분류 일정" aria-label="중분류 일정 설정">📅</button>
-                        <button class="work-task-action" onclick="deleteSubcategory('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="중분류 삭제" style="color: var(--danger);">${svgIcon('trash', 14)}</button>
+                        <button class="work-task-action" onclick="deleteSubcategory('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="중분류 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
                         <button class="work-task-action" onclick="showWorkModal('task', '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})">+ 항목</button>
                       </div>
                     </div>
@@ -1205,7 +1205,7 @@ function renderWorkProjectDetail(project) {
         })()}
 
         <!-- 새 단계 추가 버튼 -->
-        <div class="work-stage-add-new" style="margin-top: 12px; padding: 12px; border: 2px dashed var(--border); border-radius: var(--radius-md); text-align: center;">
+        <div class="work-stage-add-new" style="margin-top: 12px; padding: 12px; border: 2px dashed var(--border-color); border-radius: var(--radius-md); text-align: center;">
           <button class="work-stage-add-task" onclick="promptAddStage('${escapeAttr(project.id)}')" style="width: 100%; padding: 10px;">
             + 새 단계 추가
           </button>
@@ -1259,7 +1259,7 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
           <button class="work-task-action" onclick="showWorkModal('log', '${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" aria-label="기록 추가">+ 기록</button>
           <button class="work-task-action" onclick="event.stopPropagation(); toggleCanStartEarly('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="${task.canStartEarly ? '선제적 시작 해제' : '선제적 시작 설정'}" aria-label="선제적 시작 토글" style="${task.canStartEarly ? 'color: var(--accent-primary);' : ''}">💡</button>
           <button class="work-task-action" onclick="event.stopPropagation(); copyWorkTaskToSlack('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="슬랙 복사" aria-label="슬랙 복사">📋</button>
-          <button class="work-task-action" onclick="deleteWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="항목 삭제" aria-label="항목 삭제" style="color: var(--danger);">${svgIcon('trash', 14)}</button>
+          <button class="work-task-action" onclick="deleteWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="항목 삭제" aria-label="항목 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
         </div>
       </div>
       ${task.logs && task.logs.length > 0 ? `
@@ -1272,7 +1272,7 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
             const si = Number(stageIdx), sci = Number(subcatIdx), ti = Number(taskIdx);
             let html = '';
             if (completionLogs.length > 0) {
-              const lastIdx = task.logs.lastIndexOf(completionLogs[completionLogs.length - 1]);
+              const lastIdx = task.logs.reduce((found, l, i) => l.content === '✓ 완료' ? i : found, -1);
               const lastDate = completionLogs[completionLogs.length - 1].date;
               const label = completionLogs.length === 1
                 ? '✓ 완료 (' + lastDate + ')'
@@ -1284,7 +1284,7 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
                 '</div></div>';
             }
             otherLogs.forEach(log => {
-              const actualIdx = task.logs.indexOf(log);
+              const actualIdx = task.logs.findIndex(l => l.date === log.date && l.content === log.content);
               html += '<div class="work-task-log"><span class="work-task-log-date">' + escapeHtml(log.date) + '</span><span class="work-task-log-content">' + escapeHtml(log.content) + '</span>' +
                 '<div class="work-task-log-actions">' +
                   '<button class="work-task-log-action" onclick="editWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" aria-label="기록 편집">✏️</button>' +
@@ -1322,7 +1322,7 @@ function renderWorkGeneralView() {
                 ${task.deadline ? '<span class="work-task-deadline" onclick="editTask(\'' + escapeAttr(task.id) + '\')">' + escapeHtml(task.deadline.substring(5).replace('-', '/')) + '</span>' : ''}
                 <div class="work-task-actions">
                   <button class="work-task-action" onclick="editTask('${escapeAttr(task.id)}')">${svgIcon('edit', 14)}</button>
-                  <button class="work-task-action" onclick="deleteTask('${escapeAttr(task.id)}')" style="color: var(--danger);">${svgIcon('trash', 14)}</button>
+                  <button class="work-task-action" onclick="deleteTask('${escapeAttr(task.id)}')" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
                 </div>
               </div>
               ${task.subtasks && task.subtasks.length > 0 ? `

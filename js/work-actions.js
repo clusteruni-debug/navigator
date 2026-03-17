@@ -388,7 +388,10 @@ window.cycleWorkTaskStatus = cycleWorkTaskStatus;
 const _completionDebounceMap = new Map();
 
 function toggleWorkTaskComplete(projectId, stageIdx, subcatIdx, taskIdx) {
-  const key = `${projectId}-${stageIdx}-${subcatIdx}-${taskIdx}`;
+  // stable task ID를 디바운스 키로 사용 (인덱스 시프트 방지)
+  const project = appState.workProjects.find(p => p.id === projectId);
+  const task = project?.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  const key = task?.id || `${projectId}-${stageIdx}-${subcatIdx}-${taskIdx}`;
   if (_completionDebounceMap.has(key)) {
     clearTimeout(_completionDebounceMap.get(key));
   }
@@ -535,14 +538,20 @@ function editWorkLog(projectId, stageIdx, subcatIdx, taskIdx, logIdx) {
   const log = task.logs[logIdx];
   const isCompletion = log.content === '✓ 완료';
 
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
   if (isCompletion) {
     // 완료 로그 → 날짜 수정
     const newDate = prompt('완료 날짜 수정 (YYYY-MM-DD):', log.date);
     if (newDate === null || newDate.trim() === '') return;
     const trimmed = newDate.trim();
+    if (!dateRegex.test(trimmed) || isNaN(new Date(trimmed).getTime())) {
+      showToast('올바른 날짜 형식이 아닙니다 (YYYY-MM-DD)', 'error');
+      return;
+    }
     log.date = trimmed;
-    // task.completedAt도 동기화
-    task.completedAt = trimmed;
+    // task.completedAt도 동기화 (datetime 포맷 유지)
+    task.completedAt = trimmed + 'T00:00';
   } else {
     // 일반 로그 → 내용 수정 + 날짜 수정
     const newContent = prompt('기록 내용 편집:', log.content);
@@ -550,7 +559,12 @@ function editWorkLog(projectId, stageIdx, subcatIdx, taskIdx, logIdx) {
     log.content = newContent.trim();
     const newDate = prompt('날짜 수정 (변경 없으면 그대로 확인):', log.date);
     if (newDate && newDate.trim()) {
-      log.date = newDate.trim();
+      const dt = newDate.trim();
+      if (!dateRegex.test(dt) || isNaN(new Date(dt).getTime())) {
+        showToast('올바른 날짜 형식이 아닙니다 (YYYY-MM-DD)', 'error');
+        return;
+      }
+      log.date = dt;
     }
   }
 

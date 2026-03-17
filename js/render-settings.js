@@ -259,7 +259,7 @@ function renderSettingsModal() {
                         <div style="display: flex; gap: 4px;">
                           <button class="btn btn-secondary" style="font-size: 15px; padding: 4px 8px;"
                                   onclick="editMedicationSlot(${idx})" aria-label="${escapeHtml(slot.label)} 편집">${svgIcon('edit', 14)}</button>
-                          <button class="btn btn-secondary" style="font-size: 15px; padding: 4px 8px; color: var(--danger);"
+                          <button class="btn btn-secondary" style="font-size: 15px; padding: 4px 8px; color: var(--accent-danger);"
                                   onclick="deleteMedicationSlot(${idx})" aria-label="${escapeHtml(slot.label)} 삭제">${svgIcon('trash', 14)}</button>
                         </div>
                       </div>
