@@ -112,8 +112,12 @@
       border-radius: 8px;
       color: var(--text-primary);
       font-size: 16px;
-      min-height: 80px;
+      min-height: 150px;
+      max-height: 400px;
       resize: vertical;
+      white-space: pre-wrap;
+      font-family: inherit;
+      line-height: 1.6;
     }
 
     .work-modal-textarea:focus {

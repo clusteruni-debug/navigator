@@ -202,7 +202,7 @@ function showQuickEditModal(task) {
     </div>
     <div class="work-modal-field">
       <label class="work-modal-label">설명 (선택)</label>
-      <textarea class="work-modal-input" id="quick-edit-description" rows="2" placeholder="작업 내용, 메모 등">${escapeHtml(task.description || '')}</textarea>
+      <textarea class="work-modal-textarea" id="quick-edit-description" placeholder="작업 내용, 메모 등">${escapeHtml(task.description || '')}</textarea>
     </div>
     <div class="work-modal-field">
       <label class="work-modal-label">카테고리</label>
@@ -248,6 +248,9 @@ function showQuickEditModal(task) {
   `;
 
   modal.classList.add('show');
+
+  // textarea Tab키 + auto-resize 초기화
+  body.querySelectorAll('textarea').forEach(ta => initEnhancedTextarea(ta));
 
   // 엔터키로 저장 (제목 필드)
   body.querySelector('#quick-edit-title').addEventListener('keypress', (e) => {

@@ -550,6 +550,7 @@ function showBrainDumpModal() {
   document.body.appendChild(modal);
 
   const textarea = document.getElementById('brain-dump-input');
+  initEnhancedTextarea(textarea);
   textarea.focus();
   // 줄 수 카운터
   textarea.addEventListener('input', () => {

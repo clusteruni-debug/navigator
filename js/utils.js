@@ -145,6 +145,100 @@ function deduplicateAll() {
 }
 
 /**
+ * 텍스트를 포맷된 HTML로 변환 (불릿 리스트, 들여쓰기, 줄바꿈 지원)
+ * - `*` 또는 `-`로 시작하는 줄 → <li> 변환
+ * - 들여쓰기 깊이(스페이스 수)에 따라 중첩 <ul> 생성
+ * - 일반 텍스트 줄은 줄바꿈 유지
+ * - 기존 plain text 데이터 호환
+ */
+function renderFormattedText(text) {
+    if (!text) return '';
+    const lines = String(text).split('\n');
+    let html = '';
+    const ulStack = []; // 현재 열려있는 <ul> 들의 indent 레벨
+
+    const closeUlsTo = (targetDepth) => {
+        while (ulStack.length > 0 && ulStack[ulStack.length - 1] >= targetDepth) {
+            html += '</li></ul>';
+            ulStack.pop();
+        }
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        // 불릿 라인 감지: 선행 공백 + (* 또는 -) + 공백 + 내용
+        const bulletMatch = line.match(/^(\s*)[*\-]\s+(.*)/);
+
+        if (bulletMatch) {
+            const indent = bulletMatch[1].length;
+            const content = bulletMatch[2];
+
+            if (ulStack.length === 0) {
+                // 첫 불릿 — 새 리스트 시작
+                html += '<ul class="formatted-list"><li>' + escapeHtml(content);
+                ulStack.push(indent);
+            } else {
+                const currentIndent = ulStack[ulStack.length - 1];
+                if (indent > currentIndent) {
+                    // 더 깊은 들여쓰기 — 중첩 리스트
+                    html += '<ul class="formatted-list"><li>' + escapeHtml(content);
+                    ulStack.push(indent);
+                } else if (indent < currentIndent) {
+                    // 들여쓰기 감소 — 상위로 돌아감
+                    closeUlsTo(indent + 1);
+                    html += '</li><li>' + escapeHtml(content);
+                } else {
+                    // 같은 레벨
+                    html += '</li><li>' + escapeHtml(content);
+                }
+            }
+        } else {
+            // 불릿이 아닌 일반 텍스트 줄
+            closeUlsTo(0);
+            if (line.trim() === '') {
+                html += '<br>';
+            } else {
+                html += '<span class="formatted-line">' + escapeHtml(line) + '</span><br>';
+            }
+        }
+    }
+    // 남은 <ul> 닫기
+    closeUlsTo(0);
+
+    return '<div class="formatted-text">' + html + '</div>';
+}
+
+/**
+ * textarea에 Tab 키 입력 시 4스페이스 삽입 + auto-resize 초기화
+ */
+function initEnhancedTextarea(textarea) {
+    if (!textarea || textarea._enhanced) return;
+    textarea._enhanced = true;
+
+    // Tab 키 → 4스페이스
+    textarea.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            const value = this.value;
+            this.value = value.substring(0, start) + '    ' + value.substring(end);
+            this.selectionStart = this.selectionEnd = start + 4;
+            this.dispatchEvent(new Event('input'));
+        }
+    });
+
+    // Auto-resize
+    const autoResize = () => {
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 400) + 'px';
+    };
+    textarea.addEventListener('input', autoResize);
+    // 초기 사이즈 조정
+    setTimeout(autoResize, 0);
+}
+
+/**
  * XSS 방지: HTML 이스케이핑
  */
 // 문자열 기반 HTML 이스케이프 — DOM 요소 생성 대비 ~5x 빠름 (렌더당 106+회 호출)

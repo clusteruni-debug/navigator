@@ -69,7 +69,7 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
       bodyHtml = `
         <div class="work-modal-field">
           <label class="work-modal-label">진행 내용</label>
-          <textarea class="work-modal-textarea" id="work-input-content" placeholder="오늘 진행한 내용을 입력하세요..." autofocus></textarea>
+          <textarea class="work-modal-textarea" id="work-input-content" placeholder="* 진행 내용을 입력하세요\n   * 세부 내용" autofocus></textarea>
         </div>
       `;
       break;
@@ -209,6 +209,9 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
       };
     });
   }
+
+  // textarea에 Tab키 + auto-resize 초기화
+  body.querySelectorAll('textarea').forEach(ta => initEnhancedTextarea(ta));
 
   // 첫 입력 필드에 포커스
   setTimeout(() => {

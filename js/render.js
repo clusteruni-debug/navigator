@@ -344,6 +344,9 @@ function renderStatic() {
 
   // ── 범용 입력 복원 ──
   _restoreInputs(_inputSnapshot);
+
+  // textarea Tab 키 + auto-resize 초기화
+  document.querySelectorAll('#root textarea').forEach(ta => initEnhancedTextarea(ta));
 }
 
 /**

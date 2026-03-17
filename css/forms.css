@@ -34,7 +34,10 @@
     .form-textarea {
       resize: vertical;
       min-height: 60px;
+      max-height: 400px;
       font-family: inherit;
+      white-space: pre-wrap;
+      line-height: 1.6;
     }
 
     /* 가로 배치 폼 행 */
@@ -276,4 +279,111 @@
 
     .repeat-interval .form-input {
       max-width: 120px;
+    }
+
+    /* renderFormattedText() output styling */
+    .formatted-text {
+      font-size: inherit;
+      color: inherit;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .formatted-text .formatted-line {
+      white-space: pre-wrap;
+    }
+
+    .formatted-text .formatted-list {
+      list-style: disc;
+      padding-left: 20px;
+      margin: 2px 0;
+    }
+
+    .formatted-text .formatted-list .formatted-list {
+      list-style: circle;
+      margin: 0;
+    }
+
+    .formatted-text .formatted-list .formatted-list .formatted-list {
+      list-style: square;
+    }
+
+    .formatted-text .formatted-list li {
+      padding: 1px 0;
+      line-height: 1.5;
+    }
+
+    /* Pagination component */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .pagination-btn {
+      padding: 6px 10px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      min-width: 36px;
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pagination-btn:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    .pagination-btn.active {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: white;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .pagination-btn:disabled:hover {
+      border-color: var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    .pagination-info {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+
+    /* Sort dropdown */
+    .sort-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sort-select {
+      padding: 6px 10px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .sort-select:focus {
+      outline: none;
+      border-color: var(--accent-primary);
     }
