@@ -361,6 +361,7 @@ const appState = {
   },
   habitStreaks: {},                  // 습관별 스트릭: { "작업제목": { current, best, lastActiveDate } }
   habitFilter: 'all',               // 습관 트래커 필터: 'all' 또는 작업 제목
+  resolutions: [],                   // 결심 트래커: [{ id, title, startDate, icon, active, createdAt }]
   showOnboarding: false,           // 온보딩 모달 표시
   moreMenuOpen: false,             // 더보기 메뉴 열림 상태
   // 포모도로 상태
@@ -488,7 +489,8 @@ const appState = {
     workTemplates: {},
     commuteRoutes: {},  // 삭제된 통근 루트 추적
     completionLog: {},  // { "dateStr|title|at": "2026-03-06T..." } 삭제된 완료 기록
-    commuteTrips: {}    // { "dateStr|direction": "2026-03-06T..." } 삭제된 통근 기록
+    commuteTrips: {},   // { "dateStr|direction": "2026-03-06T..." } 삭제된 통근 기록
+    resolutions: {}     // 삭제된 결심 추적
   },
   // 휴지통: 삭제된 태스크 보관 (30일 후 자동 정리)
   trash: []
@@ -542,6 +544,10 @@ function loadState() {
     // 습관별 스트릭 로드
     const parsedHabitStreaks = safeParseJSON('navigator-habitStreaks', null);
     if (parsedHabitStreaks) appState.habitStreaks = parsedHabitStreaks;
+
+    // 결심 트래커 로드
+    const parsedResolutions = safeParseJSON('navigator-resolutions', null);
+    if (parsedResolutions) appState.resolutions = parsedResolutions;
 
     // 설정 로드
     const parsedSettings = safeParseJSON('navigator-settings', null);
@@ -665,6 +671,7 @@ function _doSaveState(immediate = false) {
       localStorage.setItem('navigator-deleted-ids', JSON.stringify(appState.deletedIds));
       localStorage.setItem('navigator-trash', JSON.stringify(appState.trash));
       localStorage.setItem('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
+      localStorage.setItem('navigator-resolutions', JSON.stringify(appState.resolutions || []));
     }
 
     // Firebase 동기화 (로그인된 경우, 디바운스 적용)
@@ -725,6 +732,7 @@ function _doSaveStateLocalOnly() {
     localStorage.setItem('navigator-trash', JSON.stringify(appState.trash));
     // 라이프 리듬도 로컬 백업 (beforeunload 시 유실 방지)
     localStorage.setItem('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
+    localStorage.setItem('navigator-resolutions', JSON.stringify(appState.resolutions || []));
   } catch (error) {
     console.error('로컬 저장 실패:', error);
   }

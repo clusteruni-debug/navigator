@@ -1,4 +1,103 @@
 /* life.css - 일상/가족 탭 스타일 (work.css에서 분리) */
+
+    /* 결심 트래커 */
+    .resolution-section {
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .resolution-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .resolution-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .resolution-add-btn {
+      width: 32px;
+      height: 32px;
+      background: var(--accent-success);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .resolution-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .resolution-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--bg-primary);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+    }
+
+    .resolution-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .resolution-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .resolution-name {
+      font-size: 15px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .resolution-days {
+      font-size: 14px;
+      color: var(--text-tertiary);
+      margin-top: 2px;
+    }
+
+    .resolution-day-count {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .resolution-actions {
+      display: flex;
+      gap: 4px;
+      opacity: 0.5;
+    }
+
+    .resolution-card:hover .resolution-actions {
+      opacity: 1;
+    }
+
+    .resolution-empty {
+      text-align: center;
+      padding: 12px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
     /* 일상/가족 탭 스타일 */
     .life-header {
       margin-bottom: 16px;

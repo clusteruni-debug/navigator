@@ -78,9 +78,45 @@ function renderLifeTab() {
           // 완료된 반복 작업 (리셋 대상)
           const completedRepeatTasks = completedTasks.filter(t => t.category === '일상' && isRepeat(t));
 
+          // 결심 트래커 데이터
+          const resolutions = appState.resolutions || [];
+          const todayMs = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime();
+
           return `
             <div class="life-header">
               <div class="life-title">🏠 일상 & 가족</div>
+            </div>
+
+            <!-- 결심 트래커 -->
+            <div class="resolution-section">
+              <div class="resolution-header">
+                <div class="resolution-title">💪 결심 트래커</div>
+                <button class="resolution-add-btn" onclick="addResolution()" title="결심 추가">+</button>
+              </div>
+              ${resolutions.length > 0 ? `
+                <div class="resolution-list">
+                  ${resolutions.map(r => {
+                    const [sy, sm, sd] = (r.startDate || '').split('-').map(Number);
+                    const startMs = sy ? new Date(sy, sm - 1, sd).getTime() : todayMs;
+                    const days = isNaN(startMs) ? 0 : Math.max(0, Math.floor((todayMs - startMs) / 86400000));
+                    return `
+                      <div class="resolution-card" onclick="editResolution('${escapeAttr(r.id)}')">
+                        <div class="resolution-icon">${escapeHtml(r.icon || '🎯')}</div>
+                        <div class="resolution-info">
+                          <div class="resolution-name">${escapeHtml(r.title)}</div>
+                          <div class="resolution-days"><span class="resolution-day-count">${days}</span>일째</div>
+                        </div>
+                        <div class="resolution-actions">
+                          <button class="life-action-btn" onclick="event.stopPropagation(); resetResolution('${escapeAttr(r.id)}')" title="리셋">⟳</button>
+                          <button class="life-action-btn delete" onclick="event.stopPropagation(); deleteResolution('${escapeAttr(r.id)}')" title="삭제">✕</button>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              ` : `
+                <div class="resolution-empty">결심을 추가해보세요</div>
+              `}
             </div>
 
             <!-- 빠른 추가 -->
@@ -179,3 +215,75 @@ function renderLifeTab() {
             ` : ''}
           `;
 }
+
+// ============================================
+// 결심 트래커 CRUD
+// ============================================
+
+function addResolution() {
+  const title = prompt('결심 이름을 입력하세요 (예: 간식 끊기)');
+  if (!title || !title.trim()) return;
+
+  const icon = prompt('아이콘 이모지 (기본: 🎯)', '🎯') || '🎯';
+  const startDateInput = prompt('시작일 (YYYY-MM-DD, 비우면 오늘)', '');
+  const startDate = startDateInput && /^\d{4}-\d{2}-\d{2}$/.test(startDateInput)
+    ? startDateInput
+    : getLocalDateStr();
+
+  if (!appState.resolutions) appState.resolutions = [];
+  const now = new Date().toISOString();
+  appState.resolutions.push({
+    id: generateId(),
+    title: title.trim(),
+    startDate,
+    icon,
+    createdAt: now,
+    updatedAt: now
+  });
+  saveState();
+  renderStatic();
+}
+window.addResolution = addResolution;
+
+function resetResolution(id) {
+  const r = (appState.resolutions || []).find(item => item.id === id);
+  if (!r) return;
+  if (!confirm(`"${r.title}" 카운터를 리셋하시겠습니까?\n(시작일이 오늘로 변경됩니다)`)) return;
+  r.startDate = getLocalDateStr();
+  r.updatedAt = new Date().toISOString();
+  saveState();
+  renderStatic();
+}
+window.resetResolution = resetResolution;
+
+function deleteResolution(id) {
+  const r = (appState.resolutions || []).find(item => item.id === id);
+  if (!r) return;
+  if (!confirm(`"${r.title}" 결심을 삭제하시겠습니까?`)) return;
+  if (!appState.deletedIds.resolutions) appState.deletedIds.resolutions = {};
+  appState.deletedIds.resolutions[id] = new Date().toISOString();
+  appState.resolutions = appState.resolutions.filter(item => item.id !== id);
+  saveState();
+  renderStatic();
+}
+window.deleteResolution = deleteResolution;
+
+function editResolution(id) {
+  const r = (appState.resolutions || []).find(item => item.id === id);
+  if (!r) return;
+
+  const newTitle = prompt('결심 이름', r.title);
+  if (newTitle === null) return;
+  if (newTitle.trim()) r.title = newTitle.trim();
+
+  const newIcon = prompt('아이콘 이모지', r.icon);
+  if (newIcon !== null && newIcon.trim()) r.icon = newIcon.trim();
+
+  const newDate = prompt('시작일 (YYYY-MM-DD)', r.startDate);
+  if (newDate !== null && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) r.startDate = newDate;
+
+  r.updatedAt = new Date().toISOString();
+  saveState();
+  renderStatic();
+}
+window.editResolution = editResolution;

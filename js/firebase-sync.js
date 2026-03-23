@@ -201,6 +201,7 @@ async function _doSyncToFirebase() {
       weeklyPlan: appState.weeklyPlan,
       shuttleSuccess: appState.shuttleSuccess,
       theme: appState.theme,
+      resolutions: appState.resolutions || [],
       deletedIds: appState.deletedIds,
       trash: appState.trash,
       lastUpdated: writeTimestamp
@@ -371,7 +372,8 @@ function createSyncBackup() {
       lifeRhythm: appState.lifeRhythm,
       availableTags: appState.availableTags,
       streak: appState.streak,
-      completionLog: appState.completionLog
+      completionLog: appState.completionLog,
+      resolutions: appState.resolutions || []
     };
 
     localStorage.setItem('navigator-sync-backup', JSON.stringify(backup));
@@ -442,6 +444,7 @@ function restoreFromSyncBackup() {
     if (backup.availableTags) appState.availableTags = backup.availableTags;
     if (backup.streak) appState.streak = backup.streak;
     if (backup.completionLog) appState.completionLog = backup.completionLog;
+    if (backup.resolutions) appState.resolutions = backup.resolutions;
 
     // 로컬 저장 + Firebase 동기화
     _doSaveState();
@@ -686,6 +689,10 @@ async function loadFromFirebase() {
         }
         // updatedAt 없는 구버전 데이터는 클라우드 우선
       }
+      // 결심 트래커 병합 (ID 기반, deletedIds 전달)
+      if (data.resolutions) {
+        appState.resolutions = mergeById(appState.resolutions || [], data.resolutions, appState.deletedIds.resolutions);
+      }
       // 셔틀/테마 동기화
       if (data.shuttleSuccess !== undefined) {
         appState.shuttleSuccess = data.shuttleSuccess;
@@ -899,6 +906,10 @@ function startRealtimeSync() {
           if (cUp >= lUp) {
             appState.weeklyPlan = { ...appState.weeklyPlan, ...data.weeklyPlan };
           }
+        }
+        // 결심 트래커 병합 (ID 기반, deletedIds 전달)
+        if (data.resolutions) {
+          appState.resolutions = mergeById(appState.resolutions || [], data.resolutions, appState.deletedIds.resolutions);
         }
         if (data.shuttleSuccess !== undefined) {
           appState.shuttleSuccess = data.shuttleSuccess;
