@@ -47,6 +47,48 @@ function _renderLifeTaskItem(task) {
 }
 
 /**
+ * 결심 트래커 섹션 HTML (오늘 탭 + 일상 탭 공통)
+ */
+function _renderResolutionSection() {
+  const resolutions = appState.resolutions || [];
+  const now = new Date();
+  const todayMs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+  return `
+    <div class="resolution-section">
+      <div class="resolution-header">
+        <div class="resolution-title">💪 결심 트래커</div>
+        <button class="resolution-add-btn" onclick="addResolution()" title="결심 추가">+</button>
+      </div>
+      ${resolutions.length > 0 ? `
+        <div class="resolution-list">
+          ${resolutions.map(r => {
+            const [sy, sm, sd] = (r.startDate || '').split('-').map(Number);
+            const startMs = sy ? new Date(sy, sm - 1, sd).getTime() : todayMs;
+            const days = isNaN(startMs) ? 0 : Math.max(0, Math.floor((todayMs - startMs) / 86400000));
+            return `
+              <div class="resolution-card" onclick="editResolution('${escapeAttr(r.id)}')">
+                <div class="resolution-icon">${escapeHtml(r.icon || '🎯')}</div>
+                <div class="resolution-info">
+                  <div class="resolution-name">${escapeHtml(r.title)}</div>
+                  <div class="resolution-days"><span class="resolution-day-count">${days}</span>일째</div>
+                </div>
+                <div class="resolution-actions">
+                  <button class="life-action-btn" onclick="event.stopPropagation(); resetResolution('${escapeAttr(r.id)}')" title="리셋">⟳</button>
+                  <button class="life-action-btn delete" onclick="event.stopPropagation(); deleteResolution('${escapeAttr(r.id)}')" title="삭제">✕</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      ` : `
+        <div class="resolution-empty">결심을 추가해보세요</div>
+      `}
+    </div>
+  `;
+}
+
+/**
  * 일상/가족 탭 HTML을 반환한다.
  */
 function renderLifeTab() {
@@ -78,46 +120,12 @@ function renderLifeTab() {
           // 완료된 반복 작업 (리셋 대상)
           const completedRepeatTasks = completedTasks.filter(t => t.category === '일상' && isRepeat(t));
 
-          // 결심 트래커 데이터
-          const resolutions = appState.resolutions || [];
-          const todayMs = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime();
-
           return `
             <div class="life-header">
               <div class="life-title">🏠 일상 & 가족</div>
             </div>
 
-            <!-- 결심 트래커 -->
-            <div class="resolution-section">
-              <div class="resolution-header">
-                <div class="resolution-title">💪 결심 트래커</div>
-                <button class="resolution-add-btn" onclick="addResolution()" title="결심 추가">+</button>
-              </div>
-              ${resolutions.length > 0 ? `
-                <div class="resolution-list">
-                  ${resolutions.map(r => {
-                    const [sy, sm, sd] = (r.startDate || '').split('-').map(Number);
-                    const startMs = sy ? new Date(sy, sm - 1, sd).getTime() : todayMs;
-                    const days = isNaN(startMs) ? 0 : Math.max(0, Math.floor((todayMs - startMs) / 86400000));
-                    return `
-                      <div class="resolution-card" onclick="editResolution('${escapeAttr(r.id)}')">
-                        <div class="resolution-icon">${escapeHtml(r.icon || '🎯')}</div>
-                        <div class="resolution-info">
-                          <div class="resolution-name">${escapeHtml(r.title)}</div>
-                          <div class="resolution-days"><span class="resolution-day-count">${days}</span>일째</div>
-                        </div>
-                        <div class="resolution-actions">
-                          <button class="life-action-btn" onclick="event.stopPropagation(); resetResolution('${escapeAttr(r.id)}')" title="리셋">⟳</button>
-                          <button class="life-action-btn delete" onclick="event.stopPropagation(); deleteResolution('${escapeAttr(r.id)}')" title="삭제">✕</button>
-                        </div>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              ` : `
-                <div class="resolution-empty">결심을 추가해보세요</div>
-              `}
-            </div>
+            ${_renderResolutionSection()}
 
             <!-- 빠른 추가 -->
             <div class="life-quick-add">

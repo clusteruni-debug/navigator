@@ -46,6 +46,9 @@ function renderActionTab(ctx) {
           </div>
         </details>
 
+        <!-- 결심 트래커 -->
+        ${(appState.resolutions || []).length > 0 ? _renderResolutionSection() : ''}
+
         <!-- ▶ 지금 할 것 (메인 히어로) -->
         ${nextAction ? `
           <div class="next-action ${urgencyClass}">
