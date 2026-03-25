@@ -22,7 +22,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #667eea;
+      background: var(--accent-primary);
       color: white;
       border-radius: 50%;
       font-size: 14px;
@@ -51,7 +51,7 @@
 
     .subtask-remove:hover {
       background: rgba(255, 107, 107, 0.2);
-      color: #ff6b6b;
+      color: var(--accent-danger);
     }
 
     .subtask-input {
@@ -105,7 +105,7 @@
       padding: 2px 8px;
       font-size: 14px;
       font-weight: 500;
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+      background: var(--accent-primary-alpha);
       color: var(--primary);
       border-radius: 12px;
       cursor: pointer;
@@ -113,8 +113,7 @@
     }
 
     .subtask-badge:hover {
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.25), rgba(118, 75, 162, 0.25));
-      transform: scale(1.05);
+      background: var(--accent-primary-alpha);
     }
 
     .subtask-preview {
@@ -122,7 +121,7 @@
       padding: 6px 10px;
       font-size: 14px;
       color: var(--text-secondary);
-      background: rgba(102, 126, 234, 0.08);
+      background: var(--accent-primary-alpha);
       border-left: 3px solid var(--primary);
       border-radius: 0 6px 6px 0;
       cursor: pointer;
@@ -130,7 +129,7 @@
     }
 
     .subtask-preview:hover {
-      background: rgba(102, 126, 234, 0.15);
+      background: var(--accent-primary-alpha);
       color: var(--text-primary);
     }
 
@@ -161,13 +160,13 @@
 
     .subtask-progress-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #48bb78, #38a169);
+      background: var(--accent-success);
       border-radius: 3px;
       transition: width 0.3s ease;
     }
 
     .subtask-progress-bar-fill.complete {
-      background: linear-gradient(90deg, #667eea, #764ba2);
+      background: var(--accent-primary);
     }
 
     .subtask-progress-bar-text {
@@ -227,12 +226,12 @@
     }
 
     .subtask-list-check:hover {
-      border-color: #667eea;
+      border-color: var(--accent-primary);
     }
 
     .subtask-list-item.completed .subtask-list-check {
-      background: #48bb78;
-      border-color: #48bb78;
+      background: var(--accent-success);
+      border-color: var(--accent-success);
       color: white;
     }
 
@@ -246,7 +245,7 @@
       margin-top: 8px;
       width: 100%;
       padding: 8px;
-      background: linear-gradient(135deg, #48bb78, #38a169);
+      background: var(--accent-success);
       border: none;
       border-radius: 6px;
       color: white;
@@ -258,7 +257,6 @@
 
     .complete-all-subtasks-btn:hover {
       opacity: 0.9;
-      transform: translateY(-1px);
     }
 
     .complete-all-subtasks-btn:disabled {
@@ -294,8 +292,8 @@
     }
 
     .subtask-chip:hover {
-      border-color: #667eea;
-      background: rgba(102, 126, 234, 0.1);
+      border-color: var(--accent-primary);
+      background: var(--accent-primary-alpha);
     }
 
     .subtask-chip:active {
@@ -305,7 +303,7 @@
     .subtask-chip.done {
       background: rgba(72, 187, 120, 0.15);
       border-color: rgba(72, 187, 120, 0.3);
-      color: #48bb78;
+      color: var(--accent-success);
       text-decoration: line-through;
     }
 
@@ -325,7 +323,7 @@
     }
 
     .subtask-progress-indicator.all-done {
-      color: #48bb78;
+      color: var(--accent-success);
     }
 
     /* Quick edit modal subtask section */
@@ -368,7 +366,7 @@
 
     .quick-edit-subtask-remove:hover {
       background: rgba(255, 107, 107, 0.2);
-      color: #ff6b6b;
+      color: var(--accent-danger);
     }
 
     .quick-edit-subtask-add {

@@ -5,7 +5,7 @@
       border-radius: 16px;
       padding: 20px;
       margin-bottom: 20px;
-      border: 2px solid #333;
+      border: 2px solid var(--border-color);
       text-align: center;
     }
 
@@ -14,7 +14,7 @@
     }
 
     .pomodoro-section.break {
-      border-color: #48bb78;
+      border-color: var(--accent-success);
       background: var(--bg-secondary);
     }
 
@@ -45,7 +45,7 @@
 
     .pomodoro-task {
       font-size: 16px;
-      color: #ccc;
+      color: var(--text-secondary);
       margin-bottom: 15px;
       padding: 10px;
       background: rgba(255,255,255,0.05);

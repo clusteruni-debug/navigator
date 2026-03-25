@@ -76,9 +76,16 @@ function deleteProjectStage(projectId, stageIdx) {
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project || !project.stages[stageIdx]) return;
 
-  const stageName = project.stages[stageIdx].name;
+  const stage = project.stages[stageIdx];
+  const stageName = stage.name;
   if (!confirm(`"${escapeHtml(stageName)}" 단계를 삭제하시겠습니까?\n하위 중분류/작업도 모두 삭제됩니다.`)) return;
 
+  // expandedWorkLogs cleanup
+  if (appState.expandedWorkLogs) {
+    (stage.subcategories || []).forEach(sub => {
+      (sub.tasks || []).forEach(t => { if (t.id) delete appState.expandedWorkLogs[t.id]; });
+    });
+  }
   project.stages.splice(stageIdx, 1);
   if (project.currentStage >= project.stages.length) {
     project.currentStage = Math.max(0, project.stages.length - 1);
@@ -276,8 +283,15 @@ function deleteSubcategory(projectId, stageIdx, subcatIdx) {
 
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
+  const stage = project.stages[stageIdx];
+  if (!stage) return;
 
-  project.stages[stageIdx].subcategories.splice(subcatIdx, 1);
+  // expandedWorkLogs cleanup
+  const subcat = (stage.subcategories || [])[subcatIdx];
+  if (subcat && appState.expandedWorkLogs) {
+    (subcat.tasks || []).forEach(t => { if (t.id) delete appState.expandedWorkLogs[t.id]; });
+  }
+  stage.subcategories.splice(subcatIdx, 1);
   project.updatedAt = new Date().toISOString();
   saveWorkProjects();
   renderStatic();
@@ -309,6 +323,15 @@ window.moveWorkProjectStage = moveWorkProjectStage;
 function deleteWorkProject(projectId) {
   if (!confirm('이 프로젝트를 삭제하시겠습니까?')) return;
 
+  // expandedWorkLogs cleanup
+  const proj = appState.workProjects.find(p => p.id === projectId);
+  if (proj && appState.expandedWorkLogs) {
+    (proj.stages || []).forEach(s => {
+      (s.subcategories || []).forEach(sub => {
+        (sub.tasks || []).forEach(t => { if (t.id) delete appState.expandedWorkLogs[t.id]; });
+      });
+    });
+  }
   // Soft-Delete: 삭제 기록 남기기 (동기화 시 부활 방지)
   appState.deletedIds.workProjects[projectId] = new Date().toISOString();
   appState.workProjects = appState.workProjects.filter(p => p.id !== projectId);
@@ -481,8 +504,17 @@ function deleteWorkTask(projectId, stageIdx, subcatIdx, taskIdx) {
 
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
+  const stage = project.stages[stageIdx];
+  if (!stage) return;
+  const subcat = (stage.subcategories || [])[subcatIdx];
+  if (!subcat) return;
 
-  project.stages[stageIdx].subcategories[subcatIdx].tasks.splice(taskIdx, 1);
+  const task = subcat.tasks[taskIdx];
+  if (task && appState.expandedWorkLogs) {
+    const uid = task.id || (projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx);
+    delete appState.expandedWorkLogs[uid];
+  }
+  subcat.tasks.splice(taskIdx, 1);
   project.updatedAt = new Date().toISOString();
   saveWorkProjects();
   renderStatic();

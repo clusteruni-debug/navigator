@@ -291,7 +291,7 @@
 
     .rhythm-history-item.today {
       border-color: var(--primary);
-      background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(102, 126, 234, 0.1) 100%);
+      background: var(--bg-secondary);
     }
 
     .rhythm-history-date {
@@ -489,7 +489,7 @@
     }
 
     .calendar-weekday:first-child {
-      color: #f5576c;
+      color: var(--accent-danger);
     }
 
     .calendar-weekday:last-child {
@@ -617,7 +617,7 @@
     }
 
     .work-calendar .calendar-day.selected .calendar-day-number {
-      color: #667eea;
+      color: var(--accent-primary);
     }
 
     .calendar-day-tasks {

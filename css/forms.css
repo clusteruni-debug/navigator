@@ -26,8 +26,8 @@
 
     .form-input:focus, .form-select:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+      border-color: var(--accent-primary);
+      box-shadow: var(--focus-ring);
     }
 
     /* textarea 스타일 */
@@ -79,7 +79,6 @@
     .form-input::-webkit-calendar-picker-indicator:hover,
     .work-modal-input::-webkit-calendar-picker-indicator:hover {
       opacity: 0.8;
-      transform: scale(1.1);
     }
 
     [data-theme="light"] .form-input[type="datetime-local"],
@@ -95,7 +94,7 @@
     [data-theme="light"] .work-modal-input::-webkit-calendar-picker-indicator {
       filter: none;
       opacity: 0.9;
-      background-color: rgba(102, 126, 234, 0.15);
+      background-color: var(--accent-primary-alpha);
     }
 
     .form-note {
@@ -131,18 +130,18 @@
     }
 
     .tag:hover {
-      border-color: #667eea;
-      background: rgba(102, 126, 234, 0.1);
+      border-color: var(--accent-primary);
+      background: var(--accent-primary-alpha);
     }
 
     .tag.selected {
-      background: #667eea;
-      border-color: #667eea;
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
       color: white;
     }
 
     .tag.selected:hover {
-      background: #5a6fd6;
+      background: var(--accent-primary-hover);
     }
 
     .new-tag-input {
@@ -165,11 +164,11 @@
     .task-tag {
       display: inline-block;
       padding: 3px 8px;
-      background: rgba(102, 126, 234, 0.15);
+      background: var(--accent-primary-alpha);
       border-radius: 10px;
       font-size: 14px;
       font-weight: 500;
-      color: #8b9cf7;
+      color: var(--accent-primary);
     }
 
     /* 태그 필터 */
@@ -204,13 +203,13 @@
     }
 
     .tag-filter-chip:hover {
-      border-color: #667eea;
-      color: #667eea;
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
     }
 
     .tag-filter-chip.active {
-      background: #667eea;
-      border-color: #667eea;
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
       color: white;
     }
 
@@ -226,8 +225,8 @@
     }
 
     .clear-tag-filter:hover {
-      border-color: #ff6b6b;
-      color: #ff6b6b;
+      border-color: var(--accent-danger);
+      color: var(--accent-danger);
     }
 
     /* 반복 요일 선택 */
@@ -252,7 +251,7 @@
     }
 
     .repeat-day-option:hover {
-      border-color: #667eea;
+      border-color: var(--accent-primary);
     }
 
     .repeat-day-option input[type="checkbox"] {
@@ -260,8 +259,8 @@
     }
 
     .repeat-day-option:has(input:checked) {
-      background: #667eea;
-      border-color: #667eea;
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
       color: white;
     }
 

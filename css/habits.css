@@ -48,7 +48,7 @@
     }
 
     .habit-cell:hover {
-      transform: scale(1.2);
+      border-color: var(--text-muted);
     }
 
     .habit-cell.level-1 {
@@ -64,11 +64,11 @@
     }
 
     .habit-cell.level-4 {
-      background: #48bb78;
+      background: var(--accent-success);
     }
 
     .habit-cell.today {
-      outline: 2px solid #667eea;
+      outline: 2px solid var(--accent-primary);
       outline-offset: 1px;
     }
 

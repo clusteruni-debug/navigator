@@ -135,7 +135,7 @@
     .life-quick-btn {
       width: 40px;
       height: 40px;
-      background: #48bb78;
+      background: var(--accent-success);
       border: none;
       border-radius: var(--radius-sm);
       color: white;
@@ -295,12 +295,11 @@
 
     .life-action-btn:hover {
       background: var(--bg-secondary);
-      transform: scale(1.05);
     }
 
     .life-action-btn.delete:hover {
       background: rgba(239, 68, 68, 0.2);
-      border-color: #ef4444;
+      border-color: var(--accent-danger);
     }
 
     .life-empty {

@@ -282,11 +282,14 @@ function duplicateWorkProject(projectId) {
   newProject.updatedAt = new Date().toISOString();
   newProject.archived = false;
 
-  // 모든 단계와 항목 초기화
+  // 모든 단계와 항목 초기화 + id 재생성
   newProject.stages.forEach(stage => {
+    stage.id = generateId();
     stage.completed = false;
     (stage.subcategories || []).forEach(sub => {
+      sub.id = generateId();
       sub.tasks.forEach(task => {
+        task.id = generateId();
         task.status = 'not-started';
         task.completedAt = null;
         task.actualTime = null;

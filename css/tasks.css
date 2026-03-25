@@ -39,7 +39,7 @@
     .today-mode.생존 { background: var(--accent-danger-alpha); color: var(--accent-danger); }
     .today-mode.여유 { background: var(--accent-success-alpha); color: var(--accent-success); }
     .today-mode.출근 { background: var(--accent-warning-alpha); color: var(--accent-warning); }
-    .today-mode.주말 { background: rgba(240, 147, 251, 0.15); color: #f093fb; }
+    .today-mode.주말 { background: rgba(240, 147, 251, 0.15); color: var(--cat-부업); }
     .today-mode.휴식 { background: rgba(100, 116, 139, 0.15); color: var(--text-secondary); }
 
     .today-remaining {
@@ -263,8 +263,8 @@
 
     .quick-template-btn:hover {
       background: var(--bg-secondary);
-      border-color: #667eea;
-      color: #667eea;
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
     }
 
     .quick-template-btn.secondary {
@@ -396,10 +396,10 @@
       font-weight: 500;
     }
 
-    .task-item-mini-category.본업 { background: rgba(102, 126, 234, 0.2); color: #667eea; }
-    .task-item-mini-category.부업 { background: rgba(240, 147, 251, 0.2); color: #f093fb; }
-    .task-item-mini-category.일상 { background: rgba(72, 187, 120, 0.2); color: #48bb78; }
-    .task-item-mini-category.가족 { background: rgba(246, 173, 85, 0.2); color: #f6ad55; }
+    .task-item-mini-category.본업 { background: rgba(102, 126, 234, 0.2); color: var(--accent-primary); }
+    .task-item-mini-category.부업 { background: rgba(240, 147, 251, 0.2); color: var(--cat-부업); }
+    .task-item-mini-category.일상 { background: rgba(72, 187, 120, 0.2); color: var(--accent-success); }
+    .task-item-mini-category.가족 { background: rgba(246, 173, 85, 0.2); color: var(--accent-warning); }
 
     .task-list-more {
       text-align: center;
@@ -457,7 +457,7 @@
     .quick-add-input:focus {
       outline: none;
       border-color: var(--accent-primary);
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+      box-shadow: var(--focus-ring);
     }
 
     .quick-add-btn {
@@ -498,18 +498,18 @@
     }
 
     .next-action.panic {
-      border-color: #f5576c;
-      background: linear-gradient(135deg, #2a1a1a 0%, #1a1a1a 100%);
+      border-color: var(--accent-danger);
+      background: var(--bg-primary);
       animation: pulse-border 1s infinite;
     }
 
     @keyframes pulse-border {
-      0%, 100% { border-color: #f5576c; }
-      50% { border-color: #ff7a8a; }
+      0%, 100% { border-color: var(--accent-danger); }
+      50% { border-color: var(--accent-danger); }
     }
 
     .next-action.warning {
-      border-color: #ff9500;
+      border-color: var(--accent-warning);
     }
 
     .next-action-label {
@@ -521,11 +521,11 @@
     }
 
     .next-action.panic .next-action-label {
-      color: #f5576c;
+      color: var(--accent-danger);
     }
 
     .next-action.warning .next-action-label {
-      color: #ff9500;
+      color: var(--accent-warning);
     }
 
     .task-title {
@@ -621,7 +621,6 @@
 
     .task-item:hover {
       border-color: rgba(148, 163, 184, 0.15);
-      box-shadow: 0 4px 16px var(--shadow-color);
     }
 
     .task-item:active {
@@ -648,8 +647,8 @@
 
     /* 긴급도 레벨별 그라데이션 */
     .task-item.urgent {
-      background: linear-gradient(135deg, rgba(245, 87, 108, 0.15), rgba(245, 87, 108, 0.05));
-      border-color: #f5576c;
+      background: var(--accent-danger-alpha);
+      border-color: var(--accent-danger);
       border-width: 2px;
       box-shadow: 0 2px 12px rgba(245, 87, 108, 0.2);
     }
@@ -661,17 +660,16 @@
       top: 0;
       bottom: 0;
       width: 4px;
-      background: linear-gradient(180deg, #f5576c, #ff8a9b);
+      background: var(--accent-danger);
     }
 
     .task-item.urgent:hover {
-      box-shadow: 0 4px 20px rgba(245, 87, 108, 0.3);
-      border-color: #ff6b7d;
+      border-color: var(--accent-danger);
     }
 
     .task-item.warning {
-      background: linear-gradient(135deg, rgba(255, 149, 0, 0.12), rgba(255, 149, 0, 0.04));
-      border-color: #ff9500;
+      background: var(--accent-warning-alpha);
+      border-color: var(--accent-warning);
       border-width: 2px;
       box-shadow: 0 2px 12px rgba(255, 149, 0, 0.15);
     }
@@ -683,12 +681,11 @@
       top: 0;
       bottom: 0;
       width: 4px;
-      background: linear-gradient(180deg, #ff9500, #ffb347);
+      background: var(--accent-warning);
     }
 
     .task-item.warning:hover {
-      box-shadow: 0 4px 20px rgba(255, 149, 0, 0.25);
-      border-color: #ffa726;
+      border-color: var(--accent-warning);
     }
 
     /* 일반 우선순위 표시 */
@@ -738,7 +735,7 @@
 
     /* 호버 시 예상 시간 하이라이트 */
     .task-item:hover .meta-item {
-      background: rgba(102, 126, 234, 0.1);
+      background: var(--accent-primary-alpha);
       border-radius: 4px;
       padding: 2px 6px;
       margin: -2px -6px;
@@ -765,12 +762,12 @@
 
     .swipe-actions.left {
       left: 0;
-      background: #48bb78;
+      background: var(--accent-success);
     }
 
     .swipe-actions.right {
       right: 0;
-      background: #f5576c;
+      background: var(--accent-danger);
     }
 
     .task-item-header {
@@ -894,10 +891,10 @@
       font-weight: 500;
       vertical-align: middle;
     }
-    .task-item-inline-cat.본업 { background: rgba(102, 126, 234, 0.2); color: #667eea; }
-    .task-item-inline-cat.부업 { background: rgba(240, 147, 251, 0.2); color: #f093fb; }
-    .task-item-inline-cat.일상 { background: rgba(72, 187, 120, 0.2); color: #48bb78; }
-    .task-item-inline-cat.가족 { background: rgba(246, 173, 85, 0.2); color: #f6ad55; }
+    .task-item-inline-cat.본업 { background: rgba(102, 126, 234, 0.2); color: var(--accent-primary); }
+    .task-item-inline-cat.부업 { background: rgba(240, 147, 251, 0.2); color: var(--cat-부업); }
+    .task-item-inline-cat.일상 { background: rgba(72, 187, 120, 0.2); color: var(--accent-success); }
+    .task-item-inline-cat.가족 { background: rgba(246, 173, 85, 0.2); color: var(--accent-warning); }
 
     @media (max-width: 768px) {
       .task-list .task-item .task-item-actions {

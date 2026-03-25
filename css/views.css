@@ -12,7 +12,7 @@
 
     .all-tasks-summary {
       font-size: 16px;
-      color: #888;
+      color: var(--text-muted);
     }
 
     /* 할일 서브뷰 탭 */
@@ -106,7 +106,7 @@
 
     .all-category-count {
       font-size: 15px;
-      color: #888;
+      color: var(--text-muted);
     }
 
     .all-task-list {
@@ -115,7 +115,7 @@
 
     .all-task-list.completed-list {
       display: none;
-      background: #151515;
+      background: var(--bg-primary);
     }
 
     .all-task-list.completed-list.show {
@@ -168,7 +168,7 @@
 
     .all-task-meta {
       font-size: 14px;
-      color: #888;
+      color: var(--text-muted);
     }
 
     .all-task-content .subtask-chips {
@@ -188,13 +188,13 @@
     .all-completed-toggle {
       padding: 10px 15px;
       font-size: 15px;
-      color: #888;
+      color: var(--text-muted);
       cursor: pointer;
-      background: #1f1f1f;
+      background: var(--bg-primary);
     }
 
     .all-completed-toggle:hover {
-      background: #252525;
+      background: var(--bg-secondary);
     }
 
     .all-task-more {
@@ -285,7 +285,7 @@
 
     .schedule-task-time {
       font-size: 14px;
-      color: #667eea;
+      color: var(--accent-primary);
       min-width: 50px;
     }
 
@@ -337,11 +337,11 @@
     }
 
     .timeline-task.부업 {
-      background: #f093fb;
+      background: var(--cat-부업);
     }
 
     .timeline-task.일상 {
-      background: #48bb78;
+      background: var(--accent-success);
     }
 
     /* PC에서 일정 뷰 그리드 */

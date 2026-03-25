@@ -93,11 +93,11 @@
     }
 
     .review-summary-compare.up {
-      color: #48bb78;
+      color: var(--accent-success);
     }
 
     .review-summary-compare.down {
-      color: #f5576c;
+      color: var(--accent-danger);
     }
 
     /* 다음 주 계획 */
@@ -319,7 +319,7 @@
       gap: 4px;
       padding: 2px 8px;
       background: rgba(255, 149, 0, 0.15);
-      color: #ff9500;
+      color: var(--accent-warning);
       border-radius: 10px;
       font-size: 14px;
       font-weight: 600;
@@ -327,7 +327,7 @@
 
     .postpone-badge.warning {
       background: rgba(245, 87, 108, 0.15);
-      color: #f5576c;
+      color: var(--accent-danger);
     }
 
     /* 실제 소요시간 입력 모달 */

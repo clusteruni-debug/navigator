@@ -762,13 +762,16 @@ function toggleWorkLogs(taskUid) {
   const hidden = document.getElementById('logs-hidden-' + taskUid);
   const toggle = document.getElementById('logs-toggle-' + taskUid);
   if (!hidden || !toggle) return;
+  if (!appState.expandedWorkLogs) appState.expandedWorkLogs = {};
   const isOpen = hidden.classList.contains('expanded');
   if (isOpen) {
     hidden.classList.remove('expanded');
     toggle.textContent = toggle.textContent.replace('▼', '▶');
+    delete appState.expandedWorkLogs[taskUid];
   } else {
     hidden.classList.add('expanded');
     toggle.textContent = toggle.textContent.replace('▶', '▼');
+    appState.expandedWorkLogs[taskUid] = true;
   }
 }
 window.toggleWorkLogs = toggleWorkLogs;
@@ -1141,7 +1144,7 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
             const otherLogs = task.logs.filter(l => l.content !== '✓ 완료');
             const pid = escapeAttr(projectId);
             const si = Number(stageIdx), sci = Number(subcatIdx), ti = Number(taskIdx);
-            const taskUid = pid + '-' + si + '-' + sci + '-' + ti;
+            const taskUid = task.id || (pid + '-' + si + '-' + sci + '-' + ti);
             let html = '';
             if (completionLogs.length > 0) {
               const lastIdx = task.logs.reduce((found, l, i) => l.content === '✓ 완료' ? i : found, -1);
@@ -1160,7 +1163,8 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
             const hiddenLogs = otherLogs.length > MAX_VISIBLE_LOGS ? otherLogs.slice(0, otherLogs.length - MAX_VISIBLE_LOGS) : [];
             const visibleLogs = otherLogs.length > MAX_VISIBLE_LOGS ? otherLogs.slice(otherLogs.length - MAX_VISIBLE_LOGS) : otherLogs;
             if (hiddenLogs.length > 0) {
-              html += '<div class="work-task-logs-collapsed" id="logs-hidden-' + taskUid + '">';
+              const wasExpanded = appState.expandedWorkLogs[taskUid];
+              html += '<div class="work-task-logs-collapsed' + (wasExpanded ? ' expanded' : '') + '" id="logs-hidden-' + taskUid + '">';
               hiddenLogs.forEach(log => {
                 const actualIdx = task.logs.findIndex(l => l.date === log.date && l.content === log.content);
                 html += '<div class="work-task-log"><span class="work-task-log-date">' + escapeHtml(log.date) + '</span><div class="work-task-log-content">' + renderFormattedText(log.content) + '</div>' +
@@ -1170,7 +1174,7 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
                   '</div></div>';
               });
               html += '</div>';
-              html += '<div class="work-task-logs-toggle" onclick="toggleWorkLogs(\'' + taskUid + '\')" id="logs-toggle-' + taskUid + '">▶ 이전 기록 ' + hiddenLogs.length + '개</div>';
+              html += '<div class="work-task-logs-toggle" onclick="toggleWorkLogs(\'' + taskUid + '\')" id="logs-toggle-' + taskUid + '">' + (wasExpanded ? '▼' : '▶') + ' 이전 기록 ' + hiddenLogs.length + '개</div>';
             }
             visibleLogs.forEach(log => {
               const actualIdx = task.logs.findIndex(l => l.date === log.date && l.content === log.content);

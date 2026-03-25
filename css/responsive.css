@@ -19,7 +19,6 @@
 
     .settings-btn:hover {
       background: var(--bg-tertiary);
-      transform: scale(1.05);
     }
 
     .settings-modal {
@@ -217,7 +216,7 @@
     }
 
     .daily-goal-count strong {
-      color: #667eea;
+      color: var(--accent-primary);
       font-size: 18px;
     }
 
@@ -237,11 +236,11 @@
     }
 
     .daily-goal-fill.complete {
-      background: linear-gradient(90deg, #48bb78, #38a169);
+      background: var(--accent-success);
     }
 
     .daily-goal-fill.over {
-      background: linear-gradient(90deg, #f6ad55, #ed8936);
+      background: var(--accent-warning);
     }
 
     .daily-goal-message {
@@ -255,17 +254,17 @@
 
     .daily-goal-message.success {
       background: rgba(72, 187, 120, 0.15);
-      color: #48bb78;
+      color: var(--accent-success);
     }
 
     .daily-goal-message.over {
       background: rgba(246, 173, 85, 0.15);
-      color: #f6ad55;
+      color: var(--accent-warning);
     }
 
     /* 일일 목표 (게이미피케이션 버전) */
     .daily-goal-compact {
-      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+      background: var(--bg-secondary);
       border-radius: var(--radius-lg);
       padding: 16px 20px;
       margin-bottom: 16px;
@@ -340,7 +339,7 @@
     }
 
     .daily-goal-bar-fill.complete {
-      background: linear-gradient(90deg, #48bb78, #38a169);
+      background: var(--accent-success);
     }
 
     .daily-goal-runner {
@@ -374,11 +373,11 @@
     }
 
     .daily-goal-message.positive {
-      color: #48bb78;
+      color: var(--accent-success);
     }
 
     .daily-goal-message.encourage {
-      color: #667eea;
+      color: var(--accent-primary);
     }
 
     /* 주간 통계 그래프 */
@@ -408,7 +407,7 @@
     }
 
     .weekly-chart-fill.today {
-      background: linear-gradient(180deg, #48bb78, #38a169);
+      background: var(--accent-success);
     }
 
     .weekly-chart-fill.empty {
@@ -421,7 +420,7 @@
     }
 
     .weekly-chart-label.today {
-      color: #48bb78;
+      color: var(--accent-success);
       font-weight: bold;
     }
 
@@ -524,7 +523,7 @@
 
     .template-chip-delete:hover {
       background: rgba(245, 87, 108, 0.2);
-      color: #f5576c;
+      color: var(--accent-danger);
     }
 
     .template-add-btn {
@@ -596,7 +595,7 @@
       bottom: 20px;
       right: 20px;
       padding: 10px 16px;
-      background: #48bb78;
+      background: var(--accent-success);
       color: white;
       border-radius: 8px;
       font-size: 15px;
@@ -644,10 +643,10 @@
     .commute-title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
     .commute-sub-tabs { display: flex; gap: 4px; background: var(--bg-secondary); border-radius: 12px; padding: 3px; margin-bottom: 16px; }
     .commute-sub-tab { flex: 1; padding: 8px 12px; border: none; background: transparent; border-radius: 10px; font-size: 15px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; min-height: 44px; }
-    .commute-sub-tab.active { background: var(--accent-primary); color: #fff; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3); }
+    .commute-sub-tab.active { background: var(--accent-primary); color: white; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3); }
     .commute-route-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
     .commute-route-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg-card); border-radius: 14px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s; min-height: 44px; }
-    .commute-route-card:hover { border-color: var(--accent-primary); transform: translateY(-1px); }
+    .commute-route-card:hover { border-color: var(--accent-primary); }
     .commute-route-card.selected { border-color: var(--accent-primary); background: rgba(102, 126, 234, 0.08); }
     .commute-route-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
     .commute-route-info { flex: 1; min-width: 0; }
@@ -664,17 +663,17 @@
     .commute-time-value { font-size: 18px; font-weight: 700; color: var(--text-primary); }
     .commute-time-value.empty { color: var(--text-muted); font-weight: 400; }
     .commute-duration-badge { display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px; border-radius: 20px; font-size: 17px; font-weight: 700; margin-top: 8px; }
-    .commute-duration-badge.good { background: rgba(72, 187, 120, 0.15); color: #48bb78; }
-    .commute-duration-badge.normal { background: rgba(237, 137, 54, 0.15); color: #ed8936; }
-    .commute-duration-badge.bad { background: rgba(245, 101, 101, 0.15); color: #f56565; }
+    .commute-duration-badge.good { background: rgba(72, 187, 120, 0.15); color: var(--accent-success); }
+    .commute-duration-badge.normal { background: rgba(237, 137, 54, 0.15); color: var(--accent-warning-hover); }
+    .commute-duration-badge.bad { background: rgba(245, 101, 101, 0.15); color: var(--accent-danger); }
     .commute-recommend-card { background: var(--accent-primary-alpha); border-radius: 16px; padding: 18px; margin-bottom: 16px; }
     .commute-recommend-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
     .commute-recommend-time { font-size: 28px; font-weight: 800; color: var(--accent-primary); }
     .commute-recommend-detail { font-size: 14px; color: var(--text-secondary); margin-top: 6px; }
     .commute-recommend-confidence { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 14px; font-weight: 600; margin-top: 6px; }
-    .commute-recommend-confidence.high { background: rgba(72, 187, 120, 0.15); color: #48bb78; }
-    .commute-recommend-confidence.medium { background: rgba(237, 137, 54, 0.15); color: #ed8936; }
-    .commute-recommend-confidence.low { background: rgba(160, 174, 192, 0.15); color: #a0aec0; }
+    .commute-recommend-confidence.high { background: rgba(72, 187, 120, 0.15); color: var(--accent-success); }
+    .commute-recommend-confidence.medium { background: rgba(237, 137, 54, 0.15); color: var(--accent-warning-hover); }
+    .commute-recommend-confidence.low { background: rgba(160, 174, 192, 0.15); color: var(--text-secondary); }
     .commute-recent-summary { background: var(--bg-card); border-radius: 14px; padding: 16px; margin-bottom: 16px; }
     .commute-recent-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px; }
     .commute-recent-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 15px; }
@@ -702,7 +701,7 @@
     .commute-date-nav-btn { background: var(--bg-secondary); border: none; border-radius: 8px; padding: 6px 12px; font-size: 15px; font-weight: 600; color: var(--text-secondary); cursor: pointer; min-height: 36px; }
     .commute-date-nav-btn:hover:not(:disabled) { background: var(--bg-hover); color: var(--text-primary); }
     .commute-date-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .commute-date-nav-btn.today-btn { background: var(--accent-primary); color: #fff; font-size: 13px; padding: 4px 10px; }
+    .commute-date-nav-btn.today-btn { background: var(--accent-primary); color: white; font-size: 13px; padding: 4px 10px; }
     .commute-date-nav-label { font-size: 16px; font-weight: 700; color: var(--text-primary); min-width: 80px; text-align: center; }
     .commute-date-nav-label.past { color: var(--text-secondary); }
     .commute-history-add-row { display: flex; gap: 8px; margin-top: 6px; }
@@ -726,7 +725,7 @@
     .commute-weekday-label { font-size: 14px; color: var(--text-muted); font-weight: 600; }
     .commute-weekday-value { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
     .commute-weekday-count { font-size: 14px; color: var(--text-muted); }
-    .commute-best-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 14px; font-weight: 700; background: rgba(72, 187, 120, 0.15); color: #48bb78; margin-left: 8px; }
+    .commute-best-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 14px; font-weight: 700; background: rgba(72, 187, 120, 0.15); color: var(--accent-success); margin-left: 8px; }
     .commute-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .commute-modal { background: var(--bg-primary); border-radius: 20px; padding: 24px; max-width: 400px; width: 100%; max-height: 80vh; overflow-y: auto; }
     .commute-modal-title { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }
@@ -736,13 +735,13 @@
     .commute-modal-input:focus { outline: none; border-color: var(--accent-primary); }
     .commute-modal-select { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-card); color: var(--text-primary); font-size: 16px; box-sizing: border-box; }
     .commute-color-options { display: flex; gap: 8px; flex-wrap: wrap; }
-    .commute-color-btn { width: 32px; height: 32px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: border-color 0.15s, transform 0.15s; }
-    .commute-color-btn:hover { transform: scale(1.15); }
+    .commute-color-btn { width: 32px; height: 32px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: border-color 0.15s; }
+    .commute-color-btn:hover { border-color: var(--text-secondary); }
     .commute-color-btn.selected { border-color: var(--text-primary); }
     .commute-modal-actions { display: flex; gap: 8px; margin-top: 18px; }
     .commute-modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; min-height: 44px; }
     .commute-modal-cancel { background: var(--bg-secondary); color: var(--text-secondary); }
-    .commute-modal-save { background: var(--accent-primary); color: #fff; }
+    .commute-modal-save { background: var(--accent-primary); color: white; }
     .commute-tag-prompt { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--bg-card); border-radius: 16px; padding: 16px 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); z-index: 999; max-width: 360px; width: calc(100% - 40px); animation: commuteSlideUp 0.3s ease; }
     .commute-tag-prompt-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px; }
     .commute-tag-prompt-routes { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
@@ -752,7 +751,7 @@
     .commute-empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
     .commute-empty-icon { font-size: 48px; margin-bottom: 12px; }
     .commute-empty-text { font-size: 16px; margin-bottom: 16px; }
-    .commute-add-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: var(--accent-primary); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; min-height: 44px; }
+    .commute-add-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: var(--accent-primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; min-height: 44px; }
     .commute-conditions-row { display: flex; gap: 6px; margin-top: 8px; }
     .commute-condition-btn { padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); font-size: 15px; cursor: pointer; min-height: 36px; transition: all 0.15s; }
     .commute-condition-btn.selected { border-color: var(--accent-primary); background: rgba(102, 126, 234, 0.1); color: var(--accent-primary); font-weight: 600; }
@@ -760,8 +759,8 @@
     /* SVG 아이콘 시스템 */
     .svg-icon { display: inline-block; vertical-align: -0.15em; flex-shrink: 0; }
     /* 접근성: 스킵 네비게이션 */
-    .skip-link { position: absolute; top: -50px; left: 0; background: var(--accent-primary); color: #fff; padding: 10px 20px; z-index: 10000; font-size: 16px; font-weight: 600; border-radius: 0 0 8px 0; transition: top 0.2s; text-decoration: none; }
-    .skip-link:focus { top: 0; outline: 2px solid #fff; }
+    .skip-link { position: absolute; top: -50px; left: 0; background: var(--accent-primary); color: white; padding: 10px 20px; z-index: 10000; font-size: 16px; font-weight: 600; border-radius: 0 0 8px 0; transition: top 0.2s; text-decoration: none; }
+    .skip-link:focus { top: 0; outline: 2px solid white; }
     /* 접근성: 스크린 리더 전용 */
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 

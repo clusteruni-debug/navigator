@@ -202,7 +202,7 @@
       font-weight: 700;
       font-family: 'Pretendard Variable', monospace;
       font-variant-numeric: tabular-nums;
-      color: #fff;
+      color: white;
       letter-spacing: -0.02em;
     }
 
@@ -265,11 +265,11 @@
       border-radius: 12px;
       margin-bottom: 20px;
       text-align: center;
-      border: 2px solid #333;
+      border: 2px solid var(--border-color);
     }
     
     .time-remaining.panic {
-      border-color: #f5576c;
+      border-color: var(--accent-danger);
     }
     
     .time-label {
@@ -286,7 +286,7 @@
     
     .time-warning {
       font-size: 16px;
-      color: #f5576c;
+      color: var(--accent-danger);
       margin-top: 10px;
     }
     
@@ -315,7 +315,6 @@
     }
 
     .stat-card:hover {
-      box-shadow: 0 4px 16px var(--shadow-color);
       border-color: rgba(148, 163, 184, 0.15);
     }
     

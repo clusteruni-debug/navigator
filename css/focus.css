@@ -1,11 +1,11 @@
 /* focus.css - 포커스 모드 스타일 (tasks.css에서 분리) */
     /* 포커스 모드 */
     .focus-mode-container {
-      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+      background: var(--bg-secondary);
       border-radius: 16px;
       padding: 24px;
       margin-bottom: 20px;
-      border: 2px solid #667eea;
+      border: 2px solid var(--accent-primary);
     }
 
     .focus-mode-header {
@@ -69,7 +69,7 @@
 
     .focus-subtask-check {
       font-size: 16px;
-      color: #667eea;
+      color: var(--accent-primary);
     }
 
     .focus-actions {

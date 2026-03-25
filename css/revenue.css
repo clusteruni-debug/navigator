@@ -248,15 +248,15 @@
     }
 
     .rhythm-bar.good {
-      background: linear-gradient(180deg, #48bb78, #38a169);
+      background: var(--accent-success);
     }
 
     .rhythm-bar.ok {
-      background: linear-gradient(180deg, #ecc94b, #d69e2e);
+      background: var(--accent-warning);
     }
 
     .rhythm-bar.bad {
-      background: linear-gradient(180deg, #f56565, #e53e3e);
+      background: var(--accent-danger);
     }
 
     .rhythm-bar-value {
@@ -382,7 +382,7 @@
       background: var(--bg-tertiary);
       padding: 12px;
       border-radius: 8px;
-      border-left: 4px solid #f5576c;
+      border-left: 4px solid var(--accent-danger);
     }
 
     .urgent-item-title {
@@ -392,6 +392,6 @@
 
     .urgent-item-time {
       font-size: 14px;
-      color: #f5576c;
+      color: var(--accent-danger);
     }
     

@@ -21,12 +21,11 @@
 
     .header-btn:hover {
       background: var(--bg-tertiary);
-      transform: scale(1.05);
     }
 
     .header-btn.active {
-      background: #667eea;
-      border-color: #667eea;
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
     }
 
     /* 셔틀 토글 버튼 */
@@ -41,14 +40,14 @@
 
     .header-btn.shuttle-toggle.on {
       background: rgba(72, 187, 120, 0.2);
-      border-color: #48bb78;
-      color: #48bb78;
+      border-color: var(--accent-success);
+      color: var(--accent-success);
     }
 
     .header-btn.shuttle-toggle.off {
       background: rgba(245, 87, 108, 0.15);
-      border-color: #f5576c;
-      color: #f5576c;
+      border-color: var(--accent-danger);
+      color: var(--accent-danger);
     }
 
     /* 헤더 날짜 */
@@ -59,7 +58,7 @@
 
     .header-streak {
       display: inline-block;
-      background: linear-gradient(135deg, #f093fb, #f5576c);
+      background: linear-gradient(135deg, var(--cat-부업), var(--accent-danger));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       font-weight: bold;
@@ -68,7 +67,7 @@
 
     /* 스트릭 stat card */
     .stat-card.streak {
-      background: linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1));
+      background: rgba(240, 147, 251, 0.1);
       border-color: rgba(240, 147, 251, 0.3);
     }
 

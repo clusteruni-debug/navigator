@@ -24,20 +24,20 @@
 
     .notification-text {
       font-size: 16px;
-      color: #ccc;
+      color: var(--text-secondary);
     }
 
     .notification-text.granted {
-      color: #48bb78;
+      color: var(--accent-success);
     }
 
     .notification-text.denied {
-      color: #f5576c;
+      color: var(--accent-danger);
     }
 
     .notification-btn {
       padding: 10px 16px;
-      background: #667eea;
+      background: var(--accent-primary);
       border: none;
       border-radius: 8px;
       color: white;
@@ -47,25 +47,25 @@
     }
 
     .notification-btn:hover {
-      background: #5a6fd6;
+      background: var(--accent-primary-hover);
     }
 
     .notification-btn:disabled {
-      background: #444;
+      background: var(--bg-tertiary);
       cursor: not-allowed;
     }
 
     .notification-btn.granted {
-      background: #48bb78;
+      background: var(--accent-success);
     }
 
     .notification-btn.denied {
-      background: #f5576c;
+      background: var(--accent-danger);
       cursor: pointer;
     }
 
     .notification-btn.denied:hover {
-      background: #e04460;
+      background: var(--accent-danger-hover);
     }
 
     .notification-help {
@@ -138,7 +138,7 @@
 
     .search-input:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--accent-primary);
     }
 
     .search-icon {
@@ -154,7 +154,7 @@
       right: 12px;
       top: 50%;
       transform: translateY(-50%);
-      background: #666;
+      background: var(--text-muted);
       border: none;
       color: white;
       width: 20px;
@@ -220,7 +220,7 @@
       border-radius: 4px;
       font-size: 14px;
       font-family: monospace;
-      color: #667eea;
+      color: var(--accent-primary);
     }
 
     .shortcut-desc {

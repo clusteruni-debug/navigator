@@ -53,8 +53,8 @@
 
     .telegram-status.connected {
       background: rgba(72, 187, 120, 0.15);
-      border-color: #48bb78;
-      color: #48bb78;
+      border-color: var(--accent-success);
+      color: var(--accent-success);
     }
 
     .telegram-status.connected:hover {
@@ -207,9 +207,6 @@
       transition: all 0.2s;
     }
 
-    .events-quick-btn:hover {
-    }
-
     .events-detail-btn {
       width: 40px;
       height: 40px;
@@ -270,23 +267,22 @@
     }
 
     .event-card:hover {
-      border-color: rgba(102, 126, 234, 0.5);
-      box-shadow: 0 2px 8px var(--shadow-color);
+      border-color: var(--accent-primary);
     }
 
     .event-card.urgent {
       border-left: 4px solid var(--accent-danger);
-      background: linear-gradient(90deg, rgba(245,87,108,0.08) 0%, transparent 30%);
+      background: var(--accent-danger-alpha);
     }
 
     .event-card.warning {
       border-left: 4px solid var(--accent-warning);
-      background: linear-gradient(90deg, rgba(255,149,0,0.08) 0%, transparent 30%);
+      background: var(--accent-warning-alpha);
     }
 
     .event-card.completed {
       opacity: 0.6;
-      background: #151515;
+      background: var(--bg-primary);
     }
 
     .event-card-header {
@@ -512,7 +508,7 @@
     }
 
     .event-meta-divider {
-      color: #444;
+      color: var(--text-muted);
     }
 
     .event-tag {
@@ -523,15 +519,15 @@
     }
 
     .event-tag.organizer {
-      background: #667eea22;
-      color: #99aaff;
-      border: 1px solid #667eea44;
+      background: var(--accent-primary-alpha);
+      color: var(--accent-primary);
+      border: 1px solid rgba(102, 126, 234, 0.27);
     }
 
     .event-tag.type {
-      background: #f093fb22;
-      color: #f5b8ff;
-      border: 1px solid #f093fb44;
+      background: rgba(240, 147, 251, 0.13);
+      color: var(--cat-부업);
+      border: 1px solid rgba(240, 147, 251, 0.27);
     }
 
     .event-date {
@@ -565,7 +561,6 @@
 
     .btn-submit:hover {
       filter: brightness(0.9);
-      transform: scale(1.02);
     }
 
     .btn-edit {
@@ -603,7 +598,7 @@
       padding: 60px 20px;
       background: var(--bg-secondary);
       border-radius: 16px;
-      border: 1px solid #2a2a2a;
+      border: 1px solid var(--border-color);
     }
 
     .events-empty-icon {
@@ -632,7 +627,7 @@
     .events-summary-value {
       font-size: 28px;
       font-weight: bold;
-      color: #fff;
+      color: white;
     }
 
     .events-summary-label {

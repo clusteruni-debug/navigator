@@ -16,7 +16,7 @@
       height: 40px;
       border-radius: 50%;
       object-fit: cover;
-      border: 2px solid #667eea;
+      border: 2px solid var(--accent-primary);
     }
 
     .user-info {
@@ -57,7 +57,7 @@
       width: 100%;
       padding: 14px;
       background: white;
-      color: #333;
+      color: var(--text-primary);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       font-size: 16px;
@@ -67,8 +67,7 @@
     }
 
     .login-btn:hover {
-      background: #f5f5f5;
-      transform: translateY(-1px);
+      background: var(--bg-tertiary);
     }
 
     .login-btn img {
@@ -89,8 +88,8 @@
 
     .logout-btn:hover {
       background: var(--bg-tertiary);
-      color: #f5576c;
-      border-color: #f5576c;
+      color: var(--accent-danger);
+      border-color: var(--accent-danger);
     }
 
     .sync-status {
@@ -103,15 +102,15 @@
     }
 
     .sync-status.syncing {
-      color: #667eea;
+      color: var(--accent-primary);
     }
 
     .sync-status.synced {
-      color: #48bb78;
+      color: var(--accent-success);
     }
 
     .sync-status.error {
-      color: #f5576c;
+      color: var(--accent-danger);
     }
 
     @keyframes spin {
@@ -157,15 +156,15 @@
     }
 
     .backup-btn:hover {
-      background: #3a3a3a;
+      background: var(--bg-tertiary);
     }
 
     .backup-btn.export {
-      background: #667eea;
+      background: var(--accent-primary);
     }
 
     .backup-btn.import {
-      background: #48bb78;
+      background: var(--accent-success);
     }
 
     /* 대시보드 */

@@ -134,7 +134,7 @@
       font-size: 14px;
       padding: 2px 6px;
       background: rgba(160, 160, 160, 0.2);
-      color: #a0a0a0;
+      color: var(--text-muted);
       border-radius: 8px;
       margin-left: 8px;
     }
@@ -144,7 +144,7 @@
       font-size: 14px;
       padding: 2px 6px;
       background: rgba(245, 87, 108, 0.2);
-      color: #f5576c;
+      color: var(--accent-danger);
       border-radius: 8px;
       margin-left: 8px;
     }
@@ -194,11 +194,11 @@
     }
 
     .weekly-stat-value.positive {
-      color: #48bb78;
+      color: var(--accent-success);
     }
 
     .weekly-stat-value.negative {
-      color: #f5576c;
+      color: var(--accent-danger);
     }
 
     .weekly-stat-label {
@@ -213,9 +213,9 @@
     }
 
     .weekly-stat-change.positive {
-      color: #48bb78;
+      color: var(--accent-success);
     }
 
     .weekly-stat-change.negative {
-      color: #f5576c;
+      color: var(--accent-danger);
     }
