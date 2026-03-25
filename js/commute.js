@@ -279,7 +279,7 @@ function getRecentCommuteAvg(direction) {
   return Object.keys(routeData).map(rid => {
     const route = appState.commuteTracker.routes.find(r => r.id === rid);
     const durations = routeData[rid];
-    return { routeId: rid, name: route ? route.name : '알 수 없음', color: route ? route.color : '#999',
+    return { routeId: rid, name: route ? route.name : '알 수 없음', color: route ? route.color : 'var(--text-muted)',
       avg: Math.round(durations.reduce((a,b) => a+b, 0) / durations.length), count: durations.length };
   });
 }
@@ -305,7 +305,7 @@ function getRecentCommuteDetail(direction) {
         date: dateStr,
         dayLabel,
         routeName: route ? route.name : '알 수 없음',
-        routeColor: route ? route.color : '#999',
+        routeColor: route ? route.color : 'var(--text-muted)',
         duration: trip.duration,
         depart: depart || null,
         arrive: arrive || null,
@@ -503,11 +503,11 @@ function renderCommuteHistoryView() {
       const condIcon = morning.conditions === 'rain' ? '🌧️' : (morning.conditions === 'snow' ? '❄️' : '');
       html += '<div class="commute-history-trip morning">';
       html += '<span class="commute-history-dir">🌅 출근</span>';
-      html += '<span class="commute-history-route" style="color:' + escapeHtml(route?.color || '#999') + '">' + escapeHtml(route?.name || '-') + '</span>';
+      html += '<span class="commute-history-route" style="color:' + escapeHtml(route?.color || 'var(--text-muted)') + '">' + escapeHtml(route?.name || '-') + '</span>';
       html += '<span class="commute-history-times">' + depart + ' → ' + arrive + '</span>';
       html += '<span class="commute-history-dur">' + morning.duration + '분' + (condIcon ? ' ' + condIcon : '') + '</span>';
       html += '<button class="commute-history-edit-btn" onclick="event.stopPropagation(); editCommuteTrip(\'' + escapeAttr(dateStr) + '\', \'morning\')" title="수정">✏️</button>';
-      html += '<button class="commute-history-edit-btn" onclick="event.stopPropagation(); deleteCommuteTrip(\'' + escapeAttr(dateStr) + '\', \'morning\')" title="삭제" style="color:var(--danger, #f5576c);">🗑️</button>';
+      html += '<button class="commute-history-edit-btn" onclick="event.stopPropagation(); deleteCommuteTrip(\'' + escapeAttr(dateStr) + '\', \'morning\')" title="삭제" style="color:var(--accent-danger);">🗑️</button>';
       html += '</div>';
     }
 
@@ -518,11 +518,11 @@ function renderCommuteHistoryView() {
       const condIcon = evening.conditions === 'rain' ? '🌧️' : (evening.conditions === 'snow' ? '❄️' : '');
       html += '<div class="commute-history-trip evening">';
       html += '<span class="commute-history-dir">🌆 퇴근</span>';
-      html += '<span class="commute-history-route" style="color:' + escapeHtml(route?.color || '#999') + '">' + escapeHtml(route?.name || '-') + '</span>';
+      html += '<span class="commute-history-route" style="color:' + escapeHtml(route?.color || 'var(--text-muted)') + '">' + escapeHtml(route?.name || '-') + '</span>';
       html += '<span class="commute-history-times">' + depart + ' → ' + arrive + '</span>';
       html += '<span class="commute-history-dur">' + evening.duration + '분' + (condIcon ? ' ' + condIcon : '') + '</span>';
       html += '<button class="commute-history-edit-btn" onclick="event.stopPropagation(); editCommuteTrip(\'' + escapeAttr(dateStr) + '\', \'evening\')" title="수정">✏️</button>';
-      html += '<button class="commute-history-edit-btn" onclick="event.stopPropagation(); deleteCommuteTrip(\'' + escapeAttr(dateStr) + '\', \'evening\')" title="삭제" style="color:var(--danger, #f5576c);">🗑️</button>';
+      html += '<button class="commute-history-edit-btn" onclick="event.stopPropagation(); deleteCommuteTrip(\'' + escapeAttr(dateStr) + '\', \'evening\')" title="삭제" style="color:var(--accent-danger);">🗑️</button>';
       html += '</div>';
     }
 

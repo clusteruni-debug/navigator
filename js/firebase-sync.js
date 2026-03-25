@@ -969,10 +969,10 @@ function updateSyncIndicator() {
   if (!indicator) return;
 
   const statusMap = {
-    'offline': { icon: '☁️', text: '오프라인', color: '#888' },
-    'syncing': { icon: '🔄', text: '동기화 중...', color: '#667eea' },
-    'synced': { icon: '✅', text: '동기화됨', color: '#48bb78' },
-    'error': { icon: '⚠️', text: '동기화 오류', color: '#f5576c' }
+    'offline': { icon: '☁️', text: '오프라인', color: 'var(--text-muted)' },
+    'syncing': { icon: '🔄', text: '동기화 중...', color: 'var(--accent-primary)' },
+    'synced': { icon: '✅', text: '동기화됨', color: 'var(--accent-success)' },
+    'error': { icon: '⚠️', text: '동기화 오류', color: 'var(--accent-danger)' }
   };
 
   const status = statusMap[appState.syncStatus] || statusMap['offline'];

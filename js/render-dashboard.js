@@ -427,17 +427,17 @@ function renderDashboardTab(ctx) {
 
           // 파이 차트 그라디언트 계산
           const colors = {
-            '본업': 'var(--accent-primary)',
-            '부업': '#f093fb',
-            '일상': '#4ecdc4',
-            '가족': '#ffd93d',
-            '기타': '#888'
+            '본업': 'var(--cat-본업)',
+            '부업': 'var(--cat-부업)',
+            '일상': 'var(--cat-일상)',
+            '가족': 'var(--cat-가족)',
+            '기타': 'var(--text-muted)'
           };
           let gradientParts = [];
           let currentDeg = 0;
           catDist.distribution.forEach(item => {
             const deg = (item.percentage / 100) * 360;
-            const color = colors[item.category] || '#888';
+            const color = colors[item.category] || 'var(--text-muted)';
             gradientParts.push(color + ' ' + currentDeg + 'deg ' + (currentDeg + deg) + 'deg');
             currentDeg += deg;
           });
@@ -578,7 +578,7 @@ function renderDashboardTab(ctx) {
                   <div class="stat-label">월간 완료</div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-value" style="color: #f093fb">${weekRevenue > 0 ? formatKRW(weekRevenue) : '-'}</div>
+                  <div class="stat-value" style="color: var(--cat-부업)">${weekRevenue > 0 ? formatKRW(weekRevenue) : '-'}</div>
                   <div class="stat-label">주간 수익</div>
                 </div>
                 <div class="stat-card">

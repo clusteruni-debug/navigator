@@ -13,7 +13,7 @@
       z-index: 1000;
       opacity: 0;
       visibility: hidden;
-      transition: all 0.3s;
+      transition: opacity 0.3s, visibility 0.3s;
     }
 
     .work-modal.show {
@@ -140,7 +140,7 @@
       color: var(--text-secondary);
       font-size: 15px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
     }
 
     .work-status-option:hover {

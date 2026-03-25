@@ -109,7 +109,7 @@
       color: var(--primary);
       border-radius: 12px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background-color 0.2s;
     }
 
     .subtask-badge:hover {
@@ -125,7 +125,7 @@
       border-left: 3px solid var(--primary);
       border-radius: 0 6px 6px 0;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background-color 0.2s, color 0.2s;
     }
 
     .subtask-preview:hover {
@@ -222,7 +222,7 @@
       border-radius: 4px;
       font-size: 14px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
     }
 
     .subtask-list-check:hover {
@@ -286,7 +286,7 @@
       border: 1px solid var(--border-color);
       color: var(--text-secondary);
       cursor: pointer;
-      transition: all 0.15s;
+      transition: border-color 0.15s, background-color 0.15s, transform 0.15s;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }

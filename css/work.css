@@ -72,7 +72,7 @@
       font-size: 16px;
       cursor: pointer;
       white-space: nowrap;
-      transition: all 0.2s;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
     }
 
     .work-project-tab:hover {
@@ -94,7 +94,7 @@
       color: var(--text-muted);
       font-size: 16px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: border-color 0.2s, color 0.2s;
     }
 
     .work-project-tab-add:hover {
@@ -208,7 +208,7 @@
       font-size: 20px;
       font-weight: bold;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background-color 0.2s;
     }
 
     /* Owner 토글 버튼 */
@@ -226,7 +226,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
     }
 
     .work-owner-toggle.other {
@@ -323,7 +323,7 @@
       font-size: 16px;
       cursor: pointer;
       opacity: 0;
-      transition: all 0.2s;
+      transition: opacity 0.2s, background-color 0.2s, color 0.2s;
     }
 
     .work-general-item:hover .work-general-delete-btn {
