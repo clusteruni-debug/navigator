@@ -511,13 +511,12 @@ function toggleEventSelection(id) {
  * 이벤트 전체 선택/해제
  */
 function toggleEventSelectAll() {
-  const eventTasks = appState.tasks.filter(t => t.category === '부업');
-  if (_eventBulkSelectedIds.size === eventTasks.length) {
-    // 전체 해제
+  // 로컬 이벤트만 선택 대상 (Supabase 수신 이벤트는 벌크 선택 불가)
+  const localEvents = appState.tasks.filter(t => t.category === '부업' && !(t.source && t.source.type === 'telegram-event'));
+  if (_eventBulkSelectedIds.size === localEvents.length) {
     _eventBulkSelectedIds.clear();
   } else {
-    // 전체 선택
-    eventTasks.forEach(t => _eventBulkSelectedIds.add(t.id));
+    localEvents.forEach(t => _eventBulkSelectedIds.add(t.id));
   }
   renderStatic();
 }

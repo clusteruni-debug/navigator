@@ -321,7 +321,7 @@ document.addEventListener('keydown', (e) => {
     const editLog = document.getElementById('edit-log-modal');
     if (editLog) { editLog.remove(); return; }
     const telegramModal = document.getElementById('telegram-events-modal');
-    if (telegramModal) { closeTelegramEventsModal(); return; }
+    if (telegramModal) { telegramModal.remove(); return; }
     const weeklyReview = document.getElementById('weekly-review-modal');
     if (weeklyReview && weeklyReview.style.display !== 'none') { closeWeeklyReview(); return; }
     // 입력 필드에서 blur

@@ -25,149 +25,7 @@
       white-space: nowrap;
     }
 
-    /* 텔레그램 연동 상태 */
-    .telegram-status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      font-size: 14px;
-      font-family: inherit;
-      color: var(--text-tertiary);
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-      min-height: 44px;
-    }
-
-    .telegram-status:hover {
-      background: var(--bg-secondary);
-      border-color: var(--text-tertiary);
-    }
-
-    .telegram-status:active {
-      transform: scale(0.97);
-    }
-
-    .telegram-status.connected {
-      background: var(--accent-success-alpha);
-      border-color: var(--accent-success);
-      color: var(--accent-success);
-    }
-
-    .telegram-status.connected:hover {
-      background: color-mix(in srgb, var(--accent-success) 25%, transparent);
-    }
-
-    .telegram-icon {
-      font-size: 16px;
-    }
-
-    /* 텔레그램 이벤트 목록 모달 */
-    .tg-events-list {
-      max-height: 400px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .tg-event-item {
-      padding: 12px;
-      background: var(--bg-secondary);
-      border-radius: 10px;
-      border: 1px solid var(--border-color);
-      transition: border-color 0.2s;
-    }
-
-    .tg-event-item:has(input:checked) {
-      border-color: var(--accent-blue);
-      background: var(--accent-primary-alpha);
-    }
-
-    .tg-event-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-    }
-
-    .tg-event-check {
-      flex-shrink: 0;
-      padding: 2px;
-      cursor: pointer;
-    }
-
-    .tg-event-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .tg-event-title {
-      font-weight: 600;
-      margin-bottom: 4px;
-      word-break: break-word;
-      font-size: 16px;
-    }
-
-    .tg-event-meta {
-      font-size: 14px;
-      color: var(--text-secondary);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px 10px;
-    }
-
-    .tg-event-expand {
-      flex-shrink: 0;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 14px;
-      cursor: pointer;
-      padding: 4px 6px;
-      border-radius: 4px;
-      font-family: inherit;
-    }
-
-    .tg-event-expand:hover {
-      background: var(--bg-tertiary);
-    }
-
-    .tg-event-detail {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border-color);
-    }
-
-    .tg-event-empty {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-muted);
-    }
-
-    .tg-event-empty-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-    }
-
-    .tg-select-all {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      margin-bottom: 12px;
-      background: var(--bg-secondary);
-      border-radius: 8px;
-      font-size: 15px;
-      color: var(--text-secondary);
-      cursor: pointer;
-    }
-
-    .tg-select-all:hover {
-      background: var(--bg-tertiary);
-    }
+    /* 텔레그램 모달 스타일 제거됨 — 수신 이벤트는 render-events.js에서 인라인 렌더링 */
 
     /* 이벤트 빠른 추가 */
     .events-quick-add {
@@ -627,7 +485,7 @@
     .events-summary-value {
       font-size: 28px;
       font-weight: bold;
-      color: white;
+      color: var(--text-primary);
     }
 
     .events-summary-label {
@@ -651,4 +509,34 @@
       .events-title {
         font-size: 26px;
       }
+    }
+
+    /* ============================================
+       하이브리드 이벤트 탭 — Supabase 수신 + 로컬
+       ============================================ */
+
+    .events-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      padding: 8px 0;
+      margin-bottom: 8px;
+    }
+
+    .events-section-divider {
+      border: none;
+      border-top: 1px dashed var(--border-color);
+      margin: 20px 0;
+    }
+
+    .supabase-event-card {
+      border-left: 4px solid var(--accent-blue) !important;
+    }
+
+    .supabase-badge {
+      margin-right: 4px;
+      font-size: 14px;
     }

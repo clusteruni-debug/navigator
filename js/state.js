@@ -1,9 +1,19 @@
 // ============================================
+// Supabase (telegram-event-bot) — 이벤트 탭에서 직접 사용
+// ============================================
+const TG_SUPABASE_URL = 'https://hgygyilcrkygnvaquvko.supabase.co';
+const TG_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhneWd5aWxjcmt5Z252YXF1dmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzE5NDIsImV4cCI6MjA4NDkwNzk0Mn0.iEVFwhZmfpjZqaaZyVVBiwK8GWNWfydXAtN-OaNsjFk';
+
+// ============================================
 // 이벤트 탭 UI 상태 (비영속적 — 새로고침 시 초기화)
 // ============================================
 let _eventBulkSelectMode = false;
 const _eventBulkSelectedIds = new Set();
 const _collapsedEventGroups = new Set(); // 접힌 그룹 ID
+
+// 수신 이벤트 캐시 (UI-only, not synced to Firebase)
+let _supabaseEventCache = { data: [], fetchedAt: null, loading: false, error: null };
+const SUPABASE_CACHE_TTL = 3 * 60 * 1000; // 3분
 
 // ============================================
 // 앱 상태 관리
