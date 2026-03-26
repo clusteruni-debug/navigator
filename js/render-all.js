@@ -133,9 +133,12 @@ function renderAllTasksTab() {
           <button class="all-sub-tab ${view === 'inbox' ? 'active' : ''}" onclick="setAllTasksSubView('inbox')">
             인박스 <span class="all-sub-tab-count ${inboxCount > 0 ? 'has-items' : ''}">${inboxCount}</span>
           </button>
+          <button class="all-sub-tab ${view === 'completed' ? 'active' : ''}" onclick="setAllTasksSubView('completed')">
+            다한 것 <span class="all-sub-tab-count">${appState.tasks.filter(t => t.completed).length}</span>
+          </button>
         </div>
 
-        ${view === 'all' ? _renderAllView() : _renderFilteredView(view)}
+        ${view === 'completed' ? _renderCompletedBrowse() : view === 'all' ? _renderAllView() : _renderFilteredView(view)}
 
         ${appState.tasks.length === 0 ? `
           <div class="empty-state">
@@ -192,7 +195,7 @@ function _renderAllView() {
                 </div>
               `).join('')}
               ${completedTasks.length > 5 ? `
-                <div class="all-task-more">+${completedTasks.length - 5}개 더</div>
+                <div class="all-task-more" onclick="setAllTasksSubView('completed')" style="cursor:pointer;">+${completedTasks.length - 5}개 더 →</div>
               ` : ''}
             </div>
           </div>
@@ -376,3 +379,114 @@ function renderHistoryTab() {
             `}
           `;
 }
+
+/**
+ * "다한 것" 서브뷰 — 완료 작업을 날짜별로 탐색
+ */
+function _renderCompletedBrowse() {
+  const state = appState.completedBrowseState || { page: 0, expandedDates: {} };
+  const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+
+  // completionLog의 날짜 키 수집 (_summary-only 제외) + appState.tasks의 completedAt 날짜 보완
+  const dateSet = new Set();
+  for (const [dateKey, entries] of Object.entries(appState.completionLog || {})) {
+    if (Array.isArray(entries) && entries.some(e => !e._summary)) dateSet.add(dateKey);
+  }
+  appState.tasks.forEach(t => {
+    if (t.completed && t.completedAt) {
+      const d = new Date(t.completedAt);
+      if (!isNaN(d.getTime())) dateSet.add(getLocalDateStr(d));
+    }
+  });
+
+  const allDates = [...dateSet].sort((a, b) => b.localeCompare(a)); // newest first
+  const perPage = 7;
+  const totalPages = Math.ceil(allDates.length / perPage);
+  const page = Math.min(state.page || 0, Math.max(0, totalPages - 1));
+  const pagedDates = allDates.slice(page * perPage, (page + 1) * perPage);
+
+  if (allDates.length === 0) {
+    return `
+      <div class="empty-state" style="padding: 40px 20px;">
+        <div class="empty-state-icon">✅</div>
+        <div>완료된 작업이 없어요!</div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="completed-browse">
+      ${pagedDates.map(dateStr => {
+        const tasks = getCompletedTasksByDate(dateStr);
+        if (tasks.length === 0) return '';
+        const d = new Date(dateStr + 'T00:00:00');
+        const dayLabel = `${d.getMonth() + 1}/${d.getDate()} (${dayNames[d.getDay()]})`;
+        const isExpanded = state.expandedDates[dateStr];
+        const dayRevenue = tasks.reduce((sum, t) => sum + (t.expectedRevenue || 0), 0);
+
+        return `
+          <div class="all-category-section">
+            <div class="all-category-header" style="border-left-color: var(--accent-success); cursor: pointer;" onclick="toggleCompletedBrowseDate('${escapeAttr(dateStr)}')">
+              <span class="all-category-title">✅ ${dayLabel}</span>
+              <span class="all-category-count">
+                ${tasks.length}개 완료${dayRevenue > 0 ? ' · 💰' + dayRevenue.toLocaleString() : ''} ${isExpanded ? '▲' : '▼'}
+              </span>
+            </div>
+            <div class="all-task-list completed-list ${isExpanded ? 'show' : ''}">
+              ${tasks.map(task => {
+                const timeStr = task.completedAt ? new Date(task.completedAt).toTimeString().slice(0, 5) : '';
+                return `
+                  <div class="all-task-item completed" style="--task-cat-color: var(--cat-${task.category || '일상'})">
+                    <div class="all-task-content">
+                      <div class="all-task-title completed">
+                        <span style="color: var(--text-muted); font-size: 12px; margin-right: 6px;">${escapeHtml(timeStr)}</span>
+                        ${escapeHtml(task.title)}
+                      </div>
+                      <div class="all-task-meta">
+                        <span class="category ${task.category || ''}" style="font-size:12px;">${task.category || ''}</span>
+                        ${task.subtaskDone ? '<span>📋 ' + task.subtaskDone + '개</span>' : ''}
+                        ${task.expectedRevenue ? '<span>💰 ' + Number(task.expectedRevenue).toLocaleString() + '원</span>' : ''}
+                        ${task.repeatType && task.repeatType !== 'none' ? '<span>🔄</span>' : ''}
+                      </div>
+                    </div>
+                    <div class="all-task-actions">
+                      ${task.fromLog && task.logIndex !== undefined ? `
+                        <button class="btn-small edit" onclick="editCompletionLogEntry('${escapeAttr(dateStr)}', ${task.logIndex})" aria-label="수정">${svgIcon('edit', 14)}</button>
+                        <button class="btn-small delete" onclick="deleteCompletionLogEntry('${escapeAttr(dateStr)}', ${task.logIndex})" aria-label="삭제">×</button>
+                      ` : task.id ? `
+                        <button class="btn-small uncomplete" onclick="uncompleteTask('${escapeAttr(task.id)}')" aria-label="완료 되돌리기">↩️</button>
+                        <button class="btn-small edit" onclick="editTask('${escapeAttr(task.id)}')" aria-label="수정">${svgIcon('edit', 14)}</button>
+                      ` : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('')}
+
+      ${totalPages > 1 ? `
+        <div style="display: flex; justify-content: center; align-items: center; gap: 12px; padding: 16px 0;">
+          ${page > 0 ? `<button class="btn btn-secondary" style="font-size:14px;padding:4px 12px;" onclick="navigateCompletedBrowsePage(${page - 1})">◀ 이전</button>` : '<span style="width:60px;"></span>'}
+          <span style="font-size: 14px; color: var(--text-muted);">${page + 1} / ${totalPages}</span>
+          ${page < totalPages - 1 ? `<button class="btn btn-secondary" style="font-size:14px;padding:4px 12px;" onclick="navigateCompletedBrowsePage(${page + 1})">다음 ▶</button>` : '<span style="width:60px;"></span>'}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function toggleCompletedBrowseDate(dateStr) {
+  if (!appState.completedBrowseState) appState.completedBrowseState = { page: 0, expandedDates: {} };
+  appState.completedBrowseState.expandedDates[dateStr] = !appState.completedBrowseState.expandedDates[dateStr];
+  renderStatic();
+}
+window.toggleCompletedBrowseDate = toggleCompletedBrowseDate;
+
+function navigateCompletedBrowsePage(page) {
+  if (!appState.completedBrowseState) appState.completedBrowseState = { page: 0, expandedDates: {} };
+  appState.completedBrowseState.page = page;
+  renderStatic();
+}
+window.navigateCompletedBrowsePage = navigateCompletedBrowsePage;

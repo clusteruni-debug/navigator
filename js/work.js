@@ -195,10 +195,35 @@ function renderWorkProjects() {
                 ` : ''}
               </div>
             `).join('')}
-            ${workGeneralTasks.length > 5 ? `<div class="work-general-more">+ ${workGeneralTasks.length - 5}개 더</div>` : ''}
+            ${workGeneralTasks.length > 5 ? `<div class="work-general-more" onclick="appState.workView='detail'; selectWorkProject('general')" style="cursor:pointer">+ ${workGeneralTasks.length - 5}개 더</div>` : ''}
           </div>
         </div>
       ` : ''}
+
+      ${(() => {
+        const completedGeneral = appState.tasks.filter(t => t.category === '본업' && !t.workProjectId && t.completed);
+        if (completedGeneral.length === 0) return '';
+        const isExpanded = appState.showCompletedGeneral;
+        return `
+          <div class="work-general-tasks" style="margin-top: 4px; opacity: 0.85;">
+            <div class="work-general-title" onclick="appState.showCompletedGeneral=!appState.showCompletedGeneral; renderStatic();" style="cursor:pointer;">
+              ${isExpanded ? '▼' : '▶'} ✅ 완료됨 (${completedGeneral.length})
+            </div>
+            ${isExpanded ? `
+              <div class="work-general-list">
+                ${completedGeneral.slice(0, 5).map(task => `
+                  <div class="work-general-item" style="opacity: 0.6;">
+                    <button class="task-check-btn" onclick="uncompleteTask('${escapeAttr(task.id)}')" title="완료 취소" aria-label="완료 취소">✓</button>
+                    <span class="work-general-item-title completed" title="${escapeAttr(task.title)}" onclick="editTask('${escapeAttr(task.id)}')" style="text-decoration: line-through;">${escapeHtml(task.title)}</span>
+                    ${task.completedAt ? '<span style="font-size: 13px; color: var(--text-muted);">' + escapeHtml(task.completedAt.substring(5, 10).replace('-', '/')) + '</span>' : ''}
+                  </div>
+                `).join('')}
+                ${completedGeneral.length > 5 ? `<div class="work-general-more" onclick="appState.workView='detail'; selectWorkProject('general')" style="cursor:pointer">+ ${completedGeneral.length - 5}개 더</div>` : ''}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      })()}
 
       <!-- 뷰 전환 -->
       <div class="work-view-tabs">
@@ -701,19 +726,7 @@ function toggleArchivedProjects() {
 window.toggleArchivedProjects = toggleArchivedProjects;
 
 // 라이프 리듬 트래커 + 복약 트래커: js/rhythm.js로 분리됨
-
-// 로컬 타임존 기준 날짜 문자열 (YYYY-MM-DD) - UTC 변환 방지
-function getLocalDateStr(d) {
-  const dt = d || new Date();
-  return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
-}
-
-// 로컬 시간 기준 datetime-local 문자열 (YYYY-MM-DDTHH:mm)
-function getLocalDateTimeStr(d) {
-  const dt = d || new Date();
-  return getLocalDateStr(dt) + 'T' + String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0');
-}
-
+// getLocalDateStr / getLocalDateTimeStr: js/utils.js로 이동됨
 // getTimeDiffMessage ~ loadLifeRhythm: js/rhythm.js로 분리됨
 
 

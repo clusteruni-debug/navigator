@@ -248,7 +248,7 @@ function addResolution() {
     createdAt: now,
     updatedAt: now
   });
-  saveState();
+  saveStateImmediate();
   renderStatic();
 }
 window.addResolution = addResolution;
@@ -259,7 +259,7 @@ function resetResolution(id) {
   if (!confirm(`"${r.title}" 카운터를 리셋하시겠습니까?\n(시작일이 오늘로 변경됩니다)`)) return;
   r.startDate = getLocalDateStr();
   r.updatedAt = new Date().toISOString();
-  saveState();
+  saveStateImmediate();
   renderStatic();
 }
 window.resetResolution = resetResolution;
@@ -271,7 +271,7 @@ function deleteResolution(id) {
   if (!appState.deletedIds.resolutions) appState.deletedIds.resolutions = {};
   appState.deletedIds.resolutions[id] = new Date().toISOString();
   appState.resolutions = appState.resolutions.filter(item => item.id !== id);
-  saveState();
+  saveStateImmediate();
   renderStatic();
 }
 window.deleteResolution = deleteResolution;
@@ -291,7 +291,7 @@ function editResolution(id) {
   if (newDate !== null && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) r.startDate = newDate;
 
   r.updatedAt = new Date().toISOString();
-  saveState();
+  saveStateImmediate();
   renderStatic();
 }
 window.editResolution = editResolution;

@@ -18,30 +18,30 @@
  * 라이프 리듬 통계 계산 (최근 7일)
  */
 function getLifeRhythmStats() {
-  var today = new Date();
-  var dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-  var sleepData = [];
-  var homeDepartTimes = [];
-  var workArriveTimes = [];
-  var workDepartTimes = [];
-  var homeArriveTimes = [];
-  var workHours = [];
-  var commuteToWorkTimes = [];
-  var commuteToHomeTimes = [];
-  var totalOutTimes = [];
-  var wakeUpTimes = [];
-  var bedtimes = [];
+  const today = new Date();
+  const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+  const sleepData = [];
+  const homeDepartTimes = [];
+  const workArriveTimes = [];
+  const workDepartTimes = [];
+  const homeArriveTimes = [];
+  const workHours = [];
+  const commuteToWorkTimes = [];
+  const commuteToHomeTimes = [];
+  const totalOutTimes = [];
+  const wakeUpTimes = [];
+  const bedtimes = [];
 
   // 시간을 분으로 변환하는 헬퍼
-  var toMins = function(t) { if (!t || typeof t !== 'string') return null; var p = t.split(':'); if (p.length !== 2) return null; var h = parseInt(p[0], 10), m = parseInt(p[1], 10); return isNaN(h) || isNaN(m) ? null : h * 60 + m; };
+  const toMins = function(t) { if (!t || typeof t !== 'string') return null; const p = t.split(':'); if (p.length !== 2) return null; const h = parseInt(p[0], 10), m = parseInt(p[1], 10); return isNaN(h) || isNaN(m) ? null : h * 60 + m; };
 
   // 최근 7일 데이터 수집
-  for (var i = 6; i >= 0; i--) {
-    var date = new Date(today);
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(today);
     date.setDate(today.getDate() - i);
-    var dateStr = getLocalDateStr(date);
+    const dateStr = getLocalDateStr(date);
 
-    var dayData;
+    let dayData;
     if (appState.lifeRhythm.today.date === dateStr) {
       dayData = appState.lifeRhythm.today;
     } else {
@@ -53,16 +53,16 @@ function getLifeRhythmStats() {
     if (dayData.workEnd && !dayData.workDepart) dayData.workDepart = dayData.workEnd;
 
     // 수면 시간 계산 (전날 취침 ~ 당일 기상)
-    var prevDate = new Date(date);
+    const prevDate = new Date(date);
     prevDate.setDate(prevDate.getDate() - 1);
-    var prevDateStr = getLocalDateStr(prevDate);
-    var prevData = appState.lifeRhythm.history[prevDateStr] || {};
-    var sleepHours = null;
+    const prevDateStr = getLocalDateStr(prevDate);
+    const prevData = appState.lifeRhythm.history[prevDateStr] || {};
+    let sleepHours = null;
 
     if (prevData.sleep && dayData.wakeUp) {
-      var sleepTime = toMins(prevData.sleep);
-      var wakeTime = toMins(dayData.wakeUp);
-      var duration = wakeTime + (24 * 60 - sleepTime);
+      const sleepTime = toMins(prevData.sleep);
+      const wakeTime = toMins(dayData.wakeUp);
+      let duration = wakeTime + (24 * 60 - sleepTime);
       if (sleepTime < 12 * 60) duration = wakeTime - sleepTime;
       if (duration > 0 && duration < 16 * 60) {
         sleepHours = duration / 60;
@@ -73,7 +73,7 @@ function getLifeRhythmStats() {
       date: dateStr,
       dayLabel: dayNames[date.getDay()],
       hours: sleepHours,
-      isToday: isToday
+      isToday: i === 0
     });
 
     // 시간 수집
@@ -84,100 +84,100 @@ function getLifeRhythmStats() {
     if (dayData.wakeUp) wakeUpTimes.push(toMins(dayData.wakeUp));
     // 취침: 자정 넘김 처리 (00:00~05:00은 +24시간)
     if (dayData.sleep) {
-      var sleepMins = toMins(dayData.sleep);
+      let sleepMins = toMins(dayData.sleep);
       if (sleepMins < 5 * 60) sleepMins += 24 * 60;
       bedtimes.push(sleepMins);
     }
 
     // 근무 시간 계산
     if (dayData.workArrive && dayData.workDepart) {
-      var dur = toMins(dayData.workDepart) - toMins(dayData.workArrive);
+      const dur = toMins(dayData.workDepart) - toMins(dayData.workArrive);
       if (dur > 0) workHours.push(dur / 60);
     }
 
     // 출근 통근 시간
     if (dayData.homeDepart && dayData.workArrive) {
-      var dur2 = toMins(dayData.workArrive) - toMins(dayData.homeDepart);
-      if (dur2 > 0 && dur2 < 180) commuteToWorkTimes.push(dur2);
+      const dur = toMins(dayData.workArrive) - toMins(dayData.homeDepart);
+      if (dur > 0 && dur < 180) commuteToWorkTimes.push(dur);
     }
 
     // 퇴근 통근 시간
     if (dayData.workDepart && dayData.homeArrive) {
-      var dur3 = toMins(dayData.homeArrive) - toMins(dayData.workDepart);
-      if (dur3 > 0 && dur3 < 180) commuteToHomeTimes.push(dur3);
+      const dur = toMins(dayData.homeArrive) - toMins(dayData.workDepart);
+      if (dur > 0 && dur < 180) commuteToHomeTimes.push(dur);
     }
 
     // 총 외출 시간
     if (dayData.homeDepart && dayData.homeArrive) {
-      var dur4 = toMins(dayData.homeArrive) - toMins(dayData.homeDepart);
-      if (dur4 > 0) totalOutTimes.push(dur4 / 60);
+      const dur = toMins(dayData.homeArrive) - toMins(dayData.homeDepart);
+      if (dur > 0) totalOutTimes.push(dur / 60);
     }
   }
 
   // 평균 계산 헬퍼
-  var calcAvg = function(arr) { return arr.length > 0 ? arr.reduce(function(a, b) { return a + b; }, 0) / arr.length : null; };
+  const calcAvg = function(arr) { return arr.length > 0 ? arr.reduce(function(a, b) { return a + b; }, 0) / arr.length : null; };
 
-  var validSleepData = sleepData.filter(function(d) { return d.hours !== null; });
-  var avgSleep = calcAvg(validSleepData.map(function(d) { return d.hours; })) || 0;
+  const validSleepData = sleepData.filter(function(d) { return d.hours !== null; });
+  const avgSleep = calcAvg(validSleepData.map(function(d) { return d.hours; })) || 0;
 
-  var avgHomeDepart = calcAvg(homeDepartTimes);
-  var avgWorkArrive = calcAvg(workArriveTimes);
-  var avgWorkDepart = calcAvg(workDepartTimes);
-  var avgHomeArrive = calcAvg(homeArriveTimes);
-  var avgWorkHrs = calcAvg(workHours);
-  var avgCommuteToWork = calcAvg(commuteToWorkTimes);
-  var avgCommuteToHome = calcAvg(commuteToHomeTimes);
-  var avgTotalOut = calcAvg(totalOutTimes);
+  const avgHomeDepart = calcAvg(homeDepartTimes);
+  const avgWorkArrive = calcAvg(workArriveTimes);
+  const avgWorkDepart = calcAvg(workDepartTimes);
+  const avgHomeArrive = calcAvg(homeArriveTimes);
+  const avgWorkHrs = calcAvg(workHours);
+  const avgCommuteToWork = calcAvg(commuteToWorkTimes);
+  const avgCommuteToHome = calcAvg(commuteToHomeTimes);
+  const avgTotalOut = calcAvg(totalOutTimes);
 
   // 집출발 시간 편차 계산
-  var homeDepartDeviation = null;
+  let homeDepartDeviation = null;
   if (homeDepartTimes.length >= 2) {
-    var mean = calcAvg(homeDepartTimes);
-    var variance = homeDepartTimes.reduce(function(sum, t) { return sum + Math.pow(t - mean, 2); }, 0) / homeDepartTimes.length;
+    const mean = calcAvg(homeDepartTimes);
+    const variance = homeDepartTimes.reduce(function(sum, t) { return sum + Math.pow(t - mean, 2); }, 0) / homeDepartTimes.length;
     homeDepartDeviation = Math.round(Math.sqrt(variance));
   }
 
   // 기상/취침 평균 및 목표 대비 계산
-  var avgWakeUpMins = calcAvg(wakeUpTimes);
-  var avgBedtimeMins = calcAvg(bedtimes);
+  const avgWakeUpMins = calcAvg(wakeUpTimes);
+  const avgBedtimeMins = calcAvg(bedtimes);
 
-  var targetWakeMins = (function() {
-    var t = appState.settings.targetWakeTime || '07:00';
-    var parts = t.split(':').map(Number);
+  const targetWakeMins = (function() {
+    const t = appState.settings.targetWakeTime || '07:00';
+    const parts = t.split(':').map(Number);
     return parts[0] * 60 + parts[1];
   })();
-  var targetBedMins = (function() {
-    var t = appState.settings.targetBedtime || '23:00';
-    var parts = t.split(':').map(Number);
+  const targetBedMins = (function() {
+    const t = appState.settings.targetBedtime || '23:00';
+    const parts = t.split(':').map(Number);
     // 자정 넘김 기준 통일 (목표가 00:00~05:00이면 +24시간)
     return (parts[0] < 5) ? parts[0] * 60 + parts[1] + 24 * 60 : parts[0] * 60 + parts[1];
   })();
 
   // 목표 대비 차이 (양수 = 늦음, 음수 = 일찍)
-  var wakeTimeDiff = avgWakeUpMins !== null ? Math.round(avgWakeUpMins - targetWakeMins) : null;
-  var bedtimeDiff = avgBedtimeMins !== null ? Math.round(avgBedtimeMins - targetBedMins) : null;
+  const wakeTimeDiff = avgWakeUpMins !== null ? Math.round(avgWakeUpMins - targetWakeMins) : null;
+  const bedtimeDiff = avgBedtimeMins !== null ? Math.round(avgBedtimeMins - targetBedMins) : null;
 
   // 인사이트 생성
-  var insights = [];
+  const insights = [];
 
   // 수면 vs 완료율 상관관계
-  var completionByDay = {};
+  const completionByDay = {};
   appState.tasks.forEach(function(task) {
     if (task.completed && task.completedAt) {
-      var completedDate = task.completedAt.split('T')[0];
+      const completedDate = task.completedAt.split('T')[0];
       completionByDay[completedDate] = (completionByDay[completedDate] || 0) + 1;
     }
   });
 
-  var goodSleepDays = sleepData.filter(function(d) { return d.hours && d.hours >= 7; });
-  var badSleepDays = sleepData.filter(function(d) { return d.hours && d.hours < 6; });
+  const goodSleepDays = sleepData.filter(function(d) { return d.hours && d.hours >= 7; });
+  const badSleepDays = sleepData.filter(function(d) { return d.hours && d.hours < 6; });
 
   if (goodSleepDays.length >= 2 && badSleepDays.length >= 1) {
-    var goodSleepCompletion = goodSleepDays.reduce(function(sum, d) { return sum + (completionByDay[d.date] || 0); }, 0) / goodSleepDays.length;
-    var badSleepCompletion = badSleepDays.reduce(function(sum, d) { return sum + (completionByDay[d.date] || 0); }, 0) / badSleepDays.length;
+    const goodSleepCompletion = goodSleepDays.reduce(function(sum, d) { return sum + (completionByDay[d.date] || 0); }, 0) / goodSleepDays.length;
+    const badSleepCompletion = badSleepDays.reduce(function(sum, d) { return sum + (completionByDay[d.date] || 0); }, 0) / badSleepDays.length;
 
     if (goodSleepCompletion > badSleepCompletion * 1.2) {
-      var diff = Math.round((goodSleepCompletion / Math.max(badSleepCompletion, 0.1) - 1) * 100);
+      const diff = Math.round((goodSleepCompletion / Math.max(badSleepCompletion, 0.1) - 1) * 100);
       insights.push({
         type: 'positive',
         icon: '\u{1F4C8}',
@@ -204,7 +204,7 @@ function getLifeRhythmStats() {
 
   // 통근시간 인사이트
   if (avgCommuteToWork && avgCommuteToHome) {
-    var totalCommute = avgCommuteToWork + avgCommuteToHome;
+    const totalCommute = avgCommuteToWork + avgCommuteToHome;
     if (totalCommute > 120) {
       insights.push({
         type: 'info',
@@ -215,14 +215,14 @@ function getLifeRhythmStats() {
   }
 
   // 시간 포맷팅 헬퍼
-  var formatTime = function(mins) {
+  const formatTime = function(mins) {
     if (mins === null) return null;
-    var h = Math.floor(mins / 60);
-    var m = Math.round(mins % 60);
+    const h = Math.floor(mins / 60);
+    const m = Math.round(mins % 60);
     return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
   };
 
-  var formatDur = function(mins) {
+  const formatDur = function(mins) {
     if (mins === null) return null;
     return Math.round(mins) + '분';
   };
@@ -246,9 +246,8 @@ function getLifeRhythmStats() {
     bedtimeDiff: bedtimeDiff,
     targetSleepHours: (function() {
       // 설정 기반 목표 수면 시간 (기상 - 취침, 자정 넘김 처리)
-      var dur = targetWakeMins - targetBedMins;
-      if (dur <= 0) dur += 24 * 60;
-      return dur / 60;
+      const dur = targetWakeMins - targetBedMins;
+      return (dur <= 0 ? dur + 24 * 60 : dur) / 60;
     })(),
     insights: insights
   };
@@ -259,27 +258,27 @@ function getLifeRhythmStats() {
  */
 function calculateRhythmStats(days) {
   if (days === undefined) days = 30;
-  var toMins = function(t) { if (!t || typeof t !== 'string') return null; var p = t.split(':'); if (p.length !== 2) return null; var h = parseInt(p[0], 10), m = parseInt(p[1], 10); return isNaN(h) || isNaN(m) ? null : h * 60 + m; };
-  var today = new Date();
-  var history = appState.lifeRhythm.history || {};
-  var todayStr = getLogicalDate();
-  var medSlots = getMedicationSlots();
+  const toMins = function(t) { if (!t || typeof t !== 'string') return null; const p = t.split(':'); if (p.length !== 2) return null; const h = parseInt(p[0], 10), m = parseInt(p[1], 10); return isNaN(h) || isNaN(m) ? null : h * 60 + m; };
+  const today = new Date();
+  const history = appState.lifeRhythm.history || {};
+  const todayStr = getLogicalDate();
+  const medSlots = getMedicationSlots();
 
   // 데이터 수집
-  var data = { wakeUp: [], sleep: [], homeDepart: [], workArrive: [], workDepart: [], homeArrive: [], commuteToWork: [], commuteToHome: [], sleepDuration: [], workDuration: [] };
-  var weekday = { wakeUp: [], sleep: [], commuteToWork: [], commuteToHome: [] };
-  var weekend = { wakeUp: [], sleep: [] };
-  var medStats = {}; // slotId -> { total, taken, required }
+  const data = { wakeUp: [], sleep: [], homeDepart: [], workArrive: [], workDepart: [], homeArrive: [], commuteToWork: [], commuteToHome: [], sleepDuration: [], workDuration: [] };
+  const weekday = { wakeUp: [], sleep: [], commuteToWork: [], commuteToHome: [] };
+  const weekend = { wakeUp: [], sleep: [] };
+  const medStats = {}; // slotId -> { total, taken, required }
   medSlots.forEach(function(s) { medStats[s.id] = { total: 0, taken: 0, required: s.required, label: s.label, icon: s.icon }; });
 
-  for (var i = 0; i < days; i++) {
-    var date = new Date(today);
+  for (let i = 0; i < days; i++) {
+    const date = new Date(today);
     date.setDate(today.getDate() - i);
-    var dateStr = getLocalDateStr(date);
-    var dayOfWeek = date.getDay(); // 0=일, 6=토
-    var isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const dateStr = getLocalDateStr(date);
+    const dayOfWeek = date.getDay(); // 0=일, 6=토
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
-    var dayData;
+    let dayData;
     if (appState.lifeRhythm.today.date === dateStr) {
       dayData = appState.lifeRhythm.today;
     } else {
@@ -289,12 +288,12 @@ function calculateRhythmStats(days) {
 
     // 시간 데이터 수집
     if (dayData.wakeUp) {
-      var m = toMins(dayData.wakeUp);
+      const m = toMins(dayData.wakeUp);
       data.wakeUp.push(m);
       if (isWeekend) weekend.wakeUp.push(m); else weekday.wakeUp.push(m);
     }
     if (dayData.sleep) {
-      var sm = toMins(dayData.sleep);
+      let sm = toMins(dayData.sleep);
       // 자정 넘긴 취침 보정 (00:00~05:00 -> +24h)
       if (sm < 5 * 60) sm += 24 * 60;
       data.sleep.push(sm);
@@ -307,30 +306,30 @@ function calculateRhythmStats(days) {
 
     // 통근 시간
     if (dayData.homeDepart && dayData.workArrive) {
-      var dur = toMins(dayData.workArrive) - toMins(dayData.homeDepart);
+      const dur = toMins(dayData.workArrive) - toMins(dayData.homeDepart);
       if (dur > 0 && dur < 180) {
         data.commuteToWork.push(dur);
         if (!isWeekend) weekday.commuteToWork.push(dur);
       }
     }
     if (dayData.workDepart && dayData.homeArrive) {
-      var dur2 = toMins(dayData.homeArrive) - toMins(dayData.workDepart);
-      if (dur2 > 0 && dur2 < 180) {
-        data.commuteToHome.push(dur2);
-        if (!isWeekend) weekday.commuteToHome.push(dur2);
+      const dur = toMins(dayData.homeArrive) - toMins(dayData.workDepart);
+      if (dur > 0 && dur < 180) {
+        data.commuteToHome.push(dur);
+        if (!isWeekend) weekday.commuteToHome.push(dur);
       }
     }
 
     // 수면 시간 (전날 취침 ~ 오늘 기상)
     if (i < days - 1 && dayData.wakeUp) {
-      var prevDate = new Date(date);
+      const prevDate = new Date(date);
       prevDate.setDate(prevDate.getDate() - 1);
-      var prevStr = getLocalDateStr(prevDate);
-      var prevData = history[prevStr] || {};
+      const prevStr = getLocalDateStr(prevDate);
+      const prevData = history[prevStr] || {};
       if (prevData.sleep) {
-        var sleepTime = toMins(prevData.sleep);
-        var wakeTime = toMins(dayData.wakeUp);
-        var duration = wakeTime + (24 * 60 - sleepTime);
+        const sleepTime = toMins(prevData.sleep);
+        const wakeTime = toMins(dayData.wakeUp);
+        let duration = wakeTime + (24 * 60 - sleepTime);
         if (sleepTime < 12 * 60) duration = wakeTime - sleepTime;
         if (duration > 0 && duration < 16 * 60) {
           data.sleepDuration.push(duration);
@@ -340,12 +339,12 @@ function calculateRhythmStats(days) {
 
     // 근무 시간
     if (dayData.workArrive && dayData.workDepart) {
-      var dur3 = toMins(dayData.workDepart) - toMins(dayData.workArrive);
-      if (dur3 > 0) data.workDuration.push(dur3);
+      const dur = toMins(dayData.workDepart) - toMins(dayData.workArrive);
+      if (dur > 0) data.workDuration.push(dur);
     }
 
     // 복약 통계
-    var meds = dayData.medications || {};
+    const meds = dayData.medications || {};
     medSlots.forEach(function(s) {
       medStats[s.id].total++;
       if (meds[s.id]) medStats[s.id].taken++;
@@ -353,17 +352,17 @@ function calculateRhythmStats(days) {
   }
 
   // 평균 계산 헬퍼
-  var avg = function(arr) { return arr.length ? Math.round(arr.reduce(function(a, b) { return a + b; }, 0) / arr.length) : null; };
-  var minsToTime = function(m) {
+  const avg = function(arr) { return arr.length ? Math.round(arr.reduce(function(a, b) { return a + b; }, 0) / arr.length) : null; };
+  const minsToTime = function(m) {
     if (m === null || m === undefined || isNaN(m)) return '--:--';
-    var adjusted = Math.round(m) % (24 * 60);
+    const adjusted = Math.round(m) % (24 * 60);
     return String(Math.floor(adjusted / 60)).padStart(2, '0') + ':' + String(adjusted % 60).padStart(2, '0');
   };
-  var minsToHM = function(m) {
+  const minsToHM = function(m) {
     if (m === null || m === undefined || isNaN(m)) return '--';
-    var rounded = Math.round(m);
-    var h = Math.floor(rounded / 60);
-    var min = rounded % 60;
+    const rounded = Math.round(m);
+    const h = Math.floor(rounded / 60);
+    const min = rounded % 60;
     return h > 0 ? h + 'h ' + min + 'm' : min + '분';
   };
 
@@ -409,11 +408,11 @@ window.toggleRhythmStats = toggleRhythmStats;
 function renderRhythmStats() {
   if (!_rhythmStatsVisible) return '';
 
-  var stats = calculateRhythmStats(30);
+  const stats = calculateRhythmStats(30);
 
   // 카드 생성 헬퍼
-  var makeCard = function(icon, label, value, sub1, sub2) {
-    var subHtml = '';
+  const makeCard = function(icon, label, value, sub1, sub2) {
+    let subHtml = '';
     if (sub1 || sub2) {
       subHtml = '<div class="rhythm-stat-sub">';
       if (sub1) subHtml += '<span class="rhythm-stat-sub-item">주중 ' + sub1 + '</span>';
@@ -429,22 +428,22 @@ function renderRhythmStats() {
   };
 
   // 핵심 3개 카드 (기상/취침/수면)
-  var topCards = makeCard('☀️', '기상', stats.avgWakeUp, stats.weekdayWakeUp, stats.weekendWakeUp) +
+  const topCards = makeCard('☀️', '기상', stats.avgWakeUp, stats.weekdayWakeUp, stats.weekendWakeUp) +
     makeCard('🌙', '취침', stats.avgSleep, stats.weekdaySleep, stats.weekendSleep) +
     makeCard('💤', '수면', stats.avgSleepDuration, null, null);
 
   // 하단 3개 카드 (근무/출근통근/퇴근통근)
-  var bottomCards = makeCard('💼', '근무', stats.avgWorkDuration, null, null) +
+  const bottomCards = makeCard('💼', '근무', stats.avgWorkDuration, null, null) +
     makeCard('🚌', '출근', stats.avgCommuteToWork, stats.weekdayCommuteToWork, null) +
     makeCard('🏠', '퇴근', stats.avgCommuteToHome, null, null);
 
   // 복약 준수율 카드
-  var medCard = '';
-  var medEntries = Object.values(stats.medStats);
+  let medCard = '';
+  const medEntries = Object.values(stats.medStats);
   if (medEntries.length > 0) {
-    var medItems = medEntries.map(function(s) {
-      var rate = s.total > 0 ? Math.round((s.taken / s.total) * 100) : 0;
-      var color = rate >= 80 ? 'var(--accent-success)' : rate >= 50 ? 'var(--accent-warning)' : 'var(--accent-danger)';
+    const medItems = medEntries.map(function(s) {
+      const rate = s.total > 0 ? Math.round((s.taken / s.total) * 100) : 0;
+      const color = rate >= 80 ? 'var(--accent-success)' : rate >= 50 ? 'var(--accent-warning)' : 'var(--accent-danger)';
       return '<span class="rhythm-med-stat-item" style="color: ' + color + ';">' + s.icon + ' ' + escapeHtml(s.label) + ': ' + rate + '%</span>';
     }).join(' · ');
     medCard = '<div class="rhythm-stat-card rhythm-stat-card-wide">' +

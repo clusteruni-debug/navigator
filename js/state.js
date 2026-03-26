@@ -428,6 +428,11 @@ const appState = {
     expandedDates: {}             // 펼쳐진 날짜 그룹
   },
   historyView: 'tasks',           // 히스토리 뷰: tasks / rhythm
+  completedBrowseState: {          // "다한 것" 서브뷰 상태 (UI-only, not synced to Firebase)
+    page: 0,
+    expandedDates: {}
+  },
+  showCompletedGeneral: false,     // 본업 일반 작업 완료 섹션 펼침 (UI-only, not synced to Firebase)
   // 사용자 설정
   settings: {
     targetWakeTime: '07:00',      // 목표 기상 시간

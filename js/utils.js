@@ -11,6 +11,22 @@ function generateId() {
 }
 
 // ============================================
+// 📅 날짜 유틸리티
+// ============================================
+
+// 로컬 타임존 기준 날짜 문자열 (YYYY-MM-DD) - UTC 변환 방지
+function getLocalDateStr(d) {
+  const dt = d || new Date();
+  return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+}
+
+// 로컬 시간 기준 datetime-local 문자열 (YYYY-MM-DDTHH:mm)
+function getLocalDateTimeStr(d) {
+  const dt = d || new Date();
+  return getLocalDateStr(dt) + 'T' + String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0');
+}
+
+// ============================================
 // 🎨 SVG 아이콘 시스템 (Lucide 스타일)
 // ============================================
 const SVG_ICONS = {
@@ -370,10 +386,12 @@ function validateTasks(tasks) {
  * 오늘 통계 재계산 (중복 코드 방지)
  */
 function recomputeTodayStats() {
-  const today = new Date().toDateString();
+  const today = getLocalDateStr();
   appState.todayStats.completedToday = appState.tasks.filter(t => {
     if (!t.completed || !t.completedAt) return false;
-    return new Date(t.completedAt).toDateString() === today;
+    const d = new Date(t.completedAt);
+    if (isNaN(d.getTime())) return false;
+    return getLocalDateStr(d) === today;
   }).length;
 }
 
@@ -435,10 +453,12 @@ function getStreakBadge(streak) {
  * 히스토리/캘린더/수익 통계와 무관하게, 탭의 "완료됨" 섹션에 오늘 것만 표시
  */
 function getTodayCompletedTasks(tasks) {
-  const today = new Date().toDateString();
+  const today = getLocalDateStr();
   return tasks.filter(t => {
     if (!t.completed || !t.completedAt) return false;
-    return new Date(t.completedAt).toDateString() === today;
+    const d = new Date(t.completedAt);
+    if (isNaN(d.getTime())) return false;
+    return getLocalDateStr(d) === today;
   });
 }
 
