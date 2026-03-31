@@ -169,114 +169,216 @@ function renderWorkTimeline() {
   // === 활동 단위 이력 ===
   let activityHistoryHtml = '';
   if (timelineTab === 'activity') {
-    const allLogs = [];
+    // 태스크 단위로 그룹핑된 로그 수집 (date|taskKey → { meta, logs[] })
+    const taskGroups = {};
+    const makeTaskKey = (date, taskTitle, projectId, si, sci) =>
+      date + '|' + taskTitle + '|' + (projectId || '') + '|' + si + '|' + sci;
+
     (appState.workProjects || []).filter(p => !p.archived).forEach(p => {
+      const stageName = (si) => getStageName(p, si);
       p.stages.forEach((stage, si) => {
         (stage.subcategories || []).forEach((sub, sci) => {
           sub.tasks.forEach((task, ti) => {
             (task.logs || []).forEach(log => {
-              allLogs.push({
-                date: log.date,
-                content: log.content,
-                taskTitle: task.title,
-                projectName: p.name,
-                projectId: p.id,
-                status: task.status
-              });
+              const key = makeTaskKey(log.date, task.title, p.id, si, sci);
+              if (!taskGroups[key]) {
+                taskGroups[key] = {
+                  date: log.date,
+                  taskTitle: task.title,
+                  projectName: p.name,
+                  projectId: p.id,
+                  stageName: stageName(si),
+                  subcatName: sub.name,
+                  status: task.status,
+                  logs: []
+                };
+              }
+              taskGroups[key].logs.push(log.content);
             });
           });
         });
       });
     });
 
-    // 완료된 일반 본업 작업 — completionLog (영구 저장)에서 읽기
-    // appState.tasks는 7~30일 후 자동 정리되므로 completionLog 기반으로 변경
+    // 완료된 일반 본업 작업 — completionLog에서 보완
     const projectLogKeys = new Set();
-    allLogs.forEach(l => projectLogKeys.add(l.date + '|' + l.taskTitle));
+    Object.values(taskGroups).forEach(g => projectLogKeys.add(g.date + '|' + g.taskTitle));
 
     for (const [dateKey, dayEntries] of Object.entries(appState.completionLog || {})) {
       (dayEntries || []).forEach(e => {
-        if (e._summary) return; // 압축 데이터 스킵
-        if (!e.t) return; // 제목 없는 항목 스킵
-        if (e.c !== '본업' && e.c !== 'Main Job') return; // 본업만 (레거시 포함)
-        // 이미 프로젝트 로그에 있는 동일 제목+날짜는 중복 방지
+        if (e._summary) return;
+        if (!e.t) return;
+        if (e.c !== '본업' && e.c !== 'Main Job') return;
         if (projectLogKeys.has(dateKey + '|' + e.t)) return;
-        allLogs.push({
-          date: dateKey,
-          content: '✓ 완료' + (e.at ? ' (' + e.at + ')' : ''),
-          taskTitle: e.t,
-          projectName: '일반',
-          projectId: null,
-          status: 'completed'
-        });
+        const key = makeTaskKey(dateKey, e.t, null, -1, -1);
+        if (!taskGroups[key]) {
+          taskGroups[key] = {
+            date: dateKey,
+            taskTitle: e.t,
+            projectName: '일반',
+            projectId: null,
+            stageName: null,
+            subcatName: null,
+            status: 'completed',
+            logs: []
+          };
+        }
+        taskGroups[key].logs.push('✓ 완료' + (e.at ? ' (' + e.at + ')' : ''));
       });
     }
+
+    // 태스크 그룹을 배열로 변환
+    const allGroups = Object.values(taskGroups);
 
     // 정렬
     const sortKey = appState.workActivityHistorySort;
-    // null-safe sort helpers
     const safeCompare = (a, b, locale) => (a || '').localeCompare(b || '', locale);
     if (sortKey === 'date-desc') {
-      allLogs.sort((a, b) => safeCompare(b.date, a.date) || safeCompare(a.taskTitle, b.taskTitle, 'ko'));
+      allGroups.sort((a, b) => safeCompare(b.date, a.date) || safeCompare(a.taskTitle, b.taskTitle, 'ko'));
     } else if (sortKey === 'date-asc') {
-      allLogs.sort((a, b) => safeCompare(a.date, b.date) || safeCompare(a.taskTitle, b.taskTitle, 'ko'));
+      allGroups.sort((a, b) => safeCompare(a.date, b.date) || safeCompare(a.taskTitle, b.taskTitle, 'ko'));
     } else if (sortKey === 'name-asc') {
-      allLogs.sort((a, b) => safeCompare(a.taskTitle, b.taskTitle, 'ko') || safeCompare(b.date, a.date));
+      allGroups.sort((a, b) => safeCompare(a.taskTitle, b.taskTitle, 'ko') || safeCompare(b.date, a.date));
     } else if (sortKey === 'name-desc') {
-      allLogs.sort((a, b) => safeCompare(b.taskTitle, a.taskTitle, 'ko') || safeCompare(b.date, a.date));
+      allGroups.sort((a, b) => safeCompare(b.taskTitle, a.taskTitle, 'ko') || safeCompare(b.date, a.date));
     }
 
-    // 개별 항목 기준 페이지네이션 (20건/페이지)
-    const perPage = 20;
-    const page = appState.workActivityHistoryPage;
-    const totalPages = Math.max(1, Math.ceil(allLogs.length / perPage));
-    const safePageIdx = Math.max(0, Math.min(page, totalPages - 1));
-    const pagedLogs = allLogs.slice(safePageIdx * perPage, (safePageIdx + 1) * perPage);
+    // 공통 태스크 그룹 카드 렌더러
+    const _renderGroupCard = (group, showDate) => {
+      const statusColor = group.status === 'completed' ? 'var(--accent-success)' : group.status === 'in-progress' ? 'var(--accent-primary)' : 'var(--accent-neutral)';
+      const contextParts = [group.projectName];
+      if (group.stageName) contextParts.push(group.stageName);
+      if (group.subcatName) contextParts.push(group.subcatName);
+      const contextPath = contextParts.map(p => escapeHtml(p)).join(' > ');
+      return '<div style="padding: 10px 12px; margin-top: 6px; background: var(--bg-secondary); border-radius: 8px;">' +
+        '<div style="display: flex; align-items: center; gap: 8px; margin-bottom: ' + (group.logs.length > 1 ? '6' : '0') + 'px;">' +
+          '<span style="width: 6px; height: 6px; border-radius: 50%; background: ' + statusColor + '; flex-shrink: 0;"></span>' +
+          '<span style="font-size: 15px; font-weight: 600; flex: 1; min-width: 0; word-break: break-word;">' + escapeHtml(group.taskTitle) + '</span>' +
+          (showDate ? '<span style="font-size: 12px; color: var(--text-muted);">' + escapeHtml(group.date || '') + '</span>' : '') +
+          '<span style="font-size: 12px; color: var(--text-muted); background: var(--bg-tertiary); padding: 2px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;">' + contextPath + '</span>' +
+        '</div>' +
+        (group.logs.length === 1
+          ? '<div style="font-size: 14px; color: var(--text-secondary); padding-left: 14px;">' + renderFormattedText(group.logs[0]) + '</div>'
+          : '<div style="padding-left: 14px;">' + group.logs.map(content =>
+              '<div style="font-size: 14px; color: var(--text-secondary); padding: 2px 0; display: flex; gap: 6px; align-items: flex-start;">' +
+                '<span style="color: var(--text-muted); flex-shrink: 0;">·</span>' +
+                '<span>' + renderFormattedText(content) + '</span>' +
+              '</div>'
+            ).join('') + '</div>'
+        ) +
+      '</div>';
+    };
 
-    if (allLogs.length === 0) {
+    const viewMode = appState.workActivityViewMode || 'date';
+
+    if (allGroups.length === 0) {
       activityHistoryHtml = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">아직 기록이 없습니다</div>';
-    } else {
-      // 날짜별 그룹핑 (페이지 내)
+
+    // === 날짜별 뷰 ===
+    } else if (viewMode === 'date') {
+      const perPage = 20;
+      const page = appState.workActivityHistoryPage;
+      const totalPages = Math.max(1, Math.ceil(allGroups.length / perPage));
+      const safePageIdx = Math.max(0, Math.min(page, totalPages - 1));
+      const pagedGroups = allGroups.slice(safePageIdx * perPage, (safePageIdx + 1) * perPage);
+
       const byDate = {};
-      pagedLogs.forEach(log => {
-        if (!byDate[log.date]) byDate[log.date] = [];
-        byDate[log.date].push(log);
+      pagedGroups.forEach(group => {
+        const dk = group.date || '';
+        if (!byDate[dk]) byDate[dk] = [];
+        byDate[dk].push(group);
       });
-      // 날짜 그룹 헤더 정렬: name 정렬에서도 날짜 내림차순 유지 (논리적으로 최신 먼저)
       const dateOrder = sortKey === 'date-asc' ? 1 : -1;
       const dates = Object.keys(byDate).sort((a, b) => dateOrder * a.localeCompare(b));
 
-      // 접힘/펼침 상태 초기화
       if (!appState._expandedActivityDates) appState._expandedActivityDates = {};
 
       activityHistoryHtml = dates.map(date => {
         const isExpanded = !!appState._expandedActivityDates[date];
-        const logs = byDate[date];
-        // 접힌 상태: 날짜 헤더 + 요약만 표시
-        const summaryTitles = logs.slice(0, 3).map(l => escapeHtml(l.taskTitle)).join(', ');
-        const moreCount = logs.length > 3 ? ' 외 ' + (logs.length - 3) + '건' : '';
+        const groups = byDate[date];
+        const uniqueTitles = [...new Set(groups.map(g => g.taskTitle))];
+        const summaryTitles = uniqueTitles.slice(0, 3).map(t => escapeHtml(t)).join(', ');
+        const moreCount = uniqueTitles.length > 3 ? ' 외 ' + (uniqueTitles.length - 3) + '건' : '';
 
         return '<div style="margin-bottom: 12px;">' +
           '<div style="font-size: 14px; font-weight: 600; color: var(--text-muted); padding: 8px 4px; border-bottom: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 6px;" onclick="toggleActivityDate(\'' + escapeAttr(date) + '\')">' +
             '<span style="font-size: 12px; display: inline-block;">' + (isExpanded ? '▼' : '▶') + '</span>' +
-            '<span>' + date + ' (' + logs.length + '건)</span>' +
+            '<span>' + escapeHtml(date) + ' (' + groups.length + '건)</span>' +
             (!isExpanded ? '<span style="font-size: 13px; font-weight: 400; color: var(--text-muted); margin-left: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">' + summaryTitles + moreCount + '</span>' : '') +
           '</div>' +
-          (isExpanded ? logs.map(log =>
-            '<div style="padding: 8px 12px; margin-top: 6px; background: var(--bg-secondary); border-radius: 8px; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start;">' +
-              '<span style="width: 6px; height: 6px; border-radius: 50%; background: ' + (log.status === 'completed' ? 'var(--accent-success)' : log.status === 'in-progress' ? 'var(--accent-primary)' : 'var(--accent-neutral)') + '; flex-shrink: 0; margin-top: 7px;"></span>' +
-              '<span style="min-width: 80px; max-width: 200px; font-size: 15px; font-weight: 600; word-break: break-word;">' + escapeHtml(log.taskTitle) + '</span>' +
-              '<div style="flex: 1; min-width: 120px; font-size: 14px; color: var(--text-secondary);">' + renderFormattedText(log.content) + '</div>' +
-              '<span style="font-size: 13px; color: var(--text-muted); background: var(--bg-tertiary); padding: 2px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;">' + escapeHtml(log.projectName) + '</span>' +
-            '</div>'
-          ).join('') : '') +
+          (isExpanded ? groups.map(g => _renderGroupCard(g, false)).join('') : '') +
         '</div>';
       }).join('');
 
-      // 페이지네이션
-      activityHistoryHtml += renderPagination(safePageIdx, totalPages, allLogs.length, 'goActivityHistoryPage');
+      activityHistoryHtml += renderPagination(safePageIdx, totalPages, allGroups.length, 'goActivityHistoryPage');
+
+    // === 월별 뷰 ===
+    } else if (viewMode === 'monthly') {
+      const byMonth = {};
+      allGroups.forEach(g => {
+        const monthKey = (g.date && g.date.length >= 7) ? g.date.substring(0, 7) : 'unknown';
+        if (!byMonth[monthKey]) byMonth[monthKey] = { groups: [], logCount: 0 };
+        byMonth[monthKey].groups.push(g);
+        byMonth[monthKey].logCount += g.logs.length;
+      });
+      const months = Object.keys(byMonth).sort((a, b) => b.localeCompare(a));
+      if (!appState._expandedActivityMonths) appState._expandedActivityMonths = {};
+
+      activityHistoryHtml = months.map(monthKey => {
+        const isExp = !!appState._expandedActivityMonths[monthKey];
+        const data = byMonth[monthKey];
+        const [y, m] = monthKey.split('-');
+        const label = (y && m) ? y + '년 ' + parseInt(m) + '월' : '날짜 미상';
+        const uniqueTasks = [...new Set(data.groups.map(g => g.taskTitle))];
+
+        return '<div style="margin-bottom: 12px;">' +
+          '<div style="font-size: 15px; font-weight: 600; color: var(--text-primary); padding: 10px 8px; border-bottom: 2px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="toggleActivityMonth(\'' + escapeAttr(monthKey) + '\')">' +
+            '<span style="font-size: 12px;">' + (isExp ? '▼' : '▶') + '</span>' +
+            '<span>' + escapeHtml(label) + '</span>' +
+            '<span style="font-size: 13px; color: var(--text-muted); font-weight: 400;">' + uniqueTasks.length + '개 태스크 · ' + data.logCount + '건 기록</span>' +
+          '</div>' +
+          (isExp ? data.groups.map(g => _renderGroupCard(g, true)).join('') : '') +
+        '</div>';
+      }).join('');
+
+    // === 프로젝트별 뷰 ===
+    } else if (viewMode === 'project') {
+      const byProject = {};
+      allGroups.forEach(g => {
+        const pKey = g.projectName || '일반';
+        if (!byProject[pKey]) byProject[pKey] = { groups: [], logCount: 0 };
+        byProject[pKey].groups.push(g);
+        byProject[pKey].logCount += g.logs.length;
+      });
+      const projects = Object.keys(byProject).sort((a, b) => a.localeCompare(b, 'ko'));
+      if (!appState._expandedActivityProjects) appState._expandedActivityProjects = {};
+
+      activityHistoryHtml = projects.map(pName => {
+        const isExp = !!appState._expandedActivityProjects[pName];
+        const data = byProject[pName];
+        const uniqueTasks = [...new Set(data.groups.map(g => g.taskTitle))];
+
+        return '<div style="margin-bottom: 12px;">' +
+          '<div style="font-size: 15px; font-weight: 600; color: var(--text-primary); padding: 10px 8px; border-bottom: 2px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="toggleActivityProject(\'' + escapeAttr(pName) + '\')">' +
+            '<span style="font-size: 12px;">' + (isExp ? '▼' : '▶') + '</span>' +
+            '<span>📁 ' + escapeHtml(pName) + '</span>' +
+            '<span style="font-size: 13px; color: var(--text-muted); font-weight: 400;">' + uniqueTasks.length + '개 태스크 · ' + data.logCount + '건 기록</span>' +
+          '</div>' +
+          (isExp ? data.groups.map(g => _renderGroupCard(g, true)).join('') : '') +
+        '</div>';
+      }).join('');
     }
   }
+
+  // 활동 이력 뷰 모드 UI
+  const curViewMode = appState.workActivityViewMode || 'date';
+  const viewModeHtml = timelineTab === 'activity'
+    ? '<div style="display: flex; gap: 4px; margin-bottom: 8px;">' +
+        '<button class="work-view-tab ' + (curViewMode === 'date' ? 'active' : '') + '" onclick="setActivityViewMode(\'date\')" style="font-size: 13px; padding: 4px 10px;">날짜별</button>' +
+        '<button class="work-view-tab ' + (curViewMode === 'monthly' ? 'active' : '') + '" onclick="setActivityViewMode(\'monthly\')" style="font-size: 13px; padding: 4px 10px;">월별</button>' +
+        '<button class="work-view-tab ' + (curViewMode === 'project' ? 'active' : '') + '" onclick="setActivityViewMode(\'project\')" style="font-size: 13px; padding: 4px 10px;">프로젝트별</button>' +
+      '</div>'
+    : '';
 
   return '<div style="padding: 0 4px;">' +
     // 탭 전환 + 정렬
@@ -284,10 +386,13 @@ function renderWorkTimeline() {
       '<button class="work-view-tab ' + (timelineTab === 'project' ? 'active' : '') + '" onclick="appState.workTimelineTab=\'project\'; appState.workProjectHistoryPage=0; renderStatic();" style="flex: 1;">📁 프로젝트 이력</button>' +
       '<button class="work-view-tab ' + (timelineTab === 'activity' ? 'active' : '') + '" onclick="appState.workTimelineTab=\'activity\'; appState.workActivityHistoryPage=0; renderStatic();" style="flex: 1;">📝 활동 이력</button>' +
     '</div>' +
-    '<div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">' +
-      (timelineTab === 'project'
-        ? renderSortControl(appState.workProjectHistorySort, 'setProjectHistorySort')
-        : renderSortControl(appState.workActivityHistorySort, 'setActivityHistorySort')) +
+    '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">' +
+      viewModeHtml +
+      '<div>' +
+        (timelineTab === 'project'
+          ? renderSortControl(appState.workProjectHistorySort, 'setProjectHistorySort')
+          : renderSortControl(appState.workActivityHistorySort, 'setActivityHistorySort')) +
+      '</div>' +
     '</div>' +
     (timelineTab === 'project' ? projectHistoryHtml : activityHistoryHtml) +
   '</div>';
@@ -343,3 +448,24 @@ function setActivityHistorySort(value) {
   renderStatic();
 }
 window.setActivityHistorySort = setActivityHistorySort;
+
+function setActivityViewMode(mode) {
+  appState.workActivityViewMode = mode;
+  appState.workActivityHistoryPage = 0;
+  renderStatic();
+}
+window.setActivityViewMode = setActivityViewMode;
+
+function toggleActivityMonth(monthKey) {
+  if (!appState._expandedActivityMonths) appState._expandedActivityMonths = {};
+  appState._expandedActivityMonths[monthKey] = !appState._expandedActivityMonths[monthKey];
+  renderStatic();
+}
+window.toggleActivityMonth = toggleActivityMonth;
+
+function toggleActivityProject(projectName) {
+  if (!appState._expandedActivityProjects) appState._expandedActivityProjects = {};
+  appState._expandedActivityProjects[projectName] = !appState._expandedActivityProjects[projectName];
+  renderStatic();
+}
+window.toggleActivityProject = toggleActivityProject;

@@ -260,16 +260,23 @@ function renderWorkProjectDetail(project) {
               </div>
 
               ${!isCollapsed && subcategories.length > 0 ? `
-                ${subcategories.map((subcat, subcatIdx) => `
+                ${subcategories.map((subcat, subcatIdx) => {
+                  const subcatKey = project.id + '-' + stageIdx + '-' + subcatIdx;
+                  const isSubcatCollapsed = appState.collapsedSubcategories && appState.collapsedSubcategories[subcatKey];
+                  const subcatCompletedCount = subcat.tasks.filter(t => t.status === 'completed').length;
+                  const subcatTotalCount = subcat.tasks.length;
+                  const subcatAllDone = (subcatTotalCount > 0 && subcatCompletedCount === subcatTotalCount) || (subcatTotalCount === 0 && subcat._completed);
+                  return `
                   <div class="work-subcategory">
                     <div class="work-subcategory-header">
                       <div class="work-subcategory-title">
-                        <div class="work-subcategory-checkbox ${(subcat.tasks.length > 0 && subcat.tasks.every(t => t.status === 'completed')) || (subcat.tasks.length === 0 && subcat._completed) ? 'checked' : ''}"
+                        <span class="work-subcategory-collapse-toggle" onclick="toggleSubcategoryCollapse('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="${isSubcatCollapsed ? '펼치기' : '접기'}" style="cursor: pointer; font-size: 12px; color: var(--text-muted); width: 16px; text-align: center; flex-shrink: 0;">${isSubcatCollapsed ? '▶' : '▼'}</span>
+                        <div class="work-subcategory-checkbox ${subcatAllDone ? 'checked' : ''}"
                              onclick="toggleSubcategoryComplete('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})">
-                          ${(subcat.tasks.length > 0 && subcat.tasks.every(t => t.status === 'completed')) || (subcat.tasks.length === 0 && subcat._completed) ? '✓' : ''}
+                          ${subcatAllDone ? '✓' : ''}
                         </div>
                         <span class="work-subcategory-name" onclick="promptRenameSubcategory('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx}, '${escapeAttr(subcat.name)}')" title="클릭하여 이름 변경">${escapeHtml(subcat.name)}</span>
-                        <span class="work-subcategory-toggle">(${subcat.tasks.filter(t => t.status === 'completed').length}/${subcat.tasks.length})</span>
+                        <span class="work-subcategory-toggle">(${subcatCompletedCount}/${subcatTotalCount})</span>
                         ${(subcat.startDate || subcat.endDate) ? (() => {
                           const fmtDate = (d) => d ? (new Date(d).getMonth() + 1) + '/' + new Date(d).getDate() : '';
                           let html = '<span class="work-subcat-date" style="margin-left: 8px; font-size: 15px; color: var(--text-muted);">';
@@ -292,13 +299,13 @@ function renderWorkProjectDetail(project) {
                         <button class="work-task-action" onclick="showWorkModal('task', '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})">+ 항목</button>
                       </div>
                     </div>
-                    ${subcat.tasks.length > 0 ? `
+                    ${!isSubcatCollapsed ? (subcat.tasks.length > 0 ? `
                       <div class="work-task-list">
                         ${subcat.tasks.map((task, taskIdx) => renderWorkTask(project.id, stageIdx, subcatIdx, task, taskIdx)).join('')}
                       </div>
-                    ` : '<div style="color: var(--text-muted); font-size: 14px; padding: 8px;">항목 없음</div>'}
+                    ` : '<div style="color: var(--text-muted); font-size: 14px; padding: 8px;">항목 없음</div>') : ''}
                   </div>
-                `).join('')}
+                `}).join('')}
               ` : !isCollapsed ? '<div style="color: var(--text-muted); font-size: 15px; padding: 10px;">중분류를 추가하세요</div>' : ''}
             </div>
           `;

@@ -228,12 +228,17 @@ function _renderLocalEventCard(task) {
         </div>`}
         <div class="event-dday">${formatDday(days)}</div>
         ${hasSubtasks ? `
-        <div class="subtask-chips event-subtask-chips" onclick="event.stopPropagation();">
-          ${task.subtasks.map((st, idx) => `
-            <span class="subtask-chip ${st.completed ? 'done' : ''}" onclick="toggleSubtaskComplete('${escapeAttr(task.id)}', ${idx})">
-              <span class="subtask-chip-check">${st.completed ? '✓' : '○'}</span>${escapeHtml(st.text)}
-            </span>
-          `).join('')}
+        <div onclick="event.stopPropagation();">
+          <span class="subtask-progress-indicator${task.subtasks.filter(s=>s.completed).length === task.subtasks.length ? ' all-done' : ''}" onclick="toggleSubtaskChips('${escapeAttr(task.id)}')" style="cursor:pointer; display:inline-block; margin: 4px 0 2px 0;" title="서브태스크 접기/펼치기">${task.subtasks.filter(s=>s.completed).length}/${task.subtasks.length} ${appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id] ? '▶' : '▼'}</span>
+          ${!(appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id]) ? `
+            <div class="subtask-chips event-subtask-chips">
+              ${task.subtasks.map((st, idx) => `
+                <span class="subtask-chip ${st.completed ? 'done' : ''}" onclick="toggleSubtaskComplete('${escapeAttr(task.id)}', ${idx})">
+                  <span class="subtask-chip-check">${st.completed ? '✓' : '○'}</span>${escapeHtml(st.text)}
+                </span>
+              `).join('')}
+            </div>
+          ` : ''}
         </div>
         ` : ''}
       </div>

@@ -468,6 +468,8 @@ const appState = {
   showCelebration: false,          // 축하 효과 표시
   lastMotivation: '',              // 마지막 동기부여 메시지
   expandedSubtasks: {},             // 펼쳐진 서브태스크 목록 (taskId: true/false)
+  collapsedSubtaskChips: safeParseJSON('navigator-collapsed-subtask-chips', {}), // 접힌 서브태스크 칩 (UI only, localStorage)
+  collapsedSubcategories: {},       // 접힌 중분류 (projectId-stageIdx-subcatIdx: true)
   // 주간 계획
   weeklyPlan: {
     focusTasks: [],                   // 이번 주 집중할 작업 ID 목록 (최대 3개)

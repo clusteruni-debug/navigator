@@ -346,15 +346,22 @@ function toggleSubtaskComplete(taskId, subtaskIndex) {
 }
 
 /**
- * 서브태스크 목록 펼치기/접기
+ * 서브태스크 목록 펼치기/접기 (레거시 — toggleSubtaskChips로 위임)
  */
 function toggleSubtaskExpand(taskId) {
-  if (!appState.expandedSubtasks) {
-    appState.expandedSubtasks = {};
-  }
-  appState.expandedSubtasks[taskId] = !appState.expandedSubtasks[taskId];
+  toggleSubtaskChips(taskId);
+}
+
+/**
+ * 서브태스크 칩 접기/펼치기 (태스크 카드 내 서브태스크 칩 목록)
+ */
+function toggleSubtaskChips(taskId) {
+  if (!appState.collapsedSubtaskChips) appState.collapsedSubtaskChips = {};
+  appState.collapsedSubtaskChips[taskId] = !appState.collapsedSubtaskChips[taskId];
+  try { localStorage.setItem('navigator-collapsed-subtask-chips', JSON.stringify(appState.collapsedSubtaskChips)); } catch (_) {}
   renderStatic();
 }
+window.toggleSubtaskChips = toggleSubtaskChips;
 
 /**
  * 본업 일반 작업 세부작업 펼침/접힘

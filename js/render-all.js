@@ -59,14 +59,14 @@ function _renderTaskItem(task) {
         <div class="all-task-title">${escapeHtml(task.title)}</div>
         <div class="all-task-meta">
           <span class="category ${task.category}" style="font-size:12px;">${task.category}</span>
-          ${hasSubtasks ? `<span class="subtask-progress-indicator${allDone ? ' all-done' : ''}">${doneCount}/${totalCount}</span>` : ''}
+          ${hasSubtasks ? `<span class="subtask-progress-indicator${allDone ? ' all-done' : ''}" onclick="event.stopPropagation(); toggleSubtaskChips('${escapeAttr(task.id)}')" style="cursor:pointer;" title="서브태스크 접기/펼치기">${doneCount}/${totalCount} ${appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id] ? '▶' : '▼'}</span>` : ''}
           ${task.repeatType && task.repeatType !== 'none' ? `<span>🔄 ${getRepeatLabel(task.repeatType, task)}</span>` : ''}
           ${task.estimatedTime ? `<span>⏱️ ${task.estimatedTime}분</span>` : ''}
           ${task.deadline ? `<span>${formatDeadline(task.deadline)}</span>` : ''}
           ${task.expectedRevenue ? `<span>💰 ${Number(task.expectedRevenue).toLocaleString()}원</span>` : ''}
           ${task.organizer ? `<span>👤 ${escapeHtml(task.organizer)}</span>` : ''}
         </div>
-        ${hasSubtasks ? `
+        ${hasSubtasks && !(appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id]) ? `
           <div class="subtask-chips" onclick="event.stopPropagation();">
             ${task.subtasks.map((st, idx) => `
               <span class="subtask-chip ${st.completed ? 'done' : ''}" onclick="toggleSubtaskComplete('${escapeAttr(task.id)}', ${idx})">

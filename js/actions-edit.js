@@ -480,6 +480,11 @@ function deleteTask(id) {
   // Soft-Delete: 삭제 기록 남기기 (동기화 시 부활 방지)
   appState.deletedIds.tasks[id] = new Date().toISOString();
   appState.tasks = appState.tasks.filter(t => t.id !== id);
+  // UI 상태 정리: 접힌 서브태스크 칩 제거
+  if (appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[id]) {
+    delete appState.collapsedSubtaskChips[id];
+    try { localStorage.setItem('navigator-collapsed-subtask-chips', JSON.stringify(appState.collapsedSubtaskChips)); } catch (_) {}
+  }
   saveState();
   renderStatic();
   showToast('휴지통으로 이동했습니다 (30일 보관)', 'success');

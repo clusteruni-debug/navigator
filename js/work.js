@@ -474,6 +474,16 @@ function toggleStageCollapse(projectId, stageIdx) {
 }
 window.toggleStageCollapse = toggleStageCollapse;
 
+// 중분류(subcategory) 접기/펼치기 (세션 중 유지, 비영속)
+if (!appState.collapsedSubcategories) appState.collapsedSubcategories = {};
+
+function toggleSubcategoryCollapse(projectId, stageIdx, subcatIdx) {
+  const key = projectId + '-' + stageIdx + '-' + subcatIdx;
+  appState.collapsedSubcategories[key] = !appState.collapsedSubcategories[key];
+  renderStatic();
+}
+window.toggleSubcategoryCollapse = toggleSubcategoryCollapse;
+
 /**
  * 작업 로그 접기/펼치기 (DOM 직접 조작 — renderStatic 호출 안 함)
  */

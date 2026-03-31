@@ -17,7 +17,7 @@ function _renderLifeTaskItem(task) {
   return `
     <div class="life-item" style="--task-cat-color: var(--cat-${task.category})">
       ${hasSubtasks
-        ? `<span class="subtask-progress-indicator${allDone ? ' all-done' : ''}" style="cursor:default;">${doneCount}/${totalCount}</span>`
+        ? `<span class="subtask-progress-indicator${allDone ? ' all-done' : ''}" onclick="event.stopPropagation(); toggleSubtaskChips('${escapeAttr(task.id)}')" style="cursor:pointer;" title="서브태스크 접기/펼치기">${doneCount}/${totalCount} ${appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id] ? '▶' : '▼'}</span>`
         : `<button class="task-check-btn" onclick="completeTask('${escapeAttr(task.id)}')" aria-label="작업 완료">○</button>`
       }
       <div class="life-item-content">
@@ -33,7 +33,7 @@ function _renderLifeTaskItem(task) {
         <button class="life-action-btn" onclick="editTask('${escapeAttr(task.id)}')" title="수정" aria-label="작업 수정">${svgIcon('edit', 14)}</button>
         <button class="life-action-btn delete" onclick="deleteTask('${escapeAttr(task.id)}')" title="삭제" aria-label="작업 삭제">${svgIcon('trash', 14)}</button>
       </div>
-      ${hasSubtasks ? `
+      ${hasSubtasks && !(appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id]) ? `
         <div class="subtask-chips" onclick="event.stopPropagation();">
           ${task.subtasks.map((st, idx) => `
             <span class="subtask-chip ${st.completed ? 'done' : ''}" onclick="toggleSubtaskComplete('${escapeAttr(task.id)}', ${idx})">

@@ -113,7 +113,7 @@ function renderActionTab(ctx) {
                 <div class="task-item-mini" onclick="editTask('${escapeAttr(task.id)}')" style="--task-cat-color: var(--cat-${task.category})">
                   <div class="task-item-mini-left">
                     ${hasSubtasks
-                      ? `<span class="subtask-progress-indicator${allDone ? ' all-done' : ''}" onclick="event.stopPropagation();">${doneCount}/${totalCount}</span>`
+                      ? `<span class="subtask-progress-indicator${allDone ? ' all-done' : ''}" onclick="event.stopPropagation(); toggleSubtaskChips('${escapeAttr(task.id)}')" style="cursor:pointer;" title="서브태스크 접기/펼치기">${doneCount}/${totalCount} ${appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id] ? '▶' : '▼'}</span>`
                       : `<button class="task-check-btn" onclick="event.stopPropagation(); completeTask('${escapeAttr(task.id)}')" aria-label="작업 완료">○</button>`
                     }
                     <span class="task-item-mini-title">${escapeHtml(task.title)}</span>
@@ -122,7 +122,7 @@ function renderActionTab(ctx) {
                     ${task.deadline ? `<span class="task-item-mini-deadline">${formatDeadline(task.deadline)}</span>` : ''}
                     <span class="task-item-mini-category ${task.category}">${task.category}</span>
                   </div>
-                  ${hasSubtasks ? `
+                  ${hasSubtasks && !(appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id]) ? `
                     <div class="subtask-chips" onclick="event.stopPropagation();">
                       ${task.subtasks.slice(0, 3).map((st, idx) => `
                         <span class="subtask-chip ${st.completed ? 'done' : ''}" onclick="toggleSubtaskComplete('${escapeAttr(task.id)}', ${idx})">
@@ -199,8 +199,8 @@ function _renderTodayEmptyState(completedToday) {
         ${streak > 1 ? ` · 🔥 ${streak}일 연속` : ''}
       </div>
       <div class="empty-state-actions">
-        <button class="empty-state-btn" onclick="showToast('${rest.icon} ${rest.text}: ${rest.desc}', 'success')">
-          ${rest.icon} ${rest.text}
+        <button class="empty-state-btn" onclick="showToast('${escapeAttr(rest.icon)} ${escapeAttr(rest.text)}: ${escapeAttr(rest.desc)}', 'success')">
+          ${escapeHtml(rest.icon)} ${escapeHtml(rest.text)}
         </button>
       </div>
     </div>
