@@ -5,8 +5,8 @@
 /**
  * 모달 표시
  */
-function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null, taskIdx = null) {
-  workModalState = { type, projectId, stageIdx, subcategoryIdx: subcatIdx, taskIdx };
+function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null, taskIdx = null, logIdx = null) {
+  workModalState = { type, projectId, stageIdx, subcategoryIdx: subcatIdx, taskIdx, logIdx };
 
   const modal = document.getElementById('work-input-modal');
   const title = document.getElementById('work-modal-title');
@@ -88,6 +88,43 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
         </div>
       `;
       break;
+    case 'edit-task': {
+      const editTask = project?.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+      titleText = '✏️ 항목 편집';
+      bodyHtml = `
+        <div class="work-modal-field">
+          <label class="work-modal-label">항목 이름</label>
+          <textarea class="work-modal-textarea" id="work-input-content" autofocus>${escapeHtml(editTask?.title || '')}</textarea>
+        </div>
+      `;
+      break;
+    }
+    case 'edit-log': {
+      const editTask2 = project?.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+      const editLog = editTask2?.logs?.[logIdx];
+      const isCompletion = editLog?.content === '✓ 완료';
+      titleText = '✏️ 기록 편집';
+      if (isCompletion) {
+        bodyHtml = `
+          <div class="work-modal-field">
+            <label class="work-modal-label">완료 날짜</label>
+            <input type="date" class="work-modal-input" id="work-input-date" value="${escapeAttr(editLog?.date || '')}" autofocus>
+          </div>
+        `;
+      } else {
+        bodyHtml = `
+          <div class="work-modal-field">
+            <label class="work-modal-label">기록 내용</label>
+            <textarea class="work-modal-textarea" id="work-input-content" autofocus>${escapeHtml(editLog?.content || '')}</textarea>
+          </div>
+          <div class="work-modal-field">
+            <label class="work-modal-label">날짜</label>
+            <input type="date" class="work-modal-input" id="work-input-date" value="${escapeAttr(editLog?.date || '')}">
+          </div>
+        `;
+      }
+      break;
+    }
     case 'deadline':
       titleText = '📅 프로젝트 일정';
       bodyHtml = `
@@ -318,7 +355,7 @@ function closeWorkModal() {
     `;
   }
 
-  workModalState = { type: null, projectId: null, stageIdx: null, subcategoryIdx: null, taskIdx: null };
+  workModalState = { type: null, projectId: null, stageIdx: null, subcategoryIdx: null, taskIdx: null, logIdx: null };
 }
 window.closeWorkModal = closeWorkModal;
 
@@ -326,7 +363,7 @@ window.closeWorkModal = closeWorkModal;
  * 모달 확인
  */
 function confirmWorkModal() {
-  const { type, projectId, stageIdx, subcategoryIdx, taskIdx } = workModalState;
+  const { type, projectId, stageIdx, subcategoryIdx, taskIdx, logIdx } = workModalState;
 
   switch(type) {
     case 'project': {
@@ -357,6 +394,41 @@ function confirmWorkModal() {
       const content = document.getElementById('work-input-content').value.trim();
       if (!content) { showToast('내용을 입력하세요', 'error'); return; }
       addWorkLog(projectId, stageIdx, subcategoryIdx, taskIdx, content);
+      break;
+    }
+    case 'edit-task': {
+      const newTitle = document.getElementById('work-input-content').value.trim();
+      if (!newTitle) { showToast('이름을 입력하세요', 'error'); return; }
+      renameWorkTask(projectId, stageIdx, subcategoryIdx, taskIdx, newTitle);
+      break;
+    }
+    case 'edit-log': {
+      const proj = appState.workProjects.find(p => p.id === projectId);
+      if (!proj) break;
+      const t = proj.stages[stageIdx]?.subcategories?.[subcategoryIdx]?.tasks?.[taskIdx];
+      if (!t || !t.logs[logIdx]) break;
+      const log = t.logs[logIdx];
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (log.content === '✓ 완료') {
+        const newDate = document.getElementById('work-input-date').value;
+        if (!newDate || !dateRegex.test(newDate)) {
+          showToast('올바른 날짜를 선택하세요', 'error'); return;
+        }
+        log.date = newDate;
+        t.completedAt = newDate + 'T00:00';
+      } else {
+        const newContent = document.getElementById('work-input-content').value.trim();
+        if (!newContent) { showToast('내용을 입력하세요', 'error'); return; }
+        log.content = newContent;
+        const newDate = document.getElementById('work-input-date').value;
+        if (newDate && dateRegex.test(newDate)) {
+          log.date = newDate;
+        }
+      }
+      proj.updatedAt = new Date().toISOString();
+      saveWorkProjects();
+      renderStatic();
+      showToast('기록 수정됨', 'success');
       break;
     }
     case 'deadline': {

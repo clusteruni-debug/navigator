@@ -162,13 +162,10 @@ function renameSubcategory(projectId, stageIdx, subcatIdx, newName) {
 window.renameSubcategory = renameSubcategory;
 
 /**
- * 소분류(항목) 이름 변경 프롬프트
+ * 소분류(항목) 이름 변경 — 모달 (textarea, 줄바꿈·불렛 붙여넣기 지원)
  */
 function promptRenameWorkTask(projectId, stageIdx, subcatIdx, taskIdx, currentName) {
-  const newName = prompt('항목 이름을 변경하세요:', currentName);
-  if (newName && newName.trim() && newName.trim() !== currentName) {
-    renameWorkTask(projectId, stageIdx, subcatIdx, taskIdx, newName.trim());
-  }
+  showWorkModal('edit-task', projectId, stageIdx, subcatIdx, taskIdx);
 }
 window.promptRenameWorkTask = promptRenameWorkTask;
 
@@ -558,52 +555,10 @@ function deleteWorkLog(projectId, stageIdx, subcatIdx, taskIdx, logIdx) {
 window.deleteWorkLog = deleteWorkLog;
 
 /**
- * Task 2-6: 로그 내용 편집
+ * Task 2-6: 로그 내용 편집 — 모달 (textarea, 줄바꿈·불렛 붙여넣기 지원)
  */
 function editWorkLog(projectId, stageIdx, subcatIdx, taskIdx, logIdx) {
-  const project = appState.workProjects.find(p => p.id === projectId);
-  if (!project) return;
-
-  const task = project.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
-  if (!task || !task.logs[logIdx]) return;
-
-  const log = task.logs[logIdx];
-  const isCompletion = log.content === '✓ 완료';
-
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-
-  if (isCompletion) {
-    // 완료 로그 → 날짜 수정
-    const newDate = prompt('완료 날짜 수정 (YYYY-MM-DD):', log.date);
-    if (newDate === null || newDate.trim() === '') return;
-    const trimmed = newDate.trim();
-    if (!dateRegex.test(trimmed) || isNaN(new Date(trimmed).getTime())) {
-      showToast('올바른 날짜 형식이 아닙니다 (YYYY-MM-DD)', 'error');
-      return;
-    }
-    log.date = trimmed;
-    // task.completedAt도 동기화 (datetime 포맷 유지)
-    task.completedAt = trimmed + 'T00:00';
-  } else {
-    // 일반 로그 → 내용 수정 + 날짜 수정
-    const newContent = prompt('기록 내용 편집:', log.content);
-    if (newContent === null || newContent.trim() === '') return;
-    log.content = newContent.trim();
-    const newDate = prompt('날짜 수정 (변경 없으면 그대로 확인):', log.date);
-    if (newDate && newDate.trim()) {
-      const dt = newDate.trim();
-      if (!dateRegex.test(dt) || isNaN(new Date(dt).getTime())) {
-        showToast('올바른 날짜 형식이 아닙니다 (YYYY-MM-DD)', 'error');
-        return;
-      }
-      log.date = dt;
-    }
-  }
-
-  project.updatedAt = new Date().toISOString();
-  saveWorkProjects();
-  renderStatic();
-  showToast('기록 수정됨', 'success');
+  showWorkModal('edit-log', projectId, stageIdx, subcatIdx, taskIdx, logIdx);
 }
 window.editWorkLog = editWorkLog;
 
