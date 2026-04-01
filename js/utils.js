@@ -273,6 +273,22 @@ function initEnhancedTextarea(textarea, options) {
 }
 
 /**
+ * 텍스트를 줄 단위로 분리하고 불렛 포인트 접두사 제거
+ * - item, * item, • item, 1. item, 1) item 등을 인식
+ * @param {string} text
+ * @returns {string[]} 비어있지 않은 줄 배열
+ */
+function parseBulletLines(text) {
+  // trim은 불렛 제거 후에 적용 (조기 trim하면 "- " → "-"가 되어 regex 매칭 실패)
+  const rawLines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+  // 단일 줄: 불렛 접두사 제거하지 않음 (사용자가 의도적으로 - 로 시작하는 텍스트일 수 있음)
+  if (rawLines.length <= 1) return rawLines.map(l => l.trim());
+  return rawLines
+    .map(line => line.replace(/^\s*[-*•]\s+/, '').replace(/^\s*\d+[.)]\s+/, '').trim())
+    .filter(line => line.length > 0);
+}
+
+/**
  * XSS 방지: HTML 이스케이핑
  */
 // 문자열 기반 HTML 이스케이프 — DOM 요소 생성 대비 ~5x 빠름 (렌더당 106+회 호출)

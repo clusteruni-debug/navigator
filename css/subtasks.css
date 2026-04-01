@@ -57,6 +57,11 @@
     .subtask-input {
       padding: 10px 14px !important;
       font-size: 16px !important;
+      resize: none;
+      overflow: hidden;
+      min-height: 40px;
+      line-height: 1.4;
+      font-family: inherit;
     }
 
     /* 작업 아이템 내 서브태스크 */
@@ -178,7 +183,6 @@
     .subtask-progress-toggle {
       font-size: 14px;
       color: var(--text-muted);
-      transition: transform 0.2s;
     }
 
     .subtask-progress-toggle.expanded {
@@ -252,7 +256,7 @@
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      transition: opacity 0.2s, transform 0.2s;
+      transition: opacity 0.2s;
     }
 
     .complete-all-subtasks-btn:hover {
@@ -262,7 +266,6 @@
     .complete-all-subtasks-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-      transform: none;
     }
 
     /* ── Inline subtask chips (task-item-mini) ── */
@@ -286,7 +289,7 @@
       border: 1px solid var(--border-color);
       color: var(--text-secondary);
       cursor: pointer;
-      transition: border-color 0.15s, background-color 0.15s, transform 0.15s;
+      transition: border-color 0.15s, background-color 0.15s;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
@@ -294,10 +297,6 @@
     .subtask-chip:hover {
       border-color: var(--accent-primary);
       background: var(--accent-primary-alpha);
-    }
-
-    .subtask-chip:active {
-      transform: scale(0.95);
     }
 
     .subtask-chip.done {
@@ -335,11 +334,11 @@
 
     .quick-edit-subtask-item {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 8px;
     }
 
-    .quick-edit-subtask-item input[type="text"] {
+    .quick-edit-subtask-item textarea {
       flex: 1;
       padding: 6px 10px;
       font-size: 14px;
@@ -347,11 +346,17 @@
       border-radius: 6px;
       background: var(--bg-secondary);
       color: var(--text-primary);
+      resize: none;
+      overflow: hidden;
+      min-height: 32px;
+      line-height: 1.4;
+      font-family: inherit;
     }
 
     .quick-edit-subtask-remove {
       width: 24px;
       height: 24px;
+      margin-top: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -371,12 +376,12 @@
 
     .quick-edit-subtask-add {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 8px;
       margin-top: 4px;
     }
 
-    .quick-edit-subtask-add input[type="text"] {
+    .quick-edit-subtask-add textarea {
       flex: 1;
       padding: 6px 10px;
       font-size: 14px;
@@ -384,6 +389,11 @@
       border-radius: 6px;
       background: var(--bg-secondary);
       color: var(--text-primary);
+      resize: none;
+      overflow: hidden;
+      min-height: 32px;
+      line-height: 1.4;
+      font-family: inherit;
     }
 
     .quick-edit-subtask-add-btn {

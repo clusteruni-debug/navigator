@@ -429,7 +429,7 @@ function _renderDetailedAddForm(categoryFields) {
             </div>
           `).join('')}
           <div class="subtask-add">
-            <input type="text" class="form-input subtask-input" id="new-subtask-input" placeholder="서브태스크 추가 후 Enter">
+            <textarea class="form-input subtask-input" id="new-subtask-input" rows="1" placeholder="서브태스크 추가 후 Enter (여러 줄 붙여넣기 가능)"></textarea>
           </div>
         </div>
       </div>

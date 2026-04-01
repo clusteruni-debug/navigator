@@ -395,16 +395,41 @@ function setupInputHandlers() {
       };
     }
 
-    // 서브태스크 입력 핸들러
+    // 서브태스크 입력 핸들러 (textarea: Enter=추가, Shift+Enter=줄바꿈)
     const subtaskInput = document.getElementById('new-subtask-input');
     if (subtaskInput) {
-      subtaskInput.onkeypress = (e) => {
-        if (e.key === 'Enter') {
+      subtaskInput.onkeydown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
           e.preventDefault();
           addSubtask(e.target.value);
           e.target.value = '';
         }
       };
+      // 붙여넣기 시 불렛 포인트 자동 분리 (일괄 추가 → renderStatic 1회)
+      subtaskInput.onpaste = (e) => {
+        if (!e.clipboardData) return;
+        const pastedText = e.clipboardData.getData('text');
+        const lines = parseBulletLines(pastedText);
+        if (lines.length > 1) {
+          e.preventDefault();
+          if (!appState.detailedTask.subtasks) {
+            appState.detailedTask.subtasks = [];
+          }
+          lines.forEach(line => {
+            appState.detailedTask.subtasks.push({
+              text: line,
+              completed: false,
+              completedAt: null
+            });
+          });
+          renderStatic();
+          requestAnimationFrame(() => {
+            const input = document.getElementById('new-subtask-input');
+            if (input) { input.focus(); input.value = ''; }
+          });
+        }
+      };
+      initEnhancedTextarea(subtaskInput);
     }
   }
 

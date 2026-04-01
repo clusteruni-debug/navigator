@@ -229,17 +229,20 @@ function addNewTag(tagName) {
  * 서브태스크 추가
  */
 function addSubtask(text) {
-  const subtaskText = text.trim();
-  if (!subtaskText) return;
+  const rawText = text.trim();
+  if (!rawText) return;
 
   if (!appState.detailedTask.subtasks) {
     appState.detailedTask.subtasks = [];
   }
 
-  appState.detailedTask.subtasks.push({
-    text: subtaskText,
-    completed: false,
-    completedAt: null
+  const lines = parseBulletLines(rawText);
+  lines.forEach(line => {
+    appState.detailedTask.subtasks.push({
+      text: line,
+      completed: false,
+      completedAt: null
+    });
   });
   renderStatic();
   // 포커스 복원: renderStatic() 후 DOM이 재생성되므로 새 input에 포커스

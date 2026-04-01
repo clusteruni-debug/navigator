@@ -234,14 +234,14 @@ function showQuickEditModal(task) {
       <label class="work-modal-label">서브태스크</label>
       <div class="quick-edit-subtask-list" id="quick-edit-subtask-list">
         ${(task.subtasks || []).map((st, idx) => `
-          <div class="quick-edit-subtask-item" data-subtask-idx="${idx}">
-            <input type="text" class="quick-edit-subtask-text" value="${escapeHtml(st.text)}" placeholder="서브태스크 이름">
+          <div class="quick-edit-subtask-item">
+            <textarea class="quick-edit-subtask-text" rows="1" placeholder="서브태스크 이름">${escapeHtml(st.text)}</textarea>
             <button class="quick-edit-subtask-remove" onclick="removeQuickEditSubtask(this)" type="button">×</button>
           </div>
         `).join('')}
       </div>
       <div class="quick-edit-subtask-add">
-        <input type="text" id="quick-edit-new-subtask" placeholder="새 서브태스크 추가 후 Enter">
+        <textarea id="quick-edit-new-subtask" rows="1" placeholder="새 서브태스크 추가 후 Enter (여러 줄 붙여넣기 가능)"></textarea>
         <button class="quick-edit-subtask-add-btn" onclick="addQuickEditSubtask()" type="button">+</button>
       </div>
     </div>
@@ -257,13 +257,36 @@ function showQuickEditModal(task) {
     if (e.key === 'Enter') saveQuickEdit();
   });
 
-  // 엔터키로 서브태스크 추가 (새 서브태스크 필드)
+  // 엔터키로 서브태스크 추가 (Shift+Enter는 줄바꿈 허용)
   const newSubInput = body.querySelector('#quick-edit-new-subtask');
   if (newSubInput) {
-    newSubInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
+    newSubInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         addQuickEditSubtask();
+      }
+    });
+    // 붙여넣기 시 불렛 포인트 자동 분리
+    newSubInput.addEventListener('paste', (e) => {
+      if (!e.clipboardData) return;
+      const pastedText = e.clipboardData.getData('text');
+      const lines = parseBulletLines(pastedText);
+      if (lines.length > 1) {
+        e.preventDefault();
+        const list = document.getElementById('quick-edit-subtask-list');
+        if (!list) return;
+        lines.forEach(line => {
+          const itemHtml = `
+            <div class="quick-edit-subtask-item">
+              <textarea class="quick-edit-subtask-text" rows="1" placeholder="서브태스크 이름">${escapeHtml(line)}</textarea>
+              <button class="quick-edit-subtask-remove" onclick="removeQuickEditSubtask(this)" type="button">×</button>
+            </div>
+          `;
+          list.insertAdjacentHTML('beforeend', itemHtml);
+          const newTa = list.lastElementChild.querySelector('textarea');
+          if (newTa) initEnhancedTextarea(newTa);
+        });
+        newSubInput.value = '';
       }
     });
   }
@@ -275,21 +298,26 @@ function showQuickEditModal(task) {
 function addQuickEditSubtask() {
   const input = document.getElementById('quick-edit-new-subtask');
   if (!input) return;
-  const text = input.value.trim();
-  if (!text) return;
+  const rawText = input.value.trim();
+  if (!rawText) return;
 
   const list = document.getElementById('quick-edit-subtask-list');
   if (!list) return;
 
-  const idx = list.children.length;
-  const itemHtml = `
-    <div class="quick-edit-subtask-item" data-subtask-idx="${idx}">
-      <input type="text" class="quick-edit-subtask-text" value="${escapeHtml(text)}" placeholder="서브태스크 이름">
-      <button class="quick-edit-subtask-remove" onclick="removeQuickEditSubtask(this)" type="button">×</button>
-    </div>
-  `;
-  list.insertAdjacentHTML('beforeend', itemHtml);
+  const lines = parseBulletLines(rawText);
+  lines.forEach(text => {
+    const itemHtml = `
+      <div class="quick-edit-subtask-item">
+        <textarea class="quick-edit-subtask-text" rows="1" placeholder="서브태스크 이름">${escapeHtml(text)}</textarea>
+        <button class="quick-edit-subtask-remove" onclick="removeQuickEditSubtask(this)" type="button">×</button>
+      </div>
+    `;
+    list.insertAdjacentHTML('beforeend', itemHtml);
+    const newTa = list.lastElementChild.querySelector('textarea');
+    if (newTa) initEnhancedTextarea(newTa);
+  });
   input.value = '';
+  input.style.height = 'auto'; // auto-resize 리셋
   input.focus();
 }
 window.addQuickEditSubtask = addQuickEditSubtask;
@@ -375,10 +403,10 @@ function saveQuickEdit() {
       if (eventTypeEl) updates.eventType = eventTypeEl.value;
       if (linkEl) updates.link = linkEl.value;
 
-      // 서브태스크: 기존 완료 상태 보존 (이름이 같으면)
+      // 서브태스크: 기존 완료 상태 보존 (trim 비교로 공백 차이 허용)
       const oldSubtasks = t.subtasks || [];
       updates.subtasks = newSubtasks.map(ns => {
-        const existing = oldSubtasks.find(os => os.text === ns.text);
+        const existing = oldSubtasks.find(os => os.text.trim() === ns.text.trim());
         return existing ? { ...existing, text: ns.text } : ns;
       });
 
