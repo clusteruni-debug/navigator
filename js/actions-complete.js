@@ -96,6 +96,9 @@ window.completeTaskForDate = completeTaskForDate;
  * 롱프레스용 날짜 선택 팝업 표시
  */
 function showBackdateMenu(id, anchorEl) {
+  // detached 엘리먼트 가드 (renderStatic 후 stale 참조 방지)
+  if (!document.body.contains(anchorEl)) return;
+
   // 기존 메뉴 제거
   const existing = document.querySelector('.backdate-menu');
   if (existing) existing.remove();
