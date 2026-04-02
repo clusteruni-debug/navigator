@@ -33,7 +33,11 @@ function _renderLifeTaskItem(task) {
         </div>
       </div>
       <div class="life-item-actions">
-        ${!hasSubtasks ? '' : `<button class="life-action-btn" onclick="completeTask('${escapeAttr(task.id)}')" title="전체 완료" aria-label="전체 완료">✓</button>`}
+        ${!hasSubtasks ? '' : `<button class="life-action-btn" onclick="if(this._longPressed){this._longPressed=false;return;}completeTask('${escapeAttr(task.id)}')"
+            onpointerdown="this._lpTimer = setTimeout(() => { this._longPressed = true; showBackdateMenu('${escapeAttr(task.id)}', this); }, 500)"
+            onpointerup="clearTimeout(this._lpTimer)"
+            onpointerleave="clearTimeout(this._lpTimer); this._longPressed = false;"
+            title="전체 완료 (길게 누르면 날짜 선택)" aria-label="전체 완료 (길게 누르면 날짜 선택)">✓</button>`}
         <button class="life-action-btn" onclick="editTask('${escapeAttr(task.id)}')" title="수정" aria-label="작업 수정">${svgIcon('edit', 14)}</button>
         <button class="life-action-btn delete" onclick="deleteTask('${escapeAttr(task.id)}')" title="삭제" aria-label="작업 삭제">${svgIcon('trash', 14)}</button>
       </div>
