@@ -58,7 +58,11 @@ window.addEventListener('online', async () => {
   // ⚠️ syncToFirebase만 호출하면 다른 기기의 오프라인 변경사항을 덮어쓰는 위험
   if (appState.user) {
     showToast('온라인 복귀 - 동기화 중...', 'success');
-    await loadFromFirebase();
+    try {
+      await loadFromFirebase();
+    } catch (e) {
+      console.error('[sync] 온라인 복귀 동기화 실패:', e);
+    }
     renderStatic();
   }
 });
@@ -83,6 +87,8 @@ window._navIntervals = [
   setInterval(checkDeadlinesAndNotify, 5 * 60 * 1000), // 5분마다 마감 체크
   // 반복 태스크 일일 초기화: 자정 넘김 감지 (1분마다 날짜 변경 체크)
   setInterval(() => {
+    // 클라우드 로드 중에는 checkDailyReset 스킵 (updatedAt 갱신으로 merge 오염 방지)
+    if (isLoadingFromCloud) return;
     let changed = false;
     if (checkDailyReset()) {
       recomputeTodayStats();
@@ -101,7 +107,7 @@ window._navIntervals = [
 checkDeadlinesAndNotify(); // 초기 실행
 
 // 탭 전환/숨김 시 대기 중인 Firebase 동기화 즉시 실행 + 탭 복귀 시 일일 초기화
-document.addEventListener('visibilitychange', () => {
+document.addEventListener('visibilitychange', async () => {
   if (document.hidden) {
     // 탭 전환/앱 최소화: 리듬 데이터 로컬 백업 + 대기 중인 Firebase 동기화 즉시 플러시
     localStorage.setItem('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
@@ -111,7 +117,28 @@ document.addEventListener('visibilitychange', () => {
       _doSyncToFirebase();
     }
   } else {
-    // 탭 복귀: 반복 태스크 일일 초기화 체크
+    // 탭 복귀: 클라우드 동기화 먼저 → 그 다음 일일 초기화
+    // (순서 중요: checkDailyReset이 먼저 실행되면 updatedAt이 갱신되어
+    //  다른 기기의 서브태스크 완료 데이터가 merge에서 패배함)
+    if (appState.user) {
+      // 리스너가 죽어있으면 재연결
+      if (!unsubscribeSnapshot) {
+        console.log('[sync] 탭 활성화 → 리스너 재연결');
+        startRealtimeSync();
+      }
+      // 마지막 동기화로부터 5분 이상 지났으면 강제 새로고침
+      const fiveMinutes = 5 * 60 * 1000;
+      const syncAge = appState.lastSyncTime instanceof Date ? Date.now() - appState.lastSyncTime.getTime() : Infinity;
+      if (!appState.lastSyncTime || isNaN(syncAge) || syncAge > fiveMinutes) {
+        console.log('[sync] 탭 활성화 → 데이터 새로고침 (checkDailyReset 전)');
+        try {
+          await loadFromFirebase();
+        } catch (e) {
+          console.error('[sync] 새로고침 실패:', e);
+        }
+      }
+    }
+    // 클라우드 병합 완료 후 일일 초기화 (로컬 전용일 때도 여기서 실행)
     let changed = false;
     if (checkDailyReset()) {
       recomputeTodayStats();
@@ -124,23 +151,10 @@ document.addEventListener('visibilitychange', () => {
     if (changed) {
       renderStatic();
       showToast('🔄 새로운 하루! 반복 태스크가 초기화되었습니다', 'info');
-    }
-    // 탭 활성화 시 동기화 상태 확인 + 데이터 새로고침
-    if (appState.user) {
-      // 리스너가 죽어있으면 재연결
-      if (!unsubscribeSnapshot) {
-        console.log('[sync] 탭 활성화 → 리스너 재연결');
-        startRealtimeSync();
-      }
-      // 마지막 동기화로부터 5분 이상 지났으면 강제 새로고침
-      const fiveMinutes = 5 * 60 * 1000;
-      if (!appState.lastSyncTime || (Date.now() - appState.lastSyncTime.getTime()) > fiveMinutes) {
-        console.log('[sync] 탭 활성화 → 데이터 새로고침');
-        loadFromFirebase().then(() => {
-          recomputeTodayStats();
-          renderStatic();
-        }).catch(e => console.error('[sync] 새로고침 실패:', e));
-      }
+    } else if (appState.user) {
+      // 클라우드 새로고침 후 렌더링 갱신 (일일 초기화 없어도)
+      recomputeTodayStats();
+      renderStatic();
     }
   }
 });
@@ -406,8 +420,9 @@ window.addEventListener('firebase-ready', () => {
   checkUrlImport();
 
   // 오프라인/타임아웃 대비: 5초 후에도 클라우드 로드가 안 됐으면 로컬 기반으로 checkDailyReset 실행
+  // (loadFromFirebase 진행 중이면 대기 — 진행 중인 로드가 완료되면 자체적으로 checkDailyReset 호출)
   setTimeout(() => {
-    if (!initialCloudLoadComplete) {
+    if (!initialCloudLoadComplete && !isLoadingFromCloud) {
       initialCloudLoadComplete = true;
       console.warn('[daily-reset] 클라우드 로드 타임아웃 → 로컬 데이터 기반으로 checkDailyReset 실행');
       const resetDone = checkDailyReset();

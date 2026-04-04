@@ -32,8 +32,8 @@ const _navFunctions = {
   // 리듬 통계: js/rhythm.js에서 window에 직접 등록
   // 설정
   openSettings, closeSettings, updateSetting,
-  // 템플릿
-  saveAsTemplate, deleteTemplate, addFromTemplate, saveCurrentAsTemplate,
+  // 템플릿 (saveAsTemplate은 work-data.js에서 window에 직접 등록 — 로드 순서상 여기서 참조 불가)
+  deleteTemplate, addFromTemplate, saveCurrentAsTemplate,
 };
 // 네임스페이스 객체
 window.Nav = _navFunctions;

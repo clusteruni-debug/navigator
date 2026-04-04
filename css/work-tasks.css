@@ -119,6 +119,27 @@
       color: var(--text-primary);
     }
 
+    /* Task detail accordion */
+    .work-task-detail-hidden {
+      display: none;
+    }
+
+    .work-task-detail-chevron {
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      user-select: none;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .work-task-detail-chevron:hover {
+      color: var(--accent-primary);
+      background: var(--bg-tertiary);
+    }
+
     /* 진행 로그 */
     .work-task-logs {
       margin-top: 10px;

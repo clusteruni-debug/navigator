@@ -352,9 +352,15 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
   const taskExpandKey = projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx;
   const isTaskExpanded = appState.expandedWorkTasks && appState.expandedWorkTasks[taskExpandKey];
 
+  // Detail accordion: 3+ logs → default collapsed
+  const totalLogCount = task.logs ? task.logs.length : 0;
+  const isCollapsible = totalLogCount >= 3;
+  const isDetailExpanded = !isCollapsible || (appState.expandedWorkTaskDetails && appState.expandedWorkTaskDetails[taskExpandKey]);
+
   return `
     <div class="work-task-item${task.status === 'completed' ? ' work-task-completed' : ''}" style="${pulseColor !== 'transparent' ? 'border-left: 3px solid ' + pulseColor + ';' : ''}">
       <div class="work-task-header">
+        ${isCollapsible ? `<span class="work-task-detail-chevron" data-detail-key="${taskExpandKey}" data-log-count="${totalLogCount}" onclick="event.stopPropagation(); toggleTaskDetailExpand('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="${isDetailExpanded ? '기록 접기' : '기록 펼치기'}">${isDetailExpanded ? '▼' : '▶ ' + totalLogCount + '기록'}</span>` : ''}
         <div class="work-task-checkbox ${task.status === 'completed' ? 'checked' : ''}"
              onclick="toggleWorkTaskComplete('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})"
              title="완료 체크">
@@ -380,17 +386,19 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
         </div>
       </div>
       ${task.logs && task.logs.length > 0 ? `
-        <div class="work-task-logs">
+        <div class="work-task-logs${!isDetailExpanded ? ' work-task-detail-hidden' : ''}" id="task-detail-${taskExpandKey}">
           ${(() => {
             // 완료 로그 압축: "✓ 완료" 로그는 하나로 요약
-            const completionLogs = task.logs.filter(l => l.content === '✓ 완료');
-            const otherLogs = task.logs.filter(l => l.content !== '✓ 완료');
+            // 원본 인덱스를 _idx로 보존 (findIndex 중복 매칭 방지)
+            const indexedLogs = task.logs.map((l, i) => ({ ...l, _idx: i }));
+            const completionLogs = indexedLogs.filter(l => l.content === '✓ 완료');
+            const otherLogs = indexedLogs.filter(l => l.content !== '✓ 완료');
             const pid = escapeAttr(projectId);
             const si = Number(stageIdx), sci = Number(subcatIdx), ti = Number(taskIdx);
             const taskUid = task.id || (pid + '-' + si + '-' + sci + '-' + ti);
             let html = '';
             if (completionLogs.length > 0) {
-              const lastIdx = task.logs.reduce((found, l, i) => l.content === '✓ 완료' ? i : found, -1);
+              const lastIdx = completionLogs[completionLogs.length - 1]._idx;
               const lastDate = completionLogs[completionLogs.length - 1].date;
               const label = completionLogs.length === 1
                 ? '✓ 완료 (' + lastDate + ')'
@@ -409,7 +417,7 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
               const wasExpanded = appState.expandedWorkLogs?.[taskUid];
               html += '<div class="work-task-logs-collapsed' + (wasExpanded ? ' expanded' : '') + '" id="logs-hidden-' + taskUid + '">';
               hiddenLogs.forEach(log => {
-                const actualIdx = task.logs.findIndex(l => l.date === log.date && l.content === log.content);
+                const actualIdx = log._idx;
                 html += '<div class="work-task-log"><span class="work-task-log-date">' + escapeHtml(log.date) + '</span><div class="work-task-log-content">' + renderFormattedText(log.content) + '</div>' +
                   '<div class="work-task-log-actions">' +
                     '<button class="work-task-log-action" onclick="editWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" aria-label="기록 편집">✏️</button>' +
@@ -420,7 +428,7 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
               html += '<div class="work-task-logs-toggle" onclick="toggleWorkLogs(\'' + taskUid + '\')" id="logs-toggle-' + taskUid + '">' + (wasExpanded ? '▼' : '▶') + ' 이전 기록 ' + hiddenLogs.length + '개</div>';
             }
             visibleLogs.forEach(log => {
-              const actualIdx = task.logs.findIndex(l => l.date === log.date && l.content === log.content);
+              const actualIdx = log._idx;
               html += '<div class="work-task-log"><span class="work-task-log-date">' + escapeHtml(log.date) + '</span><div class="work-task-log-content">' + renderFormattedText(log.content) + '</div>' +
                 '<div class="work-task-log-actions">' +
                   '<button class="work-task-log-action" onclick="editWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" aria-label="기록 편집">✏️</button>' +

@@ -377,7 +377,16 @@ function validateTask(task) {
   if (task.workProjectId) validated.workProjectId = task.workProjectId;
   if (typeof task.workStageIdx === 'number') validated.workStageIdx = task.workStageIdx;
   if (typeof task.workSubcatIdx === 'number') validated.workSubcatIdx = task.workSubcatIdx;
-  if (Array.isArray(task.subtasks)) validated.subtasks = task.subtasks;
+  if (Array.isArray(task.subtasks)) {
+    validated.subtasks = task.subtasks
+      .filter(st => st && typeof st.text === 'string' && st.text.trim())
+      .map(st => ({
+        ...st,
+        text: st.text,
+        completed: typeof st.completed === 'boolean' ? st.completed : false,
+        completedAt: typeof st.completedAt === 'string' ? st.completedAt : null
+      }));
+  }
   if (task.organizer) validated.organizer = task.organizer;
   if (task.eventType) validated.eventType = task.eventType;
   if (task.repeatInterval) validated.repeatInterval = task.repeatInterval;

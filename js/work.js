@@ -519,6 +519,29 @@ function toggleTaskExpand(projectId, stageIdx, subcatIdx, taskIdx) {
 }
 window.toggleTaskExpand = toggleTaskExpand;
 
+// Task detail (logs section) accordion — DOM 직접 조작
+if (!appState.expandedWorkTaskDetails) appState.expandedWorkTaskDetails = {};
+
+function toggleTaskDetailExpand(projectId, stageIdx, subcatIdx, taskIdx) {
+  const key = projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx;
+  const wasExpanded = !!appState.expandedWorkTaskDetails[key];
+  if (wasExpanded) {
+    delete appState.expandedWorkTaskDetails[key];
+  } else {
+    appState.expandedWorkTaskDetails[key] = true;
+  }
+  const expanded = !wasExpanded;
+  const detailEl = document.getElementById('task-detail-' + key);
+  if (detailEl) detailEl.classList.toggle('work-task-detail-hidden', !expanded);
+  const chevronEl = document.querySelector('[data-detail-key="' + key + '"]');
+  if (chevronEl) {
+    const count = chevronEl.getAttribute('data-log-count');
+    chevronEl.textContent = expanded ? '▼' : '▶ ' + count + '기록';
+    chevronEl.title = expanded ? '기록 접기' : '기록 펼치기';
+  }
+}
+window.toggleTaskDetailExpand = toggleTaskDetailExpand;
+
 /**
  * 작업 로그 접기/펼치기 (DOM 직접 조작 — renderStatic 호출 안 함)
  */

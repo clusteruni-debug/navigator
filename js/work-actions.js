@@ -80,11 +80,26 @@ function deleteProjectStage(projectId, stageIdx) {
   const stageName = stage.name;
   if (!confirm(`"${escapeHtml(stageName)}" 단계를 삭제하시겠습니까?\n하위 중분류/작업도 모두 삭제됩니다.`)) return;
 
-  // expandedWorkLogs cleanup
+  // expandedWorkLogs + expandedWorkTasks + expandedWorkTaskDetails cleanup
   if (appState.expandedWorkLogs) {
     (stage.subcategories || []).forEach(sub => {
       (sub.tasks || []).forEach(t => { if (t.id) delete appState.expandedWorkLogs[t.id]; });
     });
+  }
+  const stagePrefix = projectId + '-' + stageIdx + '-';
+  if (appState.expandedWorkTasks) {
+    Object.keys(appState.expandedWorkTasks).forEach(k => { if (k.startsWith(stagePrefix)) delete appState.expandedWorkTasks[k]; });
+  }
+  if (appState.expandedWorkTaskDetails) {
+    Object.keys(appState.expandedWorkTaskDetails).forEach(k => { if (k.startsWith(stagePrefix)) delete appState.expandedWorkTaskDetails[k]; });
+  }
+  // collapsedStages / collapsedSubcategories cleanup (index shift 후 잘못된 상태 방지)
+  if (appState.collapsedStages) {
+    const prefix = projectId + '-';
+    Object.keys(appState.collapsedStages).forEach(k => { if (k.startsWith(prefix)) delete appState.collapsedStages[k]; });
+  }
+  if (appState.collapsedSubcategories) {
+    Object.keys(appState.collapsedSubcategories).forEach(k => { if (k.startsWith(stagePrefix)) delete appState.collapsedSubcategories[k]; });
   }
   project.stages.splice(stageIdx, 1);
   if (project.currentStage >= project.stages.length) {
@@ -150,7 +165,7 @@ function renameSubcategory(projectId, stageIdx, subcatIdx, newName) {
   if (!newName || !newName.trim()) return;
   const subcat = project.stages[stageIdx]?.subcategories?.[subcatIdx];
   if (subcat) {
-    subcat.name = newName;
+    subcat.name = newName.trim();
     project.updatedAt = new Date().toISOString();
     saveWorkProjects();
     renderStatic();
@@ -294,6 +309,15 @@ function deleteSubcategory(projectId, stageIdx, subcatIdx) {
       const prefix = projectId + '-' + stageIdx + '-' + subcatIdx + '-';
       Object.keys(appState.expandedWorkTasks).forEach(k => { if (k.startsWith(prefix)) delete appState.expandedWorkTasks[k]; });
     }
+    if (appState.expandedWorkTaskDetails) {
+      const prefix = projectId + '-' + stageIdx + '-' + subcatIdx + '-';
+      Object.keys(appState.expandedWorkTaskDetails).forEach(k => { if (k.startsWith(prefix)) delete appState.expandedWorkTaskDetails[k]; });
+    }
+    // collapsedSubcategories cleanup (index shift 후 잘못된 상태 방지)
+    if (appState.collapsedSubcategories) {
+      const prefix = projectId + '-' + stageIdx + '-';
+      Object.keys(appState.collapsedSubcategories).forEach(k => { if (k.startsWith(prefix)) delete appState.collapsedSubcategories[k]; });
+    }
   }
   stage.subcategories.splice(subcatIdx, 1);
   project.updatedAt = new Date().toISOString();
@@ -338,6 +362,19 @@ function deleteWorkProject(projectId) {
     if (appState.expandedWorkTasks) {
       const prefix = projectId + '-';
       Object.keys(appState.expandedWorkTasks).forEach(k => { if (k.startsWith(prefix)) delete appState.expandedWorkTasks[k]; });
+    }
+    if (appState.expandedWorkTaskDetails) {
+      const prefix = projectId + '-';
+      Object.keys(appState.expandedWorkTaskDetails).forEach(k => { if (k.startsWith(prefix)) delete appState.expandedWorkTaskDetails[k]; });
+    }
+    // collapsedStages / collapsedSubcategories cleanup
+    if (appState.collapsedStages) {
+      const prefix = projectId + '-';
+      Object.keys(appState.collapsedStages).forEach(k => { if (k.startsWith(prefix)) delete appState.collapsedStages[k]; });
+    }
+    if (appState.collapsedSubcategories) {
+      const prefix = projectId + '-';
+      Object.keys(appState.collapsedSubcategories).forEach(k => { if (k.startsWith(prefix)) delete appState.collapsedSubcategories[k]; });
     }
   }
   // Soft-Delete: 삭제 기록 남기기 (동기화 시 부활 방지)
@@ -530,6 +567,10 @@ function deleteWorkTask(projectId, stageIdx, subcatIdx, taskIdx) {
     if (appState.expandedWorkTasks) {
       const prefix = projectId + '-' + stageIdx + '-' + subcatIdx + '-';
       Object.keys(appState.expandedWorkTasks).forEach(k => { if (k.startsWith(prefix)) delete appState.expandedWorkTasks[k]; });
+    }
+    if (appState.expandedWorkTaskDetails) {
+      const prefix = projectId + '-' + stageIdx + '-' + subcatIdx + '-';
+      Object.keys(appState.expandedWorkTaskDetails).forEach(k => { if (k.startsWith(prefix)) delete appState.expandedWorkTaskDetails[k]; });
     }
   }
   subcat.tasks.splice(taskIdx, 1);

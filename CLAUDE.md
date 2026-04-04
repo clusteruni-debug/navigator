@@ -10,7 +10,7 @@ npx serve -p 5000
 ```
 
 ## Deployment
-GitHub Pages: https://clusteruni-debug.github.io/To-do-list-for-adhd/navigator-v5.html
+GitHub Pages: https://clusteruni-debug.github.io/navigator/navigator-v5.html
 
 ## Architecture
 Single-file architecture (navigator-v5.html) + js/rhythm.js + js/commute.js + sw.js

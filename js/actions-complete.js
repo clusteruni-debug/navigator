@@ -785,7 +785,7 @@ function createNextRepeatTask(task) {
     repeatDays: task.repeatDays,
     repeatMonthDay: task.repeatMonthDay,
     repeatInterval: task.repeatInterval,
-    subtasks: (task.subtasks || []).map(st => ({ text: st.text, completed: false })),
+    subtasks: (task.subtasks || []).map(st => ({ ...st, completed: false, completedAt: null })),
     tags: task.tags || [],
     completed: false,
     spawnedFromTaskId: task.id,
