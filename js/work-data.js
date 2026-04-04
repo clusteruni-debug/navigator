@@ -16,7 +16,8 @@ let workModalState = {
   projectId: null,
   stageIdx: null,
   subcategoryIdx: null,
-  taskIdx: null
+  taskIdx: null,
+  logIdx: null
 };
 
 // 상태 목록
