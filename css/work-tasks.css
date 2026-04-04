@@ -59,6 +59,14 @@
       background: var(--bg-tertiary);
     }
 
+    .work-task-title.expanded {
+      display: block;
+      -webkit-line-clamp: unset;
+      overflow: visible;
+      word-break: break-word;
+      background: var(--bg-tertiary);
+    }
+
     .work-task-title.completed {
       text-decoration: line-through;
       color: var(--text-muted);

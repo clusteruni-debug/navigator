@@ -504,6 +504,21 @@ function toggleSubcategoryCollapse(projectId, stageIdx, subcatIdx) {
 }
 window.toggleSubcategoryCollapse = toggleSubcategoryCollapse;
 
+// 소분류(항목) 텍스트 펼치기/접기 (DOM 직접 조작 — renderStatic 호출 안 함)
+if (!appState.expandedWorkTasks) appState.expandedWorkTasks = {};
+
+function toggleTaskExpand(projectId, stageIdx, subcatIdx, taskIdx) {
+  const key = projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx;
+  if (appState.expandedWorkTasks[key]) {
+    delete appState.expandedWorkTasks[key];
+  } else {
+    appState.expandedWorkTasks[key] = true;
+  }
+  const el = document.getElementById('task-title-' + key);
+  if (el) el.classList.toggle('expanded');
+}
+window.toggleTaskExpand = toggleTaskExpand;
+
 /**
  * 작업 로그 접기/펼치기 (DOM 직접 조작 — renderStatic 호출 안 함)
  */

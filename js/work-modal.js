@@ -55,6 +55,17 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
         </div>
       `;
       break;
+    case 'rename-subcategory': {
+      const renameSubcat = project?.stages[stageIdx]?.subcategories?.[subcatIdx];
+      titleText = '✏️ 중분류 이름 변경';
+      bodyHtml = `
+        <div class="work-modal-field">
+          <label class="work-modal-label">중분류 이름</label>
+          <input type="text" class="work-modal-input" id="work-input-name" value="${escapeAttr(renameSubcat?.name || '')}" autofocus>
+        </div>
+      `;
+      break;
+    }
     case 'task':
       titleText = '📝 항목 추가';
       bodyHtml = `
@@ -331,6 +342,13 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
   // textarea에 Tab키 + auto-resize 초기화
   body.querySelectorAll('textarea').forEach(ta => initEnhancedTextarea(ta));
 
+  // input[type=text]에 Enter 키로 확인
+  body.querySelectorAll('input[type=text], input:not([type])').forEach(inp => {
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); confirmWorkModal(); }
+    });
+  });
+
   // 첫 입력 필드에 포커스
   setTimeout(() => {
     const input = body.querySelector('input, textarea');
@@ -380,6 +398,15 @@ function confirmWorkModal() {
       const name = document.getElementById('work-input-name').value.trim();
       if (!name) { showToast('이름을 입력하세요', 'error'); return; }
       addSubcategory(projectId, stageIdx, name);
+      break;
+    }
+    case 'rename-subcategory': {
+      const newName = document.getElementById('work-input-name').value.trim();
+      if (!newName) { showToast('이름을 입력하세요', 'error'); return; }
+      const renProj = appState.workProjects.find(p => p.id === projectId);
+      const renSubcat = renProj?.stages[stageIdx]?.subcategories?.[subcategoryIdx];
+      if (renSubcat && renSubcat.name === newName) break;
+      renameSubcategory(projectId, stageIdx, subcategoryIdx, newName);
       break;
     }
     case 'task': {

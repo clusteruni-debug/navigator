@@ -135,11 +135,8 @@ window.promptRenameStage = promptRenameStage;
 /**
  * 중분류 이름 변경 프롬프트
  */
-function promptRenameSubcategory(projectId, stageIdx, subcatIdx, currentName) {
-  const newName = prompt('중분류 이름을 변경하세요:', currentName);
-  if (newName && newName.trim() && newName.trim() !== currentName) {
-    renameSubcategory(projectId, stageIdx, subcatIdx, newName.trim());
-  }
+function promptRenameSubcategory(projectId, stageIdx, subcatIdx) {
+  showWorkModal('rename-subcategory', projectId, stageIdx, subcatIdx);
 }
 window.promptRenameSubcategory = promptRenameSubcategory;
 
@@ -150,6 +147,7 @@ function renameSubcategory(projectId, stageIdx, subcatIdx, newName) {
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
 
+  if (!newName || !newName.trim()) return;
   const subcat = project.stages[stageIdx]?.subcategories?.[subcatIdx];
   if (subcat) {
     subcat.name = newName;
@@ -164,7 +162,7 @@ window.renameSubcategory = renameSubcategory;
 /**
  * 소분류(항목) 이름 변경 — 모달 (textarea, 줄바꿈·불렛 붙여넣기 지원)
  */
-function promptRenameWorkTask(projectId, stageIdx, subcatIdx, taskIdx, currentName) {
+function promptRenameWorkTask(projectId, stageIdx, subcatIdx, taskIdx) {
   showWorkModal('edit-task', projectId, stageIdx, subcatIdx, taskIdx);
 }
 window.promptRenameWorkTask = promptRenameWorkTask;
@@ -288,10 +286,14 @@ function deleteSubcategory(projectId, stageIdx, subcatIdx) {
   const stage = project.stages[stageIdx];
   if (!stage) return;
 
-  // expandedWorkLogs cleanup
+  // expandedWorkLogs + expandedWorkTasks cleanup
   const subcat = (stage.subcategories || [])[subcatIdx];
-  if (subcat && appState.expandedWorkLogs) {
-    (subcat.tasks || []).forEach(t => { if (t.id) delete appState.expandedWorkLogs[t.id]; });
+  if (subcat) {
+    if (appState.expandedWorkLogs) (subcat.tasks || []).forEach(t => { if (t.id) delete appState.expandedWorkLogs[t.id]; });
+    if (appState.expandedWorkTasks) {
+      const prefix = projectId + '-' + stageIdx + '-' + subcatIdx + '-';
+      Object.keys(appState.expandedWorkTasks).forEach(k => { if (k.startsWith(prefix)) delete appState.expandedWorkTasks[k]; });
+    }
   }
   stage.subcategories.splice(subcatIdx, 1);
   project.updatedAt = new Date().toISOString();
@@ -325,14 +327,18 @@ window.moveWorkProjectStage = moveWorkProjectStage;
 function deleteWorkProject(projectId) {
   if (!confirm('이 프로젝트를 삭제하시겠습니까?')) return;
 
-  // expandedWorkLogs cleanup
+  // expandedWorkLogs + expandedWorkTasks cleanup
   const proj = appState.workProjects.find(p => p.id === projectId);
-  if (proj && appState.expandedWorkLogs) {
+  if (proj) {
     (proj.stages || []).forEach(s => {
       (s.subcategories || []).forEach(sub => {
-        (sub.tasks || []).forEach(t => { if (t.id) delete appState.expandedWorkLogs[t.id]; });
+        (sub.tasks || []).forEach(t => { if (t.id && appState.expandedWorkLogs) delete appState.expandedWorkLogs[t.id]; });
       });
     });
+    if (appState.expandedWorkTasks) {
+      const prefix = projectId + '-';
+      Object.keys(appState.expandedWorkTasks).forEach(k => { if (k.startsWith(prefix)) delete appState.expandedWorkTasks[k]; });
+    }
   }
   // Soft-Delete: 삭제 기록 남기기 (동기화 시 부활 방지)
   appState.deletedIds.workProjects[projectId] = new Date().toISOString();
@@ -517,9 +523,14 @@ function deleteWorkTask(projectId, stageIdx, subcatIdx, taskIdx) {
   if (!subcat) return;
 
   const task = subcat.tasks[taskIdx];
-  if (task && appState.expandedWorkLogs) {
+  if (task) {
     const uid = task.id || (projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx);
-    delete appState.expandedWorkLogs[uid];
+    if (appState.expandedWorkLogs) delete appState.expandedWorkLogs[uid];
+    // Clear all task expand keys for this subcategory (index shift after splice)
+    if (appState.expandedWorkTasks) {
+      const prefix = projectId + '-' + stageIdx + '-' + subcatIdx + '-';
+      Object.keys(appState.expandedWorkTasks).forEach(k => { if (k.startsWith(prefix)) delete appState.expandedWorkTasks[k]; });
+    }
   }
   subcat.tasks.splice(taskIdx, 1);
   project.updatedAt = new Date().toISOString();
