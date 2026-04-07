@@ -488,11 +488,17 @@ async function loadFromFirebase() {
 /**
  * 실시간 동기화 시작
  */
+let realtimeReconnectCount = 0;
+const MAX_REALTIME_RECONNECT = 5;
+
 function startRealtimeSync() {
   if (!appState.user || unsubscribeSnapshot) return;
 
   const userDoc = window.firebaseDoc(window.firebaseDb, 'users', appState.user.uid);
   unsubscribeSnapshot = window.firebaseOnSnapshot(userDoc, (doc) => {
+    // 연결 성공 시 재연결 카운터 리셋
+    realtimeReconnectCount = 0;
+
     // RC-3: loadFromFirebase 진행 중에는 onSnapshot이 appState를 동시 수정하지 않도록 차단
     if (doc.exists() && !isSyncing && !isLoadingFromCloud) {
       const data = doc.data();
@@ -503,7 +509,7 @@ function startRealtimeSync() {
         return; // 자기가 쓴 것 — 무시
       }
 
-      {
+      try {
         // 마이그레이션 플래그 병합
         if (data._migrations) {
           appState._migrations = { ...(appState._migrations || {}), ...data._migrations };
@@ -684,6 +690,9 @@ function startRealtimeSync() {
         if (isFirstRealtimeLoad) {
           isFirstRealtimeLoad = false;
         }
+      } catch (mergeError) {
+        console.error('실시간 동기화 병합 중 오류:', mergeError);
+        // 병합 실패해도 로컬 데이터 보존 — 다음 onSnapshot에서 재시도
       }
     }
   }, (error) => {
@@ -692,13 +701,18 @@ function startRealtimeSync() {
     appState.syncStatus = 'error';
     updateSyncIndicator();
     unsubscribeSnapshot = null;
-    // 자동 재연결 (5초 후)
-    setTimeout(() => {
-      if (appState.user && !unsubscribeSnapshot) {
-        console.log('[sync] 리스너 재연결 시도...');
-        startRealtimeSync();
-      }
-    }, 5000);
+    // 자동 재연결 (5초 후, 최대 MAX_REALTIME_RECONNECT회)
+    if (realtimeReconnectCount < MAX_REALTIME_RECONNECT) {
+      realtimeReconnectCount++;
+      setTimeout(() => {
+        if (appState.user && !unsubscribeSnapshot) {
+          console.log(`[sync] 리스너 재연결 시도 (${realtimeReconnectCount}/${MAX_REALTIME_RECONNECT})...`);
+          startRealtimeSync();
+        }
+      }, 5000);
+    } else {
+      console.warn(`[sync] 리스너 재연결 ${MAX_REALTIME_RECONNECT}회 초과 — 페이지 새로고침 필요`);
+    }
   });
 }
 

@@ -112,8 +112,7 @@ document.addEventListener('visibilitychange', async () => {
     // 탭 전환/앱 최소화: 리듬 데이터 로컬 백업 + 대기 중인 Firebase 동기화 즉시 플러시
     localStorage.setItem('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
     if (appState.user && syncDebounceTimer) {
-      clearTimeout(syncDebounceTimer);
-      syncDebounceTimer = null;
+      // syncToFirebase(true)가 내부에서 디바운스 타이머를 취소하고 즉시 실행
       syncToFirebase(true);
     }
   } else {
