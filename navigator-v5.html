@@ -22,7 +22,7 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
     import { getAuth, signInWithPopup, signOut, GoogleAuthProvider, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-    import { initializeFirestore, persistentLocalCache, persistentSingleTabManager, doc, setDoc, getDoc, onSnapshot, runTransaction } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    import { initializeFirestore, persistentLocalCache, persistentSingleTabManager, doc, setDoc, getDoc, getDocFromServer, onSnapshot, runTransaction } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
     // Firebase 설정
     // ⚠️ 보안 참고: Firebase API 키는 클라이언트 측에서 사용되도록 설계되었습니다.
@@ -64,6 +64,7 @@
     window.firebaseDoc = doc;
     window.firebaseSetDoc = setDoc;
     window.firebaseGetDoc = getDoc;
+    window.firebaseGetDocFromServer = getDocFromServer;
     window.firebaseRunTransaction = runTransaction;
     window.firebaseOnSnapshot = onSnapshot;
     window.firebaseOnAuthStateChanged = onAuthStateChanged;

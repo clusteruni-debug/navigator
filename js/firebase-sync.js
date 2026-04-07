@@ -721,3 +721,91 @@ function updateSyncIndicator() {
   indicator.style.color = status.color;
 }
 
+/**
+ * 동기화 진단: 로컬 vs 서버 데이터 비교
+ * 콘솔에서 diagnoseSyncIssue() 호출
+ */
+async function diagnoseSyncIssue() {
+  console.group('🔍 동기화 진단');
+
+  // 1. 로그인 상태
+  if (!appState.user) {
+    console.error('❌ 로그인 안 됨 — 동기화 불가');
+    console.groupEnd();
+    return;
+  }
+  console.log('✅ 로그인:', appState.user.email, '(UID:', appState.user.uid + ')');
+
+  // 2. 로컬 데이터 현황
+  console.log('📱 로컬 데이터:', {
+    tasks: appState.tasks.length,
+    workProjects: appState.workProjects.length,
+    templates: (appState.templates || []).length,
+    syncStatus: appState.syncStatus,
+    lastSyncTime: appState.lastSyncTime
+  });
+
+  // 3. 서버 데이터 직접 조회 (캐시 바이패스)
+  try {
+    const userDoc = window.firebaseDoc(window.firebaseDb, 'users', appState.user.uid);
+    console.log('⏳ 서버에서 직접 조회 중 (캐시 바이패스)...');
+    const serverSnap = await window.firebaseGetDocFromServer(userDoc);
+
+    if (!serverSnap.exists()) {
+      console.error('❌ 서버에 문서 없음 — 데이터가 Firebase에 도달하지 못했을 수 있음');
+      console.groupEnd();
+      return;
+    }
+
+    const serverData = serverSnap.data();
+    const serverTasks = (serverData.tasks || []).length;
+    const serverWP = (serverData.workProjects || []).length;
+    const serverUpdated = serverData.lastUpdated;
+
+    console.log('☁️ 서버 데이터:', {
+      tasks: serverTasks,
+      workProjects: serverWP,
+      lastUpdated: serverUpdated,
+      age: serverUpdated ? Math.round((Date.now() - new Date(serverUpdated).getTime()) / 1000) + '초 전' : 'N/A'
+    });
+
+    // 4. 차이 분석
+    const localTaskIds = new Set(appState.tasks.map(t => t.id));
+    const serverTaskIds = new Set((serverData.tasks || []).map(t => t.id));
+    const onlyLocal = [...localTaskIds].filter(id => !serverTaskIds.has(id));
+    const onlyServer = [...serverTaskIds].filter(id => !localTaskIds.has(id));
+
+    if (onlyLocal.length > 0) {
+      console.warn('⚠️ 로컬에만 있는 태스크:', onlyLocal.length + '개');
+      onlyLocal.forEach(id => {
+        const t = appState.tasks.find(task => task.id === id);
+        console.log('  - ' + (t ? t.title : id));
+      });
+    }
+    if (onlyServer.length > 0) {
+      console.warn('⚠️ 서버에만 있는 태스크:', onlyServer.length + '개');
+      (serverData.tasks || []).filter(t => onlyServer.includes(t.id)).forEach(t => {
+        console.log('  - ' + t.title);
+      });
+    }
+    if (onlyLocal.length === 0 && onlyServer.length === 0) {
+      console.log('✅ 로컬과 서버 태스크 ID 일치 (' + localTaskIds.size + '개)');
+    }
+
+    // 5. 리스너 상태
+    console.log('👂 실시간 리스너:', unsubscribeSnapshot ? '활성' : '비활성');
+    console.log('🔒 동기화 플래그:', { isSyncing, isLoadingFromCloud, pendingSync, initialCloudLoadComplete });
+
+  } catch (error) {
+    if (error.code === 'unavailable') {
+      console.error('❌ Firebase 서버 연결 불가 — 네트워크 차단 가능성 (회사 방화벽?)');
+      console.error('   Firestore는 로컬 캐시로만 동작 중 → "동기화됨" 표시되지만 실제 서버에 미도달');
+    } else {
+      console.error('❌ 서버 조회 실패:', error.code, error.message);
+    }
+  }
+
+  console.groupEnd();
+}
+window.diagnoseSyncIssue = diagnoseSyncIssue;
+
