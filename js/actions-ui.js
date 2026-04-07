@@ -369,17 +369,6 @@ function toggleSubtaskChips(taskId) {
 window.toggleSubtaskChips = toggleSubtaskChips;
 
 /**
- * 본업 일반 작업 세부작업 펼침/접힘
- */
-function toggleWorkGeneralSubtask(taskId) {
-  if (!appState.expandedWorkGeneralSubtasks) {
-    appState.expandedWorkGeneralSubtasks = {};
-  }
-  appState.expandedWorkGeneralSubtasks[taskId] = !appState.expandedWorkGeneralSubtasks[taskId];
-  renderStatic();
-}
-
-/**
  * 반복 유형 변경 시 호출
  */
 function updateDetailedTaskRepeat(repeatType) {

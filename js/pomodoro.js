@@ -6,37 +6,6 @@ let pomodoroInterval = null;
 let _cachedPomodoroTimeEl = null;
 
 /**
- * 포모도로 시작
- */
-function startPomodoro(taskId = null) {
-  const pomo = appState.pomodoro;
-
-  if (taskId) {
-    pomo.currentTaskId = taskId;
-  } else {
-    // Next Action 사용
-    const filtered = getFilteredTasks();
-    if (filtered.length > 0) {
-      pomo.currentTaskId = filtered[0].id;
-    }
-  }
-
-  pomo.isRunning = true;
-  pomo.isBreak = false;
-  pomo.timeLeft = pomo.workDuration;
-
-  if (pomodoroInterval) clearInterval(pomodoroInterval);
-  pomodoroInterval = setInterval(pomodoroTick, 1000);
-
-  renderStatic();
-  showToast('포모도로 시작! 25분 집중하세요', 'success');
-
-  if (navigator.vibrate) {
-    navigator.vibrate(100);
-  }
-}
-
-/**
  * 포모도로 일시정지
  */
 function pausePomodoro() {
@@ -75,17 +44,6 @@ function stopPomodoro() {
 
   renderStatic();
   showToast('포모도로 중지됨', 'error');
-}
-
-/**
- * 휴식 건너뛰기
- */
-function skipBreak() {
-  const pomo = appState.pomodoro;
-  pomo.isBreak = false;
-  pomo.timeLeft = pomo.workDuration;
-  renderStatic();
-  showToast('휴식 건너뜀! 다시 집중하세요', 'success');
 }
 
 /**

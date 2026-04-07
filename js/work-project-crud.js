@@ -117,23 +117,6 @@ function promptRenameStage(projectId, stageIdx, currentName) {
 window.promptRenameStage = promptRenameStage;
 
 /**
- * 프로젝트 단계 이동
- */
-function moveWorkProjectStage(projectId, direction) {
-  const project = appState.workProjects.find(p => p.id === projectId);
-  if (!project) return;
-
-  const newStage = project.currentStage + direction;
-  if (newStage >= 0 && newStage < project.stages.length) {
-    project.currentStage = newStage;
-    project.updatedAt = new Date().toISOString();
-    saveWorkProjects();
-    renderStatic();
-    showToast(`${getStageName(project, newStage)} 단계로 이동`, 'success');
-  }
-}
-
-/**
  * 프로젝트 삭제
  */
 function deleteWorkProject(projectId) {

@@ -7,44 +7,6 @@ let quickTimerInterval = null;
 let _cachedQuickTimerEl = null;
 
 /**
- * 5분 퀵타이머 시작
- */
-function startQuickTimer(taskId = null) {
-  if (appState.quickTimer.isRunning) {
-    stopQuickTimer();
-    return;
-  }
-
-  appState.quickTimer = {
-    isRunning: true,
-    timeLeft: 5 * 60,
-    taskId: taskId
-  };
-
-  showMotivation('시작이 반이에요! 5분만 집중해봐요 💪');
-
-  quickTimerInterval = setInterval(() => {
-    appState.quickTimer.timeLeft--;
-
-    if (appState.quickTimer.timeLeft <= 0) {
-      stopQuickTimer();
-      showMotivation('5분 완료! 계속할 수 있어요! 🎉');
-      if (navigator.vibrate) {
-        navigator.vibrate([200, 100, 200]);
-      }
-    }
-
-    renderQuickTimerDisplay();
-  }, 1000);
-
-  renderStatic();
-
-  if (navigator.vibrate) {
-    navigator.vibrate(100);
-  }
-}
-
-/**
  * 퀵타이머 중지
  */
 function stopQuickTimer() {
@@ -170,22 +132,6 @@ function checkMilestone() {
   } else if (completed > 0 && completed % 5 === 0) {
     showMotivation(completed + '개 완료! 계속 가보자! 🚀');
   }
-}
-
-/**
- * 랜덤 동기부여 메시지
- */
-function getRandomMotivation() {
-  const messages = [
-    '지금 시작하면 5분 뒤엔 끝나있어요!',
-    '완벽하지 않아도 괜찮아요, 시작만 하면 돼요!',
-    '작은 한 걸음이 큰 변화를 만들어요',
-    '할 수 있어요! 일단 시작해봐요 💪',
-    '오늘 할 일은 오늘! 미루면 내일의 내가 힘들어요',
-    '5분만 집중! 그게 시작이에요',
-    '지금이 가장 좋은 타이밍이에요!'
-  ];
-  return messages[Math.floor(Math.random() * messages.length)];
 }
 
 /**

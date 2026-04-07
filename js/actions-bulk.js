@@ -188,26 +188,3 @@ function cleanupOldTrash() {
   }
 }
 
-/**
- * 작업 복사
- */
-function copyTask(id) {
-  const task = appState.tasks.find(t => t.id === id);
-  if (!task) return;
-
-  const now = new Date().toISOString();
-  const newTask = {
-    ...task,
-    id: generateId(),
-    title: task.title + ' (복사)',
-    completed: false,
-    spawnedFromTaskId: undefined,
-    createdAt: now,
-    updatedAt: now
-  };
-
-  appState.tasks.push(newTask);
-  saveState();
-  renderStatic();
-  showToast('작업이 복사되었습니다', 'success');
-}
