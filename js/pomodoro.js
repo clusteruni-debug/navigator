@@ -3,6 +3,7 @@
 // ============================================
 
 let pomodoroInterval = null;
+let _cachedPomodoroTimeEl = null;
 
 /**
  * 포모도로 시작
@@ -143,9 +144,11 @@ function pomodoroTick() {
  * 포모도로 시간 표시 업데이트 (전체 렌더링 없이)
  */
 function updatePomodoroDisplay() {
-  const timeEl = document.getElementById('pomodoro-time');
-  if (timeEl) {
-    timeEl.textContent = formatPomodoroTime(appState.pomodoro.timeLeft);
+  if (!_cachedPomodoroTimeEl || !_cachedPomodoroTimeEl.isConnected) {
+    _cachedPomodoroTimeEl = document.getElementById('pomodoro-time');
+  }
+  if (_cachedPomodoroTimeEl) {
+    _cachedPomodoroTimeEl.textContent = formatPomodoroTime(appState.pomodoro.timeLeft);
   }
 }
 
@@ -158,10 +161,8 @@ function formatPomodoroTime(seconds) {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
-window.startPomodoro = startPomodoro;
 window.pausePomodoro = pausePomodoro;
 window.resumePomodoro = resumePomodoro;
 window.stopPomodoro = stopPomodoro;
-window.skipBreak = skipBreak;
 window.formatPomodoroTime = formatPomodoroTime;
 

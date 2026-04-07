@@ -40,12 +40,6 @@ window.Nav = _navFunctions;
 // HTML onclick 호환용 전역 등록
 Object.assign(window, _navFunctions);
 
-// UX 함수
-function dismissSwipeHint() {
-  localStorage.setItem('navigator-hide-swipe-hint', 'true');
-  renderStatic();
-}
-window.dismissSwipeHint = dismissSwipeHint;
 
 // 기능 투어
 const tourSteps = [

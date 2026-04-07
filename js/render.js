@@ -2,6 +2,11 @@
 // 렌더링 (오케스트레이터)
 // ============================================
 
+// Timer DOM cache (invalidated lazily via isConnected after renderStatic innerHTML swap)
+let _cachedTimeEl = null;
+let _cachedClockEl = null;
+let _cachedModeTimeEl = null;
+
 /**
  * renderStatic() 전후 입력값 + 포커스 보존 유틸
  * #root innerHTML 교체 시 모든 input/textarea/select가 파괴되므로
@@ -462,21 +467,27 @@ function updateTime() {
   bedtime.setHours(24, 0, 0, 0);
   const minutesUntilBed = Math.floor((bedtime - now) / (1000 * 60));
 
-  const timeEl = document.getElementById('time-value');
-  if (timeEl) {
-    timeEl.textContent = `${Math.floor(minutesUntilBed / 60)}시간 ${minutesUntilBed % 60}분`;
+  if (!_cachedTimeEl || !_cachedTimeEl.isConnected) {
+    _cachedTimeEl = document.getElementById('time-value');
+  }
+  if (_cachedTimeEl) {
+    _cachedTimeEl.textContent = `${Math.floor(minutesUntilBed / 60)}시간 ${minutesUntilBed % 60}분`;
   }
 
   // 현재 시간 시계 업데이트
-  const clockEl = document.getElementById('current-clock');
-  if (clockEl) {
-    clockEl.textContent = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+  if (!_cachedClockEl || !_cachedClockEl.isConnected) {
+    _cachedClockEl = document.getElementById('current-clock');
+  }
+  if (_cachedClockEl) {
+    _cachedClockEl.textContent = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
   }
 
   // 모드 남은 시간 업데이트
-  const modeTimeEl = document.getElementById('mode-time-remaining');
-  if (modeTimeEl) {
+  if (!_cachedModeTimeEl || !_cachedModeTimeEl.isConnected) {
+    _cachedModeTimeEl = document.getElementById('mode-time-remaining');
+  }
+  if (_cachedModeTimeEl) {
     const mode = getCurrentMode();
-    modeTimeEl.textContent = getModeTimeRemaining(mode, hour, now);
+    _cachedModeTimeEl.textContent = getModeTimeRemaining(mode, hour, now);
   }
 }

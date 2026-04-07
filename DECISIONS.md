@@ -753,6 +753,40 @@ Success. Improved time management awareness.
 
 ---
 
+## Decision 16: Modular File Splitting (Tier 1 Tech Debt)
+
+**Date**: 2026-04-07
+
+### Context
+13 JS files exceeded 500-line threshold (firebase-sync.js 992, tasks-history.js 871, etc.). Code splitting rule: component 500 lines, service 660 lines. Project had 49 JS files with sequential script loading (no ES6 modules).
+
+### Options Considered
+
+#### Option A: ES6 Module Migration
+Pros: Proper import/export, tree-shaking, modern tooling
+Cons: Requires bundler setup, scope explosion, breaks sequential loading architecture
+
+#### Option B: File Extraction (Chosen)
+Pros: Preserves sequential loading, backward-compatible, incremental
+Cons: No static dependency checking, relies on load order discipline
+
+### Chosen Option
+**Option B** — Extract cohesive function groups into new files, maintain global scope, update navigator-v5.html script tag order.
+
+### Result
+49 → 66 JS files. 17 new files extracted. 10 of 13 original files now under 500 lines.
+3 files kept above threshold with rationale:
+- `firebase-sync.js` (723): listener state machine — loadFromFirebase/startRealtimeSync share 9 module-level state variables
+- `state-types.js` (522): pure declarations (JSDoc typedefs + appState), no logic
+- `actions-add.js` (588): task creation domain cohesion (quickAdd + brainDump + detailedAdd)
+
+### Tradeoffs
+- Load order in navigator-v5.html is now critical (66 entries)
+- globals.js _navFunctions registry must reference functions from files that load before it
+- ES6 module migration deferred to Phase 2 (Next.js)
+
+---
+
 ## Decision Template
 
 Use this template when a new decision is needed:

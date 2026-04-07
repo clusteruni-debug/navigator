@@ -132,7 +132,6 @@ function moveWorkProjectStage(projectId, direction) {
     showToast(`${getStageName(project, newStage)} 단계로 이동`, 'success');
   }
 }
-window.moveWorkProjectStage = moveWorkProjectStage;
 
 /**
  * 프로젝트 삭제

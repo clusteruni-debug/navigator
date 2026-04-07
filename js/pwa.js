@@ -11,7 +11,7 @@ async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     try {
       const registration = await navigator.serviceWorker.register('./sw.js');
-      console.log('Service Worker 등록 성공:', registration.scope);
+      // SW registered
       // SW 업데이트 감지 시 알림
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
@@ -213,36 +213,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   if (banner) banner.classList.add('show');
 });
 
-/**
- * PWA 설치
- */
-async function installPWA() {
-  if (!deferredPrompt) return;
-
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-
-  if (outcome === 'accepted') {
-    showToast('앱이 설치되었습니다!', 'success');
-  }
-
-  deferredPrompt = null;
-  const banner = document.getElementById('install-banner');
-  if (banner) banner.classList.remove('show');
-}
-
-/**
- * 설치 배너 닫기
- */
-function closeInstallBanner() {
-  const banner = document.getElementById('install-banner');
-  if (banner) banner.classList.remove('show');
-  deferredPrompt = null;
-}
-
 window.requestNotificationPermission = requestNotificationPermission;
-window.installPWA = installPWA;
-window.closeInstallBanner = closeInstallBanner;
 
 // ============================================
 // 키보드 단축키

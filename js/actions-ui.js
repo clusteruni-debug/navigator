@@ -378,7 +378,6 @@ function toggleWorkGeneralSubtask(taskId) {
   appState.expandedWorkGeneralSubtasks[taskId] = !appState.expandedWorkGeneralSubtasks[taskId];
   renderStatic();
 }
-window.toggleWorkGeneralSubtask = toggleWorkGeneralSubtask;
 
 /**
  * 반복 유형 변경 시 호출

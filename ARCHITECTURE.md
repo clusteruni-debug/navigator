@@ -41,28 +41,34 @@
 ### File Structure
 ```
 navigator-app/
-├── navigator-v5.html (main app, ~3800 lines)
-│   ├── HTML (markup)
-│   ├── CSS (styles)
-│   │   ├── PC layout (3-column)
-│   │   ├── Mobile layout (1-column)
-│   │   ├── Completion animation
-│   │   └── Progress display
-│   └── JavaScript
-│       ├── State management (appState)
-│       ├── Business logic
-│       │   ├── Priority calculation
-│       │   ├── Mode determination
-│       │   ├── Filtering
-│       │   ├── Recurring task generation
-│       │   └── Time calculation
-│       ├── UI rendering (renderStatic)
-│       ├── Event handlers
-│       ├── Notification system
-│       └── LocalStorage
-├── manifest.json (PWA config)
-└── sw.js (Service Worker)
+├── navigator-v5.html      (HTML shell + CSS, 290 lines — script tags define load order)
+├── js/                     (66 modular JS files, sequential loading)
+│   ├── utils.js            (core utilities: ID gen, date, HTML escape, SVG icons)
+│   ├── utils-data.js       (data validation, migration, dedup, cleanup)
+│   ├── utils-daily.js      (daily reset, logical date, streak check)
+│   ├── state-types.js      (JSDoc typedefs + appState object literal)
+│   ├── state.js            (loadState, saveState, localStorage persistence)
+│   ├── firebase-merge.js   (merge algorithms: tasks, byId, deletedIds, shrinkage)
+│   ├── firebase-backup.js  (sync backup creation + restore)
+│   ├── firebase-sync.js    (auth, Firestore listeners, sync state machine)
+│   ├── tasks*.js            (task queries, revenue, insights, history, CRUD)
+│   ├── actions*.js          (complete, edit, ADHD, repeat, add, bulk, UI)
+│   ├── ui*.js               (weekly review, filters, toast, data, onboarding)
+│   ├── render*.js           (action tab, events, dashboard, settings, orchestrator)
+│   ├── globals.js           (central window.* registry via Object.assign)
+│   ├── work*.js             (data, templates, clipboard, analytics, modal, render, toggles)
+│   ├── pwa.js / pomodoro.js (PWA + pomodoro timer)
+│   ├── commute*.js          (commute tracker data + rendering)
+│   ├── rhythm*.js           (life rhythm: medication, merge, stats, history)
+│   ├── command-palette.js   (keyboard command palette)
+│   └── init.js              (DOMContentLoaded bootstrap — must be LAST)
+├── manifest.json           (PWA config)
+└── sw.js                   (Service Worker)
 ```
+
+> **Load order is critical**: Sequential `<script>` tags in navigator-v5.html define dependency order.
+> No ES6 modules or bundler. All functions are global scope.
+> `globals.js` contains `Object.assign(window, _navFunctions)` for HTML onclick handlers.
 
 ### State Management
 ```javascript

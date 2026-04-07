@@ -13,7 +13,8 @@ npx serve -p 5000
 GitHub Pages: https://clusteruni-debug.github.io/navigator/navigator-v5.html
 
 ## Architecture
-Single-file architecture (navigator-v5.html) + js/rhythm.js + js/commute.js + sw.js
+Modular Vanilla JS (66 files in js/) + navigator-v5.html (HTML shell, 290 lines) + sw.js
+Sequential script loading — no ES6 modules or bundler. Load order in navigator-v5.html is critical.
 
 ## Unique Constraints
 - localStorage + Firebase dual storage (localStorage only when not logged in)
@@ -21,7 +22,8 @@ Single-file architecture (navigator-v5.html) + js/rhythm.js + js/commute.js + sw
 - Dates: use getLocalDateStr() / getLocalDateTimeStr() (no UTC)
 - UUID migration complete — new Tasks use generateId() (UUID), legacy numeric IDs handled by migrateNumericIds
 - Sync ping-pong prevention: lastOwnWriteTimestamp check
-- Due to single HTML file architecture, UI changes have wide impact
+- Sequential script loading: adding/renaming JS files requires navigator-v5.html script tag order update
+- globals.js Object.assign(window, _navFunctions): central registry for HTML onclick handlers — do not remove without full call-site audit
 
 ## Verification Checklist
 - [ ] Task CRUD (quick add/detailed/edit/delete/complete/undo)
