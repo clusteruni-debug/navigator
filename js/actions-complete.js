@@ -38,14 +38,20 @@ function completeTaskForDate(id, dateStr) {
   const isToday = dateStr === getLocalDateStr();
 
   // 오늘 통계는 오늘 완료일 때만 증가
+  // 백데이트 여부 판단 (달력 날짜 기준 — isToday와 동일 기준으로 일관성 유지)
+  const isBackdate = dateStr !== getLocalDateStr();
+
+  // 오늘 통계 + 활동 기록은 오늘 완료일 때만 (백데이트는 오늘 스트릭에 반영하지 않음)
   if (isToday) {
     appState.todayStats.completedToday++;
     appState.todayStats.streak++;
+    recordActivity(task.title);
   }
-  recordActivity(task.title);
+  const isRepeating = task.repeatType && task.repeatType !== 'none';
 
-  // 반복 작업이면 다음 주기 작업 자동 생성 (daily/weekdays는 checkDailyReset이 처리)
-  if (task.repeatType && task.repeatType !== 'none'
+  // 반복 작업이면서 백데이트가 아닌 경우에만 다음 주기 작업 생성
+  // (백데이트: 기록만 남기고 태스크 리셋 → 다음 주기 태스크 불필요)
+  if (isRepeating && !isBackdate
       && task.repeatType !== 'daily' && task.repeatType !== 'weekdays') {
     const isDuplicate = appState.tasks.some(t =>
       t.id !== task.id && !t.completed &&
@@ -58,11 +64,9 @@ function completeTaskForDate(id, dateStr) {
     }
   }
 
-  // daily/weekdays 태스크를 과거 논리일로 백데이트 → 즉시 리셋 (오늘 다시 완료 가능)
-  const logicalToday = getLogicalDate();
-  const logicalCompDate = getLogicalDate(new Date(dateStr + 'T12:00:00'));
-  const wasBackdateReset = logicalCompDate !== logicalToday &&
-      (task.repeatType === 'daily' || task.repeatType === 'weekdays');
+  // 반복 작업을 과거 날짜로 백데이트 → 기록만 남기고 태스크 리셋 (오늘 다시 완료 가능)
+  // completionLog[dateStr] 엔트리는 보존됨 (리셋은 태스크 상태만 변경)
+  const wasBackdateReset = isBackdate && isRepeating;
   if (wasBackdateReset) {
     const updatedTask = appState.tasks.find(t => t.id === id);
     if (updatedTask) {
@@ -81,7 +85,7 @@ function completeTaskForDate(id, dateStr) {
 
   saveState();
 
-  // tgeventbot 연동 (백데이트 리셋 시 스킵)
+  // tgeventbot 연동 (백데이트 리셋 시 스킵 — 태스크가 리셋되므로 외부 상태 업데이트 부적절)
   if (!wasBackdateReset && task.source && task.source.type === 'telegram-event') {
     updateLinkedEventStatus(task, true);
   }
@@ -110,7 +114,7 @@ function completeTaskForDate(id, dateStr) {
     showToast(`${dateLabel} 완료: ${task.title}`, 'success');
     srAnnounce('작업 완료: ' + task.title);
     showUndoToast(id, task.title);
-    if (isToday) checkMilestone();
+    if (isToday) checkMilestone(); // 백데이트는 마일스톤 미달성 (의도적)
   }
 
   if (navigator.vibrate) {
@@ -301,6 +305,15 @@ function completeSubtaskForDate(taskId, subtaskIndex, dateStr) {
     sub: true
   });
   saveCompletionLog();
+
+  // 반복 태스크의 서브태스크를 과거 날짜로 백데이트 → 서브태스크 리셋 (오늘 다시 완료 가능)
+  const isSubBackdate = dateStr !== getLocalDateStr();
+  const isParentRepeating = task.repeatType && task.repeatType !== 'none';
+  if (isSubBackdate && isParentRepeating) {
+    subtask.completed = false;
+    subtask.completedAt = null;
+  }
+
   saveState();
   renderStatic();
 
@@ -308,7 +321,7 @@ function completeSubtaskForDate(taskId, subtaskIndex, dateStr) {
   const isToday = dateStr === getLocalDateStr();
   const dateLabel = isToday ? '오늘' :
     dateStr === getLocalDateStr(_yd) ? '어제' : dateStr;
-  showToast(`${dateLabel} 완료: ${subtask.text}`, 'success');
+  showToast(`${dateLabel} ${isSubBackdate && isParentRepeating ? '기록' : '완료'}: ${subtask.text}`, 'success');
 }
 window.completeSubtaskForDate = completeSubtaskForDate;
 
