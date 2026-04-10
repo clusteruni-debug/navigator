@@ -450,6 +450,7 @@ const appState = {
     expandedDates: {}
   },
   showCompletedGeneral: false,     // 본업 일반 작업 완료 섹션 펼침 (UI-only, not synced to Firebase)
+  workGeneralCompletedPage: 0,     // 본업 일반 작업 완료 섹션 페이지 (0-based, UI-only, not synced to Firebase)
   // 사용자 설정
   settings: {
     targetWakeTime: '07:00',      // 목표 기상 시간

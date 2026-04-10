@@ -167,15 +167,16 @@ function renderWorkProjects() {
             ${workGeneralTasks.slice(0, 5).map(task => `
               <div class="work-general-item-wrapper">
                 <div class="work-general-item">
-                  <button class="task-check-btn" onclick="completeTask('${escapeAttr(task.id)}')" aria-label="작업 완료">○</button>
-                  <span class="work-general-item-title" title="${escapeAttr(task.title)}" onclick="editTask('${escapeAttr(task.id)}')">${escapeHtml(task.title)}</span>
+                  <button class="task-check-btn" onclick="event.stopPropagation(); completeTask('${escapeAttr(task.id)}')" aria-label="작업 완료">○</button>
+                  <span class="work-general-item-title" title="${escapeAttr(task.title)}" onclick="event.stopPropagation(); editTask('${escapeAttr(task.id)}')">${escapeHtml(task.title)}</span>
                   ${task.deadline ? `<span class="work-general-deadline">${escapeHtml(formatDeadline(task.deadline))}</span>` : ''}
                   ${task.subtasks && task.subtasks.length > 0 ? `
                     <span class="subtask-badge">
                       📋${task.subtasks.filter(s => s.completed).length}/${task.subtasks.length}
                     </span>
                   ` : ''}
-                  <button class="work-general-delete-btn" onclick="deleteTask('${escapeAttr(task.id)}')" title="삭제" aria-label="작업 삭제">×</button>
+                  <button class="work-general-edit-btn" onclick="event.stopPropagation(); editTask('${escapeAttr(task.id)}')" title="수정" aria-label="작업 수정">${svgIcon('edit', 14)}</button>
+                  <button class="work-general-delete-btn" onclick="event.stopPropagation(); deleteTask('${escapeAttr(task.id)}')" title="삭제" aria-label="작업 삭제">${svgIcon('trash', 14)}</button>
                 </div>
                 ${task.subtasks && task.subtasks.length > 0 ? `
                   <div class="work-general-subtasks">
@@ -198,6 +199,10 @@ function renderWorkProjects() {
         const completedGeneral = appState.tasks.filter(t => t.category === '본업' && !t.workProjectId && t.completed);
         if (completedGeneral.length === 0) return '';
         const isExpanded = appState.showCompletedGeneral;
+        const pageSize = COMPLETED_LOG_PAGE_SIZE;  // state-types.js:19 공유 상수 (10)
+        const totalPages = Math.max(1, Math.ceil(completedGeneral.length / pageSize));
+        const currentPage = Math.min(Math.max(0, appState.workGeneralCompletedPage || 0), totalPages - 1);
+        const pageItems = completedGeneral.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
         return `
           <div class="work-general-tasks" style="margin-top: 4px; opacity: 0.85;">
             <div class="work-general-title" onclick="appState.showCompletedGeneral=!appState.showCompletedGeneral; renderStatic();" style="cursor:pointer;">
@@ -205,14 +210,16 @@ function renderWorkProjects() {
             </div>
             ${isExpanded ? `
               <div class="work-general-list">
-                ${completedGeneral.slice(0, 5).map(task => `
+                ${pageItems.map(task => `
                   <div class="work-general-item" style="opacity: 0.6;">
-                    <button class="task-check-btn" onclick="uncompleteTask('${escapeAttr(task.id)}')" title="완료 취소" aria-label="완료 취소">✓</button>
-                    <span class="work-general-item-title completed" title="${escapeAttr(task.title)}" onclick="editTask('${escapeAttr(task.id)}')" style="text-decoration: line-through;">${escapeHtml(task.title)}</span>
+                    <button class="task-check-btn" onclick="event.stopPropagation(); uncompleteTask('${escapeAttr(task.id)}')" title="완료 취소" aria-label="완료 취소">✓</button>
+                    <span class="work-general-item-title completed" title="${escapeAttr(task.title)}" onclick="event.stopPropagation(); editTask('${escapeAttr(task.id)}')" style="text-decoration: line-through;">${escapeHtml(task.title)}</span>
                     ${task.completedAt ? '<span style="font-size: 13px; color: var(--text-muted);">' + escapeHtml(task.completedAt.substring(5, 10).replace('-', '/')) + '</span>' : ''}
+                    <button class="work-general-edit-btn" onclick="event.stopPropagation(); editTask('${escapeAttr(task.id)}')" title="수정" aria-label="작업 수정">${svgIcon('edit', 14)}</button>
+                    <button class="work-general-delete-btn" onclick="event.stopPropagation(); deleteTask('${escapeAttr(task.id)}')" title="삭제" aria-label="작업 삭제">${svgIcon('trash', 14)}</button>
                   </div>
                 `).join('')}
-                ${completedGeneral.length > 5 ? `<div class="work-general-more" onclick="appState.workView='detail'; selectWorkProject('general')" style="cursor:pointer">+ ${completedGeneral.length - 5}개 더</div>` : ''}
+                ${renderPagination(currentPage, totalPages, completedGeneral.length, 'setWorkGeneralCompletedPage')}
               </div>
             ` : ''}
           </div>
@@ -393,6 +400,16 @@ function renderWorkProjects() {
     </div>
   `;
 }
+
+/**
+ * 본업 일반 작업 완료 섹션 페이지 변경 핸들러
+ * (renderPagination → onclick="setWorkGeneralCompletedPage(N)"에서 호출)
+ */
+function setWorkGeneralCompletedPage(page) {
+  appState.workGeneralCompletedPage = Math.max(0, page);
+  renderStatic();
+}
+window.setWorkGeneralCompletedPage = setWorkGeneralCompletedPage;
 
 // setWorkView, calendar state, selectWorkCalendarDate, navigateWorkCalendar,
 // toggleArchivedProjects, toggleWorkQuickOwner, toggleWorkSection,

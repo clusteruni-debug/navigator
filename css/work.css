@@ -336,6 +336,38 @@
       color: var(--danger);
     }
 
+    .work-general-edit-btn {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s, background-color 0.2s, color 0.2s;
+    }
+
+    .work-general-item:hover .work-general-edit-btn {
+      opacity: 1;
+    }
+
+    .work-general-edit-btn:hover {
+      background: var(--accent-primary-alpha);
+      color: var(--accent-primary);
+    }
+
+    /* 모바일(hover 없는 포인터 장치): 액션 버튼 항상 표시 */
+    @media (hover: none) and (pointer: coarse) {
+      .work-general-edit-btn,
+      .work-general-delete-btn {
+        opacity: 1;
+      }
+    }
+
     .work-general-deadline {
       font-size: 13px;
       color: var(--accent-warning);
