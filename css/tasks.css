@@ -44,6 +44,7 @@
 
     .today-remaining {
       font-size: 13px;
+      font-variant-numeric: tabular-nums;
       color: var(--text-muted);
     }
 
@@ -52,6 +53,7 @@
       align-items: center;
       gap: 10px;
       font-size: 14px;
+      font-variant-numeric: tabular-nums;
       color: var(--text-secondary);
     }
 
@@ -61,6 +63,7 @@
 
     .today-streak {
       font-weight: 700;
+      font-variant-numeric: tabular-nums;
       color: var(--accent-warning);
     }
 
@@ -151,7 +154,37 @@
 
     .task-item-mini-deadline {
       font-size: 12px;
+      font-variant-numeric: tabular-nums;
       color: var(--text-muted);
+    }
+
+    /* Deadline chip — 긴급도별 색상 분리 */
+    .deadline-chip {
+      display: inline-flex;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      padding: 2px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      background: rgba(148, 163, 184, 0.1);
+      color: var(--text-secondary);
+    }
+
+    .deadline-chip.urgent {
+      background: var(--accent-danger-alpha);
+      color: var(--accent-danger);
+    }
+
+    .deadline-chip.soon {
+      background: var(--accent-warning-alpha);
+      color: var(--accent-warning);
+    }
+
+    .deadline-chip.normal {
+      background: rgba(148, 163, 184, 0.1);
+      color: var(--text-secondary);
     }
 
     .task-check-done {
@@ -377,8 +410,8 @@
     }
 
     .task-check-btn:hover {
-      border-color: var(--accent-success);
-      color: var(--accent-success);
+      border-color: var(--task-cat-color, var(--accent-success));
+      color: var(--task-cat-color, var(--accent-success));
     }
 
     .task-item-mini-title {
@@ -609,18 +642,17 @@
     .task-item {
       background: var(--bg-secondary);
       padding: 14px 16px;
-      border-radius: var(--radius-md);
-      margin-bottom: 10px;
-      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      margin-bottom: var(--task-gap);
+      border: none;
       border-left: 4px solid var(--task-cat-color, var(--border-color));
       position: relative;
       overflow: hidden;
-      transition: border-color var(--transition-normal), transform var(--transition-normal);
-      box-shadow: 0 1px 4px var(--shadow-color);
+      transition: background var(--transition-normal);
     }
 
     .task-item:hover {
-      border-color: var(--border-color);
+      background: color-mix(in srgb, var(--bg-tertiary) 40%, var(--bg-secondary));
     }
 
     .task-item:active {
@@ -636,21 +668,17 @@
     }
 
     .task-item.completed {
-      opacity: 0.6;
-      background: color-mix(in srgb, var(--accent-success) 5%, transparent);
-      border-color: var(--accent-success-alpha-30);
+      opacity: 0.45;
+      background: color-mix(in srgb, var(--accent-success) 5%, var(--bg-secondary));
     }
 
     .task-item.completed:hover {
-      opacity: 0.8;
+      opacity: 0.7;
     }
 
-    /* 긴급도 레벨별 그라데이션 */
+    /* 긴급도 레벨별 */
     .task-item.urgent {
       background: var(--accent-danger-alpha);
-      border-color: var(--accent-danger);
-      border-width: 2px;
-      box-shadow: 0 2px 12px color-mix(in srgb, var(--accent-danger) 20%, transparent);
     }
 
     .task-item.urgent::before {
@@ -664,14 +692,11 @@
     }
 
     .task-item.urgent:hover {
-      border-color: var(--accent-danger);
+      background: color-mix(in srgb, var(--accent-danger) 20%, var(--bg-secondary));
     }
 
     .task-item.warning {
       background: var(--accent-warning-alpha);
-      border-color: var(--accent-warning);
-      border-width: 2px;
-      box-shadow: 0 2px 12px color-mix(in srgb, var(--pulse-warning) 15%, transparent);
     }
 
     .task-item.warning::before {
@@ -685,7 +710,7 @@
     }
 
     .task-item.warning:hover {
-      border-color: var(--accent-warning);
+      background: color-mix(in srgb, var(--accent-warning) 20%, var(--bg-secondary));
     }
 
     /* 일반 우선순위 표시 */

@@ -58,7 +58,7 @@ function renderActionTab(ctx) {
               <span class="category ${nextAction.category}">${nextAction.category}</span>
               ${nextAction.repeatType && nextAction.repeatType !== 'none' ? `<span class="meta-item">🔄 ${getRepeatLabel(nextAction.repeatType, nextAction)}</span>` : ''}
               ${nextAction.estimatedTime ? `<span class="meta-item">⏱ ${nextAction.estimatedTime}분</span>` : ''}
-              ${nextAction.deadline ? `<span class="meta-item">⏰ ${formatDeadline(nextAction.deadline)}</span>` : ''}
+              ${nextAction.deadline ? formatDeadlineChip(nextAction.deadline) : ''}
               ${nextAction.expectedRevenue ? `<span class="meta-item">💰 ${Number(nextAction.expectedRevenue).toLocaleString()}원</span>` : ''}
             </div>
             ${nextAction.subtasks && nextAction.subtasks.length > 0 ? `
@@ -122,7 +122,7 @@ function renderActionTab(ctx) {
                     <span class="task-item-mini-title">${escapeHtml(task.title)}</span>
                   </div>
                   <div class="task-item-mini-right">
-                    ${task.deadline ? `<span class="task-item-mini-deadline">${formatDeadline(task.deadline)}</span>` : ''}
+                    ${task.deadline ? formatDeadlineChip(task.deadline) : ''}
                     <span class="task-item-mini-category ${task.category}">${task.category}</span>
                   </div>
                   ${hasSubtasks && !(appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id]) ? `

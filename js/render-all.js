@@ -62,7 +62,7 @@ function _renderTaskItem(task) {
           ${hasSubtasks ? `<button class="subtask-progress-indicator${allDone ? ' all-done' : ''}" onclick="event.stopPropagation(); toggleSubtaskChips('${escapeAttr(task.id)}')" title="서브태스크 접기/펼치기" aria-label="서브태스크 ${doneCount}/${totalCount} 접기/펼치기">${doneCount}/${totalCount} ${appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id] ? '▶' : '▼'}</button>` : ''}
           ${task.repeatType && task.repeatType !== 'none' ? `<span>🔄 ${getRepeatLabel(task.repeatType, task)}</span>` : ''}
           ${task.estimatedTime ? `<span>⏱️ ${task.estimatedTime}분</span>` : ''}
-          ${task.deadline ? `<span>${formatDeadline(task.deadline)}</span>` : ''}
+          ${task.deadline ? formatDeadlineChip(task.deadline) : ''}
           ${task.expectedRevenue ? `<span>💰 ${Number(task.expectedRevenue).toLocaleString()}원</span>` : ''}
           ${task.organizer ? `<span>👤 ${escapeHtml(task.organizer)}</span>` : ''}
         </div>

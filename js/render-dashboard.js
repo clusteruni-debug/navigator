@@ -204,7 +204,7 @@ function renderDashboardTab(ctx) {
               ${urgentTasks.slice(0, 5).map(task => `
                 <div class="urgent-item">
                   <div class="urgent-item-title">${escapeHtml(task.title)}</div>
-                  <div class="urgent-item-time">⏰ ${formatDeadline(task.deadline)}</div>
+                  <div class="urgent-item-time">${formatDeadlineChip(task.deadline)}</div>
                 </div>
               `).join('')}
             </div>

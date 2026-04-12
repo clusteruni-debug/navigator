@@ -429,3 +429,18 @@ function formatDeadline(deadline) {
     minute: '2-digit'
   });
 }
+
+/**
+ * Deadline chip HTML — urgency 색상 분리
+ */
+function formatDeadlineChip(deadline) {
+  const text = formatDeadline(deadline);
+  if (!text) return '';
+  const now = new Date();
+  const d = new Date(deadline);
+  const hoursLeft = (d - now) / (1000 * 60 * 60);
+  let cls = 'normal';
+  if (hoursLeft < 3) cls = 'urgent';
+  else if (hoursLeft < 24) cls = 'soon';
+  return `<span class="deadline-chip ${cls}">${text}</span>`;
+}

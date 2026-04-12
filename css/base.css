@@ -8,6 +8,11 @@
 
     /* 다크 테마 (기본) - Slate Professional (Linear 스타일 네이비 톤) */
     :root {
+
+      /* ═══════════════════════════════════════════
+         Primitive — raw hex values, mode-agnostic
+         ═══════════════════════════════════════════ */
+
       /* 8pt 스페이싱 그리드 */
       --space-1: 8px;
       --space-2: 16px;
@@ -16,7 +21,7 @@
       --space-5: 40px;
       --space-6: 48px;
 
-      /* Slate Professional — 네이비 다크 */
+      /* Slate palette */
       --bg-primary: #0F172A;
       --bg-secondary: #1E293B;
       --bg-tertiary: #334155;
@@ -33,6 +38,33 @@
       --cat-일상: #48bb78;
       --cat-가족: #f6ad55;
 
+      /* 차트 팔레트 (프로젝트 구분용) */
+      --chart-cyan: #22d3ee;
+      --chart-lavender: #a78bfa;
+      --chart-tangerine: #fb923c;
+      --chart-blue: #4299e1;
+      --chart-teal: #38b2ac;
+      --chart-pink: #ed64a6;
+
+      /* Radius */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+
+      /* 타이포그래피 */
+      --font-body: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'SF Mono', 'Monaco', monospace;
+      --font-xs: 14px;    /* 최소 가독 크기 */
+      --font-sm: 15px;    /* 보조 라벨 */
+      --font-base: 16px;  /* 기본 본문 */
+      --font-md: 17px;    /* 강조 본문 */
+      --font-lg: 18px;    /* 소제목 */
+      --font-xl: 20px;    /* 제목 */
+
+      /* ═══════════════════════════════════════════
+         Semantic — purpose aliases
+         ═══════════════════════════════════════════ */
+
       /* 액센트 색상 */
       --accent-primary: #667eea;
       --accent-primary-hover: #5a6fd6;
@@ -47,14 +79,8 @@
       --accent-amber: #EAB308;
       --pulse-warning: #ff9500;
       --accent-celebration: #ffd93d;
-      /* 차트 팔레트 (프로젝트 구분용) */
-      --chart-cyan: #22d3ee;
-      --chart-lavender: #a78bfa;
-      --chart-tangerine: #fb923c;
-      --chart-blue: #4299e1;
-      --chart-teal: #38b2ac;
-      --chart-pink: #ed64a6;
 
+      /* Alpha variants */
       --accent-primary-alpha: rgba(102, 126, 234, 0.15);
       --accent-success-alpha: rgba(72, 187, 120, 0.15);
       --accent-success-alpha-30: rgba(72, 187, 120, 0.3);
@@ -73,29 +99,23 @@
       --overlay-backdrop: rgba(0, 0, 0, 0.7);
       --overlay-heavy: rgba(0, 0, 0, 0.85);
 
-      /* Radius */
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
-
       /* 트랜지션 */
       --transition-fast: 0.15s ease;
       --transition-normal: 0.25s ease;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-      /* 타이포그래피 스케일 */
-      --font-xs: 14px;    /* 최소 가독 크기 */
-      --font-sm: 15px;    /* 보조 라벨 */
-      --font-base: 16px;  /* 기본 본문 */
-      --font-md: 17px;    /* 강조 본문 */
-      --font-lg: 18px;    /* 소제목 */
-      --font-xl: 20px;    /* 제목 */
+      /* ═══════════════════════════════════════════
+         Component — feature-specific tokens
+         ═══════════════════════════════════════════ */
 
       /* 레이아웃 토큰 */
       --sidebar-width: 220px;
       --task-gap: 8px;
       --focus-ring: 0 0 0 3px var(--accent-primary-alpha);
 
-      /* 별칭 (레거시 참조 호환) */
+      /* ═══════════════════════════════════════════
+         Legacy aliases — brownfield compat
+         ═══════════════════════════════════════════ */
       --primary: var(--accent-primary);
       --success: var(--accent-success);
       --danger: var(--accent-danger);
@@ -106,9 +126,6 @@
       --border-primary: var(--border-color);
       --accent-color: var(--accent-primary);
       --accent-pink: var(--cat-부업);
-
-      /* 트랜지션 이징 */
-      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* 라이트 테마 */
@@ -132,7 +149,7 @@
     }
 
     body {
-      font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: var(--font-body);
       background: var(--bg-primary);
       color: var(--text-primary);
       min-height: 100vh;
