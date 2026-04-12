@@ -397,6 +397,14 @@ function renderSettingsModal() {
                   })()}
                 </div>
                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                  <button class="backup-btn" onclick="exportArchivedData()" style="width: 100%; background: var(--bg-secondary); border-color: var(--border-color);" aria-label="자동 정리된 오래된 데이터 내보내기">
+                    📦 아카이브 내보내기
+                  </button>
+                  <div class="settings-label-desc" style="text-align: center; margin-top: 6px; opacity: 0.5; font-size: 13px;">
+                    자동 정리된 2년 이전 데이터 (기상/출퇴근/완료 기록)
+                  </div>
+                </div>
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
                   <button class="backup-btn" onclick="restoreFromSyncBackup()" style="width: 100%; background: var(--accent-danger-alpha); border-color: var(--accent-danger); color: var(--accent-danger);" aria-label="동기화 백업에서 데이터 복원">
                     🔄 동기화 백업에서 복원
                   </button>

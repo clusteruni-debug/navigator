@@ -223,8 +223,31 @@ function handleFileImport(e) {
 // ============================================
 
 /**
+ * 프루닝된 데이터를 localStorage 아카이브에 병합 저장
+ * 키: navigator-archive-{type} (rhythm / commute / completionLog)
+ * 기존 아카이브가 있으면 병합, 없으면 새로 생성
+ */
+function _archivePrunedData(type, entries) {
+  const key = 'navigator-archive-' + type;
+  let archive = {};
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) archive = JSON.parse(raw);
+  } catch (e) { /* 파싱 실패 시 빈 객체로 시작 */ }
+  Object.assign(archive, entries);
+  try {
+    localStorage.setItem(key, JSON.stringify(archive));
+    return true;
+  } catch (e) {
+    console.error(`[Archive] localStorage 쓰기 실패 (${key}):`, e);
+    return false;
+  }
+}
+
+/**
  * 오래된 라이프 리듬 히스토리 프루닝 (기본 2년)
  * 안전 게이트: 최근 30일 내 백업(Export)이 있어야만 실행
+ * 삭제 전 localStorage 아카이브에 보관
  */
 function pruneOldRhythmHistory(years = 2) {
   if (!_isArchiveSafe()) return 0;
@@ -232,16 +255,20 @@ function pruneOldRhythmHistory(years = 2) {
   if (!history || typeof history !== 'object') return 0;
 
   const cutoff = _getCutoffDate(years);
-  let pruned = 0;
+  const toArchive = {};
   for (const dateKey of Object.keys(history)) {
     if (dateKey < cutoff) {
-      delete history[dateKey];
-      pruned++;
+      toArchive[dateKey] = history[dateKey];
     }
   }
+  const pruned = Object.keys(toArchive).length;
   if (pruned > 0) {
+    if (!_archivePrunedData('rhythm', toArchive)) return 0;
+    for (const dateKey of Object.keys(toArchive)) {
+      delete history[dateKey];
+    }
     saveLifeRhythm();
-    console.log(`[Prune] lifeRhythm.history: ${pruned} entries older than ${cutoff} removed`);
+    console.log(`[Prune] lifeRhythm.history: ${pruned} entries older than ${cutoff} archived + removed`);
   }
   return pruned;
 }
@@ -249,6 +276,7 @@ function pruneOldRhythmHistory(years = 2) {
 /**
  * 오래된 통근 트립 프루닝 (기본 2년)
  * 안전 게이트: 최근 30일 내 백업(Export)이 있어야만 실행
+ * 삭제 전 localStorage 아카이브에 보관
  */
 function pruneOldCommuteTrips(years = 2) {
   if (!_isArchiveSafe()) return 0;
@@ -256,29 +284,106 @@ function pruneOldCommuteTrips(years = 2) {
   if (!trips || typeof trips !== 'object') return 0;
 
   const cutoff = _getCutoffDate(years);
-  let pruned = 0;
+  const toArchive = {};
   for (const dateKey of Object.keys(trips)) {
     if (dateKey < cutoff) {
-      delete trips[dateKey];
-      pruned++;
+      toArchive[dateKey] = trips[dateKey];
     }
   }
+  const pruned = Object.keys(toArchive).length;
   if (pruned > 0) {
+    if (!_archivePrunedData('commute', toArchive)) return 0;
+    for (const dateKey of Object.keys(toArchive)) {
+      delete trips[dateKey];
+    }
     localStorage.setItem('navigator-commute-tracker', JSON.stringify(appState.commuteTracker));
-    console.log(`[Prune] commuteTracker.trips: ${pruned} entries older than ${cutoff} removed`);
+    console.log(`[Prune] commuteTracker.trips: ${pruned} entries older than ${cutoff} archived + removed`);
   }
   return pruned;
 }
 
 /**
- * 앱 시작 시 호출: 안전한 경우에만 자동 프루닝
+ * 오래된 completionLog 프루닝 (기본 2년)
+ * 안전 게이트: 최근 30일 내 백업(Export)이 있어야만 실행
+ * 1년 압축(compactOldCompletionLog)과 별개 — 압축본 포함 2년 초과 항목 아카이브 후 삭제
+ */
+function pruneOldCompletionLog(years = 2) {
+  if (!_isArchiveSafe()) return 0;
+  const log = appState.completionLog;
+  if (!log || typeof log !== 'object') return 0;
+
+  const cutoff = _getCutoffDate(years);
+  const toArchive = {};
+  for (const dateKey of Object.keys(log)) {
+    if (dateKey < cutoff) {
+      toArchive[dateKey] = log[dateKey];
+    }
+  }
+  const pruned = Object.keys(toArchive).length;
+  if (pruned > 0) {
+    if (!_archivePrunedData('completionLog', toArchive)) return 0;
+    for (const dateKey of Object.keys(toArchive)) {
+      delete log[dateKey];
+    }
+    saveCompletionLog();
+    console.log(`[Prune] completionLog: ${pruned} entries older than ${cutoff} archived + removed`);
+  }
+  return pruned;
+}
+
+/**
+ * 앱 시작 시 호출: 안전한 경우에만 자동 프루닝 (아카이브 후 삭제)
  */
 function runStartupPruning() {
   const rh = pruneOldRhythmHistory(2);
   const ct = pruneOldCommuteTrips(2);
-  if (rh > 0 || ct > 0) {
-    console.log(`[Prune] Startup pruning: rhythm=${rh}, commute=${ct}`);
+  const cl = pruneOldCompletionLog(2);
+  if (rh > 0 || ct > 0 || cl > 0) {
+    console.log(`[Prune] Startup pruning: rhythm=${rh}, commute=${ct}, completionLog=${cl}`);
   }
+}
+
+/**
+ * 아카이브된 프루닝 데이터를 JSON 파일로 다운로드
+ * 설정 화면에서 호출 가능
+ */
+function exportArchivedData() {
+  const archive = {
+    exportDate: new Date().toISOString(),
+    rhythm: {},
+    commute: {},
+    completionLog: {}
+  };
+  try {
+    const rh = localStorage.getItem('navigator-archive-rhythm');
+    if (rh) archive.rhythm = JSON.parse(rh);
+    const ct = localStorage.getItem('navigator-archive-commute');
+    if (ct) archive.commute = JSON.parse(ct);
+    const cl = localStorage.getItem('navigator-archive-completionLog');
+    if (cl) archive.completionLog = JSON.parse(cl);
+  } catch (e) {
+    console.error('[Archive] 아카이브 로드 실패:', e);
+    showToast('아카이브 데이터 로드 실패', 'error');
+    return;
+  }
+
+  const total = Object.keys(archive.rhythm).length
+    + Object.keys(archive.commute).length
+    + Object.keys(archive.completionLog).length;
+  if (total === 0) {
+    showToast('아카이브된 데이터가 없습니다', 'info');
+    return;
+  }
+
+  const json = JSON.stringify(archive, null, 2);
+  const blob = new Blob(['\uFEFF' + json], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `navigator-archive-${getLocalDateStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`📦 아카이브 ${total}건 내보내기 완료`, 'success');
 }
 
 /** 안전 게이트: 최근 30일 내 아카이브(Export)가 있는지 확인 */
@@ -289,9 +394,9 @@ function _isArchiveSafe() {
   return daysSince <= 30;
 }
 
-/** N년 전 날짜를 YYYY-MM-DD 문자열로 반환 */
+/** N년 전 날짜를 YYYY-MM-DD 문자열로 반환 (로컬 타임존 기준) */
 function _getCutoffDate(years) {
   const d = new Date();
   d.setFullYear(d.getFullYear() - years);
-  return d.toISOString().slice(0, 10);
+  return getLocalDateStr(d);
 }

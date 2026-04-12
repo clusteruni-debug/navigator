@@ -14,7 +14,7 @@ const _navFunctions = {
   // 터치/스와이프
   handleTouchStart, handleTouchMove, handleTouchEnd,
   // 백업/데이터
-  exportData, importData,
+  exportData, importData, exportArchivedData,
   // 유틸
   getRepeatLabel, setScheduleFilter, getTasksByDate, formatTime,
   setSearchQuery, clearSearch, setCategoryFilter,
