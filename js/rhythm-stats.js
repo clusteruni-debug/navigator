@@ -343,12 +343,15 @@ function calculateRhythmStats(days) {
       if (dur > 0) data.workDuration.push(dur);
     }
 
-    // 복약 통계
+    // 복약 통계 — 복약 기록이 1개라도 있는 날 또는 오늘만 분모에 포함
     const meds = dayData.medications || {};
-    medSlots.forEach(function(s) {
-      medStats[s.id].total++;
-      if (meds[s.id]) medStats[s.id].taken++;
-    });
+    const hasMedActivity = Object.values(meds).some(function(v) { return v; });
+    if (hasMedActivity || dateStr === todayStr) {
+      medSlots.forEach(function(s) {
+        medStats[s.id].total++;
+        if (meds[s.id]) medStats[s.id].taken++;
+      });
+    }
   }
 
   // 평균 계산 헬퍼

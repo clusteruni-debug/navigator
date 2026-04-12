@@ -205,8 +205,6 @@ function renderLifeRhythmHistory() {
         var medSlots = getMedicationSlots();
         if (!medSlots || medSlots.length === 0) return '';
         var meds = selectedData.medications || {};
-        var hasMedData = medSlots.some(function(s) { return meds[s.id]; });
-        if (!hasMedData && !selIsToday) return '';
         return '<div class="rhythm-history-meds">' +
           medSlots.map(function(s) {
             var taken = !!meds[s.id];
@@ -232,7 +230,7 @@ function renderLifeRhythmHistory() {
       '<div style="text-align: center; padding: 20px; color: var(--text-muted);">' +
         '<div style="font-size: 24px; margin-bottom: 8px;">📋</div>' +
         '<div>' + selectedDate + ' 기록 없음</div>' +
-        '<div style="font-size: 13px; margin-top: 4px;">캘린더에서 기록이 있는 날짜를 선택하세요</div>' +
+        '<div style="font-size: 13px; margin-top: 4px;">상단 📅 날짜 추가 버튼으로 기록을 시작하세요</div>' +
       '</div>' +
     '</div>';
   }

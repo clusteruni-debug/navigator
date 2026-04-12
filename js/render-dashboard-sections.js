@@ -159,6 +159,7 @@ function _renderDashLifeRhythm() {
         // 7일 / 30일 통계 함수
         function calcMedStats(days) {
           let tReq = 0, takenReq = 0, tOpt = 0, takenOpt = 0;
+          const todayStr = getLogicalDate();
           for (let i = 0; i < days; i++) {
             const d = new Date(today);
             d.setDate(today.getDate() - i);
@@ -170,6 +171,9 @@ function _renderDashLifeRhythm() {
               const hist = appState.lifeRhythm.history[ds];
               dayMeds = hist ? (hist.medications || {}) : {};
             }
+            // 복약 기록이 1개라도 있는 날 또는 오늘만 분모에 포함
+            const hasMedActivity = Object.values(dayMeds).some(function(v) { return v; });
+            if (!hasMedActivity && ds !== todayStr) continue;
             medSlots.forEach(s => {
               if (s.required) { tReq++; if (dayMeds[s.id]) takenReq++; }
               else { tOpt++; if (dayMeds[s.id]) takenOpt++; }
