@@ -120,11 +120,14 @@ function addSubcategory(projectId, stageIdx, name) {
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
 
-  if (!project.stages[stageIdx].subcategories) {
-    project.stages[stageIdx].subcategories = [];
+  const stage = project.stages?.[stageIdx];
+  if (!stage) return;
+
+  if (!stage.subcategories) {
+    stage.subcategories = [];
   }
 
-  project.stages[stageIdx].subcategories.push({
+  stage.subcategories.push({
     id: generateId(),
     name: name,
     tasks: []
@@ -156,7 +159,7 @@ function deleteSubcategory(projectId, stageIdx, subcatIdx) {
 
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
-  const stage = project.stages[stageIdx];
+  const stage = project.stages?.[stageIdx];
   if (!stage) return;
 
   // expandedWorkLogs + expandedWorkTasks cleanup
@@ -192,7 +195,10 @@ function addWorkTask(projectId, stageIdx, subcatIdx, title, status, canStartEarl
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
 
-  project.stages[stageIdx].subcategories[subcatIdx].tasks.push({
+  const subcat = project.stages[stageIdx]?.subcategories?.[subcatIdx];
+  if (!subcat) return;
+
+  subcat.tasks.push({
     id: generateId(),
     title: title,
     status: status,
@@ -229,7 +235,8 @@ function cycleWorkTaskStatus(projectId, stageIdx, subcatIdx, taskIdx) {
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
 
-  const task = project.stages[stageIdx].subcategories[subcatIdx].tasks[taskIdx];
+  const task = project.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  if (!task) return;
   const statuses = ['not-started', 'in-progress', 'completed', 'blocked'];
   const currentIdx = statuses.indexOf(task.status);
   task.status = statuses[(currentIdx + 1) % statuses.length];
@@ -276,7 +283,8 @@ function _doToggleWorkTaskComplete(projectId, stageIdx, subcatIdx, taskIdx) {
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
 
-  const task = project.stages[stageIdx].subcategories[subcatIdx].tasks[taskIdx];
+  const task = project.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  if (!task) return;
   const wasCompleted = task.status === 'completed';
   task.status = wasCompleted ? 'not-started' : 'completed';
 
@@ -306,7 +314,7 @@ function toggleSubcategoryComplete(projectId, stageIdx, subcatIdx) {
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
 
-  const subcat = project.stages[stageIdx].subcategories[subcatIdx];
+  const subcat = project.stages[stageIdx]?.subcategories?.[subcatIdx];
   if (!subcat) return;
 
   // 빈 중분류도 완료 토글 가능
@@ -355,7 +363,7 @@ function deleteWorkTask(projectId, stageIdx, subcatIdx, taskIdx) {
 
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
-  const stage = project.stages[stageIdx];
+  const stage = project.stages?.[stageIdx];
   if (!stage) return;
   const subcat = (stage.subcategories || [])[subcatIdx];
   if (!subcat) return;
@@ -388,7 +396,8 @@ function addWorkLog(projectId, stageIdx, subcatIdx, taskIdx, content) {
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
 
-  const task = project.stages[stageIdx].subcategories[subcatIdx].tasks[taskIdx];
+  const task = project.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  if (!task) return;
   const today = getLocalDateStr();
 
   task.logs.push({
@@ -412,7 +421,9 @@ function deleteWorkLog(projectId, stageIdx, subcatIdx, taskIdx, logIdx) {
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
 
-  project.stages[stageIdx].subcategories[subcatIdx].tasks[taskIdx].logs.splice(logIdx, 1);
+  const task = project.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  if (!task || !task.logs) return;
+  task.logs.splice(logIdx, 1);
   project.updatedAt = new Date().toISOString();
   saveWorkProjects();
   renderStatic();
@@ -503,7 +514,7 @@ function reorderSubcategory(projectId, stageIdx, fromIdx, toIdx) {
   if (fromIdx === toIdx) return;
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
-  const stage = project.stages && project.stages[stageIdx];
+  const stage = project.stages?.[stageIdx];
   if (!stage || !stage.subcategories) return;
   const arr = stage.subcategories;
   if (fromIdx < 0 || fromIdx >= arr.length || toIdx < 0 || toIdx >= arr.length) return;
