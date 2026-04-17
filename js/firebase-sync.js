@@ -121,7 +121,25 @@ async function forceSync() {
     await loadFromFirebase();
     recomputeTodayStats();
     _safeRender();
-    _safeToast('✅ 동기화 완료!', 'success');
+
+    // 서버 ack 직접 대기 — loadFromFirebase 내부 syncToFirebase(true)가 비동기로 설정한 Promise.race를
+    // 기다리지 않기 때문에, '✅ 완료' 토스트를 띄우기 전 명시적으로 서버 도달 확인.
+    // 이전 버전은 '✅ 완료' → 15초 후 '⚠️ 실패' 순으로 사용자에게 모순된 메시지 보냄.
+    if (typeof window.firebaseWaitForPendingWrites === 'function') {
+      const result = await Promise.race([
+        window.firebaseWaitForPendingWrites(window.firebaseDb).then(() => 'ACK', () => 'FAIL'),
+        new Promise(resolve => setTimeout(() => resolve('TIMEOUT'), SERVER_ACK_TIMEOUT_MS))
+      ]);
+      if (result === 'ACK') {
+        _safeToast('✅ 동기화 완료!', 'success');
+      } else {
+        const reason = result === 'TIMEOUT' ? '15초 무응답' : 'SDK 에러';
+        _safeToast(`⚠️ 서버 확인 실패 (${reason}) — 네트워크를 확인하세요`, 'error');
+      }
+    } else {
+      // SDK 모듈 로드 실패 — 성공/실패 판정 불가
+      _safeToast('⚠️ Firebase SDK 로드 실패 — 페이지 새로고침 필요', 'error');
+    }
   } catch (error) {
     console.error('수동 동기화 실패:', error);
     _safeToast('동기화에 실패했습니다', 'error');
@@ -230,28 +248,44 @@ async function _doSyncToFirebase() {
     // waitForPendingWrites(db)는 **서버 ack** 받을 때까지 기다리는 Promise 반환 (SDK 공식 API).
     // 네트워크 끊기면 영원히 pending → Promise.race로 15초 타임아웃 병행.
     // 기다리지 않고 비동기 트래킹만 (UI는 'syncing' 상태 유지, 결과에 따라 'synced'/'error' 전환).
-    Promise.race([
-      // waitForPendingWrites reject 케이스(Firestore 종료 등)도 'FAIL'로 수렴 — unhandled rejection 방지
-      window.firebaseWaitForPendingWrites(window.firebaseDb).then(() => 'ACK', () => 'FAIL'),
-      new Promise(resolve => setTimeout(() => resolve('TIMEOUT'), SERVER_ACK_TIMEOUT_MS))
-    ]).then(result => {
-      if (!appState.user) return; // 로그아웃됐으면 무시
-      if (result === 'ACK') {
-        if (appState.syncStatus !== 'synced' && !isLoadingFromCloud) {
-          appState.syncStatus = 'synced';
-          updateSyncIndicator();
+    // SDK 모듈 로드 실패 케이스 방어 — 가드 없으면 Promise.race 배열 리터럴에서 synchronous throw
+    if (typeof window.firebaseWaitForPendingWrites !== 'function') {
+      console.warn('[sync] waitForPendingWrites SDK 미로드 — 서버 ack 검증 스킵');
+      appState.syncStatus = 'error';
+      updateSyncIndicator();
+      _safeToast('⚠️ Firebase SDK 로드 실패 — 페이지를 새로고침하세요', 'error');
+    } else {
+      Promise.race([
+        // waitForPendingWrites reject(Firestore 종료, 탭 소유권 상실 등)도 'FAIL'로 수렴
+        // 에러 객체는 로깅해서 디버깅 가능 — swallow 금지
+        window.firebaseWaitForPendingWrites(window.firebaseDb).then(
+          () => 'ACK',
+          (err) => { console.warn('[sync] waitForPendingWrites rejected:', err?.code, err?.message); return 'FAIL'; }
+        ),
+        new Promise(resolve => setTimeout(() => resolve('TIMEOUT'), SERVER_ACK_TIMEOUT_MS))
+      ]).then(result => {
+        if (!appState.user) return; // 로그아웃됐으면 무시
+        if (result === 'ACK') {
+          if (appState.syncStatus !== 'synced' && !isLoadingFromCloud) {
+            appState.syncStatus = 'synced';
+            updateSyncIndicator();
+          }
+        } else {
+          // TIMEOUT 또는 FAIL — 서버 미도달 확정. 단, 'synced'는 덮어쓰지 않음
+          // (onSnapshot이 이미 서버 ack 감지해서 'synced'로 만든 경우 = 이 TIMEOUT은 stale race 결과)
+          if (appState.syncStatus === 'syncing') {
+            appState.syncStatus = 'error';
+            updateSyncIndicator();
+            const reason = result === 'TIMEOUT' ? '15초' : 'SDK 에러';
+            _safeToast(`⚠️ 서버 확인 실패 (${reason}) — 네트워크/방화벽을 확인하세요`, 'error');
+            console.warn(`[sync] 서버 ack 실패 (${result}) — SDK 큐에 쓰기는 있으나 서버 도달 미확정`);
+          }
         }
-      } else {
-        // TIMEOUT 또는 FAIL — setDoc은 SDK-side success지만 서버 미도달
-        if (appState.syncStatus === 'syncing' || appState.syncStatus === 'synced') {
-          appState.syncStatus = 'error';
-          updateSyncIndicator();
-          const reason = result === 'TIMEOUT' ? '15초' : 'SDK 에러';
-          _safeToast(`⚠️ 서버 확인 실패 (${reason}) — 네트워크/방화벽을 확인하세요`, 'error');
-          console.warn(`[sync] 서버 ack 실패 (${result}) — SDK 큐에 쓰기는 있으나 서버 도달 미확정`);
-        }
-      }
-    });
+      }).catch(err => {
+        // .then 콜백 내부에서 예외 발생 시 unhandled rejection 방지 (updateSyncIndicator DOM 접근 등)
+        console.warn('[sync] Promise.race .then 내부 예외:', err?.message);
+      });
+    }
 
     appState.lastSyncTime = new Date();
     updateSyncIndicator();
@@ -911,10 +945,14 @@ window.diagnoseSyncIssue = diagnoseSyncIssue;
 
 // 페이지 이탈 전 쓰기 미확정 경고 — 사용자가 쓰기 대기 중에 탭 닫을 때
 // 브라우저 기본 다이얼로그 표시 (확실한 브라우저 사이드 안전장치)
-// 로그인 중 && (syncing/error) 상태일 때만 활성. SDK 큐는 IndexedDB 영속이라
-// 탭 닫아도 데이터 자체는 남지만, 다른 브라우저 이동 시 유실 가능.
+// 로그인 중 && 쓰기 미확정 상태일 때만 활성:
+//   'syncing' = 서버 ack 대기 중
+//   'error'   = 서버 ack 타임아웃 (큐에 쓰기 남아있을 확률 높음)
+//   'offline' = 네트워크 단절, SDK 큐에 쓰기 대기 중 (같은 브라우저 재방문은 안전하지만 크로스 브라우저 이동 시 유실)
+// SDK 큐는 IndexedDB 영속이라 같은 브라우저 재방문 시 자동 복구.
 window.addEventListener('beforeunload', (e) => {
-  if (appState.user && (appState.syncStatus === 'syncing' || appState.syncStatus === 'error')) {
+  const s = appState.syncStatus;
+  if (appState.user && (s === 'syncing' || s === 'error' || s === 'offline')) {
     e.preventDefault();
     // 브라우저가 기본 "페이지 떠나시겠습니까?" 다이얼로그 표시
     // (모던 브라우저는 보안 이유로 커스텀 메시지 무시, 빈 문자열 반환으로 충분)
