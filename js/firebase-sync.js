@@ -16,6 +16,56 @@ const SYNC_DEBOUNCE_MS = 1500; // 동기화 디바운스 간격 (1.5초)
 let lastOwnWriteTimestamp = null; // 핑퐁 방지: 자기가 마지막으로 쓴 timestamp
 // lastRealtimeSyncToastTime 제거 — 동기화 수신 토스트 자체를 삭제함
 
+// 서버 ack 인라인 검증 — persistentLocalCache 환경에서 setDoc resolve는
+// 로컬 IndexedDB 쓰기 완료만 보장. 서버 도달 확정은 onSnapshot metadata
+// (fromCache=false + hasPendingWrites=false) 이벤트에서 확인. 각 쓰기마다
+// waiter 등록 → 서버 ack 이벤트가 내 timestamp와 매칭되면 resolve, 타임아웃
+// 시 reject하여 'error' 상태로 전환.
+const serverAckWaiters = new Map(); // timestamp string → { resolve, reject, timer }
+const SERVER_ACK_TIMEOUT_MS = 15000; // 15초 — 느린 모바일 네트워크 허용 + 회사 PC 침묵 빠른 탐지
+
+/**
+ * setDoc 후 호출 — 해당 timestamp가 서버 ack로 onSnapshot에 도달하는지 추적.
+ * 타임아웃 내 도달 → 'synced' 전환. 타임아웃 → 'error' + 토스트.
+ * 이 함수는 기다리지 않고 즉시 리턴 (비동기 추적만 설정).
+ */
+function _registerServerAckWaiter(timestamp) {
+  // 로그아웃 등으로 기존 waiter가 남아있으면 정리
+  const existing = serverAckWaiters.get(timestamp);
+  if (existing) {
+    clearTimeout(existing.timer);
+    serverAckWaiters.delete(timestamp);
+  }
+
+  const timer = setTimeout(() => {
+    if (!serverAckWaiters.has(timestamp)) return;
+    serverAckWaiters.delete(timestamp);
+    // 이미 'error'/'offline'이면 유지, 'syncing'/'synced'에서만 에스컬레이션
+    if (appState.syncStatus === 'syncing' || appState.syncStatus === 'synced') {
+      appState.syncStatus = 'error';
+      if (typeof updateSyncIndicator === 'function') updateSyncIndicator();
+      _safeToast('⚠️ 서버 확인 타임아웃 (15초) — 네트워크/방화벽을 확인하세요', 'error');
+      console.warn(`[sync] 서버 ack 타임아웃: setDoc은 SDK-side success, 서버는 미도달 (timestamp: ${timestamp})`);
+    }
+  }, SERVER_ACK_TIMEOUT_MS);
+
+  serverAckWaiters.set(timestamp, { timer });
+}
+
+/** onSnapshot에서 server-confirmed 이벤트가 도착했을 때 호출. 매칭되는 waiter 있으면 resolve. */
+function _resolveServerAckWaiter(timestamp) {
+  const waiter = serverAckWaiters.get(timestamp);
+  if (!waiter) return false;
+  clearTimeout(waiter.timer);
+  serverAckWaiters.delete(timestamp);
+  // 서버 ack 확정 — 'synced' 전환 (단, 로그인 중이고 loadFromFirebase 중간 아닐 때만)
+  if (appState.user && !isLoadingFromCloud) {
+    appState.syncStatus = 'synced';
+    if (typeof updateSyncIndicator === 'function') updateSyncIndicator();
+  }
+  return true;
+}
+
 // UI 피드백 안전 래퍼 — ui.js/render.js 로드 실패 시에도 동기화 경로 보호
 function _safeToast(msg, type) { if (typeof showToast === 'function') showToast(msg, type); }
 function _safeRender() { if (typeof renderStatic === 'function') renderStatic(); }
@@ -79,6 +129,10 @@ async function logout() {
       unsubscribeSnapshot();
       unsubscribeSnapshot = null;
     }
+
+    // 서버 ack 검증 waiter 모두 정리 (로그아웃 후 지연 타임아웃이 잘못된 에러 상태 만드는 것 방지)
+    serverAckWaiters.forEach(w => clearTimeout(w.timer));
+    serverAckWaiters.clear();
 
     _safeToast('로그아웃되었습니다', 'info');
     _safeRender();
@@ -216,14 +270,19 @@ async function _doSyncToFirebase() {
     // 핑퐁 방지: 자기가 쓴 timestamp 기록 → onSnapshot에서 자기 것인지 판별
     lastOwnWriteTimestamp = writeTimestamp;
 
-    appState.syncStatus = 'synced';
+    // 서버 ack 인라인 검증 — setDoc resolve는 persistentLocalCache 환경에서
+    // 로컬 IndexedDB 쓰기 성공만 보장. 서버 도달 확정은 onSnapshot metadata
+    // (fromCache=false + hasPendingWrites=false) + 매칭 timestamp 도착 시까지 대기.
+    // 'syncing' 상태 유지 → 서버 ack 도착하면 _resolveServerAckWaiter가 'synced' 전환.
+    //                     15초 내 미도착이면 타임아웃 → 'error' + 토스트.
+    _registerServerAckWaiter(writeTimestamp);
     appState.lastSyncTime = new Date();
     updateSyncIndicator();
 
     // 성공적인 동기화 후 데이터 수 기록
     updateDataCounts();
 
-    // 동기화 성공: 상태 아이콘(updateSyncIndicator)만으로 충분 — 토스트 제거
+    // 상태 전환은 onSnapshot 경로에서 자동: 'syncing' → 'synced' (ack) 또는 'error' (timeout)
     // 에러 시에만 토스트 표시. 수동 동기화(forceSync)는 별도 토스트 유지.
   } catch (error) {
     console.error('동기화 실패:', error);
@@ -515,13 +574,21 @@ function startRealtimeSync() {
       appState.syncStatus = 'offline';
       updateSyncIndicator();
       console.warn('[sync] 서버 미연결 감지 — 캐시 모드 (쓰기는 큐에 대기)');
-    } else if (isServerConfirmed && wasOffline && appState.user) {
+    } else if (isServerConfirmed && (wasOffline || appState.syncStatus === 'error') && appState.user) {
       // 'synced' 전환은 **서버 ack 확정(case 1)** 에서만 —
       // hasPendingWrites=true 중간 이벤트에서 전환하면 UI가 거짓말함
       // appState.user 가드 — 로그아웃 직후 지연 이벤트가 'synced' 되돌리는 것 방지
+      // 'error' 복귀도 포함 — 타임아웃 후 늦게 서버 ack 도착한 경우 (SDK 큐 flush 성공)
       appState.syncStatus = 'synced';
       updateSyncIndicator();
       console.log('[sync] 서버 연결 복구');
+    }
+
+    // 서버 ack 인라인 검증 — 내가 등록한 waiter가 있으면 resolve
+    // (timestamp 매칭 = 내가 쓴 값이 서버에 도달 확정)
+    if (isServerConfirmed && doc.exists()) {
+      const docLastUpdated = doc.data().lastUpdated;
+      if (docLastUpdated) _resolveServerAckWaiter(docLastUpdated);
     }
 
     // 재연결 카운터 리셋 — 서버 ack 확정 이벤트에서만 (중간 상태 제외)
