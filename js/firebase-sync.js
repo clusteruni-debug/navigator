@@ -500,9 +500,35 @@ function startRealtimeSync() {
   if (!appState.user || unsubscribeSnapshot) return;
 
   const userDoc = window.firebaseDoc(window.firebaseDb, 'users', appState.user.uid);
-  unsubscribeSnapshot = window.firebaseOnSnapshot(userDoc, (doc) => {
-    // 연결 성공 시 재연결 카운터 리셋
-    realtimeReconnectCount = 0;
+  // { includeMetadataChanges: true } — 서버 연결 상태 변화도 콜백에 전달받아
+  // 오프라인/온라인 전환을 UI에 즉시 반영 (SDK가 캐시에서만 읽는 상태 감지)
+  unsubscribeSnapshot = window.firebaseOnSnapshot(userDoc, { includeMetadataChanges: true }, (doc) => {
+    // 서버 연결 상태 판별 (SDK metadata 4가지 조합):
+    //   (1) !fromCache && !hasPendingWrites = 서버 ack 확정 (완전 동기화)
+    //   (2) !fromCache && hasPendingWrites  = 서버 연결 중, 쓰기 큐 flush 진행
+    //   (3) fromCache  && !hasPendingWrites = 서버 미연결 (순수 오프라인 읽기)
+    //   (4) fromCache  && hasPendingWrites  = 오프라인 + 쓰기 큐 대기 (드묾)
+    const isDisconnected = doc.metadata && doc.metadata.fromCache && !doc.metadata.hasPendingWrites;
+    const isServerConfirmed = doc.metadata && !doc.metadata.fromCache && !doc.metadata.hasPendingWrites;
+    const wasOffline = appState.syncStatus === 'offline';
+    if (isDisconnected && !wasOffline && appState.user) {
+      appState.syncStatus = 'offline';
+      updateSyncIndicator();
+      console.warn('[sync] 서버 미연결 감지 — 캐시 모드 (쓰기는 큐에 대기)');
+    } else if (isServerConfirmed && wasOffline && appState.user) {
+      // 'synced' 전환은 **서버 ack 확정(case 1)** 에서만 —
+      // hasPendingWrites=true 중간 이벤트에서 전환하면 UI가 거짓말함
+      // appState.user 가드 — 로그아웃 직후 지연 이벤트가 'synced' 되돌리는 것 방지
+      appState.syncStatus = 'synced';
+      updateSyncIndicator();
+      console.log('[sync] 서버 연결 복구');
+    }
+
+    // 재연결 카운터 리셋 — 서버 ack 확정 이벤트에서만 (중간 상태 제외)
+    if (isServerConfirmed) realtimeReconnectCount = 0;
+
+    // 메타데이터-only 이벤트는 데이터 동일 → 머지 스킵 (불필요한 syncToFirebase 재호출 방지)
+    if (isDisconnected) return;
 
     // RC-3: loadFromFirebase 진행 중에는 onSnapshot이 appState를 동시 수정하지 않도록 차단
     if (doc.exists() && !isSyncing && !isLoadingFromCloud) {
@@ -717,6 +743,8 @@ function startRealtimeSync() {
       }, 5000);
     } else {
       console.warn(`[sync] 리스너 재연결 ${MAX_REALTIME_RECONNECT}회 초과 — 페이지 새로고침 필요`);
+      // 사용자에게 명시적 알림 — console만으로는 눈치채지 못함 (회사 PC 9시간 침묵 사건 대응)
+      _safeToast('⚠️ 동기화 연결 실패 — 페이지를 새로고침하세요 (Ctrl+Shift+R)', 'error');
     }
   });
 }
