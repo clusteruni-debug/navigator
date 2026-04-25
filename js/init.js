@@ -164,6 +164,41 @@ setTimeout(() => checkWeeklyReview(), 3000);
 // ============================================
 // tgeventbot 연동: URL 파라미터 import
 // ============================================
+let _startupUrlParamsHandled = false;
+
+function checkEventDeepLink() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tab = urlParams.get('tab');
+  const eventId = urlParams.get('eventId');
+
+  if (tab !== 'events' || !eventId) return false;
+
+  _supabaseEventCache.highlightId = String(eventId);
+  urlParams.delete('import');
+  urlParams.delete('autoImport');
+  urlParams.set('tab', 'events');
+  urlParams.set('eventId', String(eventId));
+
+  if (typeof switchTab === 'function') {
+    switchTab('events');
+  } else {
+    appState.currentTab = 'events';
+    renderStatic();
+  }
+
+  window.history.replaceState({}, document.title, `${window.location.pathname}?${urlParams.toString()}`);
+  return true;
+}
+
+function handleStartupUrlParams() {
+  if (_startupUrlParamsHandled) return;
+  _startupUrlParamsHandled = true;
+
+  // Deep link takes precedence over legacy base64 import when both are present.
+  if (checkEventDeepLink()) return;
+  checkUrlImport();
+}
+
 function checkUrlImport() {
   const urlParams = new URLSearchParams(window.location.search);
   const importData = urlParams.get('import');
@@ -433,12 +468,12 @@ window.closeImportModal = closeImportModal;
 window.confirmImportTask = confirmImportTask;
 
 // URL import 체크 (Firebase 로드 후 실행)
-setTimeout(checkUrlImport, 500);
+setTimeout(handleStartupUrlParams, 500);
 
 // Firebase 인증 상태 리스너
 window.addEventListener('firebase-ready', () => {
   // URL import 파라미터 확인 (tgeventbot 연동)
-  checkUrlImport();
+  handleStartupUrlParams();
 
   // 오프라인/타임아웃 대비: 5초 후에도 클라우드 로드가 안 됐으면 로컬 기반으로 checkDailyReset 실행
   // (loadFromFirebase 진행 중이면 대기 — 진행 중인 로드가 완료되면 자체적으로 checkDailyReset 호출)

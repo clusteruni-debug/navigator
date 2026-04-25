@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "verify": "node --check js/init.js && node --check js/render-events-supabase.js && node --check js/state-types.js && node --check js/render-events.js"
+  },
   "dependencies": {
     "firebase": "^12.8.0",
     "playwright": "^1.58.1",

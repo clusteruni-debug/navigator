@@ -25,6 +25,49 @@ function getEffectiveSupabaseEventStatus(event) {
   return 'pending';
 }
 
+let _supabaseHighlightRetryId = null;
+let _supabaseHighlightFrame = null;
+
+function _syncSupabaseHighlightCard() {
+  const highlightId = _supabaseEventCache.highlightId ? String(_supabaseEventCache.highlightId) : null;
+
+  if (!highlightId || appState.currentTab !== 'events') {
+    _supabaseHighlightRetryId = null;
+    if (_supabaseHighlightFrame !== null) {
+      cancelAnimationFrame(_supabaseHighlightFrame);
+      _supabaseHighlightFrame = null;
+    }
+    return;
+  }
+
+  const hasCachedMatch = (_supabaseEventCache.data || []).some(event => String(event.supabaseId) === highlightId);
+  if (!hasCachedMatch) {
+    if (!_supabaseEventCache.loading && _supabaseHighlightRetryId !== highlightId) {
+      _supabaseHighlightRetryId = highlightId;
+      refreshSupabaseEvents();
+    }
+    return;
+  }
+
+  _supabaseHighlightRetryId = null;
+  if (_supabaseHighlightFrame !== null) {
+    cancelAnimationFrame(_supabaseHighlightFrame);
+  }
+
+  _supabaseHighlightFrame = requestAnimationFrame(() => {
+    _supabaseHighlightFrame = null;
+    if (appState.currentTab !== 'events' || String(_supabaseEventCache.highlightId || '') !== highlightId) return;
+
+    const targetCard = Array.from(document.querySelectorAll('.supabase-event-card'))
+      .find(card => card.dataset.eventId === highlightId);
+
+    if (!targetCard) return;
+
+    targetCard.classList.add('event-card--highlight');
+    targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+}
+
 // ============================================
 // Supabase fetch + 캐시
 // ============================================
@@ -250,6 +293,8 @@ function _renderSupabaseSection(pending, _, isLoading, error) {
     // 참여완료는 renderEventsTab()의 통합 로그에서 렌더링
   }
 
+  _syncSupabaseHighlightCard();
+
   return `
     <div class="events-section">
       <div class="events-section-header">
@@ -268,9 +313,19 @@ function _renderSupabaseCard(event) {
   if (event.organizer) metaChips.push(event.organizer);
   if (event.type) metaChips.push(event.type);
   const revenueStr = event.expectedRevenue ? '💰 ' + event.expectedRevenue : '';
+  const cardClasses = ['event-card', 'supabase-event-card'];
+
+  if (String(_supabaseEventCache.highlightId || '') === String(event.supabaseId)) {
+    cardClasses.push('event-card--highlight');
+  }
+  if (days !== null && days <= 1) {
+    cardClasses.push('urgent');
+  } else if (days !== null && days <= 3) {
+    cardClasses.push('warning');
+  }
 
   return `
-    <div class="event-card supabase-event-card ${days !== null && days <= 1 ? 'urgent' : (days !== null && days <= 3 ? 'warning' : '')}">
+    <div class="${cardClasses.join(' ')}" data-event-id="${escapeAttr(String(event.supabaseId))}">
       <div style="flex:1;min-width:0">
         <div class="event-card-main">
           <div class="event-title"><span class="supabase-badge">📡</span>${escapeHtml(event.title)}${revenueStr ? ' <span class="event-revenue-inline">' + revenueStr + '</span>' : ''}</div>

@@ -19,7 +19,7 @@ let _completedLogPage = 0; // 참여 완료 로그 페이지 (0-based)
 const COMPLETED_LOG_PAGE_SIZE = 10;
 
 // 수신 이벤트 캐시 (UI-only, not synced to Firebase)
-let _supabaseEventCache = { data: [], fetchedAt: null, loading: false, error: null };
+let _supabaseEventCache = { data: [], fetchedAt: null, loading: false, error: null, highlightId: null };
 const SUPABASE_CACHE_TTL = 3 * 60 * 1000; // 3분
 
 // ============================================

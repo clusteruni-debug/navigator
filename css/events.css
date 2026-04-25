@@ -137,6 +137,12 @@
       background: var(--accent-warning-alpha);
     }
 
+    .event-card--highlight {
+      outline: 2px solid var(--accent-color);
+      outline-offset: 2px;
+      background: color-mix(in srgb, var(--accent-color) 12%, var(--bg-secondary));
+    }
+
     .event-card.completed {
       opacity: 0.6;
       background: var(--bg-primary);
