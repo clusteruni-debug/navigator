@@ -126,7 +126,7 @@ async function completeSupabaseEvent(supabaseId) {
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal'
         },
-        body: JSON.stringify({ participated: true })
+        body: JSON.stringify({ status: 'done' })
       }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -168,7 +168,7 @@ async function uncompleteSupabaseEvent(supabaseId) {
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal'
         },
-        body: JSON.stringify({ participated: false })
+        body: JSON.stringify({ status: 'pending' })
       }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

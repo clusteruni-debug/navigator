@@ -352,8 +352,8 @@ async function updateLinkedEventStatus(task, participated) {
   const eventId = task.source.eventId;
   if (!eventId) return;
 
-  // 1. Supabase REST API로 telegram_messages.participated 업데이트
-  // Pre-1c shape: 1c will swap participated->status with RLS allow-list.
+  // 1. Supabase REST API로 telegram_messages.status 업데이트 (1c: status enum allow-list)
+  const status = participated ? 'done' : 'pending';
   try {
     const res = await fetch(
       `${TG_SUPABASE_URL}/rest/v1/telegram_messages?id=eq.${eventId}`,
@@ -365,11 +365,11 @@ async function updateLinkedEventStatus(task, participated) {
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal'
         },
-        body: JSON.stringify({ participated })
+        body: JSON.stringify({ status })
       }
     );
     if (res.ok) {
-      console.info(`Telegram 이벤트 #${eventId} participated=${participated} 동기화 완료`);
+      console.info(`Telegram 이벤트 #${eventId} status=${status} 동기화 완료`);
     } else {
       console.warn(`Telegram 이벤트 동기화 실패: ${res.status}`);
     }
