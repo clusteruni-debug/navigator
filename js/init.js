@@ -345,7 +345,7 @@ async function confirmImportTask() {
   }
 }
 
-// Task 완료 시 연결된 이벤트 상태 업데이트 (Supabase + Firestore 역동기화)
+// Task 완료 시 연결된 이벤트 상태 업데이트 (Supabase 단일 소스)
 async function updateLinkedEventStatus(task, participated) {
   if (!task.source || task.source.type !== 'telegram-event') return;
 
@@ -376,26 +376,47 @@ async function updateLinkedEventStatus(task, participated) {
   } catch (error) {
     console.error('Telegram 이벤트 Supabase 동기화 실패:', error);
   }
+}
 
-  // 2. Firestore도 업데이트 (로그인 시에만)
-  if (!appState.user) return;
+async function cleanupTelegramFirestoreEvents(uid) {
+  if (!uid || !window.firebaseDb || !window.firebaseDoc || !window.firebaseRunTransaction) return;
 
   try {
-    const userDoc = window.firebaseDoc(window.firebaseDb, 'users', appState.user.uid);
-    await window.firebaseRunTransaction(window.firebaseDb, async (transaction) => {
+    const userDoc = window.firebaseDoc(window.firebaseDb, 'users', uid);
+    const result = await window.firebaseRunTransaction(window.firebaseDb, async (transaction) => {
       const docSnap = await transaction.get(userDoc);
-      if (!docSnap.exists()) return;
+      const data = docSnap.exists() ? docSnap.data() : {};
+      const migrations = (data && typeof data._migrations === 'object' && data._migrations) ? data._migrations : {};
 
-      const data = docSnap.data();
+      if (migrations.firestoreEventsCleanup) {
+        return { skipped: true, removedCount: 0, migratedAt: migrations.firestoreEventsCleanup };
+      }
+
       const events = Array.isArray(data.events) ? [...data.events] : [];
-      const eventIndex = events.findIndex(e => e.id === eventId);
-      if (eventIndex === -1) return;
+      const filteredEvents = events.filter(event => event?.source?.type !== 'telegram-event');
+      const migratedAt = new Date().toISOString();
 
-      events[eventIndex] = { ...events[eventIndex], participated };
-      transaction.set(userDoc, { events }, { merge: true });
+      const nextUserData = {
+        _migrations: { ...migrations, firestoreEventsCleanup: migratedAt }
+      };
+
+      if (filteredEvents.length !== events.length) {
+        nextUserData.events = filteredEvents;
+      }
+
+      transaction.set(userDoc, nextUserData, { merge: true });
+      return {
+        skipped: false,
+        removedCount: events.length - filteredEvents.length,
+        migratedAt
+      };
     });
+
+    if (!result?.skipped) {
+      console.log(`[migration] Firestore telegram events cleanup complete (removed ${result?.removedCount || 0})`);
+    }
   } catch (error) {
-    console.error('Firestore 업데이트 실패:', error);
+    console.error('[migration] Firestore telegram events cleanup failed:', error);
   }
 }
 
@@ -442,6 +463,8 @@ window.addEventListener('firebase-ready', () => {
         displayName: user.displayName,
         photoURL: user.photoURL
       };
+
+      await cleanupTelegramFirestoreEvents(user.uid);
 
       // 클라우드 데이터 로드 및 실시간 동기화 시작
       // (loadFromFirebase 내부에서 initialCloudLoadComplete=true + checkDailyReset 호출)
