@@ -22,8 +22,8 @@ function renderEventsTab() {
   const localSubmitted = localEvents.filter(t => t.completed);
 
   // 수신 이벤트 통계
-  const sbPending = supabaseEvents.filter(e => !e.participated);
-  const sbParticipated = supabaseEvents.filter(e => e.participated);
+  const sbPending = supabaseEvents.filter(e => e.effectiveStatus !== 'done' && e.effectiveStatus !== 'skipped');
+  const sbParticipated = supabaseEvents.filter(e => e.effectiveStatus === 'done');
   const sbUrgent = sbPending.filter(e => { const d = getDaysLeft(e.deadline); return d !== null && d <= 1; });
 
   return `
@@ -130,7 +130,7 @@ function _renderCompletedLog(sbParticipated, localSubmitted) {
 }
 
 function changeCompletedLogPage(page) {
-  const sbParticipated = (_supabaseEventCache.data || []).filter(e => e.participated);
+  const sbParticipated = (_supabaseEventCache.data || []).filter(e => e.effectiveStatus === 'done');
   const localSubmitted = appState.tasks.filter(t => t.category === '부업' && !(t.source && t.source.type === 'telegram-event') && t.completed);
   const total = sbParticipated.length + localSubmitted.length;
   const maxPage = Math.max(0, Math.ceil(total / COMPLETED_LOG_PAGE_SIZE) - 1);

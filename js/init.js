@@ -353,6 +353,7 @@ async function updateLinkedEventStatus(task, participated) {
   if (!eventId) return;
 
   // 1. Supabase REST API로 telegram_messages.participated 업데이트
+  // Pre-1c shape: 1c will swap participated->status with RLS allow-list.
   try {
     const res = await fetch(
       `${TG_SUPABASE_URL}/rest/v1/telegram_messages?id=eq.${eventId}`,
