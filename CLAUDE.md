@@ -32,7 +32,12 @@ Sequential script loading — no ES6 modules or bundler. Load order in navigator
 - [ ] XSS defense (escapeHtml)
 
 ## Integrations
-- tgeventbot: Event -> Task conversion (URL parameters)
+- tgeventbot: Supabase event consumer + deep-link landing page
+  - Read: anon-key REST query against `telegram_messages` (status field is sole source of truth post-2026-04-25 STEP 1c)
+  - Write: PATCH `{status: 'done'|'pending'|'skipped'}` only — `participated` column dropped 2026-04-25
+  - Deep link: `?tab=events&eventId=<supabase_id>` selects events tab + highlights matching card + scrolls into view (handled by `handleStartupUrlParams()` in init.js)
+  - Legacy `?import=base64&autoImport=true` import path remains for backward compat (checkUrlImport)
+  - Anon key format: `sb_publishable_*` (legacy `eyJ...` disabled by Supabase 2026-04-19)
 - Asset Manager: Revenue data clipboard exchange
 
 ## References

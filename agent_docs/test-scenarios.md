@@ -63,3 +63,11 @@
 - Modal overlap prevention
 - Touch changedTouches check
 - setInterval duplicate registration prevention
+
+## 11. tgeventbot Deep Link (?tab=events&eventId=)
+- Known visible id (starred or has deadline): events tab selected, card highlighted with `event-card--highlight`, scroll-into-view smooth/center
+- Hidden id (no starred / no deadline): graceful fallback — no highlight, no JS error, generic empty state
+- Cache miss + visible id: single refetch retry, then highlight + scroll
+- Tab switch away from events: highlight cleanup via cancelAnimationFrame (no leaked frame request)
+- Offline (DevTools offline): cache.error message, no broken highlight state
+- Coordinator order: handleStartupUrlParams() runs checkEventDeepLink() BEFORE checkUrlImport() — deep link wins on URL param collision
