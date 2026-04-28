@@ -42,6 +42,7 @@
 
     .work-task-title {
       flex: 1;
+      min-width: 0;
       font-size: 16px;
       cursor: pointer;
       padding: 2px 6px;
@@ -96,6 +97,27 @@
     .work-task-actions {
       display: flex;
       gap: 6px;
+      opacity: 0;
+      max-width: 0;
+      overflow: hidden;
+      pointer-events: none;
+      flex-shrink: 0;
+      transition: opacity 0.2s, max-width 0.2s;
+    }
+
+    .work-task-item:hover .work-task-actions,
+    .work-task-item:focus-within .work-task-actions {
+      opacity: 1;
+      max-width: 500px;
+      pointer-events: auto;
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      .work-task-actions {
+        opacity: 1;
+        max-width: none;
+        pointer-events: auto;
+      }
     }
 
     .work-task-action {
