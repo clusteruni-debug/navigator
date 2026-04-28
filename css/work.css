@@ -418,3 +418,298 @@
       color: var(--accent-primary);
       border-color: color-mix(in srgb, var(--accent-primary) 30%, transparent);
     }
+
+    /* ====================================
+       Compact 부하 게이지 (한 줄)
+       ==================================== */
+    .work-load-compact {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: var(--font-body);
+    }
+    .work-load-compact-label {
+      color: var(--text-secondary);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .work-load-compact-bar {
+      flex: 1;
+      height: 4px;
+      background: var(--bg-tertiary);
+      border-radius: 2px;
+      overflow: hidden;
+      min-width: 60px;
+    }
+    .work-load-compact-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+    .work-load-compact-status {
+      font-weight: 600;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .work-load-compact-meta {
+      color: var(--text-muted);
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+      font-size: 12px;
+    }
+
+    /* ====================================
+       Compact "지금 집중" 위젯 (한 줄, 클릭으로 펼침)
+       ==================================== */
+    .work-focus-compact {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-left: 3px solid var(--accent-primary);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+      font-family: var(--font-body);
+    }
+    .work-focus-compact:hover {
+      background: var(--bg-tertiary);
+    }
+    .work-focus-compact-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .work-focus-compact-title {
+      font-size: 15px;
+      font-weight: 600;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .work-focus-compact-ctx {
+      font-size: 12px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .work-focus-compact-btn {
+      padding: 4px 12px;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+      min-height: 32px;
+      transition: opacity 0.2s;
+    }
+    .work-focus-compact-btn:hover {
+      opacity: 0.85;
+    }
+    @media (hover: none) and (pointer: coarse) {
+      .work-focus-compact { padding: 10px 12px; }
+      .work-focus-compact-btn { min-height: 40px; padding: 6px 14px; }
+    }
+
+    /* ====================================
+       진행중 카드 영역 (view tabs 위로 끌어올려진 메인 영역)
+       ==================================== */
+    .work-section-pinned {
+      margin-bottom: 14px;
+    }
+    .work-section-pinned .work-section-title {
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    /* ====================================
+       ★★★+ 평면 뷰 placeholder (다음 commit에서 활성화)
+       ==================================== */
+    .work-priority-placeholder {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg-tertiary);
+      border: 1px dashed var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .work-priority-placeholder-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    /* ====================================
+       ★★★+ 평면 뷰 (cross-project 우선순위 모음)
+       ==================================== */
+    .work-priority-list {
+      margin-bottom: 14px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      font-family: var(--font-body);
+    }
+    .work-priority-list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .work-priority-list-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .work-priority-list-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .work-priority-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border-light);
+      transition: background-color 0.2s;
+    }
+    .work-priority-item:last-child { border-bottom: none; }
+    .work-priority-item:hover { background: var(--bg-tertiary); }
+    .work-priority-item-stars {
+      font-size: 11px;
+      color: var(--accent-warning);
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .work-priority-item-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .work-priority-item-ctx {
+      font-size: 12px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .work-priority-item-deadline {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+    }
+    .work-priority-item-deadline.soon {
+      background: var(--accent-warning-alpha);
+      color: var(--accent-warning);
+    }
+    .work-priority-item-deadline.overdue {
+      background: var(--accent-danger-alpha);
+      color: var(--accent-danger);
+    }
+    .work-priority-more {
+      padding: 6px 14px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg-tertiary);
+      font-style: italic;
+    }
+
+    /* ====================================
+       Risk-alerts (stale + overdue)
+       ==================================== */
+    .work-risk-alerts {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+      font-family: var(--font-body);
+    }
+    .work-risk-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-left: 3px solid var(--accent-neutral);
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .work-risk-item:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-primary);
+    }
+    .work-risk-item.warn { border-left-color: var(--accent-warning); }
+    .work-risk-item.danger { border-left-color: var(--accent-danger); }
+    .work-risk-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .work-risk-label {
+      font-weight: 600;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+    .work-risk-target {
+      flex: 1;
+      min-width: 0;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ====================================
+       진행중 카드 stale 메타
+       ==================================== */
+    .work-dashboard-stale {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .work-dashboard-stale.warn {
+      background: var(--accent-warning-alpha);
+      color: var(--accent-warning);
+    }
+    .work-dashboard-stale.danger {
+      background: var(--accent-danger-alpha);
+      color: var(--accent-danger);
+    }

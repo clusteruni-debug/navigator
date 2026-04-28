@@ -35,10 +35,24 @@ function renderWorkDashboardCard(project) {
 
   const projectPulse = calculateProjectPulse(project);
   const projectPulseColor = PULSE_COLORS[projectPulse] || 'transparent';
+  const staleDays = (typeof getProjectStaleDays === 'function') ? getProjectStaleDays(project) : 0;
+  // pulse가 critical이면 그 색 우선 (마감 임박이 stale보다 시급) — 정보 다운그레이드 방지
+  // (calculateProjectPulse는 critical/warning/attention/on-track/waiting/done만 반환 — overdue task는 critical로 합쳐짐, work-analytics.js:59)
+  // 그 외: stale 14d+ → danger, 7d+ → warning, 미만 → pulse 색 그대로
+  const isPulseUrgent = projectPulse === 'critical';
+  const borderColor = isPulseUrgent ? projectPulseColor
+                    : staleDays >= 14 ? 'var(--accent-danger)'
+                    : staleDays >= 7  ? 'var(--accent-warning)'
+                    : projectPulseColor;
+  const staleMetaHtml = staleDays >= 14
+    ? '<span class="work-dashboard-stale danger">⚠ ' + staleDays + '일 정체</span>'
+    : staleDays >= 7
+    ? '<span class="work-dashboard-stale warn">⚠ ' + staleDays + '일</span>'
+    : '';
 
   return `
     <div class="work-dashboard-card ${project.id === appState.activeWorkProject ? 'active' : ''} ${project.archived ? 'archived' : ''}"
-         style="${projectPulseColor !== 'transparent' ? 'border-left: 4px solid ' + projectPulseColor + ';' : ''}"
+         style="${borderColor !== 'transparent' ? 'border-left: 4px solid ' + borderColor + ';' : ''}"
          onclick="selectWorkProject('${escapeAttr(project.id)}'); setWorkView('detail');">
       <div class="work-dashboard-header">
         <div class="work-dashboard-name">
@@ -66,6 +80,7 @@ function renderWorkDashboardCard(project) {
         <span>📋 ${completedTasks}/${totalTasks} 항목</span>
         <span>✓ ${completedStages}/${totalStages} 단계</span>
         ${project.participantGoal ? `<span>👥 ${project.participantCount || 0}/${project.participantGoal}</span>` : ''}
+        ${staleMetaHtml}
       </div>
     </div>
   `;

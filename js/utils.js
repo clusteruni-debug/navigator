@@ -20,10 +20,15 @@ function getLocalDateStr(d) {
   return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
 }
 
-// 로컬 시간 기준 datetime-local 문자열 (YYYY-MM-DDTHH:mm)
+// 로컬 시간 기준 ISO 8601 strict datetime 문자열 (YYYY-MM-DDTHH:mm:ss)
+// 초까지 포함하는 이유: Safari/Android WebView가 'YYYY-MM-DDTHH:mm' 포맷을 Invalid Date로 처리 (strict ISO 8601 비호환)
+// substring(5,10) / split('T')[0] / split('T')[1] 호출자는 모두 길이 무관해 안전
 function getLocalDateTimeStr(d) {
   const dt = d || new Date();
-  return getLocalDateStr(dt) + 'T' + String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0');
+  return getLocalDateStr(dt) + 'T' +
+    String(dt.getHours()).padStart(2, '0') + ':' +
+    String(dt.getMinutes()).padStart(2, '0') + ':' +
+    String(dt.getSeconds()).padStart(2, '0');
 }
 
 // ============================================

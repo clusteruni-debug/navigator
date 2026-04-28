@@ -54,8 +54,9 @@ function renderWorkProjects() {
       <!-- 헤더 -->
       <div class="work-projects-header">
         <div class="work-projects-title">💼 본업</div>
-        <div style="display: flex; gap: 8px;">
-          <button class="work-project-add-btn" onclick="showWorkModal('project')">+ 새 프로젝트</button>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="work-project-add-btn" onclick="createRoV3Project()" title="RO 6단계 표준 체크리스트 v3 자동 주입">+ RO v3</button>
+          <button class="work-project-add-btn" onclick="showWorkModal('project')">+ 빈 프로젝트</button>
           <button class="work-project-action-btn" onclick="showWorkModal('template-manage')">📋 템플릿 관리</button>
           <button class="work-project-action-btn" onclick="showMMReportModal()">📊 MM 리포트</button>
         </div>
@@ -77,7 +78,7 @@ function renderWorkProjects() {
 
         // 모드별 라벨/색상
         const modeConfig = {
-          urgent: { label: '🎯 지금 집중:', color: null }, // pulse 색상 사용
+          urgent: { label: '🎯 지금 집중:', color: null },
           normal: { label: '🎯 지금 집중:', color: 'var(--accent-success)' },
           proactive: { label: '💡 미리 해두면 좋은 것:', color: 'var(--accent-primary)' },
           general: { label: '📋 여유 시간에:', color: 'var(--accent-neutral)' }
@@ -86,12 +87,24 @@ function renderWorkProjects() {
         const focusPulse = calculateTaskPulse(focus);
         const focusColor = cfg.color || PULSE_COLORS[focusPulse] || 'var(--accent-primary)';
         const timeLabel = focus.estimatedTime ? '~' + focus.estimatedTime + '분' : '';
-
-        // 일반 업무 (프로젝트 미연결) 완료 버튼
         const isGeneral = focusMode === 'general';
-        const completeBtn = isGeneral
-          ? '<button onclick="completeTask(\'' + escapeAttr(focus.id) + '\')" style="padding: 8px 16px; background: ' + focusColor + '; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; min-height: 44px;">완료 ✓</button>'
-          : '<button onclick="toggleWorkTaskComplete(\'' + escapeAttr(focus._projectId) + '\', ' + focus._stageIdx + ', ' + focus._subcatIdx + ', ' + focus._taskIdx + ')" style="padding: 8px 16px; background: ' + focusColor + '; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; min-height: 44px;">완료 ✓</button>';
+        const completeOnClick = isGeneral
+          ? 'completeTask(\'' + escapeAttr(focus.id) + '\')'
+          : 'toggleWorkTaskComplete(\'' + escapeAttr(focus._projectId) + '\', ' + focus._stageIdx + ', ' + focus._subcatIdx + ', ' + focus._taskIdx + ')';
+
+        // Compact (default) — 한 줄, 클릭으로 펼침
+        if (!appState.workFocusExpanded) {
+          const ctxText = isGeneral ? '' : escapeHtml(focus._projectName) + (timeLabel ? ' · ' + timeLabel : '');
+          return '<div class="work-focus-compact" style="border-left-color: ' + focusColor + ';" onclick="toggleWorkFocusExpanded()" title="클릭하여 펼치기">' +
+            '<span class="work-focus-compact-label">' + cfg.label + '</span>' +
+            '<span class="work-focus-compact-title">' + escapeHtml(focus.title) + '</span>' +
+            (ctxText ? '<span class="work-focus-compact-ctx">' + ctxText + '</span>' : '') +
+            '<button class="work-focus-compact-btn" style="background: ' + focusColor + ';" onclick="event.stopPropagation(); ' + completeOnClick + '">완료 ✓</button>' +
+          '</div>';
+        }
+
+        // Full 카드 (펼침 상태) — 카드 클릭 시 다시 접힘
+        const completeBtn = '<button onclick="event.stopPropagation(); ' + completeOnClick + '" style="padding: 8px 16px; background: ' + focusColor + '; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; min-height: 44px;">완료 ✓</button>';
         const contextLine = isGeneral
           ? ''
           : '<div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">' + escapeHtml(focus._projectName) + ' &gt; ' + escapeHtml(focus._stageName) + (timeLabel ? ' · ' + timeLabel : '') + '</div>';
@@ -99,7 +112,7 @@ function renderWorkProjects() {
           ? '<div style="font-size: 12px; color: ' + focusColor + '; margin-top: 4px; opacity: 0.8;">이 태스크는 다음 단계이지만 미리 시작할 수 있습니다</div>'
           : '';
 
-        return '<div class="work-focus-card" style="background: color-mix(in srgb, ' + focusColor + ' 8%, transparent); border: 1px solid color-mix(in srgb, ' + focusColor + ' 25%, transparent); border-left: 4px solid ' + focusColor + '; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;">' +
+        return '<div class="work-focus-card" onclick="toggleWorkFocusExpanded()" title="클릭하여 접기" style="background: color-mix(in srgb, ' + focusColor + ' 8%, transparent); border: 1px solid color-mix(in srgb, ' + focusColor + ' 25%, transparent); border-left: 4px solid ' + focusColor + '; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer;">' +
           '<div style="flex: 1; min-width: 0;">' +
             '<div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">' + cfg.label + '</div>' +
             '<div style="font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + escapeHtml(focus.title) + '</div>' +
@@ -119,19 +132,100 @@ function renderWorkProjects() {
         const barWidth = Math.min(100, wl.loadPercentage);
         const hoursRemaining = (wl.totalRemainingMinutes / 60).toFixed(1);
         const hoursAvailable = (wl.totalAvailableMinutes / 60).toFixed(0);
-        return '<div style="background: var(--bg-secondary); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; border: 1px solid var(--border-color);">' +
-          '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">' +
-            '<span style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">📊 부하 게이지</span>' +
-            '<span style="font-size: 13px; color: ' + barColor + '; font-weight: 600;">' + statusLabels[wl.status] + ' ' + wl.loadPercentage + '%</span>' +
-          '</div>' +
-          '<div style="height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;">' +
-            '<div style="height: 100%; width: ' + barWidth + '%; background: ' + barColor + '; border-radius: 4px; transition: width 0.3s;"></div>' +
-          '</div>' +
-          '<div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: var(--text-muted);">' +
-            '<span>남은 공수 ' + hoursRemaining + 'h / 가용 ' + hoursAvailable + 'h</span>' +
-            '<span>' + wl.taskCount + '개 태스크 · ' + wl.remainingWorkdays + '근무일</span>' +
-          '</div>' +
+        return '<div class="work-load-compact">' +
+          '<span class="work-load-compact-label">📊 부하</span>' +
+          '<div class="work-load-compact-bar"><div class="work-load-compact-bar-fill" style="width: ' + barWidth + '%; background: ' + barColor + ';"></div></div>' +
+          '<span class="work-load-compact-status" style="color: ' + barColor + ';">' + statusLabels[wl.status] + ' ' + wl.loadPercentage + '%</span>' +
+          '<span class="work-load-compact-meta">' + hoursRemaining + 'h / ' + hoursAvailable + 'h · ' + wl.taskCount + '개 · ' + wl.remainingWorkdays + '근무일</span>' +
         '</div>';
+      })()}
+
+      ${inProgressProjects.length > 0 ? `
+        <div class="work-section work-section-pinned">
+          <div class="work-section-title">🚀 진행중 (${inProgressProjects.length})</div>
+          <div class="work-dashboard">
+            ${inProgressProjects.map(p => renderWorkDashboardCard(p)).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      ${(() => {
+        const tasks = getCrossProjectPriorityTasks();
+        if (tasks.length === 0) {
+          const activeCount = appState.workProjects.filter(p => !p.archived && !p.onHold).length;
+          if (activeCount === 0) return '';
+          return '<div class="work-priority-placeholder">' +
+            '<span class="work-priority-placeholder-icon">⭐</span>' +
+            '<span>우선순위 높은 항목이 여기 모입니다 — task에 ★ 표기 또는 마감 7일 이내 시 자동 노출</span>' +
+          '</div>';
+        }
+        const limit = 8;
+        const visible = tasks.slice(0, limit);
+        const moreCount = tasks.length - limit;
+        return '<div class="work-priority-list">' +
+          '<div class="work-priority-list-header">' +
+            '<span class="work-priority-list-title">⭐ 지금 할 것 (우선순위/임박)</span>' +
+            '<span class="work-priority-list-count">' + tasks.length + '개</span>' +
+          '</div>' +
+          visible.map(t => {
+            const priority = t.priority || 0;
+            const stars = priority > 0 ? '★'.repeat(priority) : '';
+            let deadlineHtml = '';
+            if (t.deadline) {
+              const d = new Date(t.deadline);
+              const daysLeft = Math.ceil((d - new Date()) / (1000 * 60 * 60 * 24));
+              const cls = daysLeft < 0 ? 'overdue' : daysLeft <= 3 ? 'soon' : '';
+              const txt = daysLeft < 0 ? 'D+' + Math.abs(daysLeft) : daysLeft === 0 ? 'D-Day' : 'D-' + daysLeft;
+              deadlineHtml = '<span class="work-priority-item-deadline ' + cls + '">' + txt + '</span>';
+            }
+            return '<div class="work-priority-item" onclick="selectWorkProject(\'' + escapeAttr(t._projectId) + '\'); setWorkView(\'detail\');">' +
+              (stars ? '<span class="work-priority-item-stars">' + stars + '</span>' : '') +
+              '<span class="work-priority-item-title">' + escapeHtml(t.title) + '</span>' +
+              '<span class="work-priority-item-ctx">' + escapeHtml(t._projectName) + ' · ' + escapeHtml(t._stageName) + '</span>' +
+              deadlineHtml +
+            '</div>';
+          }).join('') +
+          (moreCount > 0 ? '<div class="work-priority-more">+ ' + moreCount + '개 더 (각 프로젝트 상세에서 확인)</div>' : '') +
+        '</div>';
+      })()}
+
+      ${(() => {
+        const activeProjects = appState.workProjects.filter(p => !p.archived && !p.onHold);
+        if (activeProjects.length === 0) return '';
+        const staleWarn = [];
+        const staleDanger = [];
+        const overdueProjects = [];
+        activeProjects.forEach(p => {
+          const days = getProjectStaleDays(p);
+          if (days >= 14) staleDanger.push({ p, days });
+          else if (days >= 7) staleWarn.push({ p, days });
+          const overdueCount = getOverdueTaskCount(p);
+          if (overdueCount > 0) overdueProjects.push({ p, count: overdueCount });
+        });
+        if (staleWarn.length === 0 && staleDanger.length === 0 && overdueProjects.length === 0) return '';
+        let items = '';
+        staleDanger.forEach(({ p, days }) => {
+          items += '<div class="work-risk-item danger" onclick="selectWorkProject(\'' + escapeAttr(p.id) + '\'); setWorkView(\'detail\');">' +
+            '<span class="work-risk-icon">🔴</span>' +
+            '<span class="work-risk-label">' + days + '일째 업데이트 없음</span>' +
+            '<span class="work-risk-target">' + escapeHtml(p.name) + '</span>' +
+          '</div>';
+        });
+        staleWarn.forEach(({ p, days }) => {
+          items += '<div class="work-risk-item warn" onclick="selectWorkProject(\'' + escapeAttr(p.id) + '\'); setWorkView(\'detail\');">' +
+            '<span class="work-risk-icon">🟡</span>' +
+            '<span class="work-risk-label">' + days + '일째 업데이트 없음</span>' +
+            '<span class="work-risk-target">' + escapeHtml(p.name) + '</span>' +
+          '</div>';
+        });
+        overdueProjects.forEach(({ p, count }) => {
+          items += '<div class="work-risk-item danger" onclick="selectWorkProject(\'' + escapeAttr(p.id) + '\'); setWorkView(\'detail\');">' +
+            '<span class="work-risk-icon">⏰</span>' +
+            '<span class="work-risk-label">마감 지난 항목 ' + count + '개</span>' +
+            '<span class="work-risk-target">' + escapeHtml(p.name) + '</span>' +
+          '</div>';
+        });
+        return '<div class="work-risk-alerts">' + items + '</div>';
       })()}
 
       ${(() => {
@@ -241,53 +335,6 @@ function renderWorkProjects() {
 
       ${appState.workView === 'dashboard' ? `
         <!-- 대시보드 뷰 -->
-        <!-- 지금 할 것 -->
-        ${(() => {
-          // 프로젝트 내 진행중 작업 수집
-          const inProgressTasks = [];
-          appState.workProjects.filter(p => !p.archived && !p.onHold).forEach(p => {
-            p.stages.forEach((stage, si) => {
-              (stage.subcategories || []).forEach((sub, sci) => {
-                sub.tasks.forEach((task, ti) => {
-                  if (task.status === 'in-progress') {
-                    inProgressTasks.push({ ...task, projectName: p.name, projectId: p.id, stageIdx: si, subcatIdx: sci, taskIdx: ti });
-                  }
-                });
-              });
-            });
-          });
-          // 일반 본업 작업 (프로젝트 미연결, 미완료)
-          const generalWorkTasks = appState.tasks.filter(t => t.category === '본업' && !t.workProjectId && !t.completed);
-
-          if (inProgressTasks.length === 0 && generalWorkTasks.length === 0) return '';
-
-          return '<div class="work-focus-section" style="background: var(--accent-primary-alpha); border: 1px solid color-mix(in srgb, var(--accent-primary) 30%, transparent); border-radius: 12px; padding: 16px; margin-bottom: 20px;">' +
-            '<div style="font-size: 16px; font-weight: 700; color: var(--accent-blue); margin-bottom: 12px;">🎯 지금 할 것</div>' +
-            inProgressTasks.slice(0, 3).map(t =>
-              '<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg-primary); border-radius: 8px; margin-bottom: 6px; cursor: pointer;" onclick="selectWorkProject(\'' + escapeAttr(t.projectId) + '\'); setWorkView(\'detail\');">' +
-                '<span style="color: var(--accent-primary); font-weight: 600;">\u2192</span>' +
-                '<span style="flex: 1; font-size: 16px;">' + escapeHtml(t.title) + '</span>' +
-                '<span style="font-size: 15px; color: var(--text-muted); background: var(--bg-secondary); padding: 2px 8px; border-radius: 4px;">' + escapeHtml(t.projectName) + '</span>' +
-                (t.deadline ? '<span style="font-size: 15px; color: var(--accent-warning);">' + (new Date(t.deadline).getMonth()+1) + '/' + new Date(t.deadline).getDate() + '</span>' : '') +
-              '</div>'
-            ).join('') +
-            generalWorkTasks.slice(0, 2).map(t =>
-              '<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg-primary); border-radius: 8px; margin-bottom: 6px;">' +
-                '<button class="task-check-btn" onclick="event.stopPropagation(); completeTask(\'' + escapeAttr(t.id) + '\')" style="flex-shrink: 0;">○</button>' +
-                '<span style="flex: 1; font-size: 16px;">' + escapeHtml(t.title) + '</span>' +
-                (t.deadline ? '<span style="font-size: 15px; color: var(--accent-warning);">' + formatDeadline(t.deadline) + '</span>' : '') +
-              '</div>'
-            ).join('') +
-          '</div>';
-        })()}
-        ${inProgressProjects.length > 0 ? `
-          <div class="work-section">
-            <div class="work-section-title">🚀 진행중 (${inProgressProjects.length})</div>
-            <div class="work-dashboard">
-              ${inProgressProjects.map(p => renderWorkDashboardCard(p)).join('')}
-            </div>
-          </div>
-        ` : ''}
         ${noDeadlineProjects.length > 0 ? `
           <div class="work-section collapsible" style="margin-top: 20px;">
             <div class="work-section-title clickable" style="color: var(--text-muted);" onclick="toggleWorkSection('noDeadline')">

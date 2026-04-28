@@ -180,6 +180,27 @@ function renderWorkProjectDetail(project) {
         </div>
       </div>
 
+      <!-- 빠른 작성 텍스트 영역 (메모장 흡수: 들여쓰기 + ★ + (날짜)) -->
+      ${(() => {
+        const isExpanded = appState.workSketchExpanded && appState.workSketchExpanded[project.id];
+        const placeholder = '예: └ 음료 구매 ★★★★★ (4/27)';
+        return '<div class="work-sketch-area">' +
+          '<div class="work-sketch-header" onclick="toggleWorkSketchExpanded(\'' + escapeAttr(project.id) + '\')">' +
+            '<span class="work-sketch-toggle-icon">' + (isExpanded ? '▼' : '▶') + '</span>' +
+            '<span class="work-sketch-title">📝 빠른 작성</span>' +
+            '<span class="work-sketch-hint">메모장처럼 들여쓰기 + ★ + (4/27) 자유롭게</span>' +
+          '</div>' +
+          (isExpanded
+            ? '<textarea id="work-sketch-textarea-' + escapeAttr(project.id) + '" class="work-sketch-textarea" placeholder="' + escapeAttr(placeholder) + '"></textarea>' +
+              '<div class="work-sketch-actions">' +
+                '<button class="work-sketch-btn-apply" onclick="applySketchFromInput(\'' + escapeAttr(project.id) + '\')">트리에 추가</button>' +
+                '<span class="work-sketch-help">들여쓰기 0 = 단계 / └ prefix = 묶음 / 들여쓰기 4+ = 항목</span>' +
+              '</div>'
+            : '<div class="work-sketch-collapsed-hint" onclick="toggleWorkSketchExpanded(\'' + escapeAttr(project.id) + '\')">클릭해서 펼치기 — 메모장 텍스트 paste로 단계/항목 한 번에 입력</div>'
+          ) +
+        '</div>';
+      })()}
+
       <!-- Next Up: 지금 할 일 -->
       ${renderNextUpBlock(project)}
 
@@ -359,6 +380,36 @@ function renderWorkProjectDetail(project) {
         </div>
       </div>
 
+      <!-- 노션 보고서 아카이브 (단방향 paste, project level) -->
+      ${(() => {
+        if (!appState.workArchiveExpanded) appState.workArchiveExpanded = {};
+        if (!appState.workArchiveEditing) appState.workArchiveEditing = {};
+        const isExpanded = appState.workArchiveExpanded[project.id];
+        const isEditing = appState.workArchiveEditing[project.id];
+        const hasReport = !!project.archivedReport;
+        const charCount = hasReport ? project.archivedReport.length : 0;
+        return '<div class="work-archive-area">' +
+          '<div class="work-archive-header" onclick="toggleWorkArchiveExpanded(\'' + escapeAttr(project.id) + '\')">' +
+            '<span class="work-archive-toggle-icon">' + (isExpanded ? '▼' : '▶') + '</span>' +
+            '<span class="work-archive-title">📥 노션 보고서</span>' +
+            '<span class="work-archive-meta">' + (hasReport ? charCount + '자 저장됨' : '비어있음 — 노션 완성 보고서 paste') + '</span>' +
+            (hasReport && isExpanded && !isEditing ? '<button class="work-archive-btn-edit" onclick="event.stopPropagation(); toggleWorkArchiveEditing(\'' + escapeAttr(project.id) + '\')">편집</button>' : '') +
+          '</div>' +
+          (isExpanded ? (
+            isEditing
+              ? '<textarea id="work-archive-textarea-' + escapeAttr(project.id) + '" class="work-archive-textarea" placeholder="노션에서 완성한 보고서를 여기 paste (마크다운 지원)">' + escapeHtml(project.archivedReport || '') + '</textarea>' +
+                '<div class="work-archive-actions">' +
+                  '<button class="work-archive-btn-save" onclick="saveArchivedReport(\'' + escapeAttr(project.id) + '\')">저장</button>' +
+                  '<button class="work-archive-btn-cancel" onclick="toggleWorkArchiveEditing(\'' + escapeAttr(project.id) + '\')">취소</button>' +
+                '</div>'
+              : (hasReport
+                ? '<div class="work-archive-content">' + renderFormattedText(project.archivedReport) + '</div>'
+                : '<div class="work-archive-empty" onclick="toggleWorkArchiveEditing(\'' + escapeAttr(project.id) + '\')">클릭해서 노션 보고서 붙여넣기 — Slack→Navigator→Notion 3중 입력 대신 단방향 아카이빙</div>'
+              )
+          ) : '') +
+        '</div>';
+      })()}
+
     </div>
   `;
 }
@@ -414,6 +465,10 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
               title="클릭하여 상태 변경">
           ${statusInfo.label}
         </span>
+        <span class="work-task-priority${(task.priority || 0) > 0 ? ' has-stars' : ''}" onclick="event.stopPropagation(); cycleTaskPriority('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="클릭으로 우선순위 변경 (★0~5, 현재 ${task.priority || 0})">${(task.priority || 0) > 0 ? '★'.repeat(task.priority) + '☆'.repeat(5 - task.priority) : '★'}</span>
+        ${task.isNewFromV2 ? '<span class="task-meta-badge new-v2" title="v3 신규 항목">v3</span>' : ''}
+        ${task.rationaleRef ? '<span class="task-meta-badge rationale" title="근거: ' + escapeAttr(task.rationaleRef) + '">' + escapeHtml(task.rationaleRef) + '</span>' : ''}
+        ${task.notes ? '<span class="task-meta-badge note" title="' + escapeAttr(task.notes) + '">ⓘ</span>' : ''}
         <span id="task-title-${taskExpandKey}" class="work-task-title ${task.status === 'completed' ? 'completed' : ''}${isTaskExpanded ? ' expanded' : ''}"
               onclick="toggleTaskExpand('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})"
               title="${escapeAttr(task.title)}">${escapeHtml(task.title)}</span>
@@ -430,6 +485,17 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
           <button class="work-task-action" onclick="deleteWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="항목 삭제" aria-label="항목 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
         </div>
       </div>
+      ${task.subtasks && task.subtasks.length > 0 ? `
+        <div class="work-task-subtasks">
+          ${task.subtasks.map((st, idx) => `
+            <div class="work-task-subtask${st.completed ? ' completed' : ''}${st.isRequired === false ? ' optional' : ''}" onclick="event.stopPropagation(); toggleWorkTaskSubtaskComplete('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, ${idx})">
+              <span class="work-task-subtask-check">${st.completed ? '✓' : '○'}</span>
+              <span class="work-task-subtask-text">${escapeHtml(st.text)}</span>
+              ${st.isRequired === false ? '<span class="work-task-subtask-tag" title="선택 항목">선택</span>' : ''}
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
       ${task.logs && task.logs.length > 0 ? `
         <div class="work-task-logs${!isDetailExpanded ? ' work-task-detail-hidden' : ''}" id="task-detail-${taskExpandKey}">
           ${(() => {

@@ -68,6 +68,114 @@ function toggleWorkSection(section) {
 }
 window.toggleWorkSection = toggleWorkSection;
 
+// "지금 집중" compact ↔ full 토글 (localStorage 영속)
+if (typeof appState.workFocusExpanded === 'undefined') {
+  try {
+    appState.workFocusExpanded = localStorage.getItem('navigator-work-focus-expanded') === '1';
+  } catch (e) { appState.workFocusExpanded = false; }
+}
+
+function toggleWorkFocusExpanded() {
+  appState.workFocusExpanded = !appState.workFocusExpanded;
+  try { localStorage.setItem('navigator-work-focus-expanded', appState.workFocusExpanded ? '1' : '0'); } catch (e) {}
+  renderStatic();
+}
+window.toggleWorkFocusExpanded = toggleWorkFocusExpanded;
+
+// 빠른 작성 텍스트 영역 펼침 토글
+function toggleWorkSketchExpanded(projectId) {
+  if (!appState.workSketchExpanded) appState.workSketchExpanded = {};
+  appState.workSketchExpanded[projectId] = !appState.workSketchExpanded[projectId];
+  renderStatic();
+  setTimeout(() => {
+    const el = document.getElementById('work-sketch-textarea-' + projectId);
+    if (el && appState.workSketchExpanded[projectId]) el.focus();
+  }, 50);
+}
+window.toggleWorkSketchExpanded = toggleWorkSketchExpanded;
+
+// 빠른 작성 → 트리에 적용
+function applySketchFromInput(projectId) {
+  const el = document.getElementById('work-sketch-textarea-' + projectId);
+  if (!el) return;
+  const text = el.value;
+  if (!text.trim()) {
+    if (typeof showToast === 'function') showToast('빈 텍스트 — 추가할 내용 없음', 'warning');
+    return;
+  }
+  const result = applySketchToProject(projectId, text);
+  if (result.success) {
+    el.value = '';
+    if (typeof showToast === 'function') showToast(result.addedCount + '개 항목 추가됨', 'success');
+    renderStatic();
+  } else {
+    if (typeof showToast === 'function') showToast('추가 실패: ' + result.error, 'error');
+  }
+}
+window.applySketchFromInput = applySketchFromInput;
+
+// 노션 보고서 아카이브 영역 펼침 토글
+function toggleWorkArchiveExpanded(projectId) {
+  if (!appState.workArchiveExpanded) appState.workArchiveExpanded = {};
+  appState.workArchiveExpanded[projectId] = !appState.workArchiveExpanded[projectId];
+  renderStatic();
+}
+window.toggleWorkArchiveExpanded = toggleWorkArchiveExpanded;
+
+// 노션 보고서 편집 모드 토글
+function toggleWorkArchiveEditing(projectId) {
+  if (!appState.workArchiveEditing) appState.workArchiveEditing = {};
+  appState.workArchiveEditing[projectId] = !appState.workArchiveEditing[projectId];
+  renderStatic();
+  setTimeout(() => {
+    const el = document.getElementById('work-archive-textarea-' + projectId);
+    if (el && appState.workArchiveEditing[projectId]) el.focus();
+  }, 50);
+}
+window.toggleWorkArchiveEditing = toggleWorkArchiveEditing;
+
+// 노션 보고서 저장 (paste된 마크다운을 project.archivedReport에)
+function saveArchivedReport(projectId) {
+  const el = document.getElementById('work-archive-textarea-' + projectId);
+  if (!el) return;
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project) return;
+  project.archivedReport = el.value || null;
+  project.updatedAt = new Date().toISOString();
+  if (!appState.workArchiveEditing) appState.workArchiveEditing = {};
+  appState.workArchiveEditing[projectId] = false;
+  saveWorkProjects();
+  renderStatic();
+  if (typeof showToast === 'function') showToast('보고서 저장됨', 'success');
+}
+window.saveArchivedReport = saveArchivedReport;
+
+// work task 안 subtask 완료 토글 (RO v3 템플릿의 subtasks 체크리스트)
+function toggleWorkTaskSubtaskComplete(projectId, stageIdx, subcatIdx, taskIdx, subtaskIdx) {
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project) return;
+  const task = project.stages?.[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  if (!task || !task.subtasks?.[subtaskIdx]) return;
+  task.subtasks[subtaskIdx].completed = !task.subtasks[subtaskIdx].completed;
+  project.updatedAt = new Date().toISOString();
+  saveWorkProjects();
+  renderStatic();
+}
+window.toggleWorkTaskSubtaskComplete = toggleWorkTaskSubtaskComplete;
+
+// task 우선순위 cycle (0 → 1 → 2 → 3 → 4 → 5 → 0)
+function cycleTaskPriority(projectId, stageIdx, subcatIdx, taskIdx) {
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project) return;
+  const task = project.stages?.[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  if (!task) return;
+  task.priority = ((task.priority || 0) + 1) % 6;
+  project.updatedAt = new Date().toISOString();
+  saveWorkProjects();
+  renderStatic();
+}
+window.cycleTaskPriority = cycleTaskPriority;
+
 // 스테이지 접기/펼치기 (세션 중 유지, 비영속)
 if (!appState.collapsedStages) appState.collapsedStages = {};
 

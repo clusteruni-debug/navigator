@@ -497,6 +497,10 @@ const appState = {
   workTemplates: [],                  // 저장된 템플릿 목록
   showArchivedProjects: false,        // 아카이브 프로젝트 표시 여부
   workMetaExpanded: {},               // 프로젝트별 메타정보 펼침 상태 { projectId: true/false }
+  // workFocusExpanded는 work-toggles.js에서 localStorage 기반으로 초기화 (state-types pre-init 제거 — typeof undefined 체크 통과 위해)
+  workSketchExpanded: {},             // 프로젝트별 빠른 작성 텍스트 영역 펼침 상태 { projectId: true/false }
+  workArchiveExpanded: {},            // 프로젝트별 노션 보고서 아카이브 영역 펼침 상태 { projectId: true/false }
+  workArchiveEditing: {},             // 프로젝트별 노션 보고서 편집 모드 { projectId: true/false }
   expandedWorkLogs: {},               // 작업 로그 펼침 상태 { taskUid: true/false }
   scheduleShowAll: false,             // 스케줄 뷰: 완료/보류 포함 여부
   // Firebase 동기화
