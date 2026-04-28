@@ -439,8 +439,10 @@ window.getProjectLastActivity = getProjectLastActivity;
 
 /**
  * 프로젝트의 stale 일수 (활동 없음)
+ * 완료된 프로젝트는 stale 검사 제외 (정의상 더 이상 업데이트 안 됨)
  */
 function getProjectStaleDays(project) {
+  if (typeof isProjectCompleted === 'function' && isProjectCompleted(project)) return 0;
   const last = getProjectLastActivity(project);
   if (!last) return 0;
   return Math.floor((Date.now() - last) / (1000 * 60 * 60 * 24));
@@ -449,8 +451,10 @@ window.getProjectStaleDays = getProjectStaleDays;
 
 /**
  * 마감 지난 미완료 task 개수
+ * 완료된 프로젝트는 0 반환 (이미 종료된 프로젝트의 미완료 task는 의도된 미수행으로 간주)
  */
 function getOverdueTaskCount(project) {
+  if (typeof isProjectCompleted === 'function' && isProjectCompleted(project)) return 0;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   let count = 0;
@@ -478,6 +482,8 @@ function getCrossProjectPriorityTasks() {
   sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
 
   appState.workProjects.filter(p => !p.archived && !p.onHold).forEach(project => {
+    // 완료된 프로젝트는 ★★★+ 평면 뷰에서 제외 (이미 종료)
+    if (typeof isProjectCompleted === 'function' && isProjectCompleted(project)) return;
     (project.stages || []).forEach((stage, si) => {
       (stage.subcategories || []).forEach((sub, sci) => {
         (sub.tasks || []).forEach((task, ti) => {
