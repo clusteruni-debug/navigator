@@ -38,6 +38,7 @@ Sequential script loading — no ES6 modules or bundler. Load order in navigator
   - Deep link: `?tab=events&eventId=<supabase_id>` selects events tab + highlights matching card + scrolls into view (handled by `handleStartupUrlParams()` in init.js)
   - Legacy `?import=base64&autoImport=true` import path remains for backward compat (checkUrlImport)
   - Anon key format: `sb_publishable_*` (legacy `eyJ...` disabled by Supabase 2026-04-19)
+  - **Schema swap policy**: any DROP/RENAME of `telegram_messages` columns requires Navigator read swap (select clause + derived getter + response field mapping + in-memory cache local updates) deployed BEFORE producer applies the DDL migration. Verify with `grep -rn '<column>' js/` returning zero matches (excluding incidental function parameter names). Full spec: workspace `config/integrations.json` `eventbot-navigator-import.breaking_if_changed`. Precedent incident: 2026-04-29 PG 42703 on `participated` DROP because read swap was missed.
 - Asset Manager: Revenue data clipboard exchange
 
 ## References

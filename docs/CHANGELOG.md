@@ -671,7 +671,7 @@ f34ad44 feat: 휴지통 복원 기능 + 이벤트 그룹별 선택
   - Changed events tab Telegram badge from `<div>` to `<button>`
   - `showTelegramEvents()`: Direct query to `telegram_messages` via **Supabase REST API**
     - Bot uses Supabase, Navigator uses Firebase → cross-query via Supabase anon key
-    - Query filters: `participated=false` + `(starred OR deadline)` + `archived_date IS NULL`
+    - Query filters: `participated=false` + `(starred OR deadline)` + `archived_date IS NULL` (filter replaced 2026-04-25 by `status<>'done'`; column dropped via tgeventbot migration 100)
     - Uses analysis field: title, summary, reward_usd, time_minutes, project, organizer
   - `showTelegramEventsModal()`: Checkbox list modal UI
     - Select all / individual selection support
