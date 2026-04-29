@@ -21,7 +21,7 @@ function formatDday(days) {
 
 function getEffectiveSupabaseEventStatus(event) {
   if (event.status === 'skipped') return 'skipped';
-  if (event.status === 'done' || event.participated) return 'done';
+  if (event.status === 'done') return 'done';
   return 'pending';
 }
 
@@ -92,7 +92,7 @@ async function fetchSupabaseEvents() {
 
   try {
     const query = [
-      'select=id,content,original_channel,deadline,urls,analysis,starred,participated,status,date',
+      'select=id,content,original_channel,deadline,urls,analysis,starred,status,date',
       'archived_date=is.null',
       'or=(starred.eq.true,deadline.not.is.null)',
       'order=deadline.asc.nullslast,date.desc',
@@ -127,7 +127,6 @@ async function fetchSupabaseEvents() {
         organizer: analysis.organizer || null,
         type: analysis.type || null,
         starred: msg.starred,
-        participated: msg.participated || false,
         status: msg.status || null,
         effectiveStatus: getEffectiveSupabaseEventStatus(msg),
         date: msg.date
@@ -185,7 +184,6 @@ async function completeSupabaseEvent(supabaseId) {
 
     // 캐시 로컬 업데이트
     event.status = 'done';
-    event.participated = true;
     event.effectiveStatus = 'done';
     showToast('✅ 참여 완료!', 'success');
     renderStatic();
@@ -217,7 +215,6 @@ async function uncompleteSupabaseEvent(supabaseId) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     event.status = 'pending';
-    event.participated = false;
     event.effectiveStatus = 'pending';
 
     // completionLog에서 해당 엔트리 찾아서 splice + soft-delete
