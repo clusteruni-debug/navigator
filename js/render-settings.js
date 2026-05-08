@@ -413,6 +413,69 @@ function renderSettingsModal() {
                   </div>
                 </div>
               </div>
+
+              <div class="settings-section">
+                <div class="settings-section-title">🌙 매일 자문</div>
+                <div class="settings-row">
+                  <label style="flex: 1;">저녁 자문 시각</label>
+                  <input type="time" id="reflection-evening-time"
+                         value="${appState.dailyReflection.settings.eveningTime}"
+                         onchange="applyReflectionSettings()"
+                         style="padding: 6px 10px; border-radius: 6px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);">
+                </div>
+                <div class="settings-row">
+                  <label style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="reflection-morning-enabled"
+                           ${appState.dailyReflection.settings.morningTime ? 'checked' : ''}
+                           onchange="applyReflectionSettings()">
+                    아침 자문 활성화
+                  </label>
+                </div>
+                <div class="settings-row">
+                  <label style="flex: 1;">아침 자문 시각</label>
+                  <input type="time" id="reflection-morning-time"
+                         value="${appState.dailyReflection.settings.morningTime || '09:00'}"
+                         ${appState.dailyReflection.settings.morningTime ? '' : 'disabled'}
+                         onchange="applyReflectionSettings()"
+                         style="padding: 6px 10px; border-radius: 6px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);">
+                </div>
+                <details style="margin-top: 8px;">
+                  <summary style="cursor: pointer; padding: 6px 0; font-size: 14px;">질문 customize (저녁 3개 + 아침 3개)</summary>
+                  <div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 0;">
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">저녁</div>
+                    ${[0,1,2].map(i => `
+                      <textarea data-q-time="evening" data-q-idx="${i}"
+                                maxlength="100" rows="2"
+                                onchange="applyReflectionSettings()"
+                                style="padding: 6px 10px; border-radius: 6px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); font-family: inherit; font-size: 13px; resize: vertical;">${(appState.dailyReflection.settings.questions.evening[i]||'').replace(/</g,'&lt;')}</textarea>
+                    `).join('')}
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">아침</div>
+                    ${[0,1,2].map(i => `
+                      <textarea data-q-time="morning" data-q-idx="${i}"
+                                maxlength="100" rows="2"
+                                onchange="applyReflectionSettings()"
+                                style="padding: 6px 10px; border-radius: 6px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); font-family: inherit; font-size: 13px; resize: vertical;">${(appState.dailyReflection.settings.questions.morning[i]||'').replace(/</g,'&lt;')}</textarea>
+                    `).join('')}
+                  </div>
+                </details>
+                <div class="settings-row">
+                  <label style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="reflection-auto-modal"
+                           ${appState.dailyReflection.settings.autoModalEnabled ? 'checked' : ''}
+                           onchange="applyReflectionSettings()">
+                    시각 도달 시 modal 자동 노출
+                  </label>
+                </div>
+                <div class="settings-row">
+                  <label style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="reflection-push"
+                           ${appState.dailyReflection.settings.pushEnabled ? 'checked' : ''}
+                           onchange="applyReflectionSettings()">
+                    PWA 알림 (앱 설치된 경우만, iOS 17.4+)
+                  </label>
+                </div>
+                <button onclick="resetReflectionSettings()" class="backup-btn" style="width: 100%; margin-top: 8px;">🔄 자문 설정 기본값 복원</button>
+              </div>
             </div>
             <div class="modal-footer" style="display: flex; gap: 10px; justify-content: center;">
               <button class="btn btn-secondary" onclick="closeSettings(); startFeatureTour();">
@@ -425,4 +488,65 @@ function renderSettingsModal() {
           </div>
         </div>
       `;
+}
+
+// ============================================
+// Phase 4.5 — 자문 settings handlers
+// ============================================
+
+function applyReflectionSettings() {
+  const settings = appState.dailyReflection.settings;
+  const evTime = document.getElementById('reflection-evening-time')?.value;
+  const mEnabled = document.getElementById('reflection-morning-enabled')?.checked;
+  const mTime = document.getElementById('reflection-morning-time')?.value;
+  const auto = document.getElementById('reflection-auto-modal')?.checked;
+  const push = document.getElementById('reflection-push')?.checked;
+
+  if (evTime) settings.eveningTime = evTime;
+  settings.morningTime = mEnabled ? (mTime || '09:00') : null;
+  settings.autoModalEnabled = !!auto;
+  settings.pushEnabled = !!push;
+
+  const evTextareas = document.querySelectorAll('textarea[data-q-time="evening"]');
+  const mTextareas = document.querySelectorAll('textarea[data-q-time="morning"]');
+  if (evTextareas.length === 3) {
+    settings.questions.evening = Array.from(evTextareas).map(t => t.value.trim());
+  }
+  if (mTextareas.length === 3) {
+    settings.questions.morning = Array.from(mTextareas).map(t => t.value.trim());
+  }
+
+  // morning time input disable toggle (live)
+  const mTimeInput = document.getElementById('reflection-morning-time');
+  if (mTimeInput) mTimeInput.disabled = !mEnabled;
+
+  if (typeof saveState === 'function') saveState();
+}
+
+function resetReflectionSettings() {
+  if (!confirm('자문 설정을 기본값으로 복원할까요? (시각 / 질문 / 알림 모두 초기화)')) return;
+  appState.dailyReflection.settings = {
+    eveningTime: '22:00',
+    morningTime: null,
+    questions: {
+      evening: [
+        '오늘 30분 룰 깬 충동 있었나? 무엇이었나?',
+        '오늘 과잉 약속 / 압력솥 발현 있었나?',
+        '내일 한 가지 완성할 작은 약속은?'
+      ],
+      morning: [
+        '오늘 분기 목표 3개 중 무엇을 진전시킬까?',
+        '신체 베이스라인 (수면·카페인·운동) 오늘 무엇이 약한가?',
+        '어제 후회한 충동 행동이 있나? 패턴은?'
+      ]
+    },
+    pushEnabled: false,
+    autoModalEnabled: true
+  };
+  if (typeof saveState === 'function') saveState();
+  // settings modal 재 render
+  if (typeof closeSettings === 'function' && typeof openSettings === 'function') {
+    closeSettings();
+    setTimeout(() => openSettings(), 100);
+  }
 }
