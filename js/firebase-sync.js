@@ -775,6 +775,12 @@ function startRealtimeSync() {
         if (data.resolutions) {
           appState.resolutions = mergeById(appState.resolutions || [], data.resolutions, appState.deletedIds.resolutions);
         }
+        // 매일 자문 병합 (review fix HIGH Phase 2/5.5: cloud→local 누락 차단 — onSnapshot path)
+        if (data.dailyReflection && typeof mergeDailyReflection === 'function') {
+          appState.dailyReflection = mergeDailyReflection(appState.dailyReflection, data.dailyReflection);
+        } else if (data.dailyReflection) {
+          appState.dailyReflection = data.dailyReflection;
+        }
         if (data.shuttleSuccess !== undefined) {
           appState.shuttleSuccess = data.shuttleSuccess;
         }
