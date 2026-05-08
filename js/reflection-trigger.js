@@ -73,3 +73,36 @@ if (document.readyState === 'loading') {
 } else {
   setTimeout(_initReflectionTrigger, 500);
 }
+
+// review fix Phase 7 LOW: notification click → URL ?reflection=evening|morning 또는 sw postMessage
+// 받아서 modal 강제 노출 (30min window 지난 push 클릭에도 답할 수 있게)
+function _handleReflectionUrlHint() {
+  try {
+    const url = new URL(window.location.href);
+    const hint = url.searchParams.get('reflection');
+    if (hint === 'evening' || hint === 'morning') {
+      setTimeout(() => {
+        if (typeof showReflectionModal === 'function') showReflectionModal(hint);
+      }, 1200);
+      url.searchParams.delete('reflection');
+      window.history.replaceState({}, '', url.toString());
+    }
+  } catch (e) { /* noop */ }
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data?.type === 'reflection-open'
+        && (event.data.timeOfDay === 'evening' || event.data.timeOfDay === 'morning')) {
+      setTimeout(() => {
+        if (typeof showReflectionModal === 'function') showReflectionModal(event.data.timeOfDay);
+      }, 500);
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _handleReflectionUrlHint);
+} else {
+  _handleReflectionUrlHint();
+}

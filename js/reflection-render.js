@@ -306,6 +306,16 @@ function showQuarterlyRetrospective() {
 function showReflectionOnboarding() {
   if (localStorage.getItem('navigator-reflection-onboarded')) return;
   if (document.querySelector('.reflection-onboarding-modal-overlay')) return;
+  // review fix Phase 9.5: plan §329 — history 비어있고 autoModalEnabled=true 일 때만 노출
+  // 기존 user (history 있음) 가 새 기기에서 들어왔거나 cloud sync 늦은 경우 잘못된 onboarding 차단
+  const settings = appState.dailyReflection?.settings;
+  const history = appState.dailyReflection?.history || {};
+  if (Object.keys(history).length > 0) {
+    // 기존 사용자 — onboarding 자동 mark
+    localStorage.setItem('navigator-reflection-onboarded', 'true');
+    return;
+  }
+  if (!settings?.autoModalEnabled) return;
 
   const overlay = document.createElement('div');
   overlay.className = 'reflection-onboarding-modal-overlay reflection-modal-overlay';

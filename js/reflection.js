@@ -120,8 +120,10 @@ function shouldShowReflectionModal(timeOfDay = 'evening') {
   const elapsed = now - target;
   if (elapsed < 0 || elapsed > 30 * 60 * 1000) return false;
 
+  // 오늘 해당 슬롯에 entry 있으면 (답했든 건너뛰기든) 그 날은 처리 완료 — 재노출 차단
+  // (review fix Phase 6/8.5: skipped=true 상태에서 5min interval/visibilitychange 재출현 방지)
   const today = getReflectionToday();
-  if (today[timeOfDay] && !today[timeOfDay].skipped) return false;
+  if (today[timeOfDay]) return false;
 
   return true;
 }

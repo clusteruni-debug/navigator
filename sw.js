@@ -194,15 +194,24 @@ self.addEventListener('push', event => {
 // 알림 클릭 시 앱 열기
 self.addEventListener('notificationclick', event => {
   event.notification.close();
+  // review fix Phase 7 LOW: reflection notification 클릭 시 timeOfDay hint 전달
+  // → 앱이 30min window 지난 후에도 modal 강제 노출 가능
+  const reflectionHint = event.notification.data?.reflectionTimeOfDay;
+  const targetUrl = reflectionHint
+    ? `./navigator-v5.html?reflection=${reflectionHint}`
+    : './navigator-v5.html';
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then(clientList => {
       for (const client of clientList) {
         if (client.url.includes('navigator') && 'focus' in client) {
+          if (reflectionHint && 'postMessage' in client) {
+            client.postMessage({ type: 'reflection-open', timeOfDay: reflectionHint });
+          }
           return client.focus();
         }
       }
       if (clients.openWindow) {
-        return clients.openWindow('./navigator-v5.html');
+        return clients.openWindow(targetUrl);
       }
     })
   );

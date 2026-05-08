@@ -521,6 +521,10 @@ function applyReflectionSettings() {
   if (mTimeInput) mTimeInput.disabled = !mEnabled;
 
   if (typeof saveState === 'function') saveState();
+
+  // review fix Phase 7: settings 변경 시 push 스케줄 재시작 (시각/활성/비활성 모두 반영)
+  if (typeof stopReflectionPushSchedule === 'function') stopReflectionPushSchedule();
+  if (typeof startReflectionPushSchedule === 'function') startReflectionPushSchedule();
 }
 
 function resetReflectionSettings() {
