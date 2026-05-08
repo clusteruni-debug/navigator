@@ -233,6 +233,165 @@ E2E flow:
 5. 분기 시점 (3개월 후) → "🌙 자문" 탭 → "분기 회고" → markdown 복사 → Obsidian roadmap.md paste
 6. 매일 Obsidian 진입 = 0
 
+## Phase 4.5 — Settings UI (~80 lines)
+
+User가 reflection 시각·질문·알림 customize 가능해야. 새 file 안 만들고 기존 settings modal에 섹션 추가.
+
+File: `js/render-settings.js` (existing) — append section:
+
+```html
+<div class="settings-section">
+  <h3>🌙 자문 설정</h3>
+
+  <label>
+    저녁 자문 시각
+    <input type="time" id="reflection-evening-time" value="${eveningTime}">
+  </label>
+
+  <label>
+    <input type="checkbox" id="reflection-morning-enabled" ${morningTime ? 'checked' : ''}>
+    아침 자문 활성화
+  </label>
+  <label class="${morningTime ? '' : 'disabled'}">
+    아침 자문 시각
+    <input type="time" id="reflection-morning-time" value="${morningTime || '09:00'}" ${morningTime ? '' : 'disabled'}>
+  </label>
+
+  <details>
+    <summary>질문 customize (저녁 3개 + 아침 3개)</summary>
+    <!-- 6 textareas, max 100자 each -->
+  </details>
+
+  <label>
+    <input type="checkbox" id="reflection-auto-modal" ${autoModalEnabled ? 'checked' : ''}>
+    시각 도달 시 modal 자동 노출
+  </label>
+
+  <label>
+    <input type="checkbox" id="reflection-push" ${pushEnabled ? 'checked' : ''} ${pwaInstalled ? '' : 'disabled'}>
+    PWA 알림 (앱 설치된 경우만)
+  </label>
+
+  <button onclick="resetReflectionSettings()">기본값 복원</button>
+</div>
+```
+
+Save handler: `applyReflectionSettings()` reads form values → updates `appState.dailyReflection.settings` → `saveState()`.
+
+Default behavior: feature is *enabled by default* (`autoModalEnabled: true`), *push opt-in* (`pushEnabled: false`). User can fully disable via these toggles.
+
+## Phase 5.5 — Multi-device sync logic (~40 lines)
+
+Firebase realtime listener (existing `firebase-sync.js` `onSnapshot`) detects answer from another device.
+
+Logic in `reflection-render.js`:
+- Modal open → register one-shot snapshot listener for `dailyReflection.history[today]`
+- If listener fires with non-null evening/morning answer (from other device) → close modal + toast "다른 기기에서 답 완료됨"
+- Race resolution: `answeredAt` ISO timestamp comparison (server timestamp). last-write-wins
+- Close modal explicit listener teardown to avoid memory leak
+
+Phase 4 modal flow update:
+1. `showReflectionModal('evening')` opens
+2. Register listener
+3. User answers OR other device answers (whichever first wins)
+4. Listener fires either way → close + cleanup
+
+## Phase 8.5 — Skip + Streak rules (decision required)
+
+**Decision**: skip = streak resets (안 답 = 답 안 한 것과 동일 취급).
+
+Rationale: mylife "self-discipline = quality" rule — gaming streak by skipping defeats purpose. Single skipped day breaks streak; user re-starts from current=1 next day they answer.
+
+Alternative considered: weekly skip budget (3 skips/week before reset) — rejected as over-complex + game-able.
+
+`updateReflectionStreak()`:
+```js
+// 매일 자정 또는 답 저장 시 호출
+const yesterdayKey = getYesterdayDateStr();
+const yesterday = history[yesterdayKey]?.evening;
+if (!yesterday || yesterday.skipped) {
+  // streak 깨짐
+  appState.dailyReflection.streak.current = 0;
+}
+// 오늘 답하면 +1
+if (history[todayKey]?.evening && !history[todayKey].evening.skipped) {
+  appState.dailyReflection.streak.current += 1;
+  if (current > best) best = current;
+}
+```
+
+Best streak update → toast notification ("최고 streak 갱신: N일!").
+
+## Phase 9.5 — Onboarding (~50 lines)
+
+First-time user (or feature first-enable) → onboarding modal explaining reflection.
+
+Trigger: on `loadState()` → if `appState.dailyReflection.history` is empty AND `dailyReflection.settings.autoModalEnabled` AND no localStorage key `navigator-reflection-onboarded` → show onboarding modal.
+
+Modal content:
+- "🌙 매일 자문이 추가됐습니다"
+- "저녁 22:00에 3분 자문 modal이 자동으로 떠요. 답하면 streak이 쌓입니다."
+- 샘플 질문 3개 표시 (default evening questions)
+- "지금 시작" / "나중에 (settings에서 활성화)" 버튼
+- 후자 → `autoModalEnabled = false` + onboarded flag set
+
+`localStorage.setItem('navigator-reflection-onboarded', 'true')` 후 modal 닫음 → 다시 안 띄움.
+
+## Phase 10 — Performance & Scale (~30 lines + design rule)
+
+Storage budget:
+- 1 ReflectionDay ≈ 600 bytes (3 textareas × ~150-200 chars each, JSON overhead)
+- 1년 = 365 days × 600 = ~220KB
+- 5년 = ~1.1MB → Firestore doc 1MB limit 위배 가능
+
+Solution (existing `compactOldCompletionLog` 패턴 follow):
+- `compactOldReflectionLog()` runs on `loadState()`
+- 1년 이상 days → flat compressed format: `{date, eveningSummary, morningSummary, answered}` only (full text dropped)
+- Compression yields ~50 bytes/day → 5년 = ~91KB
+
+UI render scaling:
+- History tab default: last 30 days
+- "더 보기" → load 30 more (pagination)
+- 90-day quarterly view: server-side aggregate query (Firestore)
+
+## Phase 10.5 — Accessibility (~20 lines + CSS)
+
+Modal:
+- `role="dialog"`, `aria-labelledby="reflection-title"`, `aria-modal="true"`
+- First textarea `autofocus` on open
+- Esc 키 = `closeReflectionModal()`
+- Tab navigation through 3 textareas + skip + save buttons (loop trap)
+- Cmd/Ctrl+Enter = `submitReflection()` (저장 단축키)
+
+CSS:
+- `:focus` outline visible (ADHD: 강한 visual focus)
+- `prefers-reduced-motion` 감지 → slide-up animation 비활성
+
+## Phase 11 — Migration safety & Rollback (~20 lines)
+
+**Migration (기존 user 새 버전 update 시)**:
+- `loadState()` 첫 실행 시 `appState.dailyReflection` field 부재 → 초기값으로 set (state-types.js default)
+- `dailyReflection-onboarded` flag 부재 → onboarding modal 노출 (Phase 9.5)
+- 데이터 손상 가능성 0 (새 field 추가만, 기존 field 변경 X)
+
+**Rollback path**:
+- User-level: settings에서 `autoModalEnabled: false` + `pushEnabled: false`. data 보존, modal 안 뜸
+- Code-level: navigator-v5.html script tags 제거 + sw.js cache list revert + CACHE_NAME bump 다시. user 다음 visit에 새 SW install + 이전 버전으로 회귀
+- Data preservation: `dailyReflection` state는 rollback 후에도 localStorage/Firestore에 유지 (re-enable 시 history 살아있음)
+
+## Phase 12 — Edge cases (verification scope)
+
+| Case | Handling |
+|---|---|
+| 자정 넘김 (23:55 답 → 00:05 streak update) | `getLocalDateStr()` 시점 기준. 자정 후 답 = 다음 날 streak |
+| DST 변경 (시각 점프) | `eveningTime` HH:MM 그대로 (localtime 기준), DST 자동 적용 |
+| Multi-device 동시 modal | Phase 5.5 realtime listener로 close |
+| Offline 모드 | localStorage 저장 → 온라인 복귀 시 Firebase sync |
+| Push 권한 거부 | settings UI에 "권한 거부됨" 표시, autoModal로 fallback |
+| 1년 이상 데이터 | Phase 10 compaction 자동 |
+| First-time install | Phase 9.5 onboarding |
+| Tab background에서 22:00 도달 | visibilitychange 트리거로 modal 노출 (Phase 6) |
+
 ## Risks / Open Questions
 
 - **iOS PWA push limitation**: iOS 17.4+ 부터 web push 지원. user iOS 버전 확인 필요. fallback = client-side `setTimeout` + visibilitychange
@@ -259,26 +418,63 @@ E2E flow:
 ## Codex Dispatch Prompt (after user review)
 
 ```
-PLAN-NAVIGATOR-DAILY-REFLECTION.md (projects/navigator/docs/) Phase 1-9 implement.
+PLAN-NAVIGATOR-DAILY-REFLECTION.md (projects/navigator/docs/) Phase 1-12 implement.
 
 Stack: Vanilla JS + Firebase Auth/Firestore + PWA. Sequential script loading
-(no bundler). Add ~600-900 lines: state-types.js typedef + appState init,
-state.js load/save, new reflection.js + reflection-render.js + reflection-trigger.js
-(Phase 1-6 mandatory), reflection-push.js (Phase 7 client-side setTimeout
-implementation, server push deferred), CSS styling, navigator-v5.html script
-tag updates, sw.js cache list + CACHE_NAME bump.
+(no bundler). Add ~700-1100 lines total across phases:
+- Phase 1-3: state schema + load/save + core logic (state-types.js typedef +
+  appState init, state.js load/save, firebase-sync.js explicit field if needed,
+  new reflection.js)
+- Phase 4: reflection-render.js modal/sheet UI + history view + quarterly view
+- Phase 4.5: render-settings.js extension (settings UI section + handlers)
+- Phase 5: tab integration (currentTab enum + render dispatch + switchTab)
+- Phase 5.5: multi-device sync (firebase realtime listener in modal)
+- Phase 6: reflection-trigger.js (setInterval + visibilitychange)
+- Phase 7: reflection-push.js (client-side setTimeout + sw.js handler reuse,
+  server push deferred)
+- Phase 8: quarterly export (clipboard markdown, no Obsidian write)
+- Phase 8.5: streak rules (skip = reset, daily missing = reset)
+- Phase 9: sw.js cache list + CACHE_NAME bump (v6.13 → v6.14) + navigator-v5.html
+  script tag order
+- Phase 9.5: onboarding modal (first-time + feature enable)
+- Phase 10: compactOldReflectionLog (1년 이상 압축, completionLog 패턴 follow)
+- Phase 10.5: A11y (role/aria + Esc/Tab/Enter shortcuts + prefers-reduced-motion)
+- Phase 11: migration safety (loadState 자동 init for missing field) + rollback path doc
+- Phase 12: edge cases (자정 넘김 / DST / offline / push 거부 / first-time / multi-device)
 
 Constraints:
-- Patterns: follow existing lifeRhythm / habitStreaks / weeklyPlan / showImportConfirmModal
-- Modal: bottom sheet, 70vh, slide-up. 3 questions + textareas. 저장 / 건너뛰기 / 닫기
-- Trigger: setInterval 5min check shouldShowReflectionModal + visibilitychange.
-  Push notification = client-side setTimeout (server push out of scope)
-- Quarterly: 90-day markdown export to clipboard, no Obsidian file write
-- Firebase sync: verify dailyReflection field included in sync payload, add explicit if needed
-- iOS PWA push fallback: visibilitychange + setTimeout
+- Patterns reuse: lifeRhythm 6항목+settings / habitStreaks current·best·lastActiveDate /
+  weeklyPlan focusTasks 3max / completionLog compaction / showImportConfirmModal modal
+- Modal: bottom sheet, 70vh, slide-up. 3 questions × ~150-200 chars textarea (max 200자).
+  저장 / 건너뛰기 / 닫기. autofocus first textarea + role=dialog + aria-modal
+- Trigger: setInterval 5min + visibilitychange. autoModalEnabled toggle 존중. tab background에서 도달 = 다음 visibilitychange에 노출
+- Streak: skip = reset, daily 답 = +1, best 갱신 시 toast
+- Settings UI: 시각 (HH:MM input) / 질문 customize (6 textarea) / push 토글 (PWA 설치 시만 enabled) / autoModal 토글 / 기본값 복원
+- Multi-device: Firebase onSnapshot listener in modal (one-shot per session). 다른 디바이스 답 → close + toast. last-write-wins (answeredAt 기준)
+- Quarterly: 90일 history → markdown (답변 통계 + 키워드 빈도 + streak + 결정 갱신 후보 섹션) → clipboard.writeText. no file system write
+- Firebase sync: verify firebase-sync.js의 sync payload에 dailyReflection field 자동 포함 확인.
+  자동 안 되면 explicit 추가 (workProjects/lifeRhythm 패턴 follow)
+- iOS PWA push: 17.4+ 부터 web push. fallback = visibilitychange + setTimeout
+- Migration: 기존 user data 0 손상 (새 field 추가만). first-load 시 자동 init + onboarding modal
+- Rollback: user-level settings 토글로 disable. code-level은 sw.js + html revert + CACHE_NAME bump
+- A11y: focus trap / Esc / Cmd-Enter / prefers-reduced-motion / strong :focus outline (ADHD)
+- Performance: 1년 이상 data compactOldReflectionLog (~50 bytes/day flat). history view 30-day default + pagination
 
-Acceptance: each phase's test in plan §Verification. E2E flow verified manually
-on dev server (npx serve -p 5000).
+Verification per phase (plan §Verification + §Phase 12 edge cases). E2E flow on
+dev server (npx serve -p 5000) — first install → onboarding → 22:00 modal →
+answer → streak → quarterly markdown clipboard → settings disable/enable.
 
-Commit format: `PLAN-NAVIGATOR-DAILY-REFLECTION: <Phase X> done` per AGENTS.md §16.
+Commit per phase atomic, format: `<scope>(reflection): Phase X — <subject>`
+e.g., `feat(reflection): Phase 1-3 — state schema + core logic`. Conventional
+commits style (navigator repo follows it, not workspace AGENTS.md §16 TASK-ID format).
+
+Branch: feature branch `feature/daily-reflection` recommended for review,
+merge to main after Phase 9 verification (cache + script load order critical).
+
+Out of scope:
+- Server-side push notification (Firebase Cloud Functions)
+- NLP / AI keyword extraction (frequency-only sufficient for v1)
+- Multi-timezone (single device timezone only)
+- Reflection text 검색 (필요 시 v2)
+- Streak budget (3 skips/week 등 — 기각됨, simple reset)
 ```
