@@ -511,6 +511,13 @@ async function loadFromFirebase() {
       if (data.resolutions) {
         appState.resolutions = mergeById(appState.resolutions || [], data.resolutions, appState.deletedIds.resolutions);
       }
+      // 매일 자문 병합 (review fix HIGH Phase 2/5.5: cloud→local 누락 차단)
+      // date 별 evening/morning slot answeredAt 비교 last-write-wins
+      if (data.dailyReflection && typeof mergeDailyReflection === 'function') {
+        appState.dailyReflection = mergeDailyReflection(appState.dailyReflection, data.dailyReflection);
+      } else if (data.dailyReflection) {
+        appState.dailyReflection = data.dailyReflection;
+      }
       // 셔틀/테마 동기화
       if (data.shuttleSuccess !== undefined) {
         appState.shuttleSuccess = data.shuttleSuccess;

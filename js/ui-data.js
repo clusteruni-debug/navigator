@@ -149,8 +149,12 @@ function handleFileImport(e) {
         if (data.settings) {
           appState.settings = { ...appState.settings, ...data.settings };
         }
-        // 매일 자문 병합 (history date-key shallow merge, settings/streak imported win)
-        if (data.dailyReflection) {
+        // 매일 자문 병합 (review fix MED Phase 2.5: date+slot 단위 answeredAt 비교)
+        if (data.dailyReflection && typeof mergeDailyReflection === 'function') {
+          appState.dailyReflection = mergeDailyReflection(appState.dailyReflection, data.dailyReflection);
+          if (typeof updateReflectionStreak === 'function') updateReflectionStreak();
+        } else if (data.dailyReflection) {
+          // fallback (helper 미로드 시) — shallow merge
           appState.dailyReflection = {
             history: { ...appState.dailyReflection.history, ...(data.dailyReflection.history || {}) },
             settings: { ...appState.dailyReflection.settings, ...(data.dailyReflection.settings || {}) },

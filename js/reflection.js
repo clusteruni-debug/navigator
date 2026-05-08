@@ -282,3 +282,89 @@ ${morningTop}
 > 데이터는 navigator에 그대로 보존 (압축은 user 머릿속).
 `;
 }
+
+/**
+ * Cloud / imported / backup → local merge
+ * Date 별 evening/morning slot 단위 last-write-wins via answeredAt ISO 비교.
+ * Compact entry는 별도 처리 (정보 손실 방지: full > compact).
+ *
+ * Used by:
+ * - firebase-sync.js initial load + onSnapshot (cloud → local)
+ * - ui-data.js handleFileImport (file → local)
+ * - firebase-backup.js restoreFromSyncBackup (snapshot → local)
+ *
+ * (review fix HIGH Phase 2/5.5 — modal listener 외 sync 경로에 merge 추가)
+ *
+ * @param {DailyReflection} local
+ * @param {DailyReflection} other
+ * @returns {DailyReflection}
+ */
+function mergeDailyReflection(local, other) {
+  if (!other) return local;
+  if (!local) return other;
+
+  const result = {
+    history: { ...local.history },
+    settings: { ...(local.settings || {}), ...(other.settings || {}) },
+    streak: { ...(local.streak || { current: 0, best: 0, lastAnsweredDate: null }) }
+  };
+
+  for (const [date, otherDay] of Object.entries(other.history || {})) {
+    const localDay = result.history[date];
+    if (!localDay) {
+      result.history[date] = otherDay;
+      continue;
+    }
+    // full 우선 — compact는 정보 손실 후 형태이므로 full이 한쪽이라도 있으면 그것을 keep
+    if (otherDay.compact && !localDay.compact) {
+      // local full 유지
+      continue;
+    }
+    if (localDay.compact && !otherDay.compact) {
+      result.history[date] = otherDay;
+      continue;
+    }
+    if (otherDay.compact && localDay.compact) {
+      result.history[date] = {
+        compact: true,
+        eveningAnswered: !!(otherDay.eveningAnswered || localDay.eveningAnswered),
+        morningAnswered: !!(otherDay.morningAnswered || localDay.morningAnswered),
+        answeredAt: (otherDay.answeredAt || '') > (localDay.answeredAt || '')
+          ? otherDay.answeredAt
+          : localDay.answeredAt
+      };
+      continue;
+    }
+
+    // 일반 day — evening + morning slot 별 answeredAt 비교 last-write-wins
+    const merged = {
+      evening: localDay.evening || null,
+      morning: localDay.morning || null
+    };
+    for (const slot of ['evening', 'morning']) {
+      const localAns = localDay[slot];
+      const otherAns = otherDay[slot];
+      if (!localAns && otherAns) {
+        merged[slot] = otherAns;
+      } else if (localAns && otherAns) {
+        const localAt = localAns.answeredAt || '';
+        const otherAt = otherAns.answeredAt || '';
+        merged[slot] = otherAt > localAt ? otherAns : localAns;
+      }
+    }
+    result.history[date] = merged;
+  }
+
+  // streak — best max, lastAnsweredDate 최신 win current 동반
+  const localStreak = local.streak || {};
+  const otherStreak = other.streak || {};
+  result.streak.best = Math.max(localStreak.best || 0, otherStreak.best || 0);
+  const localLast = localStreak.lastAnsweredDate || '';
+  const otherLast = otherStreak.lastAnsweredDate || '';
+  if (otherLast > localLast) {
+    result.streak.current = otherStreak.current || 0;
+    result.streak.lastAnsweredDate = otherLast;
+  }
+
+  return result;
+}

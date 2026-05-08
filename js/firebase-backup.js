@@ -97,7 +97,11 @@ function restoreFromSyncBackup() {
     if (backup.streak) appState.streak = backup.streak;
     if (backup.completionLog) appState.completionLog = backup.completionLog;
     if (backup.resolutions) appState.resolutions = backup.resolutions;
-    if (backup.dailyReflection) {
+    // review fix MED Phase 2.5: date+slot 단위 answeredAt 비교 merge
+    if (backup.dailyReflection && typeof mergeDailyReflection === 'function') {
+      appState.dailyReflection = mergeDailyReflection(appState.dailyReflection, backup.dailyReflection);
+      if (typeof updateReflectionStreak === 'function') updateReflectionStreak();
+    } else if (backup.dailyReflection) {
       appState.dailyReflection = {
         history: { ...appState.dailyReflection.history, ...(backup.dailyReflection.history || {}) },
         settings: { ...appState.dailyReflection.settings, ...(backup.dailyReflection.settings || {}) },
