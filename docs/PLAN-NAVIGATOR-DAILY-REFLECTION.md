@@ -19,6 +19,16 @@ The integration is **navigator-native** — push notification + answer modal + h
 - WatchBot integration considered, rejected: 3-tool dance (navigator + Telegram + Obsidian) inferior to 1-tool deep integration
 - Conclusion: navigator's existing surface (lifeRhythm / habitStreaks / weeklyPlan / pomodoro) is missing a *daily reflection* layer. mylife import surfaced this as a navigator project backlog item
 
+## Phase 0.5 — Pre-flight findings (Codex read-only review, 2026-05-09)
+
+Codex dispatch (`task-mox36iky-3kfif4`) was blocked by sandbox policy (no `git checkout -b` / `apply_patch`) — 0 phases implemented. However, 4-minute read-only static analysis recovered all 5 plan §Pre-existing constraint flags. Apply these facts during Phase 1-12 implementation:
+
+1. `getLocalDateStr()` already exists at `utils.js:18` — do NOT create a new utility for Phase 12 midnight crossover; import existing (`d || new Date()` signature returns `YYYY-MM-DD` local time)
+2. `firebase-sync.js:230` payload uses explicit field list — Phase 2 must add `dailyReflection` explicitly (no auto-include; follow `workProjects` / `lifeRhythm` pattern)
+3. Modal stack: do NOT reuse centered `.modal` (`modals.css:3`) — add a new `reflection` bottom-sheet CSS file. Focus-trap pattern reference: `init.js:262` (showImportConfirmModal) + `pwa.js:238`
+4. **Phase 9 merge gate extension** — `sw.js` cache list and `navigator-v5.html` script list already have 1 pre-existing drift: `work-ro-template.js` is in HTML but missing from cache list. Phase 9 verify must include fixing this drift alongside the new reflection script entries
+5. **Phase 2 expansion (split as Phase 2.5)** — beyond `state.js:164` (load/save), the `dailyReflection` field must also be wired into `ui-data.js:8` (export/import) and `firebase-backup.js:11` (manual backup). All 3 paths must stay consistent or backup/restore loses reflection history
+
 ## Phase 1 — State schema (~50 lines, foundation)
 
 File: `js/state-types.js`

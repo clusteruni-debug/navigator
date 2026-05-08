@@ -24,7 +24,8 @@ function exportData() {
       commuteTracker: appState.commuteTracker,
       weeklyPlan: appState.weeklyPlan,
       completionLog: appState.completionLog,
-      trash: appState.trash
+      trash: appState.trash,
+      dailyReflection: appState.dailyReflection
     };
 
     const json = JSON.stringify(data, null, 2);
@@ -147,6 +148,18 @@ function handleFileImport(e) {
         }
         if (data.settings) {
           appState.settings = { ...appState.settings, ...data.settings };
+        }
+        // 매일 자문 병합 (review fix MED Phase 2.5: date+slot 단위 answeredAt 비교)
+        if (data.dailyReflection && typeof mergeDailyReflection === 'function') {
+          appState.dailyReflection = mergeDailyReflection(appState.dailyReflection, data.dailyReflection);
+          if (typeof updateReflectionStreak === 'function') updateReflectionStreak();
+        } else if (data.dailyReflection) {
+          // fallback (helper 미로드 시) — shallow merge
+          appState.dailyReflection = {
+            history: { ...appState.dailyReflection.history, ...(data.dailyReflection.history || {}) },
+            settings: { ...appState.dailyReflection.settings, ...(data.dailyReflection.settings || {}) },
+            streak: data.dailyReflection.streak || appState.dailyReflection.streak
+          };
         }
         // 라이프 리듬 병합 (날짜 비교 포함)
         if (data.lifeRhythm) {

@@ -176,6 +176,46 @@ const SUPABASE_CACHE_TTL = 3 * 60 * 1000; // 3분
  */
 
 /**
+ * @typedef {Object} ReflectionAnswer
+ * @property {string} q1 - 첫 번째 자문 답
+ * @property {string} q2 - 두 번째 자문 답
+ * @property {string} q3 - 세 번째 자문 답
+ * @property {string} answeredAt - ISO 8601 답한 시각
+ * @property {boolean} skipped - 건너뛰기 했는지 (답 없이)
+ */
+
+/**
+ * @typedef {Object} ReflectionDay
+ * @property {ReflectionAnswer|null} evening - 22시 자문 답
+ * @property {ReflectionAnswer|null} morning - 09시 자문 답 (optional)
+ */
+
+/**
+ * @typedef {Object} ReflectionSettings
+ * @property {string} eveningTime - 저녁 자문 시각 (HH:MM, 기본 '22:00')
+ * @property {string|null} morningTime - 아침 자문 시각 (HH:MM 또는 null)
+ * @property {Object} questions
+ * @property {string[]} questions.evening - 저녁 3 질문
+ * @property {string[]} questions.morning - 아침 3 질문
+ * @property {boolean} pushEnabled - PWA push notification 활성화
+ * @property {boolean} autoModalEnabled - 시각 도달 시 modal 자동 노출
+ */
+
+/**
+ * @typedef {Object} ReflectionStreak
+ * @property {number} current - 현재 연속일
+ * @property {number} best - 최고 연속일
+ * @property {string|null} lastAnsweredDate - 마지막 답한 날짜 (YYYY-MM-DD)
+ */
+
+/**
+ * @typedef {Object} DailyReflection
+ * @property {Object<string, ReflectionDay>} history - 날짜별 답 기록
+ * @property {ReflectionSettings} settings
+ * @property {ReflectionStreak} streak
+ */
+
+/**
  * @typedef {Object} AppState
  * @property {'action'|'schedule'|'all'|'work'|'more'} currentTab - 현재 활성 탭
  * @property {boolean} shuttleSuccess - 셔틀 탑승 여부
@@ -325,6 +365,8 @@ const SUPABASE_CACHE_TTL = 3 * 60 * 1000; // 3분
  * @property {Object<string, string>} deletedIds.workTemplates
  *
  * @property {Task[]} trash - 삭제된 태스크 보관 (30일 후 자동 정리)
+ *
+ * @property {DailyReflection} dailyReflection - 매일 자문 (저녁/아침 self-check)
  */
 /** @type {AppState} */
 const appState = {
@@ -523,5 +565,28 @@ const appState = {
     resolutions: {}     // 삭제된 결심 추적
   },
   // 휴지통: 삭제된 태스크 보관 (30일 후 자동 정리)
-  trash: []
+  trash: [],
+  // 매일 자문 (저녁 22:00 / 아침 09:00 self-check, life_compass.md 6 질문 native 통합)
+  dailyReflection: {
+    history: {},  // { 'YYYY-MM-DD': ReflectionDay }
+    settings: {
+      eveningTime: '22:00',
+      morningTime: null,  // null = 아침 자문 비활성
+      questions: {
+        evening: [
+          '오늘 30분 룰 깬 충동 있었나? 무엇이었나?',
+          '오늘 과잉 약속 / 압력솥 발현 있었나?',
+          '내일 한 가지 완성할 작은 약속은?'
+        ],
+        morning: [
+          '오늘 분기 목표 3개 중 무엇을 진전시킬까?',
+          '신체 베이스라인 (수면·카페인·운동) 오늘 무엇이 약한가?',
+          '어제 후회한 충동 행동이 있나? 패턴은?'
+        ]
+      },
+      pushEnabled: false,
+      autoModalEnabled: true
+    },
+    streak: { current: 0, best: 0, lastAnsweredDate: null }
+  }
 };

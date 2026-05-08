@@ -1,6 +1,6 @@
-// Navigator Service Worker v6.13
+// Navigator Service Worker v6.14
 // ⚠️ JS/CSS 파일 추가·삭제 시 이 목록과 navigator-v5.html 모두 업데이트 필요
-const CACHE_NAME = 'navigator-v6-13';
+const CACHE_NAME = 'navigator-v6-14';
 const urlsToCache = [
   './navigator-v5.html',
   './manifest.json',
@@ -36,6 +36,7 @@ const urlsToCache = [
   './css/responsive.css',
   './css/command-palette.css',
   './css/typography-override.css',
+  './css/reflection.css',
   // JS (navigator-v5.html script 순서)
   './js/utils.js',
   './js/utils-data.js',
@@ -76,6 +77,7 @@ const urlsToCache = [
   './js/globals.js',
   './js/work-data.js',
   './js/work-templates.js',
+  './js/work-ro-template.js',
   './js/work-clipboard.js',
   './js/work-analytics.js',
   './js/work-reports.js',
@@ -102,6 +104,10 @@ const urlsToCache = [
   './js/rhythm-history.js',
   './js/rhythm.js',
   './js/command-palette.js',
+  './js/reflection.js',
+  './js/reflection-render.js',
+  './js/reflection-trigger.js',
+  './js/reflection-push.js',
   './js/init.js'
 ];
 
@@ -188,15 +194,24 @@ self.addEventListener('push', event => {
 // 알림 클릭 시 앱 열기
 self.addEventListener('notificationclick', event => {
   event.notification.close();
+  // review fix Phase 7 LOW: reflection notification 클릭 시 timeOfDay hint 전달
+  // → 앱이 30min window 지난 후에도 modal 강제 노출 가능
+  const reflectionHint = event.notification.data?.reflectionTimeOfDay;
+  const targetUrl = reflectionHint
+    ? `./navigator-v5.html?reflection=${reflectionHint}`
+    : './navigator-v5.html';
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then(clientList => {
       for (const client of clientList) {
         if (client.url.includes('navigator') && 'focus' in client) {
+          if (reflectionHint && 'postMessage' in client) {
+            client.postMessage({ type: 'reflection-open', timeOfDay: reflectionHint });
+          }
           return client.focus();
         }
       }
       if (clients.openWindow) {
-        return clients.openWindow('./navigator-v5.html');
+        return clients.openWindow(targetUrl);
       }
     })
   );

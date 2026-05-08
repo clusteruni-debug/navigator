@@ -51,6 +51,12 @@ function loadState() {
     const parsedResolutions = safeParseJSON('navigator-resolutions', null);
     if (parsedResolutions) appState.resolutions = parsedResolutions;
 
+    // 매일 자문 로드 (저녁/아침 self-check)
+    const parsedReflection = safeParseJSON('navigator-reflection', null);
+    if (parsedReflection) {
+      appState.dailyReflection = { ...appState.dailyReflection, ...parsedReflection };
+    }
+
     // 설정 로드
     const parsedSettings = safeParseJSON('navigator-settings', null);
     if (parsedSettings) appState.settings = { ...appState.settings, ...parsedSettings };
@@ -174,6 +180,7 @@ function _doSaveState(immediate = false) {
       localStorage.setItem('navigator-trash', JSON.stringify(appState.trash));
       localStorage.setItem('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
       localStorage.setItem('navigator-resolutions', JSON.stringify(appState.resolutions || []));
+      localStorage.setItem('navigator-reflection', JSON.stringify(appState.dailyReflection));
     }
 
     // Firebase 동기화 (로그인된 경우, 디바운스 적용)
@@ -235,6 +242,7 @@ function _doSaveStateLocalOnly() {
     // 라이프 리듬도 로컬 백업 (beforeunload 시 유실 방지)
     localStorage.setItem('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
     localStorage.setItem('navigator-resolutions', JSON.stringify(appState.resolutions || []));
+    localStorage.setItem('navigator-reflection', JSON.stringify(appState.dailyReflection));
   } catch (error) {
     console.error('로컬 저장 실패:', error);
   }
