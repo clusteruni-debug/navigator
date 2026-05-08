@@ -239,6 +239,7 @@ async function _doSyncToFirebase() {
       shuttleSuccess: appState.shuttleSuccess,
       theme: appState.theme,
       resolutions: appState.resolutions || [],
+      dailyReflection: appState.dailyReflection,
       deletedIds: appState.deletedIds,
       trash: appState.trash,
       _migrations: appState._migrations || {},
