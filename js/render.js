@@ -210,7 +210,7 @@ function renderStatic() {
           ${svgIcon('home')} 일상
         </button>
         <div class="tab-more-dropdown">
-          <button class="tab-btn ${['commute', 'dashboard', 'history'].includes(appState.currentTab) ? 'active' : ''}" onclick="toggleMoreMenu(event)" aria-label="더보기 메뉴" aria-expanded="${appState.moreMenuOpen}" aria-haspopup="true">
+          <button class="tab-btn ${['commute', 'dashboard', 'history', 'reflection'].includes(appState.currentTab) ? 'active' : ''}" onclick="toggleMoreMenu(event)" aria-label="더보기 메뉴" aria-expanded="${appState.moreMenuOpen}" aria-haspopup="true">
             ${svgIcon('menu')} 더보기 ▾
           </button>
           <div id="more-menu" class="more-menu ${appState.moreMenuOpen ? 'show' : ''}" role="menu">
@@ -222,6 +222,9 @@ function renderStatic() {
             </button>
             <button class="more-menu-item ${appState.currentTab === 'history' ? 'active' : ''}" onclick="appState.moreMenuOpen = false; switchTab('history');" role="menuitem" aria-label="히스토리 탭">
               ${svgIcon('calendar')} 히스토리
+            </button>
+            <button class="more-menu-item ${appState.currentTab === 'reflection' ? 'active' : ''}" onclick="appState.moreMenuOpen = false; switchTab('reflection');" role="menuitem" aria-label="자문 탭">
+              <span style="font-size:18px;">🌙</span> 자문
             </button>
           </div>
         </div>
@@ -338,6 +341,11 @@ function renderStatic() {
       <!-- 히스토리 탭 -->
       <div class="tab-content ${appState.currentTab === 'history' ? 'active' : ''}">
         ${appState.currentTab === 'history' ? renderHistoryTab() : ''}
+      </div>
+
+      <!-- 자문 탭 (Phase 5) -->
+      <div id="tab-content-reflection" class="tab-content ${appState.currentTab === 'reflection' ? 'active' : ''}">
+        ${appState.currentTab === 'reflection' ? renderReflectionTab() : ''}
       </div>
 
       <!-- 온보딩 모달 -->

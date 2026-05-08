@@ -156,9 +156,6 @@ function submitReflection(timeOfDay, skipped = false) {
  * Phase 4 — 자문 탭 메인 화면
  */
 function renderReflectionTab() {
-  const container = document.getElementById('tab-content-reflection');
-  if (!container) return;
-
   const today = getReflectionToday();
   const settings = appState.dailyReflection.settings;
   const streak = appState.dailyReflection.streak;
@@ -169,7 +166,7 @@ function renderReflectionTab() {
   const eveningLabel = today.evening && !today.evening.skipped ? '저녁 자문 다시' : '저녁 자문 시작';
   const morningLabel = today.morning && !today.morning.skipped ? '아침 자문 다시' : '아침 자문 시작';
 
-  container.innerHTML = `
+  const html = `
     <div class="reflection-tab">
       <header class="reflection-tab-header">
         <h2>🌙 매일 자문</h2>
@@ -196,6 +193,10 @@ function renderReflectionTab() {
       </section>
     </div>
   `;
+
+  const container = document.getElementById('tab-content-reflection');
+  if (container) container.innerHTML = html;
+  return html;
 }
 
 function renderTodayReflectionCard(today) {
