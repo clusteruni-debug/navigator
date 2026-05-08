@@ -24,7 +24,8 @@ function exportData() {
       commuteTracker: appState.commuteTracker,
       weeklyPlan: appState.weeklyPlan,
       completionLog: appState.completionLog,
-      trash: appState.trash
+      trash: appState.trash,
+      dailyReflection: appState.dailyReflection
     };
 
     const json = JSON.stringify(data, null, 2);
@@ -147,6 +148,14 @@ function handleFileImport(e) {
         }
         if (data.settings) {
           appState.settings = { ...appState.settings, ...data.settings };
+        }
+        // 매일 자문 병합 (history date-key shallow merge, settings/streak imported win)
+        if (data.dailyReflection) {
+          appState.dailyReflection = {
+            history: { ...appState.dailyReflection.history, ...(data.dailyReflection.history || {}) },
+            settings: { ...appState.dailyReflection.settings, ...(data.dailyReflection.settings || {}) },
+            streak: data.dailyReflection.streak || appState.dailyReflection.streak
+          };
         }
         // 라이프 리듬 병합 (날짜 비교 포함)
         if (data.lifeRhythm) {

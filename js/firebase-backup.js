@@ -24,7 +24,8 @@ function createSyncBackup() {
       availableTags: appState.availableTags,
       streak: appState.streak,
       completionLog: appState.completionLog,
-      resolutions: appState.resolutions || []
+      resolutions: appState.resolutions || [],
+      dailyReflection: appState.dailyReflection
     };
 
     localStorage.setItem('navigator-sync-backup', JSON.stringify(backup));
@@ -96,6 +97,13 @@ function restoreFromSyncBackup() {
     if (backup.streak) appState.streak = backup.streak;
     if (backup.completionLog) appState.completionLog = backup.completionLog;
     if (backup.resolutions) appState.resolutions = backup.resolutions;
+    if (backup.dailyReflection) {
+      appState.dailyReflection = {
+        history: { ...appState.dailyReflection.history, ...(backup.dailyReflection.history || {}) },
+        settings: { ...appState.dailyReflection.settings, ...(backup.dailyReflection.settings || {}) },
+        streak: backup.dailyReflection.streak || appState.dailyReflection.streak
+      };
+    }
 
     // 로컬 저장 + Firebase 동기화
     _doSaveState();
