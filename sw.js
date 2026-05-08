@@ -1,6 +1,6 @@
-// Navigator Service Worker v6.13
+// Navigator Service Worker v6.14
 // ⚠️ JS/CSS 파일 추가·삭제 시 이 목록과 navigator-v5.html 모두 업데이트 필요
-const CACHE_NAME = 'navigator-v6-13';
+const CACHE_NAME = 'navigator-v6-14';
 const urlsToCache = [
   './navigator-v5.html',
   './manifest.json',
@@ -36,6 +36,7 @@ const urlsToCache = [
   './css/responsive.css',
   './css/command-palette.css',
   './css/typography-override.css',
+  './css/reflection.css',
   // JS (navigator-v5.html script 순서)
   './js/utils.js',
   './js/utils-data.js',
@@ -76,6 +77,7 @@ const urlsToCache = [
   './js/globals.js',
   './js/work-data.js',
   './js/work-templates.js',
+  './js/work-ro-template.js',
   './js/work-clipboard.js',
   './js/work-analytics.js',
   './js/work-reports.js',
@@ -102,6 +104,10 @@ const urlsToCache = [
   './js/rhythm-history.js',
   './js/rhythm.js',
   './js/command-palette.js',
+  './js/reflection.js',
+  './js/reflection-render.js',
+  './js/reflection-trigger.js',
+  './js/reflection-push.js',
   './js/init.js'
 ];
 
