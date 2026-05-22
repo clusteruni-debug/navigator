@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Navigator — 대시보드 탭 재설계 시안</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <style>
+    body { font-family: var(--font-body, 'Pretendard Variable', sans-serif); background: var(--bg-primary); color: var(--text-primary); padding: 24px; margin: 0; min-height: 100vh; }
+    .mockup-header { max-width: 1320px; margin: 0 auto 24px; display: flex; justify-content: space-between; align-items: center; }
+    .mockup-title { font-size: 22px; font-weight: 700; margin: 0; }
+    .mockup-subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+    .theme-toggle { padding: 8px 16px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); cursor: pointer; font-size: 13px; font-family: inherit; }
+    .theme-toggle:hover { background: var(--bg-secondary); border-color: var(--accent-primary); }
+
+    .mockup-grid { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .mockup-col h2 { font-size: 16px; font-weight: 600; margin: 0 0 12px 0; color: var(--text-secondary); }
+    .mockup-frame { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; min-height: 920px; }
+    .change-note { margin-top: 12px; padding: 14px 16px; background: var(--bg-tertiary); border-radius: 10px; border: 1px solid var(--border-light); }
+    .change-note h3 { font-size: 13px; font-weight: 600; margin: 0 0 8px 0; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .change-note ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.7; }
+    .change-note code { font-family: var(--font-mono, monospace); font-size: 12px; background: var(--bg-secondary); padding: 1px 5px; border-radius: 4px; }
+    .section-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 6px 4px; }
+
+    .dashboard-section { background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+    .dashboard-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px; }
+
+    /* hero */
+    .dash-hero { padding: 16px; }
+    .dash-hero-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .dash-hero-clock { font-family: var(--font-mono, monospace); font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .dash-hero-mode { padding: 3px 12px; border-radius: 14px; background: color-mix(in srgb, var(--accent-primary) 15%, transparent); color: var(--accent-primary); font-weight: 600; font-size: 12px; margin-left: 10px; }
+    .dash-hero-streak { display: inline-flex; gap: 6px; align-items: center; color: var(--accent-celebration, #ffd93d); font-weight: 600; }
+    .dash-hero-streak-best { color: var(--text-muted); font-size: 11px; font-weight: 400; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .stat-card { background: var(--bg-tertiary); border-radius: 8px; padding: 10px 6px; text-align: center; }
+    .stat-value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* category */
+    .category-stat { margin-bottom: 8px; }
+    .category-stat:last-child { margin-bottom: 0; }
+    .category-stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 12px; }
+    .category-pill { padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 600; color: white; }
+    .category-pill.본업 { background: var(--cat-본업); }
+    .category-pill.부업 { background: var(--cat-부업); }
+    .category-pill.일상 { background: var(--cat-일상); }
+    .category-pill.가족 { background: var(--cat-가족); }
+    .category-progress { color: var(--text-muted); }
+    .progress-bar { height: 6px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 4px; }
+    .progress-fill.본업 { background: var(--cat-본업); }
+    .progress-fill.부업 { background: var(--cat-부업); }
+    .progress-fill.일상 { background: var(--cat-일상); }
+    .progress-fill.가족 { background: var(--cat-가족); }
+
+    /* urgent */
+    .urgent-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: var(--bg-tertiary); border-radius: 6px; margin-bottom: 4px; font-size: 13px; border-left: 3px solid var(--accent-danger); }
+    .urgent-item-time { color: var(--accent-danger); font-weight: 600; font-size: 12px; font-family: var(--font-mono, monospace); }
+
+    /* completed chips */
+    .completed-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .completed-chip { font-size: 12px; padding: 4px 10px; background: var(--bg-tertiary); border-radius: 12px; color: var(--text-secondary); }
+
+    /* weekly stat */
+    .weekly-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .weekly-stat { background: var(--bg-tertiary); border-radius: 8px; padding: 10px 8px; }
+    .weekly-stat-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .weekly-stat-value.positive { color: var(--accent-success); }
+    .weekly-stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .weekly-stat-change { font-size: 10px; margin-top: 4px; color: var(--text-muted); }
+    .weekly-stat-change.positive { color: var(--accent-success); }
+    .weekly-stat-change.negative { color: var(--accent-danger); }
+
+    /* analysis stub (BEFORE) */
+    .stub-chart { padding: 16px; background: var(--bg-tertiary); border-radius: 8px; display: flex; align-items: flex-end; gap: 6px; height: 80px; margin-bottom: 8px; }
+    .stub-bar { flex: 1; background: var(--accent-primary); border-radius: 4px 4px 0 0; }
+    .stub-pie { width: 70px; height: 70px; border-radius: 50%; background: conic-gradient(var(--cat-본업) 0deg 130deg, var(--cat-부업) 130deg 220deg, var(--cat-일상) 220deg 300deg, var(--cat-가족) 300deg 360deg); margin: 0 auto; }
+    .habit-grid-stub { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; margin-bottom: 6px; }
+    .habit-cell-stub { width: 100%; aspect-ratio: 1; background: var(--bg-tertiary); border-radius: 2px; }
+    .habit-cell-stub.level-1 { background: color-mix(in srgb, var(--accent-success) 25%, var(--bg-tertiary)); }
+    .habit-cell-stub.level-2 { background: color-mix(in srgb, var(--accent-success) 50%, var(--bg-tertiary)); }
+    .habit-cell-stub.level-3 { background: color-mix(in srgb, var(--accent-success) 75%, var(--bg-tertiary)); }
+    .habit-cell-stub.level-4 { background: var(--accent-success); }
+
+    /* AFTER routing badge */
+    .routing-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: color-mix(in srgb, var(--accent-primary) 12%, transparent); border: 1px dashed var(--accent-primary); border-radius: 8px; color: var(--accent-primary); font-size: 11px; cursor: pointer; }
+    .routing-badge svg { width: 11px; height: 11px; }
+
+    /* sub-tabs (AFTER) */
+    .dash-sub-tabs { display: flex; gap: 4px; padding: 4px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 14px; }
+    .dash-sub-tab { flex: 1; padding: 8px 10px; border: none; background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 500; font-family: inherit; border-radius: 6px; cursor: pointer; transition: background-color 0.15s, color 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+    .dash-sub-tab:hover { color: var(--text-primary); background: var(--bg-secondary); }
+    .dash-sub-tab.active { background: var(--accent-primary); color: white; font-weight: 600; }
+    .dash-sub-tab svg { width: 13px; height: 13px; }
+    .dash-sub-tab-count { font-size: 10px; padding: 1px 6px; border-radius: 8px; background: var(--bg-secondary); color: var(--text-muted); min-width: 16px; text-align: center; }
+    .dash-sub-tab.active .dash-sub-tab-count { background: rgba(255,255,255,0.25); color: white; }
+    .dash-panel { display: none; }
+    .dash-panel.active { display: block; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .panel-stat-large { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .panel-info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .panel-info-cell { background: var(--bg-tertiary); border-radius: 8px; padding: 10px 8px; text-align: center; }
+    .panel-info-label { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
+    .panel-info-value { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .panel-info-value.good { color: var(--accent-success); }
+    .panel-info-value.bad { color: var(--accent-danger); }
+
+    /* hero v2 — visual rework */
+    .after .dashboard-section.dash-hero { padding: 18px; background: color-mix(in srgb, var(--accent-primary) 4%, var(--bg-secondary)); border-color: color-mix(in srgb, var(--accent-primary) 25%, var(--border-light)); }
+    .dash-hero-v2 { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: stretch; }
+    .dash-hero-left { display: flex; flex-direction: column; gap: 10px; }
+    .dash-hero-time-mode { display: flex; gap: 12px; align-items: baseline; }
+    .after .dash-hero-clock { font-family: var(--font-mono, monospace); font-size: 38px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -0.02em; }
+    .dash-hero-mode-pill { padding: 4px 12px; border-radius: 14px; background: color-mix(in srgb, var(--accent-primary) 18%, transparent); color: var(--accent-primary); font-weight: 700; font-size: 13px; letter-spacing: -0.01em; }
+    .dash-hero-progress { background: var(--bg-tertiary); border-radius: 10px; padding: 8px 12px; }
+    .dash-hero-progress-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .dash-hero-progress-remain { color: var(--accent-primary); font-weight: 600; }
+    .dash-hero-progress-bar { height: 5px; background: var(--bg-primary); border-radius: 3px; overflow: hidden; }
+    .dash-hero-progress-fill { height: 100%; background: var(--accent-primary); border-radius: 3px; }
+    .dash-hero-streak-v2 { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: color-mix(in srgb, var(--accent-celebration) 15%, transparent); border: 1px solid color-mix(in srgb, var(--accent-celebration) 35%, transparent); border-radius: 20px; color: var(--accent-celebration); font-weight: 600; font-size: 12px; align-self: flex-start; }
+    .dash-hero-streak-v2 svg { width: 14px; height: 14px; }
+    .dash-hero-streak-v2-best { color: var(--text-muted); font-weight: 400; font-size: 11px; margin-left: 2px; }
+    .dash-hero-right { display: grid; grid-template-columns: 1fr; gap: 8px; min-width: 200px; }
+    .dash-hero-stat-primary { background: var(--bg-tertiary); border-radius: 10px; padding: 12px 14px; }
+    .dash-hero-stat-primary-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .dash-hero-stat-primary-label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+    .dash-hero-stat-primary-num { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; color: var(--accent-success); letter-spacing: -0.02em; }
+    .dash-hero-stat-primary-percent { font-size: 14px; color: var(--accent-success); font-weight: 700; }
+    .dash-hero-stat-primary-progress { height: 4px; background: var(--bg-primary); border-radius: 2px; overflow: hidden; }
+    .dash-hero-stat-primary-progress-fill { height: 100%; background: var(--accent-success); border-radius: 2px; }
+    .dash-hero-stat-alert { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: color-mix(in srgb, var(--accent-danger) 10%, transparent); border: 1px solid color-mix(in srgb, var(--accent-danger) 28%, transparent); border-radius: 10px; }
+    .dash-hero-stat-alert svg { width: 22px; height: 22px; color: var(--accent-danger); flex-shrink: 0; }
+    .dash-hero-stat-alert-num { font-size: 22px; font-weight: 700; color: var(--accent-danger); font-variant-numeric: tabular-nums; line-height: 1; }
+    .dash-hero-stat-alert-label { font-size: 11px; color: var(--accent-danger); margin-top: 3px; opacity: 0.85; }
+
+    @media (max-width: 700px) {
+      .dash-hero-v2 { grid-template-columns: 1fr; }
+      .dash-hero-right { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* hero v3 — clean rewrite, no nested cards */
+    .dash-hero-clean { display: flex; flex-direction: column; gap: 14px; }
+    .dash-hero-row-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .after .dash-hero-clock { font-family: var(--font-mono, monospace); font-size: 40px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+    .dash-hero-mode-line { font-size: 13px; color: var(--text-secondary); margin-top: 6px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .dash-hero-mode-text { color: var(--accent-primary); font-weight: 700; }
+    .dash-hero-mode-sep { color: var(--text-muted); opacity: 0.5; }
+    .dash-hero-alert-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: color-mix(in srgb, var(--accent-danger) 12%, transparent); border: 1px solid color-mix(in srgb, var(--accent-danger) 30%, transparent); border-radius: 18px; color: var(--accent-danger); font-weight: 700; font-size: 13px; flex-shrink: 0; cursor: pointer; }
+    .dash-hero-alert-pill svg { width: 14px; height: 14px; }
+    .dash-hero-mode-bar { height: 3px; background: var(--bg-tertiary); border-radius: 2px; overflow: hidden; }
+    .dash-hero-mode-bar-fill { height: 100%; background: var(--accent-primary); border-radius: 2px; }
+    .dash-hero-completion { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg-tertiary); border-radius: 10px; }
+    .dash-hero-completion-num { font-size: 17px; font-weight: 700; color: var(--accent-success); white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .dash-hero-completion-bar { flex: 1; height: 6px; background: var(--bg-primary); border-radius: 3px; overflow: hidden; }
+    .dash-hero-completion-bar-fill { height: 100%; background: var(--accent-success); border-radius: 3px; }
+    .dash-hero-completion-percent { font-size: 13px; font-weight: 700; color: var(--accent-success); font-variant-numeric: tabular-nums; min-width: 32px; text-align: right; }
+    .dash-hero-streak-line { display: inline-flex; align-items: center; gap: 6px; color: var(--accent-celebration); font-size: 12px; font-weight: 600; align-self: flex-start; }
+    .dash-hero-streak-line svg { width: 13px; height: 13px; }
+    .dash-hero-streak-best { color: var(--text-muted); font-weight: 400; }
+
+    /* day timeline (new feature — 24h × mode zone × task dots) */
+    .day-timeline { padding: 4px 0 2px; }
+    .day-timeline-axis { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-bottom: 6px; font-family: var(--font-mono, monospace); font-variant-numeric: tabular-nums; }
+    .day-timeline-track { position: relative; height: 36px; background: var(--bg-tertiary); border-radius: 8px; overflow: hidden; }
+    .day-timeline-zone { position: absolute; top: 0; bottom: 0; }
+    .day-timeline-zone.work { background: color-mix(in srgb, var(--accent-primary) 22%, transparent); }
+    .day-timeline-zone.leisure { background: color-mix(in srgb, var(--accent-success) 22%, transparent); }
+    .day-timeline-zone.survival { background: color-mix(in srgb, var(--accent-warning) 22%, transparent); }
+    .day-timeline-zone.commute { background: color-mix(in srgb, var(--text-muted) 15%, transparent); }
+    .day-timeline-task { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; border-radius: 50%; background: var(--text-secondary); border: 2px solid var(--bg-secondary); z-index: 2; cursor: pointer; }
+    .day-timeline-task.done { background: var(--accent-success); }
+    .day-timeline-task.pending { background: var(--text-muted); }
+    .day-timeline-task.pending.urgent { background: var(--accent-danger); }
+    .day-timeline-now { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--accent-celebration); z-index: 3; box-shadow: 0 0 0 1px var(--bg-secondary); }
+    .day-timeline-now::after { content: ''; position: absolute; top: -3px; left: 50%; transform: translateX(-50%); width: 8px; height: 8px; border-radius: 50%; background: var(--accent-celebration); }
+    .day-timeline-legend { display: flex; flex-wrap: wrap; gap: 10px 14px; margin-top: 10px; font-size: 10px; color: var(--text-secondary); }
+    .day-timeline-legend > span { display: inline-flex; align-items: center; gap: 4px; }
+    .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+    .legend-dot.mode-work { background: color-mix(in srgb, var(--accent-primary) 60%, transparent); border-radius: 2px; }
+    .legend-dot.mode-leisure { background: color-mix(in srgb, var(--accent-success) 60%, transparent); border-radius: 2px; }
+    .legend-dot.task-done { background: var(--accent-success); }
+    .legend-dot.task-urgent { background: var(--accent-danger); }
+    .day-timeline-next-mode { margin-top: 8px; padding: 6px 10px; background: var(--bg-tertiary); border-radius: 6px; font-size: 11px; color: var(--text-secondary); display: flex; justify-content: space-between; }
+    .day-timeline-next-mode-time { color: var(--accent-success); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    /* 수익 — ROI 막대 + 월 목표 */
+    .roi-bar-list { display: flex; flex-direction: column; gap: 8px; }
+    .roi-bar-item { display: grid; grid-template-columns: 110px 1fr 90px; align-items: center; gap: 10px; font-size: 12px; }
+    .roi-bar-name { color: var(--text-primary); }
+    .roi-bar-track { height: 8px; background: var(--bg-primary); border-radius: 4px; overflow: hidden; }
+    .roi-bar-fill { height: 100%; background: var(--cat-부업); border-radius: 4px; }
+    .roi-bar-value { text-align: right; font-family: var(--font-mono, monospace); color: var(--cat-부업); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .monthly-goal { background: var(--bg-tertiary); border-radius: 10px; padding: 14px 16px; }
+    .monthly-goal-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .monthly-goal-label { font-size: 11px; color: var(--text-muted); }
+    .monthly-goal-amount { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .monthly-goal-percent { font-size: 14px; color: var(--accent-success); font-weight: 700; }
+    .monthly-goal-bar { height: 8px; background: var(--bg-primary); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+    .monthly-goal-bar-fill { height: 100%; background: var(--accent-success); border-radius: 4px; }
+    .monthly-goal-foot { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); }
+
+    /* 건강 — sleep correlation + debt */
+    .sleep-corr { display: flex; flex-direction: column; gap: 6px; padding-top: 4px; }
+    .sleep-corr-row { display: grid; grid-template-columns: 60px 1fr 50px; align-items: center; gap: 8px; font-size: 11px; padding: 3px 6px; border-radius: 6px; }
+    .sleep-corr-band { color: var(--text-secondary); font-family: var(--font-mono, monospace); font-variant-numeric: tabular-nums; }
+    .sleep-corr-track { height: 8px; background: var(--bg-primary); border-radius: 4px; overflow: hidden; }
+    .sleep-corr-fill { height: 100%; border-radius: 4px; background: var(--accent-primary); }
+    .sleep-corr-fill.good { background: var(--accent-success); }
+    .sleep-corr-fill.warning { background: var(--accent-warning); }
+    .sleep-corr-fill.bad { background: var(--accent-danger); }
+    .sleep-corr-pct { text-align: right; font-family: var(--font-mono, monospace); color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .sleep-corr-row.optimal { background: color-mix(in srgb, var(--accent-success) 10%, transparent); }
+    .sleep-corr-row.optimal .sleep-corr-band { color: var(--accent-success); font-weight: 700; }
+    .sleep-debt { background: var(--bg-tertiary); border-radius: 10px; padding: 14px 16px; }
+    .sleep-debt-row { display: flex; justify-content: space-between; align-items: baseline; }
+    .sleep-debt-label { font-size: 11px; color: var(--text-muted); }
+    .sleep-debt-num { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .sleep-debt-num.neg { color: var(--accent-warning); }
+    .sleep-debt-num.pos { color: var(--accent-success); }
+    .sleep-debt-detail { display: flex; gap: 12px; font-size: 11px; color: var(--text-muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .sleep-debt-rec { margin-top: 10px; padding: 8px 12px; background: var(--bg-primary); border-radius: 6px; font-size: 12px; color: var(--accent-primary); display: flex; align-items: center; gap: 6px; }
+    .sleep-debt-rec svg { width: 14px; height: 14px; }
+
+    /* 패턴 — heatmap + deferred */
+    .cat-time-heatmap { display: grid; grid-template-columns: 50px repeat(5, 1fr); gap: 5px; align-items: center; }
+    .heatmap-cell-header { color: var(--text-muted); font-weight: 600; text-align: center; padding: 4px 0; font-size: 11px; }
+    .heatmap-row-label { color: var(--text-primary); font-weight: 600; font-size: 11px; padding-right: 4px; }
+    .heatmap-row-label.본업 { color: var(--cat-본업); }
+    .heatmap-row-label.부업 { color: var(--cat-부업); }
+    .heatmap-row-label.일상 { color: var(--cat-일상); }
+    .heatmap-row-label.가족 { color: var(--cat-가족); }
+    .heatmap-cell { aspect-ratio: 2 / 1; border-radius: 4px; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .heatmap-cell.level-1 { background: color-mix(in srgb, var(--accent-primary) 20%, var(--bg-tertiary)); color: var(--text-primary); }
+    .heatmap-cell.level-2 { background: color-mix(in srgb, var(--accent-primary) 40%, var(--bg-tertiary)); color: var(--text-primary); }
+    .heatmap-cell.level-3 { background: color-mix(in srgb, var(--accent-primary) 65%, var(--bg-tertiary)); color: white; }
+    .heatmap-cell.level-4 { background: var(--accent-primary); color: white; font-weight: 700; }
+    .heatmap-cell.peak { box-shadow: 0 0 0 2px var(--accent-celebration); }
+    .heatmap-hint { margin-top: 10px; padding: 8px 12px; background: var(--bg-primary); border-radius: 6px; font-size: 11px; color: var(--accent-celebration); display: flex; align-items: center; gap: 6px; }
+    .heatmap-hint svg { width: 13px; height: 13px; }
+
+    .deferred-list { display: flex; flex-direction: column; gap: 6px; }
+    .deferred-item { display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 10px; padding: 8px 12px; background: var(--bg-tertiary); border-radius: 8px; font-size: 12px; }
+    .deferred-rank { font-weight: 700; color: var(--accent-warning); font-family: var(--font-mono, monospace); }
+    .deferred-title { color: var(--text-primary); }
+    .deferred-count { font-size: 11px; color: var(--accent-warning); font-weight: 600; padding: 2px 8px; background: color-mix(in srgb, var(--accent-warning) 15%, transparent); border-radius: 10px; }
+
+    /* next-action mini (BEFORE redundancy) */
+    .dash-next-card { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--bg-tertiary); border-radius: 8px; font-size: 13px; }
+    .dash-next-info { display: flex; gap: 8px; align-items: center; flex: 1; min-width: 0; }
+    .dash-next-actions { display: flex; gap: 4px; }
+    .btn-small { padding: 4px 10px; background: var(--accent-primary); color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .btn-small.complete { background: var(--accent-success); }
+
+    @media (max-width: 1000px) { .mockup-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="mockup-header">
+    <div>
+      <h1 class="mockup-title">대시보드 탭 재설계 시안</h1>
+      <div class="mockup-subtitle">11 컴포넌트 한 페이지 → sub-탭 4개 (전체 / 수익 / 건강 / 패턴) + 활성 "전체" = state 5 컴포넌트</div>
+    </div>
+    <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.body.dataset.theme = document.documentElement.dataset.theme;">다크/라이트 전환</button>
+  </div>
+
+  <div class="mockup-grid">
+    <!-- =========================== BEFORE =========================== -->
+    <div class="mockup-col">
+      <h2>현재 (BEFORE) — 11 컴포넌트, state + analysis 혼재</h2>
+      <div class="mockup-frame">
+        <!-- 1. dash-hero -->
+        <div class="dashboard-section dash-hero">
+          <div class="dash-hero-top">
+            <div>
+              <span class="dash-hero-clock">14:23</span>
+              <span class="dash-hero-mode">회사 모드</span>
+            </div>
+            <div class="dash-hero-streak">🔥 3 <span class="dash-hero-streak-best">최고 12일</span></div>
+          </div>
+          <div class="stats">
+            <div class="stat-card"><div class="stat-value" style="color: var(--accent-success)">2</div><div class="stat-label">완료</div></div>
+            <div class="stat-card"><div class="stat-value">5</div><div class="stat-label">남은 작업</div></div>
+            <div class="stat-card"><div class="stat-value">29%</div><div class="stat-label">완료율</div></div>
+            <div class="stat-card"><div class="stat-value">1</div><div class="stat-label">긴급</div></div>
+          </div>
+        </div>
+
+        <!-- 2. dash-next-action -->
+        <div class="dashboard-section">
+          <div class="dashboard-title">▶ 지금 할 것</div>
+          <div class="dash-next-card">
+            <div class="dash-next-info">
+              <span class="category-pill 부업">부업</span>
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Polygon Quiz 3문제 풀기</span>
+              <span style="font-size:11px;color:var(--text-muted);">10분</span>
+            </div>
+            <div class="dash-next-actions">
+              <button class="btn-small">GO</button>
+              <button class="btn-small complete">✓</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. revenue dashboard (analysis) -->
+        <div class="dashboard-section">
+          <div class="dashboard-title">💰 수익 대시보드</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <div class="stat-card" style="flex:1;text-align:left;"><div class="stat-label">총 수익</div><div class="stat-value" style="font-size:18px;">152만원</div></div>
+            <div class="stat-card" style="flex:1;text-align:left;"><div class="stat-label">이번 달</div><div class="stat-value" style="font-size:18px;">35만원</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">📊 월별 수익 추이</div>
+          <div class="stub-chart"><div class="stub-bar" style="height:20%"></div><div class="stub-bar" style="height:45%"></div><div class="stub-bar" style="height:30%"></div><div class="stub-bar" style="height:60%"></div><div class="stub-bar" style="height:80%"></div><div class="stub-bar" style="height:100%"></div></div>
+        </div>
+
+        <!-- 4. life rhythm 7days (analysis) -->
+        <div class="dashboard-section">
+          <div class="dashboard-title">😴 라이프 리듬 (최근 7일)</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">💤 수면 패턴</div>
+          <div class="stub-chart"><div class="stub-bar" style="height:70%;background:var(--accent-success);"></div><div class="stub-bar" style="height:60%;background:var(--accent-warning);"></div><div class="stub-bar" style="height:80%;background:var(--accent-success);"></div><div class="stub-bar" style="height:50%;background:var(--accent-danger);"></div><div class="stub-bar" style="height:75%;background:var(--accent-success);"></div><div class="stub-bar" style="height:65%;background:var(--accent-warning);"></div><div class="stub-bar" style="height:85%;background:var(--accent-success);"></div></div>
+          <div style="font-size:11px;color:var(--text-muted);">평균 수면: <strong style="color:var(--text-primary);">7.1h</strong> · 목표 대비 <strong style="color:var(--accent-success);">+0.6h</strong></div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text-muted);">💊 복약 통계 — 필수 7일 86%, 필수 30일 78%, 연속 3일</div>
+        </div>
+
+        <!-- 5. weekly report (mix state+analysis) -->
+        <div class="dashboard-section">
+          <div class="dashboard-title">📅 이번 주 요약 (5/14 - 5/20)</div>
+          <div class="weekly-stats">
+            <div class="weekly-stat"><div class="weekly-stat-value">12</div><div class="weekly-stat-label">완료한 작업</div><div class="weekly-stat-change positive">▲ 3 vs 지난주</div></div>
+            <div class="weekly-stat"><div class="weekly-stat-value positive">화요일</div><div class="weekly-stat-label">생산적 요일</div></div>
+            <div class="weekly-stat"><div class="weekly-stat-value">부업</div><div class="weekly-stat-label">많이 한 카테고리</div></div>
+            <div class="weekly-stat"><div class="weekly-stat-value positive">🔥 3일</div><div class="weekly-stat-label">스트릭</div></div>
+          </div>
+        </div>
+
+        <!-- 6. habit tracker (analysis) -->
+        <div class="dashboard-section">
+          <div class="dashboard-title">🌱 습관 트래커 (최근 12주)</div>
+          <div class="habit-grid-stub">
+            <div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-1"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-4"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-1"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-4"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-2"></div>
+            <div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-4"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-4"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-1"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-4"></div><div class="habit-cell-stub level-3"></div>
+            <div class="habit-cell-stub level-1"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-4"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-1"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-4"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-1"></div>
+          </div>
+        </div>
+
+        <!-- 7. category stats (state) -->
+        <div class="dashboard-section">
+          <div class="dashboard-title">📊 카테고리별 현황</div>
+          <div class="category-stat">
+            <div class="category-stat-header"><span class="category-pill 본업">본업</span><span class="category-progress">3/5 완료</span></div>
+            <div class="progress-bar"><div class="progress-fill 본업" style="width: 60%"></div></div>
+          </div>
+          <div class="category-stat">
+            <div class="category-stat-header"><span class="category-pill 부업">부업</span><span class="category-progress">1/3 완료</span></div>
+            <div class="progress-bar"><div class="progress-fill 부업" style="width: 33%"></div></div>
+          </div>
+          <div class="category-stat">
+            <div class="category-stat-header"><span class="category-pill 일상">일상</span><span class="category-progress">2/4 완료</span></div>
+            <div class="progress-bar"><div class="progress-fill 일상" style="width: 50%"></div></div>
+          </div>
+          <div class="category-stat">
+            <div class="category-stat-header"><span class="category-pill 가족">가족</span><span class="category-progress">0/2 완료</span></div>
+            <div class="progress-bar"><div class="progress-fill 가족" style="width: 0%"></div></div>
+          </div>
+        </div>
+
+        <!-- 8. urgent (state) -->
+        <div class="dashboard-section">
+          <div class="dashboard-title">🚨 마감 임박</div>
+          <div class="urgent-item"><span>Polygon Quiz 3문제 풀기</span><span class="urgent-item-time">6h</span></div>
+          <div class="urgent-item"><span>주간 보고서 초안</span><span class="urgent-item-time">8h</span></div>
+        </div>
+
+        <!-- 9. insights (analysis) -->
+        <div class="dashboard-section">
+          <div class="dashboard-title">🔍 나의 생산성 패턴</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">가장 생산적인 시간대: 오후</div>
+          <div class="stub-chart" style="height:50px;"><div class="stub-bar" style="height:30%"></div><div class="stub-bar" style="height:50%"></div><div class="stub-bar" style="height:90%;background:var(--accent-celebration);"></div><div class="stub-bar" style="height:60%"></div><div class="stub-bar" style="height:25%"></div></div>
+          <div style="display:flex;gap:12px;margin-top:10px;align-items:center;">
+            <div class="stub-pie"></div>
+            <div style="font-size:11px;color:var(--text-muted);">총 24개 완료<br><span style="color:var(--cat-본업);">●</span> 본업 36%<br><span style="color:var(--cat-부업);">●</span> 부업 25%</div>
+          </div>
+        </div>
+
+        <!-- 10. today completed (state) -->
+        <div class="dashboard-section">
+          <div class="dashboard-title">✅ 오늘 완료 (2개)</div>
+          <div class="completed-chips">
+            <span class="completed-chip">아침 운동</span>
+            <span class="completed-chip">Polygon 자료 정리</span>
+          </div>
+        </div>
+
+        <!-- 11. weekly/monthly report (analysis) -->
+        <div class="dashboard-section">
+          <div class="dashboard-title">📋 주간/월간 리포트</div>
+          <div class="weekly-stats">
+            <div class="weekly-stat"><div class="weekly-stat-value" style="color:var(--accent-primary);">12</div><div class="weekly-stat-label">주간 완료</div></div>
+            <div class="weekly-stat"><div class="weekly-stat-value" style="color:var(--accent-success);">48</div><div class="weekly-stat-label">월간 완료</div></div>
+            <div class="weekly-stat"><div class="weekly-stat-value" style="color:var(--cat-부업);">35만</div><div class="weekly-stat-label">주간 수익</div></div>
+            <div class="weekly-stat"><div class="weekly-stat-value" style="color:var(--accent-danger);">152만</div><div class="weekly-stat-label">월간 수익</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">📊 월별 트렌드</div>
+          <div class="stub-chart" style="height:60px;"><div class="stub-bar" style="height:60%"></div><div class="stub-bar" style="height:75%"></div><div class="stub-bar" style="height:100%"></div></div>
+        </div>
+      </div>
+      <div class="change-note">
+        <h3>현재 텐션</h3>
+        <ul>
+          <li><strong>State vs Analysis 혼재</strong> — 11 컴포넌트가 *지금 상태* (3초 glance) 와 *장기 트렌드* (3분 deep read) 두 인지 모드 섞임. 같은 surface 에서 두 모드 = 둘 다 약해짐</li>
+          <li><strong>액션 탭과 redundancy</strong> — dash-hero status (시계+모드+streak+stat) 가 액션 탭 today-status-bar 와 중복. dash-next-action 이 액션 탭 hero 카드의 mini 복제</li>
+          <li><strong>이모지 30+</strong> — 🔥 💰 📤 📊 😴 💤 💼 💡 💊 📅 🌱 🚨 🔍 ✅ 📋 등. Standing rule 위반</li>
+          <li><strong>4-stat grid 두 번 반복</strong> — hero stats + weekly-monthly stats. 시각 패턴 redundancy</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- =========================== AFTER =========================== -->
+    <div class="mockup-col">
+      <h2>제안 (AFTER) — sub-탭 4개 + 활성 "전체" = state 5</h2>
+      <div class="mockup-frame">
+        <!-- sub-탭 navigation -->
+        <div class="dash-sub-tabs">
+          <button class="dash-sub-tab active" data-target="전체" onclick="switchDashPanel(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            전체
+          </button>
+          <button class="dash-sub-tab" data-target="수익" onclick="switchDashPanel(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            수익
+          </button>
+          <button class="dash-sub-tab" data-target="건강" onclick="switchDashPanel(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            건강
+          </button>
+          <button class="dash-sub-tab" data-target="패턴" onclick="switchDashPanel(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            패턴
+          </button>
+        </div>
+
+        <!-- panel: 전체 (active) -->
+        <div class="dash-panel active" data-panel="전체">
+
+        <!-- 1. dash-hero v3 (clean — no nested cards, 4 single-layer rows) -->
+        <div class="dashboard-section dash-hero">
+          <div class="dash-hero-clean">
+            <div class="dash-hero-row-top">
+              <div>
+                <div class="dash-hero-clock">14:23</div>
+                <div class="dash-hero-mode-line">
+                  <span class="dash-hero-mode-text">회사 모드</span>
+                  <span class="dash-hero-mode-sep">·</span>
+                  <span>5h 37m 남음</span>
+                </div>
+              </div>
+              <button class="dash-hero-alert-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>1 긴급</span>
+              </button>
+            </div>
+
+            <div class="dash-hero-mode-bar"><div class="dash-hero-mode-bar-fill" style="width: 60%;"></div></div>
+
+            <div class="dash-hero-completion">
+              <span class="dash-hero-completion-num">2 / 7 완료</span>
+              <div class="dash-hero-completion-bar"><div class="dash-hero-completion-bar-fill" style="width: 29%;"></div></div>
+              <span class="dash-hero-completion-percent">29%</span>
+            </div>
+
+            <div class="dash-hero-streak-line">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+              <span>3일 연속 <span class="dash-hero-streak-best">· 최고 12</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1.5 NEW: 하루 timeline + 모드 zone (제안 추가 기능 — ADHD 시간 인식) -->
+        <div class="section-label">오늘 일과 (NEW)</div>
+        <div class="dashboard-section">
+          <div class="day-timeline">
+            <div class="day-timeline-axis">
+              <span>00</span><span>06</span><span>12</span><span>18</span><span>24</span>
+            </div>
+            <div class="day-timeline-track">
+              <!-- mode zones (background) — 출근 7-11 / 회사 11-20 / 여유 19-22 -->
+              <div class="day-timeline-zone commute" style="left: 29.2%; width: 16.7%;"></div>
+              <div class="day-timeline-zone work" style="left: 45.8%; width: 37.5%;"></div>
+              <div class="day-timeline-zone leisure" style="left: 79.2%; width: 12.5%;"></div>
+              <!-- task dots -->
+              <div class="day-timeline-task done" style="left: 31.3%;" title="아침 운동 (07:30 완료)"></div>
+              <div class="day-timeline-task done" style="left: 50%;" title="Polygon 자료 정리 (12:00 완료)"></div>
+              <div class="day-timeline-task pending urgent" style="left: 87.5%;" title="Polygon Quiz (~21:00 마감 — 긴급)"></div>
+              <div class="day-timeline-task pending" style="left: 70.8%;" title="주간 보고서 초안 (~17:00 예정)"></div>
+              <div class="day-timeline-task pending" style="left: 91.7%;" title="세탁기 돌리기 (~22:00)"></div>
+              <!-- 현재 위치 14:23 -->
+              <div class="day-timeline-now" style="left: 60%;" title="현재 14:23"></div>
+            </div>
+            <div class="day-timeline-legend">
+              <span><span class="legend-dot mode-work"></span> 회사 11-20</span>
+              <span><span class="legend-dot mode-leisure"></span> 여유 19-22</span>
+              <span><span class="legend-dot task-done"></span> 완료 2</span>
+              <span><span class="legend-dot task-urgent"></span> 긴급 1</span>
+            </div>
+            <div class="day-timeline-next-mode">
+              <span>다음 모드 전환</span>
+              <span><strong class="day-timeline-next-mode-time">19:00</strong> · 여유 모드 시작 (4h 37m 후)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 이번 주 요약 (state — 짧은 retrospective) -->
+        <div class="section-label">이번 주</div>
+        <div class="dashboard-section">
+          <div class="dashboard-title">5/14 - 5/20</div>
+          <div class="weekly-stats">
+            <div class="weekly-stat"><div class="weekly-stat-value">12</div><div class="weekly-stat-label">완료한 작업</div><div class="weekly-stat-change positive">+3 vs 지난주</div></div>
+            <div class="weekly-stat"><div class="weekly-stat-value positive">화</div><div class="weekly-stat-label">생산적 요일</div></div>
+            <div class="weekly-stat"><div class="weekly-stat-value">부업</div><div class="weekly-stat-label">많은 카테고리</div></div>
+            <div class="weekly-stat"><div class="weekly-stat-value positive">3일</div><div class="weekly-stat-label">스트릭</div></div>
+          </div>
+        </div>
+
+        <!-- 3. 카테고리별 현황 (state) -->
+        <div class="section-label">카테고리</div>
+        <div class="dashboard-section">
+          <div class="category-stat">
+            <div class="category-stat-header"><span class="category-pill 본업">본업</span><span class="category-progress">3/5</span></div>
+            <div class="progress-bar"><div class="progress-fill 본업" style="width: 60%"></div></div>
+          </div>
+          <div class="category-stat">
+            <div class="category-stat-header"><span class="category-pill 부업">부업</span><span class="category-progress">1/3</span></div>
+            <div class="progress-bar"><div class="progress-fill 부업" style="width: 33%"></div></div>
+          </div>
+          <div class="category-stat">
+            <div class="category-stat-header"><span class="category-pill 일상">일상</span><span class="category-progress">2/4</span></div>
+            <div class="progress-bar"><div class="progress-fill 일상" style="width: 50%"></div></div>
+          </div>
+          <div class="category-stat">
+            <div class="category-stat-header"><span class="category-pill 가족">가족</span><span class="category-progress">0/2</span></div>
+            <div class="progress-bar"><div class="progress-fill 가족" style="width: 0%"></div></div>
+          </div>
+        </div>
+
+        <!-- 4. 마감 임박 (state) -->
+        <div class="section-label">마감 임박</div>
+        <div class="dashboard-section">
+          <div class="urgent-item"><span>Polygon Quiz 3문제 풀기</span><span class="urgent-item-time">6h</span></div>
+          <div class="urgent-item"><span>주간 보고서 초안</span><span class="urgent-item-time">8h</span></div>
+        </div>
+
+        </div><!-- /panel: 전체 — "오늘 완료 chip" 섹션 제거 (hero의 2/7 완료 stat과 중복) -->
+
+        <!-- panel: 수익 -->
+        <div class="dash-panel" data-panel="수익">
+          <div class="dashboard-section">
+            <div class="dashboard-title">총 수익</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div class="stat-card" style="text-align: left;">
+                <div class="stat-label">누적</div>
+                <div class="panel-stat-large" style="color: var(--cat-부업);">152만원</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">12개 완료</div>
+              </div>
+              <div class="stat-card" style="text-align: left;">
+                <div class="stat-label">이번 달</div>
+                <div class="panel-stat-large">35만원</div>
+              </div>
+            </div>
+          </div>
+          <div class="section-label">월별 추이</div>
+          <div class="dashboard-section">
+            <div class="stub-chart" style="height: 100px;">
+              <div class="stub-bar" style="height: 20%;"></div>
+              <div class="stub-bar" style="height: 45%;"></div>
+              <div class="stub-bar" style="height: 30%;"></div>
+              <div class="stub-bar" style="height: 60%;"></div>
+              <div class="stub-bar" style="height: 80%;"></div>
+              <div class="stub-bar" style="height: 100%; background: var(--cat-부업);"></div>
+            </div>
+            <div style="display: flex; justify-content: space-around; font-size: 10px; color: var(--text-muted); margin-top: 6px;">
+              <span>12월</span><span>1월</span><span>2월</span><span>3월</span><span>4월</span><span>5월</span>
+            </div>
+          </div>
+          <div class="section-label">카테고리별 수익</div>
+          <div class="dashboard-section">
+            <div class="category-stat">
+              <div class="category-stat-header"><span class="category-pill 부업">부업</span><span class="category-progress">120만원 (78%)</span></div>
+              <div class="progress-bar"><div class="progress-fill 부업" style="width: 78%"></div></div>
+            </div>
+            <div class="category-stat">
+              <div class="category-stat-header"><span class="category-pill 본업">본업</span><span class="category-progress">25만원 (16%)</span></div>
+              <div class="progress-bar"><div class="progress-fill 본업" style="width: 16%"></div></div>
+            </div>
+            <div class="category-stat">
+              <div class="category-stat-header"><span class="category-pill 일상">일상</span><span class="category-progress">7만원 (5%)</span></div>
+              <div class="progress-bar"><div class="progress-fill 일상" style="width: 5%"></div></div>
+            </div>
+          </div>
+
+          <!-- NEW: 월 목표 vs 실적 -->
+          <div class="section-label">5월 목표 (NEW)</div>
+          <div class="monthly-goal">
+            <div class="monthly-goal-header">
+              <div>
+                <div class="monthly-goal-label">목표 대비 진행률</div>
+                <div class="monthly-goal-amount">35만원 / 100만원</div>
+              </div>
+              <div class="monthly-goal-percent">35%</div>
+            </div>
+            <div class="monthly-goal-bar"><div class="monthly-goal-bar-fill" style="width: 35%;"></div></div>
+            <div class="monthly-goal-foot">
+              <span>남은 65만원</span>
+              <span>10일 남음 (일평균 6.5만)</span>
+            </div>
+          </div>
+
+          <!-- NEW: 시간당 ROI -->
+          <div class="section-label">시간당 ROI (NEW)</div>
+          <div class="dashboard-section">
+            <div class="roi-bar-list">
+              <div class="roi-bar-item">
+                <span class="roi-bar-name">Polygon Quiz</span>
+                <div class="roi-bar-track"><div class="roi-bar-fill" style="width: 100%;"></div></div>
+                <span class="roi-bar-value">5,000원/분</span>
+              </div>
+              <div class="roi-bar-item">
+                <span class="roi-bar-name">번역</span>
+                <div class="roi-bar-track"><div class="roi-bar-fill" style="width: 50%;"></div></div>
+                <span class="roi-bar-value">2,500원/분</span>
+              </div>
+              <div class="roi-bar-item">
+                <span class="roi-bar-name">글쓰기</span>
+                <div class="roi-bar-track"><div class="roi-bar-fill" style="width: 24%;"></div></div>
+                <span class="roi-bar-value">1,200원/분</span>
+              </div>
+              <div class="roi-bar-item">
+                <span class="roi-bar-name">설문 응답</span>
+                <div class="roi-bar-track"><div class="roi-bar-fill" style="width: 6%;"></div></div>
+                <span class="roi-bar-value">300원/분</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="routing-badge" style="margin-top: 12px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            자산관리로 내보내기
+          </button>
+        </div>
+
+        <!-- panel: 건강 -->
+        <div class="dash-panel" data-panel="건강">
+          <div class="section-label">수면 패턴 (7일)</div>
+          <div class="dashboard-section">
+            <div class="stub-chart" style="height: 100px;">
+              <div class="stub-bar" style="height: 70%; background: var(--accent-success);"></div>
+              <div class="stub-bar" style="height: 60%; background: var(--accent-warning);"></div>
+              <div class="stub-bar" style="height: 80%; background: var(--accent-success);"></div>
+              <div class="stub-bar" style="height: 50%; background: var(--accent-danger);"></div>
+              <div class="stub-bar" style="height: 75%; background: var(--accent-success);"></div>
+              <div class="stub-bar" style="height: 65%; background: var(--accent-warning);"></div>
+              <div class="stub-bar" style="height: 85%; background: var(--accent-success);"></div>
+            </div>
+            <div style="display: flex; justify-content: space-around; font-size: 10px; color: var(--text-muted); margin-top: 6px;">
+              <span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 10px;">
+              <span style="color: var(--text-secondary);">평균 수면 <strong style="color: var(--text-primary);">7.1h</strong></span>
+              <span class="panel-info-value good" style="font-size: 13px;">목표 +0.6h</span>
+            </div>
+          </div>
+          <div class="section-label">근무 패턴</div>
+          <div class="dashboard-section">
+            <div class="panel-info-grid">
+              <div class="panel-info-cell"><div class="panel-info-label">평균 출근</div><div class="panel-info-value">09:18</div></div>
+              <div class="panel-info-cell"><div class="panel-info-label">평균 퇴근</div><div class="panel-info-value">19:42</div></div>
+              <div class="panel-info-cell"><div class="panel-info-label">평균 근무</div><div class="panel-info-value">8.5h</div></div>
+              <div class="panel-info-cell"><div class="panel-info-label">출근 편차</div><div class="panel-info-value good">±12분</div></div>
+            </div>
+          </div>
+          <div class="section-label">복약 통계</div>
+          <div class="dashboard-section">
+            <div class="panel-info-grid">
+              <div class="panel-info-cell"><div class="panel-info-label">필수 7일</div><div class="panel-info-value good">86%</div></div>
+              <div class="panel-info-cell"><div class="panel-info-label">필수 30일</div><div class="panel-info-value good">78%</div></div>
+              <div class="panel-info-cell"><div class="panel-info-label">선택 7일</div><div class="panel-info-value">42%</div></div>
+              <div class="panel-info-cell"><div class="panel-info-label">연속</div><div class="panel-info-value good">3일</div></div>
+            </div>
+          </div>
+
+          <!-- NEW: 수면-완료율 correlation -->
+          <div class="section-label">수면-완료율 (NEW)</div>
+          <div class="dashboard-section">
+            <div class="sleep-corr">
+              <div class="sleep-corr-row">
+                <span class="sleep-corr-band">&lt; 5h</span>
+                <div class="sleep-corr-track"><div class="sleep-corr-fill bad" style="width: 24%;"></div></div>
+                <span class="sleep-corr-pct">24%</span>
+              </div>
+              <div class="sleep-corr-row">
+                <span class="sleep-corr-band">5-6h</span>
+                <div class="sleep-corr-track"><div class="sleep-corr-fill warning" style="width: 38%;"></div></div>
+                <span class="sleep-corr-pct">38%</span>
+              </div>
+              <div class="sleep-corr-row">
+                <span class="sleep-corr-band">6-7h</span>
+                <div class="sleep-corr-track"><div class="sleep-corr-fill" style="width: 62%;"></div></div>
+                <span class="sleep-corr-pct">62%</span>
+              </div>
+              <div class="sleep-corr-row optimal">
+                <span class="sleep-corr-band">7-8h</span>
+                <div class="sleep-corr-track"><div class="sleep-corr-fill good" style="width: 81%;"></div></div>
+                <span class="sleep-corr-pct">81%</span>
+              </div>
+              <div class="sleep-corr-row">
+                <span class="sleep-corr-band">8h+</span>
+                <div class="sleep-corr-track"><div class="sleep-corr-fill good" style="width: 75%;"></div></div>
+                <span class="sleep-corr-pct">75%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- NEW: 수면 부채 누적 -->
+          <div class="section-label">수면 부채 (NEW)</div>
+          <div class="sleep-debt">
+            <div class="sleep-debt-row">
+              <div>
+                <div class="sleep-debt-label">7일 누적 부채</div>
+                <div class="sleep-debt-num neg">-2.4시간</div>
+                <div class="sleep-debt-detail">
+                  <span>목표 49h</span>
+                  <span>실제 46.6h</span>
+                </div>
+              </div>
+            </div>
+            <div class="sleep-debt-rec">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              회복 권고: 오늘 7.5h 자기 (평소 +30분)
+            </div>
+          </div>
+        </div>
+
+        <!-- panel: 패턴 -->
+        <div class="dash-panel" data-panel="패턴">
+          <div class="section-label">생산적인 시간대</div>
+          <div class="dashboard-section">
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">최고: <strong style="color: var(--accent-celebration);">오후</strong></div>
+            <div class="stub-chart" style="height: 60px;">
+              <div class="stub-bar" style="height: 30%;"></div>
+              <div class="stub-bar" style="height: 50%;"></div>
+              <div class="stub-bar" style="height: 90%; background: var(--accent-celebration);"></div>
+              <div class="stub-bar" style="height: 60%;"></div>
+              <div class="stub-bar" style="height: 25%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-around; font-size: 10px; color: var(--text-muted); margin-top: 4px;">
+              <span>아침</span><span>점심</span><span>오후</span><span>저녁</span><span>밤</span>
+            </div>
+          </div>
+          <div class="section-label">활발한 요일</div>
+          <div class="dashboard-section">
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">최고: <strong style="color: var(--accent-celebration);">화요일</strong> (5개)</div>
+            <div class="stub-chart" style="height: 50px;">
+              <div class="stub-bar" style="height: 40%;"></div>
+              <div class="stub-bar" style="height: 100%; background: var(--accent-celebration);"></div>
+              <div class="stub-bar" style="height: 60%;"></div>
+              <div class="stub-bar" style="height: 80%;"></div>
+              <div class="stub-bar" style="height: 70%;"></div>
+              <div class="stub-bar" style="height: 30%;"></div>
+              <div class="stub-bar" style="height: 25%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-around; font-size: 10px; color: var(--text-muted); margin-top: 4px;">
+              <span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span>
+            </div>
+          </div>
+          <div class="section-label">카테고리 분배 (24개 완료)</div>
+          <div class="dashboard-section">
+            <div style="display: flex; gap: 16px; align-items: center;">
+              <div class="stub-pie"></div>
+              <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.8;">
+                <div><span style="color: var(--cat-본업);">●</span> 본업 36%</div>
+                <div><span style="color: var(--cat-부업);">●</span> 부업 25%</div>
+                <div><span style="color: var(--cat-일상);">●</span> 일상 22%</div>
+                <div><span style="color: var(--cat-가족);">●</span> 가족 17%</div>
+              </div>
+            </div>
+          </div>
+          <div class="section-label">습관 트래커 (12주)</div>
+          <div class="dashboard-section">
+            <div class="habit-grid-stub">
+              <div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-1"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-4"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-1"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-4"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-2"></div>
+              <div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-4"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-4"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-1"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-4"></div><div class="habit-cell-stub level-3"></div>
+              <div class="habit-cell-stub level-1"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-4"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-1"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-3"></div><div class="habit-cell-stub level-4"></div><div class="habit-cell-stub level-2"></div><div class="habit-cell-stub level-1"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 6px;">
+              <span>적음</span><span>많음</span>
+            </div>
+          </div>
+
+          <!-- NEW: 카테고리 × 시간대 heatmap -->
+          <div class="section-label">카테고리 × 시간대 (NEW)</div>
+          <div class="dashboard-section">
+            <div class="cat-time-heatmap">
+              <div></div>
+              <div class="heatmap-cell-header">아침</div>
+              <div class="heatmap-cell-header">점심</div>
+              <div class="heatmap-cell-header">오후</div>
+              <div class="heatmap-cell-header">저녁</div>
+              <div class="heatmap-cell-header">밤</div>
+
+              <div class="heatmap-row-label 본업">본업</div>
+              <div class="heatmap-cell">1</div>
+              <div class="heatmap-cell level-2">3</div>
+              <div class="heatmap-cell level-4 peak">8</div>
+              <div class="heatmap-cell level-2">3</div>
+              <div class="heatmap-cell">0</div>
+
+              <div class="heatmap-row-label 부업">부업</div>
+              <div class="heatmap-cell">0</div>
+              <div class="heatmap-cell">0</div>
+              <div class="heatmap-cell level-1">1</div>
+              <div class="heatmap-cell level-2">3</div>
+              <div class="heatmap-cell level-4 peak">6</div>
+
+              <div class="heatmap-row-label 일상">일상</div>
+              <div class="heatmap-cell level-4 peak">5</div>
+              <div class="heatmap-cell level-2">2</div>
+              <div class="heatmap-cell level-1">1</div>
+              <div class="heatmap-cell level-1">1</div>
+              <div class="heatmap-cell level-2">2</div>
+
+              <div class="heatmap-row-label 가족">가족</div>
+              <div class="heatmap-cell">0</div>
+              <div class="heatmap-cell">0</div>
+              <div class="heatmap-cell">0</div>
+              <div class="heatmap-cell level-2">2</div>
+              <div class="heatmap-cell level-3 peak">4</div>
+            </div>
+            <div class="heatmap-hint">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              본업 = 오후 / 부업 = 밤 / 일상 = 아침 — 오늘 task 배치 시 hint
+            </div>
+          </div>
+
+          <!-- NEW: 반복 미루기 -->
+          <div class="section-label">반복 미루기 (NEW)</div>
+          <div class="dashboard-section">
+            <div class="deferred-list">
+              <div class="deferred-item">
+                <span class="deferred-rank">1</span>
+                <span class="deferred-title">아침 운동</span>
+                <span class="deferred-count">5번 미룸</span>
+              </div>
+              <div class="deferred-item">
+                <span class="deferred-rank">2</span>
+                <span class="deferred-title">부모님 전화</span>
+                <span class="deferred-count">4번 미룸</span>
+              </div>
+              <div class="deferred-item">
+                <span class="deferred-rank">3</span>
+                <span class="deferred-title">자기개발 책 읽기</span>
+                <span class="deferred-count">3번 미룸</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="change-note">
+        <h3>핵심 변경점</h3>
+        <ul>
+          <li>한 페이지에 다 때려넣음 → <strong>sub-탭 4개 navigation</strong> 도입 — 전체 / 수익 / 건강 / 패턴. 각 sub-탭이 자체 surface, 분석 정보 자연 그루핑</li>
+          <li>활성 "전체" sub-탭 = 5 state 컴포넌트 (hero / 이번 주 / 카테고리 / 마감 임박 / 오늘 완료). 3초 glance용</li>
+          <li>"수익" sub-탭 = 수익 대시보드 + 월별 트렌드 + 카테고리별 수익</li>
+          <li>"건강" sub-탭 = 라이프 리듬 7일 + 수면 패턴 + 근무 패턴 + 복약 통계 7/30일</li>
+          <li>"패턴" sub-탭 = 생산성 패턴 (시간대/요일 차트) + 카테고리 파이 + 습관 트래커 12주 + 월별 트렌드</li>
+          <li>액션 탭 redundancy 제거 — <code>dash-next-action</code> 삭제. status bar / Next Action ownership 명확화</li>
+          <li>모든 이모지 → Lucide inline SVG. sub-탭에도 Lucide 아이콘 (grid / dollar / activity / bar-chart)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <script>
+    function switchDashPanel(btn) {
+      const target = btn.dataset.target;
+      document.querySelectorAll('.dash-sub-tab').forEach(t => t.classList.toggle('active', t === btn));
+      document.querySelectorAll('.dash-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === target));
+    }
+  </script>
+</body>
+</html>

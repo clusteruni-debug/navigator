@@ -226,7 +226,7 @@
     }
 
     .rhythm-recent-day.selected {
-      border-color: var(--primary, #667eea);
+      border-color: var(--primary);
       background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
     }
 

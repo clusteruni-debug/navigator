@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Navigator — 본업 탭 재설계 시안 (Dashboard view)</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <style>
+    body { font-family: var(--font-body); background: var(--bg-primary); color: var(--text-primary); padding: 24px; margin: 0; min-height: 100vh; }
+    .mockup-header { max-width: 1320px; margin: 0 auto 24px; display: flex; justify-content: space-between; align-items: center; }
+    .mockup-title { font-size: 22px; font-weight: 700; margin: 0; }
+    .mockup-subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+    .theme-toggle { padding: 8px 16px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); cursor: pointer; font-size: 13px; font-family: inherit; }
+    .theme-toggle:hover { background: var(--bg-secondary); border-color: var(--accent-primary); }
+    .mockup-grid { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .mockup-col h2 { font-size: 16px; font-weight: 600; margin: 0 0 12px 0; color: var(--text-secondary); }
+    .mockup-frame { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px; min-height: 920px; }
+    .change-note { margin-top: 12px; padding: 14px 16px; background: var(--bg-tertiary); border-radius: 10px; border: 1px solid var(--border-light); }
+    .change-note h3 { font-size: 13px; font-weight: 600; margin: 0 0 8px 0; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .change-note ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.7; color: var(--text-primary); }
+    .change-note code { font-family: var(--font-mono); font-size: 12px; background: var(--bg-secondary); padding: 1px 5px; border-radius: 4px; }
+    .icon { width: 14px; height: 14px; flex-shrink: 0; }
+    .icon-sm { width: 12px; height: 12px; flex-shrink: 0; }
+
+    /* ============= BEFORE ============= */
+    .before .work-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 8px; flex-wrap: wrap; }
+    .before .work-title { font-size: 18px; font-weight: 700; }
+    .before .work-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .before .work-actions button { padding: 6px 10px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); font-size: 12px; cursor: pointer; font-family: inherit; }
+    .before .focus-card { padding: 12px 14px; background: color-mix(in srgb, var(--accent-success) 8%, transparent); border: 1px solid color-mix(in srgb, var(--accent-success) 25%, transparent); border-left: 4px solid var(--accent-success); border-radius: 12px; margin-bottom: 12px; }
+    .before .focus-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+    .before .focus-title { font-size: 16px; font-weight: 600; }
+    .before .focus-ctx { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .before .focus-btn { float: right; margin-top: -36px; padding: 6px 14px; background: var(--accent-success); color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .before .work-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .before .work-card { padding: 12px; background: var(--bg-primary); border: 1px solid var(--border-light); border-left: 4px solid var(--accent-warning); border-radius: 10px; cursor: pointer; }
+    .before .work-card.urgent { border-left-color: var(--accent-danger); }
+    .before .work-card.ontrack { border-left-color: var(--accent-success); }
+    .before .work-card.stale { border-left-color: var(--accent-warning); }
+    .before .work-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 4px; }
+    .before .work-card-name { font-size: 14px; font-weight: 600; }
+    .before .work-card-dday { padding: 2px 6px; background: var(--accent-danger-alpha); color: var(--accent-danger); border-radius: 6px; font-size: 11px; font-weight: 600; }
+    .before .work-card-dday.soon { background: var(--accent-warning-alpha); color: var(--accent-warning); }
+    .before .work-schedule { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+    .before .work-stage-dots { display: flex; gap: 3px; margin-bottom: 6px; }
+    .before .work-stage-dot { width: 12px; height: 4px; background: var(--border-color); border-radius: 2px; }
+    .before .work-stage-dot.completed { background: var(--accent-success); }
+    .before .work-stage-dot.current { background: var(--accent-primary); }
+    .before .work-meta { display: flex; gap: 8px; font-size: 11px; color: var(--text-muted); flex-wrap: wrap; }
+    .before .work-meta .stale-flag { color: var(--accent-warning); }
+    .before .general-task { padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 8px; margin-bottom: 6px; display: flex; gap: 8px; align-items: center; font-size: 13px; }
+    .before .general-check { width: 16px; height: 16px; border: 2px solid var(--border-color); border-radius: 50%; }
+    .before .general-title { flex: 1; }
+    .before .general-meta { font-size: 11px; color: var(--text-muted); }
+    .before .section-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 14px 0 8px 0; }
+
+    /* ============= AFTER ============= */
+    .after .work-tabbar { display: flex; gap: 4px; margin-bottom: 14px; padding: 4px; background: var(--bg-tertiary); border-radius: 10px; border: 1px solid var(--border-light); }
+    .after .work-tab-btn { padding: 6px 12px; background: transparent; border: none; border-radius: 7px; color: var(--text-secondary); font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; display: inline-flex; gap: 5px; align-items: center; transition: background-color 0.15s, color 0.15s; }
+    .after .work-tab-btn:hover { background: var(--bg-secondary); color: var(--text-primary); }
+    .after .work-tab-btn.active { background: color-mix(in srgb, var(--cat-본업) 18%, var(--bg-secondary)); color: var(--cat-본업); font-weight: 600; }
+
+    .after .work-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .after .work-header-left { display: inline-flex; gap: 10px; align-items: baseline; }
+    .after .work-title { font-size: 18px; font-weight: 700; display: inline-flex; gap: 8px; align-items: center; }
+    .after .work-title-bar { width: 3px; height: 18px; background: var(--cat-본업); border-radius: 2px; }
+    .after .work-subtitle { font-size: 12px; color: var(--text-muted); }
+    .after .work-actions { display: inline-flex; gap: 6px; align-items: center; }
+    .after .btn-primary-soft { padding: 6px 12px; background: color-mix(in srgb, var(--cat-본업) 14%, transparent); border: 1px solid color-mix(in srgb, var(--cat-본업) 40%, transparent); border-radius: 8px; color: var(--cat-본업); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; gap: 5px; align-items: center; transition: background-color 0.15s, border-color 0.15s; }
+    .after .btn-primary-soft:hover { background: color-mix(in srgb, var(--cat-본업) 22%, transparent); }
+    .after .btn-more { width: 30px; height: 30px; padding: 0; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 8px; color: var(--text-muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-family: inherit; }
+    .after .btn-more:hover { background: var(--bg-secondary); color: var(--text-primary); }
+
+    .after .anchors { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+    .after .anchor { padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 10px; display: flex; flex-direction: column; gap: 2px; }
+    .after .anchor-label { font-size: 11px; color: var(--text-muted); display: inline-flex; gap: 4px; align-items: center; }
+    .after .anchor-value { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .after .anchor.urgent .anchor-value { color: var(--accent-danger); }
+    .after .anchor.warn .anchor-value { color: var(--accent-warning); }
+    .after .anchor.cat .anchor-value { color: var(--cat-본업); }
+
+    .after .focus-compact { padding: 10px 14px; background: color-mix(in srgb, var(--cat-본업) 8%, var(--bg-primary)); border: 1px solid color-mix(in srgb, var(--cat-본업) 25%, transparent); border-left: 4px solid var(--cat-본업); border-radius: 10px; margin-bottom: 14px; display: flex; gap: 10px; align-items: center; }
+    .after .focus-compact.urgent { background: color-mix(in srgb, var(--accent-danger) 7%, var(--bg-primary)); border-color: color-mix(in srgb, var(--accent-danger) 30%, transparent); border-left-color: var(--accent-danger); }
+    .after .focus-label { font-size: 11px; color: var(--text-muted); display: inline-flex; gap: 4px; align-items: center; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+    .after .focus-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .after .focus-title { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .after .focus-ctx { font-size: 11px; color: var(--text-muted); }
+    .after .focus-complete-btn { padding: 6px 12px; background: var(--cat-본업); color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; gap: 4px; align-items: center; min-height: 32px; }
+    .after .focus-complete-btn.urgent { background: var(--accent-danger); }
+
+    .after .section-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin: 14px 0 8px 0; display: flex; justify-content: space-between; align-items: center; }
+    .after .section-title .count { color: var(--text-muted); font-weight: 500; }
+
+    .after .project-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .after .project-card { padding: 12px 14px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 12px; cursor: pointer; position: relative; overflow: hidden; transition: background-color 0.15s, border-color 0.15s; }
+    .after .project-card::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px; background: var(--cat-본업); opacity: 0.55; }
+    .after .project-card:hover { background: var(--bg-tertiary); border-color: var(--border-color); }
+    .after .project-card.urgent { border-color: color-mix(in srgb, var(--accent-danger) 40%, var(--border-light)); }
+    .after .project-card.urgent::before { background: var(--accent-danger); opacity: 0.85; }
+    .after .project-card.warn { border-color: color-mix(in srgb, var(--accent-warning) 35%, var(--border-light)); }
+    .after .project-card.warn::before { background: var(--accent-warning); opacity: 0.85; }
+    .after .project-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; padding-left: 8px; }
+    .after .project-card-name { font-size: 14px; font-weight: 600; line-height: 1.3; flex: 1; min-width: 0; }
+    .after .dday-chip { padding: 2px 8px; background: rgba(148,163,184,0.1); color: var(--text-secondary); border-radius: 999px; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+    .after .dday-chip.urgent { background: var(--accent-danger-alpha); color: var(--accent-danger); }
+    .after .dday-chip.warn { background: var(--accent-warning-alpha); color: var(--accent-warning); }
+    .after .project-card-schedule { font-size: 11px; color: var(--text-muted); padding-left: 8px; margin-bottom: 8px; display: inline-flex; gap: 4px; align-items: center; }
+    .after .stage-progress { display: flex; gap: 3px; margin-bottom: 8px; padding-left: 8px; padding-right: 4px; }
+    .after .stage-pill { flex: 1; height: 4px; background: var(--border-color); border-radius: 2px; }
+    .after .stage-pill.completed { background: var(--accent-success); }
+    .after .stage-pill.current { background: var(--cat-본업); }
+    .after .project-card-meta { display: flex; gap: 10px; padding-left: 8px; font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; flex-wrap: wrap; align-items: center; }
+    .after .project-card-meta .stale { color: var(--accent-warning); display: inline-flex; gap: 3px; align-items: center; }
+    .after .project-card-meta .stale.danger { color: var(--accent-danger); }
+    .after .project-card-meta .meta-item { display: inline-flex; gap: 3px; align-items: center; }
+
+    .after .archive-section { margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--border-light); }
+    .after .archive-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 4px; cursor: pointer; font-size: 12px; color: var(--text-muted); }
+    .after .archive-row:hover { color: var(--text-secondary); }
+
+    /* 일반 업무 v2 — sort + 완료 collapsed + task-row 일관 */
+    .after .general-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .after .sort-group { display: inline-flex; gap: 4px; align-items: center; }
+    .after .sort-label { font-size: 11px; color: var(--text-muted); margin-right: 4px; }
+    .after .sort-chip { padding: 4px 10px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 999px; font-size: 11px; color: var(--text-secondary); cursor: pointer; font-family: inherit; transition: background-color 0.15s, border-color 0.15s, color 0.15s; }
+    .after .sort-chip:hover { background: var(--bg-secondary); color: var(--text-primary); }
+    .after .sort-chip.active { background: var(--bg-secondary); border-color: var(--cat-본업); color: var(--cat-본업); font-weight: 600; }
+    .after .general-add { padding: 4px 10px; background: transparent; border: 1px dashed var(--border-color); border-radius: 8px; color: var(--text-muted); font-size: 11px; cursor: pointer; font-family: inherit; display: inline-flex; gap: 4px; align-items: center; }
+    .after .general-add:hover { border-style: solid; border-color: var(--cat-본업); color: var(--cat-본업); background: color-mix(in srgb, var(--cat-본업) 6%, transparent); }
+    .after .general-list { display: grid; gap: 4px; margin-bottom: 8px; }
+    .after .general-task { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 9px 12px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 9px; position: relative; overflow: hidden; transition: background-color 0.15s, border-color 0.15s; }
+    .after .general-task::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px; background: var(--cat-본업); opacity: 0.6; }
+    .after .general-task:hover { background: var(--bg-tertiary); border-color: var(--border-color); }
+    .after .general-task.urgent { border-color: color-mix(in srgb, var(--accent-danger) 35%, var(--border-light)); }
+    .after .general-task.completed { opacity: 0.5; }
+    .after .general-task.completed .general-task-title { text-decoration: line-through; }
+    .after .general-check { width: 18px; height: 18px; border: 2px solid var(--border-color); border-radius: 50%; background: transparent; cursor: pointer; padding: 0; margin-left: 4px; display: inline-flex; align-items: center; justify-content: center; transition: border-color 0.15s; }
+    .after .general-check:hover { border-color: var(--cat-본업); color: var(--cat-본업); }
+    .after .general-check.checked { background: var(--accent-success); border-color: var(--accent-success); color: white; }
+    .after .general-task-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-left: 4px; }
+    .after .general-task-title { font-size: 13px; font-weight: 500; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .after .general-task-meta { display: flex; gap: 8px; font-size: 11px; color: var(--text-muted); align-items: center; }
+    .after .general-task-meta .repeat { display: inline-flex; gap: 3px; align-items: center; opacity: 0.7; }
+    .after .general-task-right { display: flex; gap: 6px; align-items: center; }
+    .after .general-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+    .after .general-task:hover .general-actions { opacity: 1; }
+    @media (hover: none) and (pointer: coarse) { .after .general-actions { opacity: 1; } }
+    .after .general-act-btn { width: 26px; height: 26px; min-width: 32px; min-height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-family: inherit; transition: background-color 0.15s, color 0.15s, border-color 0.15s; }
+    .after .general-act-btn:hover { background: var(--bg-primary); color: var(--cat-본업); border-color: var(--cat-본업); }
+    .after .show-more-row { padding: 6px 10px; text-align: center; font-size: 11px; color: var(--text-muted); cursor: pointer; border: 1px dashed var(--border-light); border-radius: 8px; }
+    .after .show-more-row:hover { color: var(--text-secondary); border-color: var(--border-color); }
+    .after .general-completed-section { margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--border-light); }
+    .after .completed-header { display: flex; justify-content: space-between; align-items: center; padding: 6px 4px; cursor: pointer; font-size: 12px; color: var(--text-muted); }
+    .after .completed-header:hover { color: var(--text-secondary); }
+    .after .completed-header .count-completed { font-variant-numeric: tabular-nums; }
+    .after .completed-list { display: grid; gap: 3px; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="mockup-header">
+    <div>
+      <h1 class="mockup-title">본업 탭 재설계 시안 — Dashboard view</h1>
+      <p class="mockup-subtitle">sub-tab nav / focus compact 1줄 / 카드 좌측 stripe 1축 (pulse 우선) / 안정앵커 4개 / cat-본업 indigo identity</p>
+    </div>
+    <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.body.dataset.theme = document.documentElement.dataset.theme;">테마 전환</button>
+  </div>
+
+  <div class="mockup-grid">
+    <!-- ===================== BEFORE ===================== -->
+    <div class="mockup-col before">
+      <h2>BEFORE — 현재 (4-action 헤더 + 다축 색 + 이모지 다수)</h2>
+      <div class="mockup-frame">
+        <div class="work-header">
+          <div class="work-title">💼 본업</div>
+          <div class="work-actions">
+            <button>+ RO v3</button>
+            <button>+ 빈 프로젝트</button>
+            <button>📋 템플릿 관리</button>
+            <button>📊 MM 리포트</button>
+          </div>
+        </div>
+
+        <div class="focus-card">
+          <div class="focus-label">🎯 지금 집중:</div>
+          <div class="focus-title">Q2 RO 리포트 초안 작성</div>
+          <div class="focus-ctx">RO 프로젝트 #14 &gt; 2단계 본조사 · ~45분</div>
+          <button class="focus-btn">완료 ✓</button>
+        </div>
+
+        <div class="section-title">진행 중 (3)</div>
+        <div class="work-grid">
+          <div class="work-card urgent">
+            <div class="work-card-head">
+              <div class="work-card-name">RO 프로젝트 #14</div>
+              <div class="work-card-dday">D-2</div>
+            </div>
+            <div class="work-schedule">📅 5/15 ~ 5/23</div>
+            <div class="work-stage-dots">
+              <div class="work-stage-dot completed"></div>
+              <div class="work-stage-dot current"></div>
+              <div class="work-stage-dot"></div>
+              <div class="work-stage-dot"></div>
+              <div class="work-stage-dot"></div>
+              <div class="work-stage-dot"></div>
+            </div>
+            <div class="work-meta">
+              <span>📋 12/28 항목</span>
+              <span>✓ 1/6 단계</span>
+              <span>👥 0/3</span>
+            </div>
+          </div>
+
+          <div class="work-card stale">
+            <div class="work-card-head">
+              <div class="work-card-name">상반기 회의록 정리</div>
+              <div class="work-card-dday soon">D-7</div>
+            </div>
+            <div class="work-schedule">📅 5/10 ~ 5/28</div>
+            <div class="work-stage-dots">
+              <div class="work-stage-dot completed"></div>
+              <div class="work-stage-dot completed"></div>
+              <div class="work-stage-dot current"></div>
+              <div class="work-stage-dot"></div>
+            </div>
+            <div class="work-meta">
+              <span>📋 8/15 항목</span>
+              <span>✓ 2/4 단계</span>
+              <span class="stale-flag">⚠ 9일 정체</span>
+            </div>
+          </div>
+
+          <div class="work-card ontrack">
+            <div class="work-card-head">
+              <div class="work-card-name">신규 클라이언트 RFP</div>
+              <div class="work-card-dday soon">D-12</div>
+            </div>
+            <div class="work-schedule">📅 5/18 ~ 6/2</div>
+            <div class="work-stage-dots">
+              <div class="work-stage-dot current"></div>
+              <div class="work-stage-dot"></div>
+              <div class="work-stage-dot"></div>
+            </div>
+            <div class="work-meta">
+              <span>📋 3/9 항목</span>
+              <span>✓ 0/3 단계</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">📋 일반 업무 (2)</div>
+        <div class="general-task">
+          <div class="general-check"></div>
+          <div class="general-title">팀 OKR 회의 안건 정리</div>
+          <div class="general-meta">30분 · 5/22</div>
+        </div>
+        <div class="general-task">
+          <div class="general-check"></div>
+          <div class="general-title">월간 정산서 검토</div>
+          <div class="general-meta">15분 · 5/24</div>
+        </div>
+
+        <div class="section-title">📦 보관 (5)  ▶</div>
+        <div class="section-title">⏸ 보류 (1)  ▶</div>
+      </div>
+
+      <div class="change-note">
+        <h3>현재 패턴 — 발견된 문제</h3>
+        <ul>
+          <li>이모지 10+ 개 (<code>💼 🎯 📅 📋 ✓ 👥 ⚠ 📦 ⏸ 📊 💾 🗑</code>) — Standing rule 위반</li>
+          <li><b>3축 색 mix</b>: 카드 좌측 border-left 가 pulse / stale / deadline 셋 다 결정 (<code>work-render.js:43-46</code>) — 색 의미 추론 어려움</li>
+          <li>헤더 액션 4개 (RO v3 / 빈 프로젝트 / 템플릿 / MM 리포트) — 동등 무게로 충돌, "+RO v3" naming 불투명</li>
+          <li>Focus 카드가 <code>--accent-success</code> 초록 — 본업 카테고리 정체성(<code>--cat-본업</code> 인디고)과 색 충돌</li>
+          <li>일반 업무 / 보관 / 보류 가 평면 나열 — 우선순위 시각 위계 없음</li>
+          <li>다중 view (캘린더 / 타임라인 / 리포트 / 템플릿) 진입점이 모달 4개 — 같은 탭 내 sub-section 으로 통합 안 됨</li>
+          <li>안정 앵커 부재 — 오늘 본업 시간 / 정체 프로젝트 수 등 한 눈에 안 보임</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ===================== AFTER ===================== -->
+    <div class="mockup-col after">
+      <h2>AFTER — sub-tab nav + focus compact + 1축 stripe + cat-본업 identity</h2>
+      <div class="mockup-frame">
+        <!-- 헤더: 제목 + 카테고리 색 bar + 액션 정리 -->
+        <div class="work-header">
+          <div class="work-header-left">
+            <div class="work-title">
+              <span class="work-title-bar"></span>
+              본업
+            </div>
+            <span class="work-subtitle">프로젝트 4개 활성 · RO v3 표준 가능</span>
+          </div>
+          <div class="work-actions">
+            <button class="btn-primary-soft" title="새 프로젝트">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              새 프로젝트
+            </button>
+            <button class="btn-more" title="더 보기 — RO v3 / 템플릿 / 리포트">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sub-tab nav (대시보드 탭 sub-tab 패턴 차용) -->
+        <div class="work-tabbar">
+          <button class="work-tab-btn active">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+            프로젝트
+          </button>
+          <button class="work-tab-btn">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            일반 업무
+          </button>
+          <button class="work-tab-btn">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            캘린더
+          </button>
+          <button class="work-tab-btn">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+            타임라인
+          </button>
+          <button class="work-tab-btn">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+            리포트
+          </button>
+          <button class="work-tab-btn">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+            템플릿
+          </button>
+        </div>
+
+        <!-- 안정 앵커 4개 -->
+        <div class="anchors">
+          <div class="anchor urgent">
+            <span class="anchor-label">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              마감 임박
+            </span>
+            <span class="anchor-value">2</span>
+          </div>
+          <div class="anchor warn">
+            <span class="anchor-label">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              정체 7일+
+            </span>
+            <span class="anchor-value">1</span>
+          </div>
+          <div class="anchor cat">
+            <span class="anchor-label">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              활성 프로젝트
+            </span>
+            <span class="anchor-value">4</span>
+          </div>
+          <div class="anchor">
+            <span class="anchor-label">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              이번 주 완료
+            </span>
+            <span class="anchor-value">7</span>
+          </div>
+        </div>
+
+        <!-- Focus compact 1줄 (cat-본업 색) -->
+        <div class="focus-compact urgent">
+          <span class="focus-label">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            지금
+          </span>
+          <div class="focus-main">
+            <div class="focus-title">Q2 RO 리포트 초안 작성</div>
+            <div class="focus-ctx">RO 프로젝트 #14 · 2단계 본조사 · ~45분 · D-2</div>
+          </div>
+          <button class="focus-complete-btn urgent">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            완료
+          </button>
+        </div>
+
+        <!-- 진행 중 프로젝트 -->
+        <div class="section-title">
+          <span>진행 중</span>
+          <span class="count">3</span>
+        </div>
+        <div class="project-grid">
+          <div class="project-card urgent">
+            <div class="project-card-head">
+              <div class="project-card-name">RO 프로젝트 #14</div>
+              <span class="dday-chip urgent">D-2</span>
+            </div>
+            <div class="project-card-schedule">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              5/15 ~ 5/23
+            </div>
+            <div class="stage-progress">
+              <span class="stage-pill completed"></span>
+              <span class="stage-pill current"></span>
+              <span class="stage-pill"></span>
+              <span class="stage-pill"></span>
+              <span class="stage-pill"></span>
+              <span class="stage-pill"></span>
+            </div>
+            <div class="project-card-meta">
+              <span class="meta-item">12/28 항목</span>
+              <span class="meta-item">1/6 단계</span>
+              <span class="meta-item">0/3 참여</span>
+            </div>
+          </div>
+
+          <div class="project-card warn">
+            <div class="project-card-head">
+              <div class="project-card-name">상반기 회의록 정리</div>
+              <span class="dday-chip warn">D-7</span>
+            </div>
+            <div class="project-card-schedule">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              5/10 ~ 5/28
+            </div>
+            <div class="stage-progress">
+              <span class="stage-pill completed"></span>
+              <span class="stage-pill completed"></span>
+              <span class="stage-pill current"></span>
+              <span class="stage-pill"></span>
+            </div>
+            <div class="project-card-meta">
+              <span class="meta-item">8/15 항목</span>
+              <span class="meta-item">2/4 단계</span>
+              <span class="stale">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                9일 정체
+              </span>
+            </div>
+          </div>
+
+          <div class="project-card">
+            <div class="project-card-head">
+              <div class="project-card-name">신규 클라이언트 RFP</div>
+              <span class="dday-chip">D-12</span>
+            </div>
+            <div class="project-card-schedule">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              5/18 ~ 6/2
+            </div>
+            <div class="stage-progress">
+              <span class="stage-pill current"></span>
+              <span class="stage-pill"></span>
+              <span class="stage-pill"></span>
+            </div>
+            <div class="project-card-meta">
+              <span class="meta-item">3/9 항목</span>
+              <span class="meta-item">0/3 단계</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 마감 없음 -->
+        <div class="section-title">
+          <span>마감 없음</span>
+          <span class="count">1</span>
+        </div>
+        <div class="project-grid">
+          <div class="project-card">
+            <div class="project-card-head">
+              <div class="project-card-name">사내 위키 리팩터링</div>
+              <span class="dday-chip">—</span>
+            </div>
+            <div class="stage-progress">
+              <span class="stage-pill current"></span>
+              <span class="stage-pill"></span>
+              <span class="stage-pill"></span>
+              <span class="stage-pill"></span>
+            </div>
+            <div class="project-card-meta">
+              <span class="meta-item">5/22 항목</span>
+              <span class="meta-item">0/4 단계</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 일반 업무 sub-tab preview (실제 라이브에선 별도 sub-tab 선택 시 전체 영역 표시) -->
+        <div class="section-title" style="margin-top: 18px; padding: 10px 12px; background: var(--bg-tertiary); border-radius: 8px; border-left: 3px solid var(--cat-본업);">
+          <span style="display: inline-flex; gap: 6px; align-items: center;">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--cat-본업);"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            일반 업무 sub-tab 미리보기
+          </span>
+          <span class="count">8 + 완료 4</span>
+        </div>
+
+        <div class="general-toolbar">
+          <div class="sort-group">
+            <span class="sort-label">정렬</span>
+            <button class="sort-chip active">마감</button>
+            <button class="sort-chip">최근</button>
+            <button class="sort-chip">시간</button>
+          </div>
+          <button class="general-add" title="일반 업무 빠른 추가">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            빠른 추가
+          </button>
+        </div>
+
+        <div class="general-list">
+          <div class="general-task urgent">
+            <button class="general-check" aria-label="완료"></button>
+            <div class="general-task-main">
+              <span class="general-task-title">Q2 보고서 외부 검토 요청</span>
+              <span class="general-task-meta">
+                <span>~30분</span>
+                <span>· 5/22</span>
+              </span>
+            </div>
+            <div class="general-task-right">
+              <span class="dday-chip urgent">D-1</span>
+              <div class="general-actions">
+                <button class="general-act-btn" title="수정">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="general-act-btn" title="프로젝트로 이동">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5l7 7-7 7M3 12h18"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="general-task">
+            <button class="general-check" aria-label="완료"></button>
+            <div class="general-task-main">
+              <span class="general-task-title">팀 OKR 회의 안건 정리</span>
+              <span class="general-task-meta">
+                <span>~30분</span>
+                <span>· 5/22</span>
+              </span>
+            </div>
+            <div class="general-task-right">
+              <span class="dday-chip">D-1</span>
+            </div>
+          </div>
+
+          <div class="general-task">
+            <button class="general-check" aria-label="완료"></button>
+            <div class="general-task-main">
+              <span class="general-task-title">월간 정산서 검토</span>
+              <span class="general-task-meta">
+                <span>~15분</span>
+                <span>· 5/24</span>
+              </span>
+            </div>
+            <div class="general-task-right">
+              <span class="dday-chip">D-3</span>
+            </div>
+          </div>
+
+          <div class="general-task">
+            <button class="general-check" aria-label="완료"></button>
+            <div class="general-task-main">
+              <span class="general-task-title">팀 회의록 작성 (수요일 분)</span>
+              <span class="general-task-meta">
+                <span>~20분</span>
+                <span class="repeat">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                  매주
+                </span>
+              </span>
+            </div>
+            <div class="general-task-right">
+              <span class="dday-chip">수</span>
+            </div>
+          </div>
+
+          <div class="general-task">
+            <button class="general-check" aria-label="완료"></button>
+            <div class="general-task-main">
+              <span class="general-task-title">사이드 리서치 자료 정리</span>
+              <span class="general-task-meta">
+                <span>~45분</span>
+                <span>· 마감 없음</span>
+              </span>
+            </div>
+            <div class="general-task-right">
+              <span class="dday-chip none">—</span>
+            </div>
+          </div>
+
+          <div class="show-more-row">+ 3개 더 보기</div>
+        </div>
+
+        <div class="general-completed-section">
+          <div class="completed-header">
+            <span>완료 <span class="count-completed">(4)</span></span>
+            <span>▼</span>
+          </div>
+          <div class="completed-list">
+            <div class="general-task completed">
+              <button class="general-check checked" aria-label="완료 취소">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </button>
+              <div class="general-task-main">
+                <span class="general-task-title">주간 보고서 제출</span>
+                <span class="general-task-meta">
+                  <span>5/20 완료</span>
+                </span>
+              </div>
+              <div class="general-task-right">
+                <span class="dday-chip none">—</span>
+              </div>
+            </div>
+            <div class="general-task completed">
+              <button class="general-check checked" aria-label="완료 취소">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </button>
+              <div class="general-task-main">
+                <span class="general-task-title">회의록 작성 (수요일 분)</span>
+                <span class="general-task-meta">
+                  <span>5/19 완료</span>
+                  <span class="repeat">
+                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                    매주
+                  </span>
+                </span>
+              </div>
+              <div class="general-task-right">
+                <span class="dday-chip none">—</span>
+              </div>
+            </div>
+            <div class="show-more-row">+ 2개 더 보기</div>
+          </div>
+        </div>
+
+        <!-- 보관/보류 collapsed -->
+        <div class="archive-section">
+          <div class="archive-row">
+            <span>보류 (1)</span>
+            <span>▶</span>
+          </div>
+          <div class="archive-row">
+            <span>완료 (3)</span>
+            <span>▶</span>
+          </div>
+          <div class="archive-row">
+            <span>보관 (5)</span>
+            <span>▶</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="change-note">
+        <h3>변경 요지 — sub-tab + 1축 색 + cat-본업 identity 일관</h3>
+        <ul>
+          <li><b>Sub-tab nav 5개</b> (프로젝트 / 캘린더 / 타임라인 / 리포트 / 템플릿) — 4 modal 분산 → 한 탭 내 sub-section. 대시보드 탭 sub-tab 패턴과 cross-tab 일관</li>
+          <li><b>1축 stripe 색 (pulse 우선)</b> — 카드 좌측 stripe = deadline pulse 1축만. stale 은 meta 텍스트 "9일 정체" 로 격하 (<code>work-render.js:43-46</code> 의 3축 mix 해소)</li>
+          <li><b>cat-본업 (indigo) identity</b> — 제목 좌측 3px bar / focus compact 좌측 4px stripe / 새 프로젝트 버튼 soft-tint / sub-tab active. 본업 탭 = 인디고 톤 일관</li>
+          <li><b>Focus compact 1줄</b> — expandable 제거. cat-본업 색이 default, 마감 임박 시 <code>--accent-danger</code> 오버라이드. 색이 mode 가 아니라 deadline urgency 를 의미 (axis 단순화)</li>
+          <li><b>안정 앵커 4개 상단</b> — 마감 임박 / 정체 7일+ / 활성 프로젝트 / 이번 주 완료. peripheral scan 단위</li>
+          <li><b>헤더 액션 1+1</b> — primary "+ 새 프로젝트" 단독, "더 보기" 3-dot 메뉴 안에 RO v3 / 템플릿 / 리포트. 4-action bloat 정리. 같은 메뉴 sub-tab 으로도 진입 가능 = 2-way affordance</li>
+          <li><b>일반 업무 카드 좌측 3px <code>--cat-본업</code></b> — 할일 탭 패턴과 동일 (peripheral scan 일관)</li>
+          <li><b>아카이브 격하</b> — 보류 / 완료 / 보관 = dashed border 하단 collapsed</li>
+          <li>모든 이모지 → Lucide 인라인 SVG (clock / shield / box / activity / target / calendar / file-text / grid / list-checks / alert-triangle / plus)</li>
+          <li>Hover: bg <code>bg-tertiary</code> + border <code>border-color</code> — Standing rule 준수 (no transform/scale/shadow)</li>
+        </ul>
+        <h3 style="margin-top: 14px;">후속 mockup 필요</h3>
+        <ul>
+          <li><b>05a-work-detail.html</b> — 프로젝트 상세 (4-level 계층: 프로젝트 / 단계 / 중분류 / 태스크) + breadcrumb</li>
+          <li><b>05b-work-calendar.html</b> — 캘린더 sub-view (월별 task 분포)</li>
+          <li><b>05c-work-timeline.html</b> — 타임라인 sub-view (간트 또는 horizontal phase bar)</li>
+          <li><b>05d-work-report.html</b> — MM 리포트 + analytics</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

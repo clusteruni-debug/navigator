@@ -458,6 +458,7 @@ const appState = {
       medicationSlots: [
         { id: 'med_morning', label: 'ADHD약(아침)', icon: '💊', required: true },
         { id: 'med_afternoon_adhd', label: 'ADHD약(점심)', icon: '💊', required: true },
+        { id: 'med_morning_nutrient', label: '영양제(아침)', icon: '🌿', required: false },
         { id: 'med_afternoon_nutrient', label: '영양제(점심)', icon: '🌿', required: false },
         { id: 'med_evening', label: '영양제(저녁)', icon: '🌿', required: false }
       ]
@@ -527,7 +528,9 @@ const appState = {
     lastReminderDate: null,           // 마지막 월요일 리마인더 날짜
     dismissed: false                  // 이번 주 리마인더 닫음 여부
   },
-  allTasksSubView: 'all',              // 할일 서브뷰: all/today/upcoming/inbox
+  allTasksSubView: 'all',              // 할일 서브뷰: all/today/upcoming/inbox (legacy — 2x2 grid 재설계 후 미사용)
+  allTasksSearch: '',                  // 할일 탭 검색어 (case-insensitive contains)
+  dashboardSubView: '전체',             // 대시보드 서브뷰: 전체/수익/건강/패턴
   quickFilter: null,                  // 퀵 필터: null, '2min', '5min', 'urgent'
   pendingTimeInput: null,             // 실제 소요시간 입력 대기 중인 작업
   // 본업 프로젝트 관리

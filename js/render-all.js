@@ -10,11 +10,210 @@ function setAllTasksSubView(view) {
   renderStatic();
 }
 
+// safeCatId is defined in utils.js (single source — shared with render-action.js / render-life.js / render.js)
+
+if (typeof appState !== 'undefined' && appState.allTasksSearch === undefined) {
+  appState.allTasksSearch = '';
+}
+
+function setAllTasksSearch(value) {
+  appState.allTasksSearch = value || '';
+  renderStatic();
+}
+window.setAllTasksSearch = setAllTasksSearch;
+
+function getStableAnchorsData() {
+  const now = new Date();
+  const todayStr = getLocalDateStr(now);
+  const pending = (appState.tasks || []).filter(t => !t.completed);
+  return {
+    todayDeadline: pending.filter(t => {
+      if (!t.deadline) return false;
+      return getLocalDateStr(new Date(t.deadline)) === todayStr;
+    }).length,
+    inbox: pending.filter(t => !t.deadline).length,
+    streak: (appState.streak && appState.streak.current) || 0
+  };
+}
+window.getStableAnchorsData = getStableAnchorsData;
+
+function _allTasksIcon(name, size = 14) {
+  const paths = {
+    'alert-triangle': '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+    'package': '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+    flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+    'arrow-right': '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
+    circle: '<circle cx="12" cy="12" r="6"/>'
+  };
+  if (name === 'search' || name === 'check' || name === 'plus') return svgIcon(name, size);
+  const path = paths[name];
+  if (!path) return '';
+  return '<svg class="svg-icon" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg>';
+}
+
+function _getAllTasksSearchQuery() {
+  return String(appState.allTasksSearch || '').trim().toLowerCase();
+}
+
+function _matchesAllTasksSearch(task, query) {
+  if (!query) return true;
+  return String(task.title || '').toLowerCase().includes(query);
+}
+
+function _isCompletedRepeatingToday(task) {
+  if (!task.completed || !task.completedAt) return false;
+  if (!task.repeatType || task.repeatType === 'none') return false;
+  const completedAt = new Date(task.completedAt);
+  if (isNaN(completedAt.getTime())) return false;
+  return getLocalDateStr(completedAt) === getLocalDateStr(new Date());
+}
+
+function _getColumnTasks(category, query) {
+  return (appState.tasks || []).filter(task => {
+    if (task.category !== category) return false;
+    if (!_matchesAllTasksSearch(task, query)) return false;
+    if (!task.completed) return true;
+    return _isCompletedRepeatingToday(task);
+  });
+}
+
+function _getColumnPendingCount(category, query) {
+  return (appState.tasks || []).filter(task =>
+    task.category === category &&
+    !task.completed &&
+    _matchesAllTasksSearch(task, query)
+  ).length;
+}
+
+function _getCompactTaskDeadline(task, isCompletedRepeating) {
+  if (isCompletedRepeating) {
+    if (!task.completedAt) return { label: '완료', className: '' };
+    const completedAt = new Date(task.completedAt);
+    if (isNaN(completedAt.getTime())) return { label: '완료', className: '' };
+    return {
+      label: String(completedAt.getHours()).padStart(2, '0') + ':' + String(completedAt.getMinutes()).padStart(2, '0'),
+      className: ''
+    };
+  }
+
+  if (!task.deadline) return { label: '—', className: '' };
+
+  const now = new Date();
+  const deadline = new Date(task.deadline);
+  if (isNaN(deadline.getTime())) return { label: '—', className: '' };
+
+  const today = getLocalDateStr(now);
+  const tomorrowDate = new Date(now);
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrow = getLocalDateStr(tomorrowDate);
+  const deadlineDate = getLocalDateStr(deadline);
+  const hoursLeft = (deadline - now) / (1000 * 60 * 60);
+
+  if (hoursLeft < 0) return { label: '지남', className: 'urgent' };
+  if (hoursLeft < 3) return { label: Math.max(1, Math.ceil(hoursLeft)) + 'h', className: 'urgent' };
+  if (deadlineDate === today) return { label: Math.ceil(hoursLeft) + 'h', className: 'warning' };
+  if (deadlineDate === tomorrow) return { label: '내일', className: 'warning' };
+  return { label: (deadline.getMonth() + 1) + '/' + deadline.getDate(), className: '' };
+}
+
+function _renderCompactCategoryTask(task) {
+  const isCompletedRepeating = _isCompletedRepeatingToday(task);
+  const deadline = _getCompactTaskDeadline(task, isCompletedRepeating);
+  const urgency = getUrgencyLevel(task);
+  const urgentClass = urgency === 'urgent' || urgency === 'expired' ? ' urgent' : '';
+  const repeatingClass = isCompletedRepeating ? ' completed-repeating' : '';
+  const timeClass = deadline.className ? ' ' + deadline.className : '';
+  return `
+    <div class="cat-column-task${urgentClass}${repeatingClass}" onclick="editTask('${escapeAttr(task.id)}')">
+      ${isCompletedRepeating ? _allTasksIcon('check', 12).replace('class="svg-icon"', 'class="cat-column-task-check"') : ''}
+      <span class="cat-column-task-title">${escapeHtml(task.title)}</span>
+      <span class="cat-column-task-time${timeClass}">${escapeHtml(deadline.label)}</span>
+    </div>
+  `;
+}
+
+function _renderCategoryColumn(category, query) {
+  const tasks = _getColumnTasks(category, query);
+  const pendingCount = _getColumnPendingCount(category, query);
+  const isEmpty = tasks.length === 0;
+
+  return `
+    <div class="cat-column ${isEmpty ? 'empty' : ''}" style="--task-cat-color: var(--cat-${safeCatId(category)});">
+      <div class="cat-column-head">
+        <span class="cat-column-name">
+          ${_allTasksIcon('circle', 12)}
+          ${escapeHtml(category)}
+        </span>
+        <span class="cat-column-count">${pendingCount}</span>
+        <button class="cat-column-navigate" type="button" onclick="event.stopPropagation(); navigateAllTasksCategory('${escapeAttr(category)}')" aria-label="${escapeAttr(category)} 섹션 열기">
+          ${_allTasksIcon(isEmpty ? 'plus' : 'arrow-right', 13)}
+        </button>
+      </div>
+      <div class="cat-column-task-list">
+        ${tasks.length > 0 ? tasks.map(task => _renderCompactCategoryTask(task)).join('') : `
+          <button class="cat-column-empty" type="button" onclick="openAllTasksCategoryAdd('${escapeAttr(category)}')" aria-label="${escapeAttr(category)} task 추가">
+            <span class="cat-column-empty-icon">${_allTasksIcon('plus', 13)}</span>
+            <span>task 없음</span>
+            <span class="cat-column-empty-action">추가</span>
+          </button>
+        `}
+      </div>
+    </div>
+  `;
+}
+
+function navigateAllTasksCategory(category) {
+  if (category === '본업') {
+    switchTab('work');
+    return;
+  }
+  if (category === '부업') {
+    switchTab('events');
+    return;
+  }
+  switchTab('life');
+}
+window.navigateAllTasksCategory = navigateAllTasksCategory;
+
+function openAllTasksCategoryAdd(category) {
+  appState.detailedTask = {
+    title: '',
+    category: category,
+    startDate: '',
+    deadline: '',
+    estimatedTime: category === '본업' ? 30 : category === '일상' || category === '가족' ? 15 : 10,
+    link: '',
+    expectedRevenue: '',
+    description: '',
+    repeatType: 'none',
+    repeatDays: [],
+    repeatMonthDay: null,
+    repeatInterval: null,
+    organizer: '',
+    eventType: '',
+    tags: [],
+    subtasks: [],
+    workProjectId: null,
+    workStageIdx: null,
+    workSubcatIdx: null
+  };
+  appState.showDetailedAdd = true;
+  appState.editingTaskId = null;
+  appState._detailedShowDeadline = undefined;
+  appState.currentTab = 'action';
+  renderStatic();
+  setTimeout(() => {
+    const form = document.querySelector('.detailed-add');
+    if (form) form.scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+}
+window.openAllTasksCategoryAdd = openAllTasksCategoryAdd;
+
 /**
  * 서브뷰에 맞는 작업 필터링
  */
 function _getSubViewTasks(view) {
-  const pending = appState.tasks.filter(t => !t.completed);
+  const pending = (appState.tasks || []).filter(t => !t.completed);
   const now = new Date();
   const todayStr = getLocalDateStr(now);
   const tomorrowDate = new Date(now);
@@ -54,7 +253,7 @@ function _renderTaskItem(task) {
   const totalCount = hasSubtasks ? task.subtasks.length : 0;
   const allDone = hasSubtasks && doneCount === totalCount;
   return `
-    <div class="all-task-item ${urgency === 'urgent' ? 'urgent' : ''} ${urgency === 'warning' ? 'warning' : ''}" style="--task-cat-color: var(--cat-${task.category})">
+    <div class="all-task-item ${urgency === 'urgent' ? 'urgent' : ''} ${urgency === 'warning' ? 'warning' : ''}" style="--task-cat-color: var(--cat-${safeCatId(task.category)})">
       <div class="all-task-content">
         <div class="all-task-title">${escapeHtml(task.title)}</div>
         <div class="all-task-meta">
@@ -97,65 +296,60 @@ function _renderTaskItem(task) {
  * 전체 목록 탭 HTML을 반환한다.
  */
 function renderAllTasksTab() {
-  const view = appState.allTasksSubView || 'all';
-  const pending = appState.tasks.filter(t => !t.completed);
-
-  // 서브뷰별 카운트 계산
-  const now = new Date();
-  const todayStr = getLocalDateStr(now);
-  const tomorrowDate = new Date(now);
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const tomorrowStr = getLocalDateStr(tomorrowDate);
-
-  const todayCount = pending.filter(t => {
-    if (!t.deadline) return false;
-    const dStr = getLocalDateStr(new Date(t.deadline));
-    return dStr === todayStr || dStr < todayStr;
-  }).length;
-  const upcomingCount = pending.filter(t => {
-    if (!t.deadline) return false;
-    return getLocalDateStr(new Date(t.deadline)) >= tomorrowStr;
-  }).length;
-  const inboxCount = pending.filter(t => !t.deadline).length;
+  const tasks = appState.tasks || [];
+  const pending = tasks.filter(t => !t.completed);
+  const completedToday = getTodayCompletedTasks(tasks).length;
+  const anchors = getStableAnchorsData();
+  const searchValue = appState.allTasksSearch || '';
+  const query = _getAllTasksSearchQuery();
+  const filteredVisibleCount = ['본업', '부업', '일상', '가족'].reduce((sum, category) => sum + _getColumnTasks(category, query).length, 0);
 
   return `
-        <div class="all-tasks-header">
-          <h2>📋 전체 작업 목록</h2>
-          <div class="all-tasks-summary">
-            총 ${appState.tasks.length}개 · 진행 중 ${pending.length}개 · 오늘 완료 ${getTodayCompletedTasks(appState.tasks).length}개
-          </div>
-        </div>
-
-        <!-- 서브뷰 탭 -->
-        <div class="all-sub-tabs">
-          <button class="all-sub-tab ${view === 'all' ? 'active' : ''}" onclick="setAllTasksSubView('all')">
-            전체 <span class="all-sub-tab-count">${pending.length}</span>
-          </button>
-          <button class="all-sub-tab ${view === 'today' ? 'active' : ''}" onclick="setAllTasksSubView('today')">
-            오늘 <span class="all-sub-tab-count ${todayCount > 0 ? 'has-items' : ''}">${todayCount}</span>
-          </button>
-          <button class="all-sub-tab ${view === 'upcoming' ? 'active' : ''}" onclick="setAllTasksSubView('upcoming')">
-            예정 <span class="all-sub-tab-count">${upcomingCount}</span>
-          </button>
-          <button class="all-sub-tab ${view === 'inbox' ? 'active' : ''}" onclick="setAllTasksSubView('inbox')">
-            인박스 <span class="all-sub-tab-count ${inboxCount > 0 ? 'has-items' : ''}">${inboxCount}</span>
-          </button>
-          <button class="all-sub-tab ${view === 'completed' ? 'active' : ''}" onclick="setAllTasksSubView('completed')">
-            다한 것 <span class="all-sub-tab-count">${appState.tasks.filter(t => t.completed).length}</span>
-          </button>
-        </div>
-
-        ${view === 'completed' ? _renderCompletedBrowse() : view === 'all' ? _renderAllView() : _renderFilteredView(view)}
-
-        ${appState.tasks.length === 0 ? `
-          <div class="empty-state">
-            <div class="empty-state-icon">📝</div>
-            <div>등록된 작업이 없습니다</div>
-            <div style="margin-top: 10px; font-size: 16px; color: var(--text-secondary);">
-              🎯 오늘 탭에서 새 작업을 추가해보세요
+        <div class="all-overview-header">
+          <div>
+            <h2 class="all-overview-title">전체 작업 조망</h2>
+            <div class="all-tasks-summary">
+              총 <strong>${tasks.length}</strong>개 · 진행 중 <strong>${pending.length}</strong>개 · 오늘 완료 <strong>${completedToday}</strong>개${query ? ` · 검색 <strong>${filteredVisibleCount}</strong>개` : ''}
             </div>
           </div>
-        ` : ''}
+          <label class="all-overview-search" aria-label="할일 제목 검색">
+            ${_allTasksIcon('search', 14)}
+            <input id="all-overview-search-input" type="search" placeholder="제목 검색" value="${escapeAttr(searchValue)}" oninput="setAllTasksSearch(this.value)">
+          </label>
+        </div>
+
+        <div class="stable-anchors" aria-label="할일 고정 지표">
+          <div class="anchor-widget ${anchors.todayDeadline > 0 ? 'urgent' : ''}">
+            <span class="anchor-icon">${_allTasksIcon('alert-triangle', 14)}</span>
+            <div class="anchor-body">
+              <div class="anchor-num">${anchors.todayDeadline}</div>
+              <div class="anchor-label">오늘 마감</div>
+            </div>
+          </div>
+          <div class="anchor-widget">
+            <span class="anchor-icon">${_allTasksIcon('package', 14)}</span>
+            <div class="anchor-body">
+              <div class="anchor-num">${anchors.inbox}</div>
+              <div class="anchor-label">마감 없음 (inbox)</div>
+            </div>
+          </div>
+          <div class="anchor-widget streak">
+            <span class="anchor-icon">${_allTasksIcon('flame', 14)}</span>
+            <div class="anchor-body">
+              <div class="anchor-num">${anchors.streak}일</div>
+              <div class="anchor-label">연속 달성</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="category-columns">
+          <div class="row-label">일</div>
+          ${_renderCategoryColumn('본업', query)}
+          ${_renderCategoryColumn('부업', query)}
+          <div class="row-label">생활</div>
+          ${_renderCategoryColumn('일상', query)}
+          ${_renderCategoryColumn('가족', query)}
+        </div>
         `;
 }
 
@@ -164,7 +358,7 @@ function renderAllTasksTab() {
  */
 function _renderAllView() {
   return ['본업', '부업', '일상', '가족'].map(category => {
-    const categoryTasks = appState.tasks.filter(t => t.category === category);
+    const categoryTasks = (appState.tasks || []).filter(t => t.category === category);
     const pendingTasks = categoryTasks.filter(t => !t.completed);
     const completedTasks = categoryTasks.filter(t => t.completed);
 
@@ -190,7 +384,7 @@ function _renderAllView() {
             </div>
             <div class="all-task-list completed-list ${appState.showCompletedByCategory && appState.showCompletedByCategory[category] ? 'show' : ''}">
               ${completedTasks.slice(0, 5).map(task => `
-                <div class="all-task-item completed" style="--task-cat-color: var(--cat-${task.category})">
+                <div class="all-task-item completed" style="--task-cat-color: var(--cat-${safeCatId(task.category)})">
                   <div class="all-task-content">
                     <div class="all-task-title completed">${escapeHtml(task.title)}</div>
                   </div>
@@ -305,7 +499,7 @@ function _renderFilteredView(view) {
  */
 function renderHistoryTab() {
           const weeklyStats = getWeeklyStats();
-          const totalCompleted = appState.tasks.filter(t => t.completed).length;
+          const totalCompleted = (appState.tasks || []).filter(t => t.completed).length;
 
           return `
             <div class="history-header">
@@ -389,6 +583,7 @@ function renderHistoryTab() {
 
 /**
  * "다한 것" 서브뷰 — 완료 작업을 날짜별로 탐색
+ * TODO: no longer called from renderAllTasksTab(); relocate completed browse into history/category surfaces in a future task.
  */
 function _renderCompletedBrowse() {
   const state = appState.completedBrowseState || { page: 0, expandedDates: {} };
@@ -399,7 +594,7 @@ function _renderCompletedBrowse() {
   for (const [dateKey, entries] of Object.entries(appState.completionLog || {})) {
     if (Array.isArray(entries) && entries.some(e => !e._summary)) dateSet.add(dateKey);
   }
-  appState.tasks.forEach(t => {
+  (appState.tasks || []).forEach(t => {
     if (t.completed && t.completedAt) {
       const d = new Date(t.completedAt);
       if (!isNaN(d.getTime())) dateSet.add(getLocalDateStr(d));
@@ -443,7 +638,7 @@ function _renderCompletedBrowse() {
               ${tasks.map(task => {
                 const timeStr = task.completedAt ? new Date(task.completedAt).toTimeString().slice(0, 5) : '';
                 return `
-                  <div class="all-task-item completed" style="--task-cat-color: var(--cat-${task.category || '일상'})">
+                  <div class="all-task-item completed" style="--task-cat-color: var(--cat-${safeCatId(task.category)})">
                     <div class="all-task-content">
                       <div class="all-task-title completed">
                         <span style="color: var(--text-muted); font-size: 12px; margin-right: 6px;">${escapeHtml(timeStr)}</span>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Navigator — 이벤트 탭 재설계 시안</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <style>
+    body { font-family: var(--font-body); background: var(--bg-primary); color: var(--text-primary); padding: 24px; margin: 0; min-height: 100vh; }
+    .mockup-header { max-width: 1320px; margin: 0 auto 24px; display: flex; justify-content: space-between; align-items: center; }
+    .mockup-title { font-size: 22px; font-weight: 700; margin: 0; }
+    .mockup-subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+    .theme-toggle { padding: 8px 16px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); cursor: pointer; font-size: 13px; font-family: inherit; }
+    .theme-toggle:hover { background: var(--bg-secondary); border-color: var(--accent-primary); }
+
+    .mockup-grid { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .mockup-col h2 { font-size: 16px; font-weight: 600; margin: 0 0 12px 0; color: var(--text-secondary); }
+    .mockup-frame { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px; min-height: 920px; }
+    .change-note { margin-top: 12px; padding: 14px 16px; background: var(--bg-tertiary); border-radius: 10px; border: 1px solid var(--border-light); }
+    .change-note h3 { font-size: 13px; font-weight: 600; margin: 0 0 8px 0; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .change-note ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.7; color: var(--text-primary); }
+    .change-note code { font-family: var(--font-mono); font-size: 12px; background: var(--bg-secondary); padding: 1px 5px; border-radius: 4px; }
+
+    .icon { width: 14px; height: 14px; flex-shrink: 0; }
+    .icon-sm { width: 12px; height: 12px; flex-shrink: 0; }
+
+    /* ============= BEFORE ============= */
+    .before .events-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .before .events-title { font-size: 18px; font-weight: 700; }
+    .before .btn-secondary { padding: 4px 10px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); font-size: 13px; cursor: pointer; }
+    .before .events-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; padding: 12px; background: var(--bg-tertiary); border-radius: 10px; }
+    .before .events-summary-item { text-align: center; }
+    .before .events-summary-value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .before .events-summary-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .before .events-section { margin-bottom: 14px; }
+    .before .events-group-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: var(--bg-tertiary); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 6px; }
+    .before .events-list .event-card { padding: 10px 12px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 8px; margin-bottom: 6px; font-size: 13px; }
+    .before .event-card-title { font-weight: 600; margin-bottom: 4px; }
+    .before .event-card-meta { display: flex; gap: 6px; font-size: 11px; color: var(--text-muted); }
+    .before .event-card-actions { margin-top: 6px; display: flex; gap: 4px; }
+    .before .event-card-actions button { padding: 3px 8px; font-size: 11px; border-radius: 6px; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; }
+    .before .dday-urgent { color: var(--accent-danger); font-weight: 600; }
+    .before .dday-warn { color: var(--accent-warning); font-weight: 600; }
+    .before .completed-log { padding: 8px 10px; background: var(--bg-tertiary); border-radius: 8px; font-size: 13px; color: var(--text-secondary); cursor: pointer; display: flex; justify-content: space-between; }
+    .before .trash-row { padding: 8px 10px; background: var(--bg-tertiary); border-radius: 8px; font-size: 12px; color: var(--text-muted); margin-top: 8px; display: flex; justify-content: space-between; }
+
+    /* ============= AFTER ============= */
+    .after .anchors { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+    .after .anchor { padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 10px; display: flex; flex-direction: column; gap: 2px; }
+    .after .anchor-label { font-size: 11px; color: var(--text-muted); display: inline-flex; gap: 4px; align-items: center; }
+    .after .anchor-value { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .after .anchor.urgent .anchor-value { color: var(--accent-danger); }
+    .after .anchor.success .anchor-value { color: var(--accent-success); }
+    .after .anchor.warn .anchor-value { color: var(--accent-warning); }
+
+    .after .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .after .filter-chips { display: flex; gap: 4px; }
+    .after .chip { padding: 5px 11px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 999px; font-size: 12px; color: var(--text-secondary); cursor: pointer; transition: background-color 0.15s, border-color 0.15s, color 0.15s; font-family: inherit; }
+    .after .chip:hover { background: var(--bg-secondary); border-color: var(--accent-primary); color: var(--text-primary); }
+    .after .chip.active { background: color-mix(in srgb, var(--accent-primary) 15%, transparent); border-color: var(--accent-primary); color: var(--accent-primary); }
+    .after .search-wrap { display: inline-flex; gap: 6px; align-items: center; padding: 5px 10px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 8px; }
+    .after .search-wrap input { background: transparent; border: none; color: var(--text-primary); font-family: inherit; font-size: 12px; outline: none; width: 110px; }
+
+    .after .time-group { margin-bottom: 14px; }
+    .after .time-group-header { display: flex; justify-content: space-between; align-items: center; padding: 6px 4px; margin-bottom: 6px; cursor: pointer; }
+    .after .time-group-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; display: inline-flex; gap: 6px; align-items: center; }
+    .after .time-group-title .count { color: var(--text-muted); font-variant-numeric: tabular-nums; font-weight: 500; }
+    .after .time-group-title.today { color: var(--accent-danger); }
+    .after .time-group-title.thisweek { color: var(--accent-warning); }
+    .after .time-group-toggle { color: var(--text-muted); font-size: 11px; }
+
+    .after .event-card { padding: 12px 14px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 10px; margin-bottom: 6px; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; transition: background-color 0.15s, border-color 0.15s; position: relative; overflow: hidden; }
+    .after .event-card::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px; background: var(--cat-부업); opacity: 0.7; }
+    .after .event-card:hover { background: var(--bg-tertiary); border-color: var(--border-color); }
+    .after .event-card.urgent { border-color: color-mix(in srgb, var(--accent-danger) 40%, var(--border-light)); }
+    .after .event-card.warn { border-color: color-mix(in srgb, var(--accent-warning) 35%, var(--border-light)); }
+    .after .event-card-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding-left: 6px; }
+    .after .event-card-row1 { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .after .channel-pill { display: inline-flex; gap: 4px; align-items: center; padding: 2px 7px; background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 999px; font-size: 11px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+    .after .channel-pill svg { color: var(--text-muted); }
+    .after .event-type-pill { display: inline-flex; gap: 4px; align-items: center; padding: 2px 7px; background: color-mix(in srgb, var(--cat-부업) 12%, transparent); border: 1px solid color-mix(in srgb, var(--cat-부업) 30%, transparent); border-radius: 999px; font-size: 11px; color: var(--cat-부업); }
+    .after .event-card-title { font-size: 14px; font-weight: 600; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .after .event-card-meta { display: flex; gap: 10px; font-size: 11px; color: var(--text-muted); align-items: center; }
+    .after .reward { color: var(--accent-celebration); font-weight: 600; font-variant-numeric: tabular-nums; display: inline-flex; gap: 3px; align-items: center; }
+    .after .dday-chip { padding: 3px 9px; background: rgba(148,163,184,0.1); color: var(--text-secondary); border-radius: 999px; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; display: inline-flex; gap: 4px; align-items: center; }
+    .after .dday-chip.urgent { background: var(--accent-danger-alpha); color: var(--accent-danger); }
+    .after .dday-chip.warn { background: var(--accent-warning-alpha); color: var(--accent-warning); }
+    .after .event-card-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+    .after .event-card:hover .event-card-actions { opacity: 1; }
+    @media (hover: none) and (pointer: coarse) { .after .event-card-actions { opacity: 1; } }
+    .after .act-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; min-height: 32px; padding: 0 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; font-family: inherit; font-size: 12px; transition: background-color 0.15s, border-color 0.15s, color 0.15s; }
+    .after .act-btn:hover { background: var(--bg-primary); border-color: var(--accent-primary); color: var(--accent-primary); }
+    .after .act-btn.primary { background: color-mix(in srgb, var(--accent-primary) 14%, var(--bg-secondary)); border-color: color-mix(in srgb, var(--accent-primary) 40%, var(--border-color)); color: var(--accent-primary); }
+    .after .act-btn.primary:hover { background: color-mix(in srgb, var(--accent-primary) 22%, var(--bg-secondary)); }
+    .after .act-btn.success:hover { border-color: var(--accent-success); color: var(--accent-success); }
+
+    .after .empty-row { padding: 10px; text-align: center; color: var(--text-muted); font-size: 12px; font-style: italic; }
+
+    .after .archive-section { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border-light); }
+    .after .archive-header { display: flex; justify-content: space-between; align-items: center; padding: 6px 4px; cursor: pointer; font-size: 12px; color: var(--text-muted); }
+    .after .archive-header:hover { color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+  <div class="mockup-header">
+    <div>
+      <h1 class="mockup-title">이벤트 탭 재설계 시안 — Phase 6 first cut</h1>
+      <p class="mockup-subtitle">시간축 primary IA / 부업 카테고리 색 subtle / 이모지 → Lucide / 안정 앵커 4개 상단</p>
+    </div>
+    <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.body.dataset.theme = document.documentElement.dataset.theme;">테마 전환</button>
+  </div>
+
+  <div class="mockup-grid">
+    <!-- ===================== BEFORE ===================== -->
+    <div class="mockup-col before">
+      <h2>BEFORE — 현재 (수신/로컬 분리 + 긴급/마감전/미제출 중첩 그룹)</h2>
+      <div class="mockup-frame">
+        <div class="events-header">
+          <div class="events-title">💰 이벤트</div>
+          <button class="btn-secondary">🔄 새로고침</button>
+        </div>
+
+        <div class="events-summary">
+          <div class="events-summary-item">
+            <div class="events-summary-value" style="color: var(--accent-danger)">7</div>
+            <div class="events-summary-label">미제출</div>
+          </div>
+          <div class="events-summary-item">
+            <div class="events-summary-value" style="color: var(--accent-warning)">3</div>
+            <div class="events-summary-label">긴급</div>
+          </div>
+          <div class="events-summary-item">
+            <div class="events-summary-value" style="color: var(--accent-success)">24</div>
+            <div class="events-summary-label">참여완료</div>
+          </div>
+        </div>
+
+        <div class="events-section">
+          <div class="events-group-header">📡 수신 이벤트 (5) <span>▼</span></div>
+          <div class="events-group-header" style="margin-left: 8px; font-weight: 500;">🚨 긴급 (2) <span>▼</span></div>
+          <div class="event-card">
+            <div class="event-card-title">Polygon Quiz Event - 50 USDT</div>
+            <div class="event-card-meta">@cryptodrops · <span class="dday-urgent">D-Day</span> · $50</div>
+            <div class="event-card-actions">
+              <button>참여</button><button>완료</button><button>건너뜀</button>
+            </div>
+          </div>
+          <div class="event-card">
+            <div class="event-card-title">OKX Airdrop Round 12</div>
+            <div class="event-card-meta">@okx_official · <span class="dday-urgent">D-Day</span> · $30</div>
+            <div class="event-card-actions">
+              <button>참여</button><button>완료</button><button>건너뜀</button>
+            </div>
+          </div>
+
+          <div class="events-group-header" style="margin-left: 8px; font-weight: 500;">⚡ 마감 전 (1) <span>▼</span></div>
+          <div class="event-card">
+            <div class="event-card-title">Binance Lottery Weekly</div>
+            <div class="event-card-meta">@binance_kr · <span class="dday-warn">D-3</span> · $100</div>
+          </div>
+
+          <div class="events-group-header" style="margin-left: 8px; font-weight: 500;">📅 미제출 (2) <span>▶</span></div>
+        </div>
+
+        <div class="events-section">
+          <div class="events-group-header">📌 내 이벤트 (2) <span>▼</span></div>
+          <div class="events-group-header" style="margin-left: 8px; font-weight: 500;">🚨 긴급 (1) <span>▼</span></div>
+          <div class="event-card">
+            <div class="event-card-title">Manual: Discord Quest #4</div>
+            <div class="event-card-meta">로컬 · <span class="dday-urgent">D-1</span> · $20</div>
+          </div>
+          <div class="events-group-header" style="margin-left: 8px; font-weight: 500;">📅 미제출 (1) <span>▶</span></div>
+        </div>
+
+        <div class="completed-log">
+          <span>✅ 참여 완료 (24)</span>
+          <span>▶</span>
+        </div>
+
+        <div class="trash-row">
+          <span>🗑 휴지통 (3)</span>
+          <span>비우기 ▶</span>
+        </div>
+      </div>
+
+      <div class="change-note">
+        <h3>현재 패턴 — 발견된 문제</h3>
+        <ul>
+          <li>이모지 5종 (<code>💰🔄📡📌🚨⚡📅✅🗑</code>) — Standing rule 위반 (Lucide 권장)</li>
+          <li><b>2축 중첩</b>: 수신/로컬 (백엔드 출처) × 긴급/마감 전/미제출 (시간) — 사용자는 출처보다 시간이 중요</li>
+          <li><b>안정 앵커 부재</b>: 미제출/긴급/참여완료 3개만, "오늘 마감" 시각 비교 단위 없음</li>
+          <li>이벤트 카드 = 제목 + 메타 1줄만 — 채널/타입/리워드가 메타 텍스트로 mix되어 peripheral scan 어려움</li>
+          <li>휴지통이 본문 흐름 안에 — secondary surface 격하 필요</li>
+          <li><code>--cat-부업</code> 색 미적용 — 카테고리 정체성 시각 단서 부재</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ===================== AFTER ===================== -->
+    <div class="mockup-col after">
+      <h2>AFTER — 시간축 primary + 부업 색 subtle + 액션 호버 노출</h2>
+      <div class="mockup-frame">
+        <!-- 안정 앵커 4개 -->
+        <div class="anchors">
+          <div class="anchor urgent">
+            <span class="anchor-label">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+              오늘 마감
+            </span>
+            <span class="anchor-value">3</span>
+          </div>
+          <div class="anchor warn">
+            <span class="anchor-label">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              이번 주
+            </span>
+            <span class="anchor-value">7</span>
+          </div>
+          <div class="anchor">
+            <span class="anchor-label">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 12h13M8 18h13M3 12h.01M3 18h.01"/></svg>
+              미참여
+            </span>
+            <span class="anchor-value">12</span>
+          </div>
+          <div class="anchor success">
+            <span class="anchor-label">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              참여 완료
+            </span>
+            <span class="anchor-value">24</span>
+          </div>
+        </div>
+
+        <!-- 필터 + 검색 -->
+        <div class="toolbar">
+          <div class="filter-chips">
+            <button class="chip active">전체</button>
+            <button class="chip">수신</button>
+            <button class="chip">로컬</button>
+            <button class="chip">★ 즐겨찾기</button>
+          </div>
+          <div class="search-wrap">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input placeholder="검색…">
+          </div>
+        </div>
+
+        <!-- 오늘 그룹 -->
+        <div class="time-group">
+          <div class="time-group-header">
+            <span class="time-group-title today">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              오늘 <span class="count">(3)</span>
+            </span>
+            <span class="time-group-toggle">▼</span>
+          </div>
+
+          <div class="event-card urgent">
+            <div class="event-card-main">
+              <div class="event-card-row1">
+                <span class="channel-pill">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                  cryptodrops
+                </span>
+                <span class="event-type-pill">Quiz</span>
+              </div>
+              <div class="event-card-title">Polygon Quiz Event — 50 USDT</div>
+              <div class="event-card-meta">
+                <span class="reward">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9.5a3 3 0 0 1 6 0c0 1.5-1 2.5-3 2.5s-3 1-3 2.5 1.5 3 3 3 3-1 3-2.5"/></svg>
+                  $50
+                </span>
+                <span>22:30 마감 · 5분</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="dday-chip urgent">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/></svg>
+                D-Day
+              </span>
+              <div class="event-card-actions">
+                <button class="act-btn primary" title="링크 열기">참여</button>
+                <button class="act-btn success" title="완료 표시">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="act-btn" title="건너뜀">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="event-card urgent">
+            <div class="event-card-main">
+              <div class="event-card-row1">
+                <span class="channel-pill">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                  okx_official
+                </span>
+                <span class="event-type-pill">Airdrop</span>
+              </div>
+              <div class="event-card-title">OKX Airdrop Round 12 — Snapshot 23:00</div>
+              <div class="event-card-meta">
+                <span class="reward">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9.5a3 3 0 0 1 6 0c0 1.5-1 2.5-3 2.5s-3 1-3 2.5 1.5 3 3 3 3-1 3-2.5"/></svg>
+                  $30
+                </span>
+                <span>23:00 마감 · 즉시</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="dday-chip urgent">2h</span>
+              <div class="event-card-actions">
+                <button class="act-btn primary">참여</button>
+                <button class="act-btn success">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="act-btn">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="event-card">
+            <div class="event-card-main">
+              <div class="event-card-row1">
+                <span class="channel-pill">로컬</span>
+                <span class="event-type-pill">Discord Quest</span>
+              </div>
+              <div class="event-card-title">Discord Quest #4 — 4 challenges</div>
+              <div class="event-card-meta"><span class="reward">$20</span><span>마감 23:59</span></div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="dday-chip warn">8h</span>
+              <div class="event-card-actions">
+                <button class="act-btn primary">열기</button>
+                <button class="act-btn success">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="act-btn">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 이번 주 그룹 -->
+        <div class="time-group">
+          <div class="time-group-header">
+            <span class="time-group-title thisweek">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              이번 주 <span class="count">(4)</span>
+            </span>
+            <span class="time-group-toggle">▼</span>
+          </div>
+
+          <div class="event-card warn">
+            <div class="event-card-main">
+              <div class="event-card-row1">
+                <span class="channel-pill">binance_kr</span>
+                <span class="event-type-pill">Lottery</span>
+              </div>
+              <div class="event-card-title">Binance Lottery Weekly — Round 47</div>
+              <div class="event-card-meta"><span class="reward">$100</span><span>금 23:00</span></div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="dday-chip warn">D-3</span>
+              <div class="event-card-actions">
+                <button class="act-btn primary">참여</button>
+                <button class="act-btn success">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="act-btn">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="event-card">
+            <div class="event-card-main">
+              <div class="event-card-row1">
+                <span class="channel-pill">layerzero_news</span>
+                <span class="event-type-pill">Whitelist</span>
+              </div>
+              <div class="event-card-title">LayerZero Cohort 3 — Whitelist Form</div>
+              <div class="event-card-meta"><span class="reward">TBA</span><span>토 17:00</span></div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="dday-chip">D-4</span>
+              <div class="event-card-actions">
+                <button class="act-btn primary">참여</button>
+                <button class="act-btn success">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="act-btn">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 다음 주 / 나중 (collapsed) -->
+        <div class="time-group">
+          <div class="time-group-header">
+            <span class="time-group-title">다음 주 <span class="count">(3)</span></span>
+            <span class="time-group-toggle">▶</span>
+          </div>
+        </div>
+
+        <div class="time-group">
+          <div class="time-group-header">
+            <span class="time-group-title">나중 <span class="count">(12)</span></span>
+            <span class="time-group-toggle">▶</span>
+          </div>
+        </div>
+
+        <div class="time-group">
+          <div class="time-group-header">
+            <span class="time-group-title">마감 없음 <span class="count">(5)</span></span>
+            <span class="time-group-toggle">▶</span>
+          </div>
+        </div>
+
+        <!-- 아카이브 (참여 완료 + 휴지통) -->
+        <div class="archive-section">
+          <div class="archive-header">
+            <span>참여 완료 (24)</span>
+            <span>▶</span>
+          </div>
+          <div class="archive-header">
+            <span>건너뜀 (8)</span>
+            <span>▶</span>
+          </div>
+          <div class="archive-header">
+            <span>휴지통 (3)</span>
+            <span>▶</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="change-note">
+        <h3>변경 요지 — 시간축 primary + peripheral scan 강화</h3>
+        <ul>
+          <li><b>시간축이 primary axis</b> — 오늘 / 이번 주 / 다음 주 / 나중 / 마감 없음. 수신 vs 로컬은 필터 chip 으로 격하 (사용자는 출처보다 시각이 더 중요)</li>
+          <li><b>안정 앵커 4개 상단</b> — 오늘 마감 / 이번 주 / 미참여 / 참여 완료. 한 번 보면 오늘 우선순위 잡힘</li>
+          <li><b>부업 카테고리 색 적용</b> — 카드 좌측 3px 스트라이프 (<code>--cat-부업</code>) + 타입 pill 동일 색 12% alpha. peripheral scan 단서 회복</li>
+          <li><b>이모지 → Lucide 인라인 SVG</b> — clock / calendar / list / check-circle / triangle-alert / search / send / coin / target / x. Standing rule 준수</li>
+          <li><b>액션 호버 노출</b> — 참여 / 완료 / 건너뜀 3개 버튼이 카드 hover 시에만 보임 (모바일은 항상 표시). 평소 시각 노이즈 감소</li>
+          <li><b>D-day chip 색 분리</b> — &lt;24h 빨강 (<code>--accent-danger-alpha</code>) / &lt;72h 황 (<code>--accent-warning-alpha</code>) / 그 외 회색. 텍스트 안 읽고 색만 봐도 긴급도 판독</li>
+          <li><b>아카이브 격하</b> — 참여 완료 / 건너뜀 / 휴지통 = dashed border 하단 collapsed. 본문 흐름 정리</li>
+          <li>채널 pill 에 Telegram send 아이콘 + 채널 핸들 — 데이터 출처 명시 (analysis.type / original_channel 활용)</li>
+          <li>호버 시 카드 배경 <code>bg-tertiary</code> + 보더 <code>border-color</code> — Standing rule (no transform/scale/shadow on hover) 준수</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

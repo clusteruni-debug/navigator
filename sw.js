@@ -1,6 +1,6 @@
-// Navigator Service Worker v6.14
+// Navigator Service Worker v6.18
 // ⚠️ JS/CSS 파일 추가·삭제 시 이 목록과 navigator-v5.html 모두 업데이트 필요
-const CACHE_NAME = 'navigator-v6-14';
+const CACHE_NAME = 'navigator-v6-18';
 const urlsToCache = [
   './navigator-v5.html',
   './manifest.json',
@@ -126,13 +126,14 @@ self.addEventListener('install', event => {
   );
 });
 
-// 활성화 시 이전 캐시 삭제
+// 활성화 시 이전 캐시 삭제 (navigator-* prefix 만 정리, 같은 origin 의 다른 SW
+// 또는 라이브러리 캐시 보호)
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName.startsWith('navigator-') && cacheName !== CACHE_NAME) {
             return caches.delete(cacheName);
           }
         })

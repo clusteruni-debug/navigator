@@ -24,8 +24,8 @@
   width: 100%;
   max-width: 640px;
   max-height: 70vh;
-  background: var(--bg-elevated, #1c1f24);
-  color: var(--text-primary, #e6e8ec);
+  background: var(--bg-card, #1E293B);
+  color: var(--text-primary, #F1F5F9);
   border-radius: 16px 16px 0 0;
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
   display: flex;
@@ -40,7 +40,7 @@
 
 .reflection-modal-header {
   padding: 16px 20px 12px;
-  border-bottom: 1px solid var(--border-subtle, #2a2e35);
+  border-bottom: 1px solid var(--border-light, rgba(148, 163, 184, 0.08));
 }
 .reflection-modal-header h2 {
   margin: 0;
@@ -67,32 +67,32 @@
 .reflection-question-text {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary, #e6e8ec);
+  color: var(--text-primary, #F1F5F9);
 }
 .reflection-answer-input {
   width: 100%;
   min-height: 64px;
   padding: 10px 12px;
   font-size: 14px;
-  background: var(--bg-input, #14161a);
-  color: var(--text-primary, #e6e8ec);
-  border: 1px solid var(--border-default, #353a42);
+  background: var(--bg-tertiary, #334155);
+  color: var(--text-primary, #F1F5F9);
+  border: 1px solid var(--border-color, rgba(148, 163, 184, 0.18));
   border-radius: 8px;
   resize: vertical;
   font-family: inherit;
 }
 /* Phase 10.5 — strong :focus outline (ADHD) */
 .reflection-answer-input:focus {
-  outline: 2px solid var(--accent, #4f8cff);
+  outline: 2px solid var(--accent-primary, #667eea);
   outline-offset: 2px;
-  border-color: var(--accent, #4f8cff);
+  border-color: var(--accent-primary, #667eea);
 }
 
 .reflection-actions {
   display: flex;
   gap: 8px;
   padding: 12px 20px;
-  border-top: 1px solid var(--border-subtle, #2a2e35);
+  border-top: 1px solid var(--border-light, rgba(148, 163, 184, 0.08));
   flex-wrap: wrap;
 }
 .reflection-actions button {
@@ -100,37 +100,37 @@
   min-width: 80px;
   padding: 10px 14px;
   font-size: 14px;
-  background: var(--bg-button, #2a2e35);
-  color: var(--text-primary, #e6e8ec);
-  border: 1px solid var(--border-default, #353a42);
+  background: var(--bg-tertiary, #334155);
+  color: var(--text-primary, #F1F5F9);
+  border: 1px solid var(--border-color, rgba(148, 163, 184, 0.18));
   border-radius: 8px;
   cursor: pointer;
 }
 .reflection-actions button:focus {
-  outline: 2px solid var(--accent, #4f8cff);
+  outline: 2px solid var(--accent-primary, #667eea);
   outline-offset: 2px;
 }
 .reflection-actions button:hover {
-  background: var(--bg-button-hover, #353a42);
+  background: var(--bg-secondary, #1E293B);
 }
 .reflection-btn-primary {
-  background: var(--accent, #4f8cff) !important;
-  border-color: var(--accent, #4f8cff) !important;
+  background: var(--accent-primary, #667eea) !important;
+  border-color: var(--accent-primary, #667eea) !important;
   color: #fff !important;
 }
 
 .reflection-streak-badge {
   display: inline-block;
   padding: 4px 10px;
-  background: rgba(255, 152, 0, 0.18);
-  color: #ffb74d;
+  background: var(--accent-warning-alpha, rgba(246, 173, 85, 0.15));
+  color: var(--accent-warning, #f6ad55);
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
 }
 .reflection-streak-best {
   font-size: 12px;
-  color: var(--text-muted, #8b929d);
+  color: var(--text-muted, #64748B);
 }
 
 /* Tab view */
@@ -153,8 +153,8 @@
 .reflection-today-section,
 .reflection-recent-section,
 .reflection-quarterly-section {
-  background: var(--bg-card, #1c1f24);
-  border: 1px solid var(--border-subtle, #2a2e35);
+  background: var(--bg-card, #1E293B);
+  border: 1px solid var(--border-light, rgba(148, 163, 184, 0.08));
   border-radius: 10px;
   padding: 14px 16px;
 }
@@ -163,7 +163,7 @@
 .reflection-quarterly-section h3 {
   margin: 0 0 10px;
   font-size: 14px;
-  color: var(--text-secondary, #b1b6be);
+  color: var(--text-secondary, #94A3B8);
 }
 
 .reflection-today-actions {
@@ -174,7 +174,7 @@
 }
 .reflection-today-actions button {
   padding: 8px 14px;
-  background: var(--accent, #4f8cff);
+  background: var(--accent-primary, #667eea);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -187,20 +187,20 @@
 }
 
 .reflection-answer-block {
-  border-left: 3px solid var(--accent, #4f8cff);
+  border-left: 3px solid var(--accent-primary, #667eea);
   padding: 8px 12px;
   margin-bottom: 10px;
-  background: rgba(79, 140, 255, 0.06);
+  background: var(--accent-primary-alpha, rgba(102, 126, 234, 0.15));
   border-radius: 0 6px 6px 0;
 }
 .reflection-answer-skipped {
-  color: var(--text-muted, #8b929d);
+  color: var(--text-muted, #64748B);
   font-style: italic;
 }
 .reflection-answer-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary, #b1b6be);
+  color: var(--text-secondary, #94A3B8);
   margin-bottom: 4px;
 }
 .reflection-answer-list {
@@ -214,7 +214,7 @@
 }
 
 .reflection-empty {
-  color: var(--text-muted, #8b929d);
+  color: var(--text-muted, #64748B);
   font-size: 13px;
   margin: 0;
 }
@@ -228,24 +228,24 @@
   display: flex;
   justify-content: space-between;
   padding: 8px 0;
-  border-bottom: 1px solid var(--border-subtle, #2a2e35);
+  border-bottom: 1px solid var(--border-light, rgba(148, 163, 184, 0.08));
   font-size: 13px;
 }
 .reflection-history-item:last-child {
   border-bottom: none;
 }
 .reflection-history-date {
-  color: var(--text-secondary, #b1b6be);
+  color: var(--text-secondary, #94A3B8);
 }
 .reflection-history-compact {
-  color: var(--text-muted, #8b929d);
+  color: var(--text-muted, #64748B);
   font-size: 11px;
 }
 
 .reflection-quarterly-btn {
   width: 100%;
   padding: 12px;
-  background: var(--accent, #4f8cff);
+  background: var(--accent-primary, #667eea);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -262,8 +262,8 @@
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
-  color: var(--text-primary, #e6e8ec);
-  background: var(--bg-input, #14161a);
+  color: var(--text-primary, #F1F5F9);
+  background: var(--bg-tertiary, #334155);
   padding: 12px;
   border-radius: 8px;
   margin: 0;
@@ -280,7 +280,7 @@
   line-height: 1.6;
 }
 .reflection-onboard-note {
-  color: var(--text-muted, #8b929d) !important;
+  color: var(--text-muted, #64748B) !important;
   font-size: 12px !important;
   font-style: italic;
 }

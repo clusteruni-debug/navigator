@@ -20,10 +20,100 @@ function getMedicationSlots() {
   return (appState.lifeRhythm.settings && appState.lifeRhythm.settings.medicationSlots) || [
     { id: 'med_morning', label: 'ADHD약(아침)', icon: '\u{1F48A}', required: true },
     { id: 'med_afternoon_adhd', label: 'ADHD약(점심)', icon: '\u{1F48A}', required: true },
+    { id: 'med_morning_nutrient', label: '영양제(아침)', icon: '\u{1F33F}', required: false },
     { id: 'med_afternoon_nutrient', label: '영양제(점심)', icon: '\u{1F33F}', required: false },
     { id: 'med_evening', label: '영양제(저녁)', icon: '\u{1F33F}', required: false }
   ];
 }
+
+function _getActionMedicationRecords(todayRhythm) {
+  var records = Object.assign({}, (todayRhythm && todayRhythm.medications) || {});
+  var compactMedication = todayRhythm && todayRhythm.medication;
+
+  if (Array.isArray(compactMedication)) {
+    compactMedication.forEach(function(item) {
+      if (!item) return;
+      var id = item.slotId || item.id || item.key;
+      if (!id) return;
+      records[id] = item.time || item.takenAt || item.value || item.taken || records[id] || null;
+    });
+  } else if (compactMedication && typeof compactMedication === 'object') {
+    Object.keys(compactMedication).forEach(function(key) {
+      records[key] = compactMedication[key];
+    });
+  }
+
+  return records;
+}
+
+function _takeActionMedicationSlots(slots, required, limit) {
+  return slots.filter(function(slot) { return !!slot.required === required; }).slice(0, limit);
+}
+
+function _renderActionMedicationSlot(slot, todayMeds, requiredGroup) {
+  var taken = !!todayMeds[slot.id];
+  var timeVal = todayMeds[slot.id];
+  var timeText = taken && typeof timeVal === 'string' ? timeVal : (taken ? '완료' : '--:--');
+  var shortLabel = (typeof _getMedicationSlotShortLabel === 'function')
+    ? _getMedicationSlotShortLabel(slot)
+    : String(slot.label || slot.id);
+
+  return '' +
+    '<button class="med-compact-slot ' + (taken ? 'taken ' : '') + (requiredGroup ? 'required' : 'optional') + '"' +
+      ' type="button" onclick="handleMedicationClick(\'' + escapeAttr(slot.id) + '\', ' + taken + ', event)"' +
+      ' aria-label="' + escapeAttr(slot.label || shortLabel) + (taken ? ' 기록됨' : ' 기록') + '">' +
+      '<span class="med-compact-slot-main">' +
+        (taken && typeof _renderActionIcon === 'function' ? _renderActionIcon('check', 14) : '') +
+        '<span class="med-compact-slot-label">' + escapeHtml(shortLabel) + '</span>' +
+      '</span>' +
+      '<span class="med-compact-slot-time">' + escapeHtml(timeText) + '</span>' +
+    '</button>';
+}
+
+function _renderActionMedicationRow(label, iconName, slots, todayMeds, requiredGroup) {
+  var slotsClass = slots.length >= 3 ? 'med-compact-slots med-compact-slots-3col' : 'med-compact-slots';
+  var icon = typeof _renderActionIcon === 'function' ? _renderActionIcon(iconName, 14) : '';
+  return '' +
+    '<div class="med-compact-row ' + (requiredGroup ? 'med-compact-adhd' : 'med-compact-vitamin') + '">' +
+      '<span class="med-compact-group-label">' +
+        icon +
+        '<span>' + escapeHtml(label) + '</span>' +
+        (requiredGroup ? '<span class="med-compact-tag">필수</span>' : '') +
+      '</span>' +
+      '<div class="' + slotsClass + '">' +
+        slots.map(function(slot) { return _renderActionMedicationSlot(slot, todayMeds, requiredGroup); }).join('') +
+      '</div>' +
+    '</div>';
+}
+
+function renderActionMedicationCompact() {
+  var allSlots = getMedicationSlots();
+  if (!allSlots || allSlots.length === 0) return '';
+
+  var todayStr = getLogicalDate();
+  var lifeRhythm = appState.lifeRhythm || {};
+  var todayBlock = lifeRhythm.today || {};
+  var todayRhythm = (todayBlock.date === todayStr) ? todayBlock : {};
+  var todayMeds = _getActionMedicationRecords(todayRhythm);
+  var adhdSlots = _takeActionMedicationSlots(allSlots, true, 2);
+  var vitaminSlots = _takeActionMedicationSlots(allSlots, false, 3);
+  var compactSlots = adhdSlots.concat(vitaminSlots);
+  var takenCount = compactSlots.filter(function(slot) { return !!todayMeds[slot.id]; }).length;
+  var totalCount = compactSlots.length;
+
+  if (totalCount === 0) return '';
+
+  return '' +
+    '<div class="med-compact-section">' +
+      _renderActionSectionTitle('약 복용', takenCount + ' / ' + totalCount) +
+      _renderActionMedicationRow('ADHD 약', 'pill', adhdSlots, todayMeds, true) +
+      _renderActionMedicationRow('영양제', 'smile', vitaminSlots, todayMeds, false) +
+      '<div class="med-compact-link-row">' +
+        '<button type="button" class="med-compact-link" onclick="switchTab(\'life\')">일상 탭 → 약 복용 전체 관리 →</button>' +
+      '</div>' +
+    '</div>';
+}
+window.renderActionMedicationCompact = renderActionMedicationCompact;
 
 /**
  * 복약 기록 (현재 시간)
@@ -47,7 +137,7 @@ function recordMedication(slotId) {
   var slots = getMedicationSlots();
   var slot = slots.find(function(s) { return s.id === slotId; });
   var label = slot ? slot.label : slotId;
-  showToast(slot ? slot.icon + ' ' + label + ' 복용 기록: ' + timeStr : '복용 기록: ' + timeStr, 'success');
+  showToast(label + ' 복용 기록: ' + timeStr, 'success');
 
   if (navigator.vibrate) navigator.vibrate(30);
 }
@@ -140,8 +230,8 @@ function showMedicationActionMenu(slotId, event) {
   var menu = document.createElement('div');
   menu.className = 'rhythm-action-menu';
   menu.id = 'rhythm-action-menu';
-  menu.innerHTML = '<button onclick="hideRhythmActionMenu(); editMedication(\'' + escapeAttr(slotId) + '\')">✏️ 시간 수정</button>' +
-    '<button class="danger" onclick="hideRhythmActionMenu(); deleteMedication(\'' + escapeAttr(slotId) + '\')">🗑️ 기록 삭제</button>';
+  menu.innerHTML = '<button onclick="hideRhythmActionMenu(); editMedication(\'' + escapeAttr(slotId) + '\')">' + svgIcon('edit', 14) + ' 시간 수정</button>' +
+    '<button class="danger" onclick="hideRhythmActionMenu(); deleteMedication(\'' + escapeAttr(slotId) + '\')">' + svgIcon('trash', 14) + ' 기록 삭제</button>';
 
   document.body.appendChild(overlay);
   document.body.appendChild(menu);
@@ -172,7 +262,7 @@ function addMedicationSlot() {
   var label = prompt('복약/영양제 이름:', '');
   if (!label) return;
 
-  var icon = prompt('아이콘 (예: 💊, 🌿, 💉):', '💊') || '💊';
+  var icon = prompt('레거시 아이콘 값 (선택):', '') || '\u{1F48A}';
   var required = confirm('필수 복약인가요? (확인=필수, 취소=선택)');
 
   if (!appState.lifeRhythm.settings) appState.lifeRhythm.settings = {};
@@ -206,7 +296,9 @@ function editMedicationSlot(idx) {
   if (newLabel === null) return;
   if (!newLabel) { showToast('이름은 비워둘 수 없습니다', 'error'); return; }
 
-  var newIcon = prompt('아이콘:', slot.icon) || slot.icon;
+  var newIcon = prompt('레거시 아이콘 값 (선택):', '');
+  if (newIcon === null) newIcon = slot.icon;
+  if (!newIcon) newIcon = slot.icon || '\u{1F48A}';
   var newRequired = confirm('필수 복약인가요? (확인=필수, 취소=선택)');
 
   slot.label = newLabel;
@@ -223,7 +315,10 @@ window.editMedicationSlot = editMedicationSlot;
  * 복약 슬롯 삭제 (설정)
  */
 function deleteMedicationSlot(idx) {
-  if (!appState.lifeRhythm.settings || !appState.lifeRhythm.settings.medicationSlots) return;
+  if (!appState.lifeRhythm.settings) appState.lifeRhythm.settings = {};
+  if (!appState.lifeRhythm.settings.medicationSlots) {
+    appState.lifeRhythm.settings.medicationSlots = getMedicationSlots().slice();
+  }
 
   var slots = appState.lifeRhythm.settings.medicationSlots;
   if (idx < 0 || idx >= slots.length) return;
@@ -259,10 +354,13 @@ function getMedicationStreak() {
     var dateStr = getLocalDateStr(date);
 
     var dayMeds;
-    if (dateStr === todayStr && appState.lifeRhythm.today.date === todayStr) {
-      dayMeds = appState.lifeRhythm.today.medications || {};
+    var lifeRhythm = appState.lifeRhythm || {};
+    var todayBlock = lifeRhythm.today || {};
+    var historyMap = lifeRhythm.history || {};
+    if (dateStr === todayStr && todayBlock.date === todayStr) {
+      dayMeds = todayBlock.medications || {};
     } else {
-      var histEntry = appState.lifeRhythm.history[dateStr];
+      var histEntry = historyMap[dateStr];
       dayMeds = histEntry ? (histEntry.medications || {}) : {};
     }
 

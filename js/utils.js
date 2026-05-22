@@ -10,6 +10,16 @@ function generateId() {
   return crypto.randomUUID();
 }
 
+/**
+ * 카테고리 ID 안전 토큰 — CSS custom property 컨텍스트 (`var(--cat-${name})`)에
+ * 사용자 입력을 직접 삽입할 때 사용. allowlist 4개 외엔 '일상' 폴백.
+ * escapeAttr만으론 CSS-context의 `)`, `(`, `;` 등을 못 막으므로 enum 검증이 정공.
+ */
+const _NAV_VALID_CATEGORIES = ['본업', '부업', '일상', '가족'];
+function safeCatId(category) {
+  return _NAV_VALID_CATEGORIES.includes(category) ? category : '일상';
+}
+
 // ============================================
 // 📅 날짜 유틸리티
 // ============================================

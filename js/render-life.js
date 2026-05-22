@@ -15,7 +15,7 @@ function _renderLifeTaskItem(task) {
     : '';
 
   return `
-    <div class="life-item" style="--task-cat-color: var(--cat-${task.category})">
+    <div class="life-item" style="--task-cat-color: var(--cat-${safeCatId(task.category)})">
       ${hasSubtasks
         ? `<button class="subtask-progress-indicator${allDone ? ' all-done' : ''}" onclick="if(this._longPressed){this._longPressed=false;return;}event.stopPropagation(); toggleSubtaskChips('${escapeAttr(task.id)}')"
             onpointerdown="this._lpTimer = setTimeout(() => { this._longPressed = true; showBackdateMenu('${escapeAttr(task.id)}', this); }, 500)"
@@ -227,7 +227,7 @@ function renderLifeTab() {
                 <div class="life-section-title">✓ 완료됨 (${completedTasks.length})</div>
                 <div class="life-list">
                   ${completedTasks.slice(0, 5).map(task => `
-                    <div class="life-item completed" style="opacity: 0.6; --task-cat-color: var(--cat-${task.category})">
+                    <div class="life-item completed" style="opacity: 0.6; --task-cat-color: var(--cat-${safeCatId(task.category)})">
                       <div class="task-check-btn checked" style="color: var(--accent-success);">✓</div>
                       <div class="life-item-content" style="text-decoration: line-through;">
                         <div class="life-item-title">${escapeHtml(task.title)}</div>

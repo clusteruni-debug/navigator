@@ -9,7 +9,8 @@ function renderCommuteTab() {
   const viewDate = getCommuteViewDate();
   const viewTrips = appState.commuteTracker.trips[viewDate] || {};
   const subTab = appState.commuteSubTab;
-  const rhythm = (viewDate === today) ? appState.lifeRhythm.today : (appState.lifeRhythm.history[viewDate] || {});
+  const lifeRhythm = appState.lifeRhythm || {};
+  const rhythm = (viewDate === today) ? (lifeRhythm.today || {}) : ((lifeRhythm.history || {})[viewDate] || {});
 
   let modalHtml = '';
   if (appState.commuteRouteModal) {
@@ -158,7 +159,9 @@ function renderCommuteDayView(direction, dayTrips, rhythm, routes, viewDate) {
 
 function renderCommuteHistoryView() {
   const trips = appState.commuteTracker.trips;
-  const history = appState.lifeRhythm.history;
+  const lifeRhythm = appState.lifeRhythm || {};
+  const history = lifeRhythm.history || {};
+  const todayBlock = lifeRhythm.today || {};
   const dayNames = ['일','월','화','수','목','금','토'];
   const allDates = Object.keys(trips).sort((a,b) => b.localeCompare(a)); // 최신순
 
@@ -172,7 +175,7 @@ function renderCommuteHistoryView() {
     const d = new Date(dateStr + 'T12:00:00');
     const dayLabel = `${d.getMonth()+1}/${d.getDate()} (${dayNames[d.getDay()]})`;
     const dayTrips = trips[dateStr];
-    const rhythmData = history[dateStr] || (appState.lifeRhythm.today.date === dateStr ? appState.lifeRhythm.today : null);
+    const rhythmData = history[dateStr] || (todayBlock.date === dateStr ? todayBlock : null);
 
     const morning = dayTrips.morning;
     const evening = dayTrips.evening;

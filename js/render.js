@@ -282,7 +282,7 @@ function renderStatic() {
             <div class="dashboard-title">📌 마감 없는 작업 (${appState.tasks.filter(t => !t.completed && !t.deadline).length}개)</div>
             <div class="task-list show">
               ${appState.tasks.filter(t => !t.completed && !t.deadline).map((task, index) => `
-                <div class="task-item" style="--task-cat-color: var(--cat-${task.category})">
+                <div class="task-item" style="--task-cat-color: var(--cat-${safeCatId(task.category)})">
                   <div class="task-item-header">
                     <div class="task-item-title">${index + 1}. ${escapeHtml(task.title)}</div>
                   </div>

@@ -6,22 +6,327 @@
  * 실행(오늘) 탭 HTML을 반환한다.
  * 핵심: "지금 할 것" 중심 — 나머지는 최소화
  */
+// safeCatId is defined in utils.js (single source — shared across render files)
+
+const ACTION_SVG_ICONS = {
+  check: '<polyline points="20 6 9 17 4 12"/>',
+  circle: '<circle cx="12" cy="12" r="9"/>',
+  'circle-fill': '<circle cx="12" cy="12" r="6"/>',
+  'clipboard-list': '<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
+  flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  'bar-chart-3': '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
+  'arrow-right': '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  building: '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/>',
+  briefcase: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+  home: '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+  pill: '<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
+  leaf: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  dollar: '<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  rocket: '<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
+  'rotate-ccw': '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
+  edit: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/><path d="m15 5 4 4"/>',
+  'alert-triangle': '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  repeat: '<path d="m17 2 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
+  plus: '<path d="M12 5v14"/><path d="M5 12h14"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  'chevron-down': '<polyline points="6 9 12 15 18 9"/>',
+  'chevron-right': '<polyline points="9 18 15 12 9 6"/>',
+  timer: '<line x1="10" y1="2" x2="14" y2="2"/><line x1="12" y1="14" x2="15" y2="11"/><circle cx="12" cy="14" r="8"/>',
+  coffee: '<path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h11z"/><path d="M18 8h1a3 3 0 0 1 0 6h-1"/><path d="M6 2v2"/>',
+  target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+  pause: '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>',
+  square: '<rect x="6" y="6" width="12" height="12" rx="1"/>',
+  trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+  calendar: '<path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/>',
+  smile: '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>'
+};
+
+function _renderActionIcon(name, size = 16, className = 'action-svg-icon') {
+  const path = ACTION_SVG_ICONS[name];
+  if (!path) return '';
+  if (name === 'circle-fill') {
+    return `<svg class="${className}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${path}</svg>`;
+  }
+  return `<svg class="${className}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
+}
+
+function _getActionUrgencyText(urgencyClass) {
+  const labels = {
+    urgent: '긴급',
+    warning: '주의',
+    expired: '마감 지남',
+    normal: '지금 할 것'
+  };
+  return labels[urgencyClass] || labels.normal;
+}
+
+function _renderDeadlineMeta(deadline) {
+  const text = formatDeadline(deadline);
+  if (!text) return '';
+  const now = new Date();
+  const d = new Date(deadline);
+  const hoursLeft = (d - now) / (1000 * 60 * 60);
+  const warningClass = hoursLeft < 24 ? ' warning' : '';
+  return `<span class="meta-chip${warningClass}">${_renderActionIcon('alert-triangle', 13)}${escapeHtml(text)}</span>`;
+}
+
+function _getMedicationSlotShortLabel(slot) {
+  const match = String(slot.label || '').match(/\(([^)]+)\)/);
+  if (match) return match[1];
+  return String(slot.label || '').replace(/^ADHD약\s*/, '').replace(/^영양제\s*/, '');
+}
+
+function _renderActionSectionTitle(label, countText) {
+  return `
+    <div class="section-title action-section-title">
+      <span>${escapeHtml(label)}</span>
+      ${countText ? `<span class="count">${escapeHtml(countText)}</span>` : ''}
+    </div>
+  `;
+}
+
+function _getActionAnchors(filteredTasks, completedToday) {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayEnd = new Date(todayStart);
+  todayEnd.setDate(todayEnd.getDate() + 1);
+  const weekEnd = new Date(todayStart);
+  weekEnd.setDate(weekEnd.getDate() + 7);
+  const pending = (filteredTasks || []).filter(t => !t.completed);
+  const withDeadline = pending.filter(t => t.deadline);
+
+  return {
+    todayDeadline: withDeadline.filter(t => {
+      const d = new Date(t.deadline);
+      return !isNaN(d.getTime()) && d >= todayStart && d < todayEnd;
+    }).length,
+    thisWeek: withDeadline.filter(t => {
+      const d = new Date(t.deadline);
+      return !isNaN(d.getTime()) && d >= todayStart && d < weekEnd;
+    }).length,
+    completed: completedToday || 0,
+    streak: (appState.streak && appState.streak.current) || 0
+  };
+}
+
+function _renderActionAnchors(filteredTasks, completedToday) {
+  const anchors = _getActionAnchors(filteredTasks, completedToday);
+  return `
+    <div class="anchors action-anchors" aria-label="오늘 안정 앵커">
+      <div class="anchor urgent">
+        <span class="anchor-label">오늘 마감</span>
+        <span class="anchor-value">${anchors.todayDeadline}</span>
+      </div>
+      <div class="anchor warn">
+        <span class="anchor-label">이번 주</span>
+        <span class="anchor-value">${anchors.thisWeek}</span>
+      </div>
+      <div class="anchor success">
+        <span class="anchor-label">완료</span>
+        <span class="anchor-value">${anchors.completed}</span>
+      </div>
+      <div class="anchor celebration">
+        <span class="anchor-label">streak</span>
+        <span class="anchor-value">${_renderActionIcon('flame', 15)}${anchors.streak}</span>
+      </div>
+    </div>
+  `;
+}
+
+function _getResolutionSortTime(resolution) {
+  const dateValue = resolution.deadline || resolution.dueDate || resolution.targetDate || resolution.endDate || resolution.startDate || resolution.createdAt;
+  if (!dateValue) return Number.MAX_SAFE_INTEGER;
+  const date = new Date(dateValue);
+  return isNaN(date.getTime()) ? Number.MAX_SAFE_INTEGER : date.getTime();
+}
+
+function _getResolutionDayCount(resolution, now) {
+  const todayMs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const startValue = resolution.startDate || resolution.createdAt;
+  const start = startValue ? new Date(startValue) : now;
+  const startMs = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+  if (isNaN(startMs)) return 0;
+  return Math.max(0, Math.floor((todayMs - startMs) / 86400000));
+}
+
+function _formatResolutionNumber(value, prefix) {
+  if (value === undefined || value === null || value === '') return null;
+  const text = typeof value === 'number' ? Number(value).toLocaleString() : String(value);
+  if (!prefix || text.startsWith(prefix)) return text;
+  return prefix + text;
+}
+
+function _formatResolutionMiniItem(resolution, now) {
+  const title = resolution.title || resolution.name || '결심';
+  const current = resolution.doneAmount ?? resolution.doneCount ?? resolution.current ?? resolution.progress ?? resolution.count ?? null;
+  const target = resolution.targetAmount ?? resolution.target ?? resolution.goal ?? resolution.total ?? null;
+  const currencyPrefix = resolution.currency === 'USD' || resolution.unit === '$' || String(title).includes('$') ? '$' : '';
+
+  if (target !== null && target !== undefined && target !== '') {
+    const currentText = _formatResolutionNumber(current === null ? 0 : current, currencyPrefix);
+    const targetText = _formatResolutionNumber(target, currencyPrefix);
+    return `${title} ${currentText}/${targetText}`;
+  }
+
+  return `${title} ${_getResolutionDayCount(resolution, now)}일째`;
+}
+
+function _renderResolutionsMini() {
+  const now = new Date();
+  const activeResolutions = (appState.resolutions || [])
+    .filter(r => r && r.active !== false)
+    .slice()
+    .sort((a, b) => _getResolutionSortTime(a) - _getResolutionSortTime(b))
+    .slice(0, 3);
+
+  const listText = activeResolutions.length > 0
+    ? activeResolutions.map(r => _formatResolutionMiniItem(r, now)).join(' · ')
+    : '기록할 결심을 일상 탭에서 추가하세요';
+
+  return `
+    <div class="resolutions-mini">
+      <span class="resolutions-mini-label">오늘 결심</span>
+      <span class="resolutions-mini-list">${escapeHtml(listText)}</span>
+      <button class="resolutions-mini-btn" type="button" onclick="openResolutionRecordModal()">
+        ${_renderActionIcon('plus', 13)}
+        <span>기록</span>
+      </button>
+    </div>
+  `;
+}
+
+function openResolutionRecordModal() {
+  if (typeof switchTab === 'function') {
+    switchTab('life');
+    requestAnimationFrame(() => {
+      const section = document.querySelector('.resolution-section');
+      if (section) section.scrollIntoView({ block: 'start' });
+    });
+  }
+  if (typeof showToast === 'function') {
+    showToast('일상 탭 → 결심 트래커 에서 기록', 'info');
+  }
+}
+window.openResolutionRecordModal = openResolutionRecordModal;
+
+function _getPreviewDeadlineChip(task) {
+  if (!task.deadline) return '';
+  const text = formatDeadline(task.deadline);
+  if (!text) return '';
+  const urgency = getUrgencyLevel(task);
+  const cls = urgency === 'expired' || urgency === 'urgent' ? 'urgent' : urgency === 'warning' ? 'warn' : '';
+  return `<span class="dday-chip ${cls}">${escapeHtml(text)}</span>`;
+}
+
+function _renderTodayPreviewTask(task) {
+  const urgency = getUrgencyLevel(task);
+  const rowUrgency = urgency === 'expired' || urgency === 'urgent' ? 'urgent' : urgency === 'warning' ? 'warn' : '';
+  const category = safeCatId(task.category);
+  return `
+    <div class="task-row action-task-preview-row cat-${category} ${rowUrgency}" style="--task-cat-color: var(--cat-${category})" data-task-id="${escapeAttr(task.id)}">
+      <button class="action-preview-check" type="button" onclick="event.stopPropagation(); completeTask('${escapeAttr(task.id)}')" aria-label="${escapeAttr(task.title)} 완료">
+        ${_renderActionIcon('check', 14)}
+      </button>
+      <div class="task-main">
+        <span class="task-title">${escapeHtml(task.title)}</span>
+        <span class="task-meta">
+          <span class="cat-tag cat-${category}">${escapeHtml(task.category || '일상')}</span>
+          ${task.repeatType && task.repeatType !== 'none' ? `<span class="repeat-mark">${_renderActionIcon('repeat', 12)}${escapeHtml(getRepeatLabel(task.repeatType, task))}</span>` : ''}
+          ${task.estimatedTime ? `<span>${_renderActionIcon('clock', 12)}${Number(task.estimatedTime)}분</span>` : ''}
+        </span>
+      </div>
+      ${_getPreviewDeadlineChip(task)}
+    </div>
+  `;
+}
+
+function _renderTodayTaskPreview(filteredTasks) {
+  const pendingTasks = (filteredTasks || []).filter(t => !t.completed);
+  if (pendingTasks.length === 0) return '';
+  const previewTasks = pendingTasks.slice(0, 3);
+  return `
+    ${_renderActionSectionTitle('오늘 task preview', `상위 ${previewTasks.length} / 진행 중 ${pendingTasks.length}`)}
+    <div class="today-task-preview">
+      ${previewTasks.map(task => _renderTodayPreviewTask(task)).join('')}
+    </div>
+  `;
+}
+
+(function initActionToastFixedBehavior() {
+  if (window.__navigatorActionToastFixedBehavior) return;
+  window.__navigatorActionToastFixedBehavior = true;
+
+  function markToast(node) {
+    if (!node || !node.classList) return;
+    if (node.classList.contains('toast') || node.classList.contains('toast-undo')) {
+      node.classList.add('toast-fixed', 'active');
+    }
+  }
+
+  function scanToasts() {
+    document.querySelectorAll('.toast, .toast-undo').forEach(markToast);
+  }
+
+  function startObserver() {
+    scanToasts();
+    if (typeof MutationObserver === 'function' && document.body) {
+      const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+          mutation.addedNodes.forEach(markToast);
+        });
+      });
+      observer.observe(document.body, { childList: true });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startObserver, { once: true });
+  } else {
+    startObserver();
+  }
+
+  document.addEventListener('keydown', event => {
+    const target = event.target;
+    const isEditable = target && target.closest && target.closest('input, textarea, select, [contenteditable="true"]');
+    if (isEditable) return;
+
+    if (event.key === 'Escape') {
+      document.querySelectorAll('.toast-fixed.active, .toast-undo, .toast').forEach(toast => toast.remove());
+      return;
+    }
+
+    if ((event.ctrlKey || event.metaKey) && String(event.key).toLowerCase() === 'z') {
+      const undoButton = document.querySelector('.toast-undo .toast-undo-btn');
+      if (undoButton) {
+        event.preventDefault();
+        undoButton.click();
+      }
+    }
+  });
+})();
+
 function renderActionTab(ctx) {
   var now = ctx.now;
   var hour = ctx.hour;
   var filteredTasks = ctx.filteredTasks;
   var nextAction = ctx.nextAction;
   var mode = ctx.mode;
-  var urgentTasks = ctx.urgentTasks;
-  var completedTasks = ctx.completedTasks;
   var urgencyClass = ctx.urgencyClass;
-  var urgencyLabel = ctx.urgencyLabel;
-  var minutesUntilBed = ctx.minutesUntilBed;
-  var categoryFields = ctx.categoryFields;
 
   // 오늘 작업 수
   const pendingCount = filteredTasks.filter(t => !t.completed).length;
-  const completedToday = appState.todayStats.completedToday;
+  const completedToday = (ctx.completedTasks && ctx.completedTasks.length) || (appState.todayStats && appState.todayStats.completedToday) || 0;
+  const noTasks = !appState.tasks || appState.tasks.length === 0;
+  const medicationCompact = (typeof renderActionMedicationCompact === 'function')
+    ? renderActionMedicationCompact()
+    : _renderMedicationCompact();
+
+  // TODO(routing): _renderResolutionSection() - move to dashboard or settings.
+  // TODO(routing): other pending/completed action sections now belong in all/history tabs.
 
   return `
         <!-- 컴팩트 상단 바: 시간 + 모드 + 진행률 -->
@@ -32,34 +337,36 @@ function renderActionTab(ctx) {
             <span class="today-remaining" id="mode-time-remaining">${getModeTimeRemaining(mode, hour, now)}</span>
           </div>
           <div class="today-status-right">
-            <span class="today-progress-mini">✅ ${completedToday} / 📋 ${pendingCount}</span>
-            ${appState.streak.current > 0 ? `<span class="today-streak">🔥${appState.streak.current}</span>` : ''}
+            <span class="today-progress-mini" aria-label="오늘 완료 ${completedToday}개, 남은 작업 ${pendingCount}개">
+              ${_renderActionIcon('check', 14)} ${completedToday} / ${_renderActionIcon('clipboard-list', 14)} ${pendingCount}
+            </span>
+            ${(appState.streak && appState.streak.current > 0) ? `<span class="today-streak">${_renderActionIcon('flame', 14)}${appState.streak.current}</span>` : ''}
           </div>
         </div>
 
-        <!-- 오늘의 리듬 + 복약 (기본 펼침) -->
-        <details class="today-rhythm-details" open>
-          <summary class="today-rhythm-summary">📊 오늘의 리듬 · 복약</summary>
-          <div class="today-rhythm-content">
-            ${_renderRhythmCompact()}
-            ${_renderMedicationCompact()}
-          </div>
-        </details>
-
-        <!-- 결심 트래커 -->
-        ${(appState.resolutions || []).length > 0 ? _renderResolutionSection() : ''}
+        ${_renderActionAnchors(filteredTasks, completedToday)}
+        ${_renderResolutionsMini()}
+        ${_renderRhythmCompact()}
+        ${medicationCompact}
 
         <!-- ▶ 지금 할 것 (메인 히어로) -->
         ${nextAction ? `
-          <div class="next-action ${urgencyClass}">
-            <div class="next-action-label">${urgencyLabel[urgencyClass]}</div>
-            <div class="task-title">${escapeHtml(nextAction.title)}</div>
-            <div class="task-meta">
-              <span class="category ${nextAction.category}">${nextAction.category}</span>
-              ${nextAction.repeatType && nextAction.repeatType !== 'none' ? `<span class="meta-item">🔄 ${getRepeatLabel(nextAction.repeatType, nextAction)}</span>` : ''}
-              ${nextAction.estimatedTime ? `<span class="meta-item">⏱ ${nextAction.estimatedTime}분</span>` : ''}
-              ${nextAction.deadline ? formatDeadlineChip(nextAction.deadline) : ''}
-              ${nextAction.expectedRevenue ? `<span class="meta-item">💰 ${Number(nextAction.expectedRevenue).toLocaleString()}원</span>` : ''}
+          <div class="action-section-label">지금 할 것</div>
+          <div class="next-action ${urgencyClass}" style="--task-cat-color: var(--cat-${safeCatId(nextAction.category)})">
+            <div class="next-action-label">
+              <span class="next-action-label-main">
+                ${urgencyClass === 'normal' ? _renderActionIcon('target', 13) : _renderActionIcon('alert-triangle', 13)}
+                ${_getActionUrgencyText(urgencyClass)}
+              </span>
+              ${nextAction.deadline ? `<span class="next-action-deadline">${escapeHtml(formatDeadline(nextAction.deadline))}</span>` : ''}
+            </div>
+            <div class="next-action-title">${escapeHtml(nextAction.title)}</div>
+            <div class="next-action-meta">
+              <span class="meta-chip category">${_renderActionIcon('circle-fill', 13)}${escapeHtml(nextAction.category)}</span>
+              ${nextAction.repeatType && nextAction.repeatType !== 'none' ? `<span class="meta-chip">${_renderActionIcon('repeat', 13)}${escapeHtml(getRepeatLabel(nextAction.repeatType, nextAction))}</span>` : ''}
+              ${nextAction.estimatedTime ? `<span class="meta-chip">${_renderActionIcon('clock', 13)}${nextAction.estimatedTime}분</span>` : ''}
+              ${nextAction.deadline ? _renderDeadlineMeta(nextAction.deadline) : ''}
+              ${nextAction.expectedRevenue ? `<span class="meta-chip">${_renderActionIcon('dollar', 13)}${Number(nextAction.expectedRevenue).toLocaleString()}원</span>` : ''}
             </div>
             ${nextAction.subtasks && nextAction.subtasks.length > 0 ? `
               <div class="next-action-subtasks">
@@ -68,23 +375,23 @@ function renderActionTab(ctx) {
                     onpointerdown="this._lpTimer = setTimeout(() => { this._longPressed = true; showSubtaskBackdateMenu('${escapeAttr(nextAction.id)}', ${idx}, this); }, 500)"
                     onpointerup="clearTimeout(this._lpTimer)"
                     onpointerleave="clearTimeout(this._lpTimer)">
-                    <span class="next-action-subtask-check">${st.completed ? '✓' : '○'}</span>
+                    <span class="next-action-subtask-check">${st.completed ? _renderActionIcon('check', 14) : _renderActionIcon('circle', 14)}</span>
                     <span>${escapeHtml(st.text)}</span>
                   </div>
                 `).join('')}
-                ${nextAction.subtasks.length > 5 ? `<div style="color: var(--text-muted); font-size: 14px; padding-left: 24px;">+${nextAction.subtasks.length - 5}개 더</div>` : ''}
+                ${nextAction.subtasks.length > 5 ? `<div class="next-action-subtask-more">${nextAction.subtasks.length - 5}개 더</div>` : ''}
               </div>
             ` : ''}
             <div class="next-action-buttons">
-              ${nextAction.link ? `<button class="btn btn-primary" onclick="handleGo('${escapeAttr(nextAction.link)}')">🚀 GO</button>` : ''}
-              <button class="btn btn-success" onclick="completeTask('${escapeAttr(nextAction.id)}')">✓ 완료</button>
-              <button class="btn btn-secondary btn-sm" onclick="postponeTask('${escapeAttr(nextAction.id)}')">⏰ 내일로</button>
-              <button class="btn btn-secondary btn-sm" onclick="editTask('${escapeAttr(nextAction.id)}')">${svgIcon('edit', 14)} 수정</button>
+              ${nextAction.link ? `<button class="btn btn-primary" onclick="handleGo('${escapeAttr(nextAction.link)}')">${_renderActionIcon('rocket', 15)} GO</button>` : ''}
+              <button class="btn btn-success" onclick="completeTask('${escapeAttr(nextAction.id)}')">${_renderActionIcon('check', 15)} 완료</button>
+              <button class="btn btn-secondary btn-sm" onclick="postponeTask('${escapeAttr(nextAction.id)}')">${_renderActionIcon('rotate-ccw', 14)} 내일로</button>
+              <button class="btn btn-secondary btn-sm" onclick="editTask('${escapeAttr(nextAction.id)}')">${_renderActionIcon('edit', 14)} 수정</button>
             </div>
           </div>
-        ` : `
-          ${_renderTodayEmptyState(completedToday)}
-        `}
+        ` : ''}
+
+        ${_renderTodayTaskPreview(filteredTasks)}
 
         <!-- 빠른 추가 -->
         <div class="quick-add-simple">
@@ -92,93 +399,17 @@ function renderActionTab(ctx) {
             type="text"
             id="quick-add-input"
             class="quick-add-input"
-            placeholder="+ 새 작업 추가 (#부업 #본업 #일상)"
+            placeholder="+ 새 작업 추가 (#본업 #부업 #일상 #가족)"
             value="${escapeHtml(appState.quickAddValue)}"
             onkeypress="if(event.key==='Enter') quickAdd()"
           >
-          <button class="quick-add-btn" onclick="quickAdd()" aria-label="빠른 작업 추가">+</button>
+          <button class="quick-add-btn" onclick="quickAdd()" aria-label="빠른 작업 추가">${_renderActionIcon('plus', 18)}</button>
         </div>
 
-        <!-- 나머지 작업 목록 -->
-        ${pendingCount > (nextAction ? 1 : 0) ? `
-          <div class="today-task-list">
-            <div class="today-task-list-header">
-              <span>📋 다른 작업 ${pendingCount - (nextAction ? 1 : 0)}개</span>
-            </div>
-            ${filteredTasks
-              .filter(t => !t.completed && t.id !== (nextAction ? nextAction.id : null))
-              .map(task => {
-                const hasSubtasks = task.subtasks && task.subtasks.length > 0;
-                const doneCount = hasSubtasks ? task.subtasks.filter(s => s.completed).length : 0;
-                const totalCount = hasSubtasks ? task.subtasks.length : 0;
-                const allDone = hasSubtasks && doneCount === totalCount;
-                return `
-                <div class="task-item-mini" onclick="editTask('${escapeAttr(task.id)}')" style="--task-cat-color: var(--cat-${task.category})">
-                  <div class="task-item-mini-left">
-                    ${hasSubtasks
-                      ? `<button class="subtask-progress-indicator${allDone ? ' all-done' : ''}" onclick="event.stopPropagation(); toggleSubtaskChips('${escapeAttr(task.id)}')" title="서브태스크 접기/펼치기" aria-label="서브태스크 ${doneCount}/${totalCount} 접기/펼치기">${doneCount}/${totalCount} ${appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id] ? '▶' : '▼'}</button>`
-                      : `<button class="task-check-btn" onclick="event.stopPropagation(); completeTask('${escapeAttr(task.id)}')" aria-label="작업 완료">○</button>`
-                    }
-                    <span class="task-item-mini-title">${escapeHtml(task.title)}</span>
-                  </div>
-                  <div class="task-item-mini-right">
-                    ${task.deadline ? formatDeadlineChip(task.deadline) : ''}
-                    <span class="task-item-mini-category ${task.category}">${task.category}</span>
-                  </div>
-                  ${hasSubtasks && !(appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id]) ? `
-                    <div class="subtask-chips" onclick="event.stopPropagation();">
-                      ${task.subtasks.slice(0, 3).map((st, idx) => `
-                        <span class="subtask-chip ${st.completed ? 'done' : ''}" onclick="if(this._longPressed){this._longPressed=false;return;}toggleSubtaskComplete('${escapeAttr(task.id)}', ${idx})"
-                          onpointerdown="this._lpTimer = setTimeout(() => { this._longPressed = true; showSubtaskBackdateMenu('${escapeAttr(task.id)}', ${idx}, this); }, 500)"
-                          onpointerup="clearTimeout(this._lpTimer)"
-                          onpointerleave="clearTimeout(this._lpTimer)">
-                          <span class="subtask-chip-check">${st.completed ? '✓' : '○'}</span>${escapeHtml(st.text)}
-                        </span>
-                      `).join('')}
-                      ${task.subtasks.length > 3 ? `<span class="subtask-chip" style="color: var(--text-muted); border-style: dashed; cursor: default;">+${task.subtasks.length - 3}개</span>` : ''}
-                    </div>
-                  ` : ''}
-                </div>
-              `}).join('')}
-          </div>
-        ` : ''}
-
-        <!-- 오늘 완료 (접기) -->
-        ${completedTasks.length > 0 ? `
-          <div class="today-completed-section">
-            <div class="today-completed-toggle" onclick="toggleCompletedTasks()">
-              <span>✅ 오늘 완료 ${completedTasks.length}개</span>
-              <span>${appState.showCompletedTasks ? '▲' : '▼'}</span>
-            </div>
-            ${appState.showCompletedTasks ? `
-              <div class="today-completed-list">
-                ${completedTasks.map(task => `
-                  <div class="task-item-mini completed" style="--task-cat-color: var(--cat-${task.category})">
-                    <div class="task-item-mini-left">
-                      <span class="task-check-done">✓</span>
-                      <span class="task-item-mini-title" style="text-decoration: line-through; opacity: 0.6;">${escapeHtml(task.title)}</span>
-                    </div>
-                    <button class="btn-small uncomplete" onclick="uncompleteTask('${escapeAttr(task.id)}')" style="font-size: 12px;">↩️</button>
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
-          </div>
-        ` : ''}
+        ${!nextAction ? (noTasks ? _renderNoTasksEmptyState() : _renderTodayEmptyState(completedToday)) : ''}
 
         <!-- 포모도로 (활성 시에만) -->
         ${_renderPomodoroIfActive()}
-
-        <!-- 상세 추가 폼 (수정 모드일 때만) -->
-        ${appState.showDetailedAdd ? _renderDetailedAddForm(categoryFields) : ''}
-
-        ${appState.tasks.length === 0 ? `
-          <div class="empty-state">
-            <div class="empty-state-icon">📋</div>
-            <div>작업이 없습니다</div>
-            <div style="font-size: 16px; margin-top: 10px">위 입력창에서 새 작업을 추가해보세요</div>
-          </div>
-        ` : ''}
         `;
 }
 
@@ -187,7 +418,7 @@ function renderActionTab(ctx) {
  */
 function _renderTodayEmptyState(completedToday) {
   const rest = getRestActivity();
-  const streak = appState.streak.current;
+  const streak = (appState.streak && appState.streak.current) || 0;
   const messages = [
     '오늘의 할 일을 모두 끝냈어요!',
     '깔끔하게 정리됐어요!',
@@ -197,18 +428,28 @@ function _renderTodayEmptyState(completedToday) {
   const msg = messages[Math.floor(Math.random() * messages.length)];
   return `
     <div class="empty-state-enhanced todoist-zero" id="todoist-zero">
-      <div class="empty-state-icon-large">🏆</div>
+      <div class="empty-state-icon-large">${_renderActionIcon('trophy', 42)}</div>
       <div class="empty-state-title">#NavigatorZero</div>
       <div class="empty-state-subtitle">
         ${msg}<br>
         오늘 <strong>${completedToday}개</strong> 완료
-        ${streak > 1 ? ` · 🔥 ${streak}일 연속` : ''}
+        ${streak > 1 ? ` · <span class="today-streak inline">${_renderActionIcon('flame', 14)}${streak}일 연속</span>` : ''}
       </div>
       <div class="empty-state-actions">
-        <button class="empty-state-btn" onclick="showToast('${escapeAttr(rest.icon)} ${escapeAttr(rest.text)}: ${escapeAttr(rest.desc)}', 'success')">
-          ${escapeHtml(rest.icon)} ${escapeHtml(rest.text)}
+        <button class="empty-state-btn" onclick="showToast('${escapeAttr(rest.text)}: ${escapeAttr(rest.desc)}', 'success')">
+          ${escapeHtml(rest.text)}
         </button>
       </div>
+    </div>
+  `;
+}
+
+function _renderNoTasksEmptyState() {
+  return `
+    <div class="empty-state">
+      <div class="empty-state-icon">${_renderActionIcon('clipboard-list', 34)}</div>
+      <div>작업이 없습니다</div>
+      <div class="empty-state-helper">위 입력창에서 새 작업을 추가해보세요</div>
     </div>
   `;
 }
@@ -218,48 +459,30 @@ function _renderTodayEmptyState(completedToday) {
  */
 function _renderRhythmCompact() {
   const today = getLogicalDate();
-  const rhythm = appState.lifeRhythm.today.date === today ? appState.lifeRhythm.today : { wakeUp: null, homeDepart: null, workArrive: null, workDepart: null, homeArrive: null, sleep: null, medications: {} };
+  const lifeRhythm = appState.lifeRhythm || {};
+  const todayRhythm = lifeRhythm.today || {};
+  const rhythm = (todayRhythm.date === today) ? todayRhythm : { wakeUp: null, homeDepart: null, workArrive: null, workDepart: null, homeArrive: null, sleep: null, medications: {} };
+  const rhythmItems = [
+    { key: 'wakeUp', label: '기상', icon: 'sun', value: rhythm.wakeUp },
+    { key: 'homeDepart', label: '오전', icon: 'arrow-right', value: rhythm.homeDepart },
+    { key: 'workArrive', label: '점심', icon: 'coffee', value: rhythm.workArrive },
+    { key: 'workDepart', label: '오후', icon: 'briefcase', value: rhythm.workDepart },
+    { key: 'homeArrive', label: '저녁', icon: 'home', value: rhythm.homeArrive },
+    { key: 'sleep', label: '취침', icon: 'moon', value: rhythm.sleep }
+  ];
+  const recordedCount = rhythmItems.filter(item => item.value).length;
 
   return `
-    <div class="life-rhythm-tracker" style="margin-bottom: 12px;">
-      <div class="life-rhythm-buttons six-items">
-        <button class="life-rhythm-btn ${rhythm.wakeUp ? 'recorded' : ''}"
-                onclick="handleLifeRhythmClick('wakeUp', ${rhythm.wakeUp ? 'true' : 'false'}, event)">
-          <span class="life-rhythm-icon">☀️</span>
-          <span class="life-rhythm-label">기상</span>
-          <span class="life-rhythm-time">${rhythm.wakeUp || '--:--'}</span>
+    ${_renderActionSectionTitle('라이프 리듬', `${recordedCount} / ${rhythmItems.length}`)}
+    <div class="rhythm-strip">
+      ${rhythmItems.map(item => `
+        <button class="rhythm-btn ${item.value ? 'recorded' : ''}"
+                onclick="handleLifeRhythmClick('${item.key}', ${item.value ? 'true' : 'false'}, event)">
+          ${_renderActionIcon(item.icon, 18)}
+          <span class="rhythm-label">${item.label}</span>
+          <span class="rhythm-time">${item.value || '--:--'}</span>
         </button>
-        <button class="life-rhythm-btn ${rhythm.homeDepart ? 'recorded' : ''}"
-                onclick="handleLifeRhythmClick('homeDepart', ${rhythm.homeDepart ? 'true' : 'false'}, event)">
-          <span class="life-rhythm-icon">🚶</span>
-          <span class="life-rhythm-label">집출발</span>
-          <span class="life-rhythm-time">${rhythm.homeDepart || '--:--'}</span>
-        </button>
-        <button class="life-rhythm-btn ${rhythm.workArrive ? 'recorded' : ''}"
-                onclick="handleLifeRhythmClick('workArrive', ${rhythm.workArrive ? 'true' : 'false'}, event)">
-          <span class="life-rhythm-icon">🏢</span>
-          <span class="life-rhythm-label">근무시작</span>
-          <span class="life-rhythm-time">${rhythm.workArrive || '--:--'}</span>
-        </button>
-        <button class="life-rhythm-btn ${rhythm.workDepart ? 'recorded' : ''}"
-                onclick="handleLifeRhythmClick('workDepart', ${rhythm.workDepart ? 'true' : 'false'}, event)">
-          <span class="life-rhythm-icon">🚀</span>
-          <span class="life-rhythm-label">근무종료</span>
-          <span class="life-rhythm-time">${rhythm.workDepart || '--:--'}</span>
-        </button>
-        <button class="life-rhythm-btn ${rhythm.homeArrive ? 'recorded' : ''}"
-                onclick="handleLifeRhythmClick('homeArrive', ${rhythm.homeArrive ? 'true' : 'false'}, event)">
-          <span class="life-rhythm-icon">🏠</span>
-          <span class="life-rhythm-label">집도착</span>
-          <span class="life-rhythm-time">${rhythm.homeArrive || '--:--'}</span>
-        </button>
-        <button class="life-rhythm-btn ${rhythm.sleep ? 'recorded' : ''}"
-                onclick="handleLifeRhythmClick('sleep', ${rhythm.sleep ? 'true' : 'false'}, event)">
-          <span class="life-rhythm-icon">🌙</span>
-          <span class="life-rhythm-label">취침</span>
-          <span class="life-rhythm-time">${rhythm.sleep || '--:--'}</span>
-        </button>
-      </div>
+      `).join('')}
     </div>
   `;
 }
@@ -268,35 +491,79 @@ function _renderRhythmCompact() {
  * 복약 트래커 (컴팩트)
  */
 function _renderMedicationCompact() {
-  const medSlots = getMedicationSlots();
-  if (!medSlots || medSlots.length === 0) return '';
+  const allSlots = getMedicationSlots();
+  if (!allSlots || allSlots.length === 0) return '';
 
   const todayStr = getLogicalDate();
-  const todayRhythm = appState.lifeRhythm.today.date === todayStr ? appState.lifeRhythm.today : {};
+  const lifeRhythm = appState.lifeRhythm || {};
+  const todayBlock = lifeRhythm.today || {};
+  const todayRhythm = (todayBlock.date === todayStr) ? todayBlock : {};
   const todayMeds = (todayRhythm.medications) || {};
-  const takenCount = medSlots.filter(s => todayMeds[s.id]).length;
-  const totalCount = medSlots.length;
+  const slotsWithIndex = allSlots.map((slot, idx) => ({ slot, idx }));
+  const requiredSlots = slotsWithIndex.filter(item => item.slot.required);
+  const optionalSlots = slotsWithIndex.filter(item => !item.slot.required);
 
   return `
-    <div class="medication-tracker">
-      <div class="medication-header">
-        <span class="medication-title">💊 복약 ${takenCount}/${totalCount}</span>
+    <div class="action-section-label">복약</div>
+    ${_renderMedicationGroup('ADHD약 (필수)', requiredSlots, true, todayMeds)}
+    ${_renderMedicationGroup('영양제 (선택)', optionalSlots, false, todayMeds)}
+  `;
+}
+
+function _renderMedicationGroup(label, indexedSlots, requiredGroup, todayMeds) {
+  const takenCount = indexedSlots.filter(item => todayMeds[item.slot.id]).length;
+  const totalCount = indexedSlots.length;
+  const complete = totalCount > 0 && takenCount === totalCount;
+  const streak = (requiredGroup && typeof getMedicationStreak === 'function') ? getMedicationStreak() : 0;
+  const iconName = requiredGroup ? 'pill' : 'leaf';
+  const slotsClass = totalCount >= 3 ? 'medication-group-slots three' : 'medication-group-slots';
+
+  return `
+    <div class="medication-group ${requiredGroup ? 'required-group' : 'optional-group'}">
+      <div class="medication-group-header">
+        <span class="medication-group-label ${requiredGroup ? 'required' : ''}">
+          ${_renderActionIcon(iconName, 14)}
+          ${label}
+        </span>
+        <div class="medication-group-header-right">
+          <span class="medication-group-count ${complete ? 'complete' : ''}">
+            ${takenCount}/${totalCount}${requiredGroup && streak > 0 ? ` · ${_renderActionIcon('flame', 13)}${streak}` : ''}
+          </span>
+          <button class="medication-add-btn" type="button" onclick="addMedicationSlot()" title="슬롯 추가" aria-label="${escapeAttr(label)} 슬롯 추가">
+            ${_renderActionIcon('plus', 12)}
+          </button>
+        </div>
       </div>
-      <div class="medication-slots">
-        ${medSlots.map(slot => {
-          const taken = !!todayMeds[slot.id];
-          const timeVal = todayMeds[slot.id] || '--:--';
-          return `
-            <button class="medication-btn ${taken ? 'taken' : ''} ${slot.required ? 'required' : ''}"
-                    onclick="handleMedicationClick('${escapeAttr(slot.id)}', ${taken}, event)">
-              <span class="med-icon">${slot.icon}</span>
-              <span class="med-label">${escapeHtml(slot.label)}</span>
-              <span class="med-time">${timeVal}</span>
-            </button>
-          `;
-        }).join('')}
+      <div class="${slotsClass}">
+        ${indexedSlots.map(item => _renderMedicationSlot(item.slot, item.idx, requiredGroup, todayMeds)).join('')}
       </div>
     </div>
+  `;
+}
+
+function _renderMedicationSlot(slot, originalIndex, requiredGroup, todayMeds) {
+  const taken = !!todayMeds[slot.id];
+  const timeVal = todayMeds[slot.id] || '--:--';
+  const shortLabel = _getMedicationSlotShortLabel(slot);
+  const deleteLabel = slot.label + ' 슬롯 삭제';
+
+  return `
+    <button class="medication-btn ${taken ? 'taken' : ''} ${requiredGroup ? 'required' : ''}"
+            onclick="handleMedicationClick('${escapeAttr(slot.id)}', ${taken}, event)">
+      ${taken ? _renderActionIcon('check', 14, 'medication-icon-lucide') : ''}
+      <span class="medication-btn-label">${escapeHtml(shortLabel)}</span>
+      <span class="medication-btn-time">${escapeHtml(timeVal)}</span>
+      ${taken ? '' : '<span class="medication-btn-edit-hint">탭하여 기록</span>'}
+      <span class="medication-btn-delete"
+            role="button"
+            tabindex="0"
+            title="슬롯 삭제"
+            aria-label="${escapeAttr(deleteLabel)}"
+            onclick="event.stopPropagation(); deleteMedicationSlot(${originalIndex})"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();deleteMedicationSlot(${originalIndex})}">
+        ${_renderActionIcon('x', 10)}
+      </span>
+    </button>
   `;
 }
 
@@ -311,16 +578,16 @@ function _renderPomodoroIfActive() {
   }
   return `
     <div class="pomodoro-section ${pomo.isRunning ? 'active' : ''} ${pomo.isBreak ? 'break' : ''}">
-      <div class="pomodoro-title">${pomo.isBreak ? '☕ 휴식 중' : '🍅 포모도로'}</div>
+      <div class="pomodoro-title">${_renderActionIcon(pomo.isBreak ? 'coffee' : 'timer', 16)}${pomo.isBreak ? '휴식 중' : '포모도로'}</div>
       <div class="pomodoro-time" id="pomodoro-time">${formatPomodoroTime(pomo.timeLeft)}</div>
-      ${currentTask ? `<div class="pomodoro-task" style="font-size: 15px; color: var(--text-secondary); margin-top: 4px; text-align: center;">🎯 ${escapeHtml(currentTask.title)}</div>` : ''}
+      ${currentTask ? `<div class="pomodoro-task">${_renderActionIcon('target', 14)}${escapeHtml(currentTask.title)}</div>` : ''}
       <div class="pomodoro-controls">
         ${pomo.isRunning ? `
-          <button class="pomodoro-btn pause" onclick="pausePomodoro()">⏸ 일시정지</button>
+          <button class="pomodoro-btn pause" onclick="pausePomodoro()">${_renderActionIcon('pause', 14)} 일시정지</button>
         ` : `
-          <button class="pomodoro-btn start" onclick="resumePomodoro()">▶ 재개</button>
+          <button class="pomodoro-btn start" onclick="resumePomodoro()">${_renderActionIcon('play', 14)} 재개</button>
         `}
-        <button class="pomodoro-btn stop" onclick="stopPomodoro()">⏹ 중지</button>
+        <button class="pomodoro-btn stop" onclick="stopPomodoro()">${_renderActionIcon('square', 14)} 중지</button>
       </div>
     </div>
   `;
@@ -346,7 +613,7 @@ function _renderDetailedAddForm(categoryFields) {
       ${appState.detailedTask.category === '본업' && appState.workProjects.filter(p => !p.archived).length > 0 ? `
         <div class="work-project-link-section" style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
           <div class="form-group" style="margin-bottom: 8px;">
-            <label class="form-label">📁 프로젝트 연결 (선택)</label>
+            <label class="form-label">프로젝트 연결 (선택)</label>
             <select class="form-select" id="detailed-work-project" onchange="updateWorkProjectLink(this.value)">
               <option value="">연결 안함 (일반 할일)</option>
               ${appState.workProjects.filter(p => !p.archived).map(p => `
@@ -356,7 +623,7 @@ function _renderDetailedAddForm(categoryFields) {
           </div>
           ${appState.detailedTask.workProjectId ? `
             <div class="form-group" style="margin-bottom: 8px;">
-              <label class="form-label">📋 단계</label>
+              <label class="form-label">단계</label>
               <select class="form-select" id="detailed-work-stage" onchange="updateWorkStageLink(this.value)">
                 ${appState.workProjectStages.map((stage, idx) => `
                   <option value="${idx}" ${appState.detailedTask.workStageIdx === idx ? 'selected' : ''}>${idx + 1}. ${stage}</option>
@@ -370,7 +637,7 @@ function _renderDetailedAddForm(categoryFields) {
               if (subcats.length > 0) {
                 return `
                   <div class="form-group" style="margin-bottom: 0;">
-                    <label class="form-label">📂 중분류</label>
+                    <label class="form-label">중분류</label>
                     <select class="form-select" id="detailed-work-subcat" onchange="updateWorkSubcatLink(this.value)">
                       ${subcats.map((sub, idx) => `
                         <option value="${idx}" ${appState.detailedTask.workSubcatIdx === idx ? 'selected' : ''}>${escapeHtml(sub.name)}</option>

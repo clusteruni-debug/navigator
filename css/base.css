@@ -173,6 +173,18 @@
       outline-offset: 2px;
     }
 
+    /* 동작 감소 선호 — WCAG 2.3.3, 전정장애/ADHD 사용자 배려 */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
     .app {
       max-width: 1400px;
       margin: 0 auto;

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Navigator — 할일 (전체 조망) 탭 시안 v2</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <style>
+    body { font-family: var(--font-body, 'Pretendard Variable', sans-serif); background: var(--bg-primary); color: var(--text-primary); padding: 24px; margin: 0; min-height: 100vh; }
+    .mockup-header { max-width: 1320px; margin: 0 auto 24px; display: flex; justify-content: space-between; align-items: center; }
+    .mockup-title { font-size: 22px; font-weight: 700; margin: 0; }
+    .mockup-subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+    .theme-toggle { padding: 8px 16px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); cursor: pointer; font-size: 13px; font-family: inherit; }
+    .mockup-grid { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .mockup-col h2 { font-size: 16px; font-weight: 600; margin: 0 0 12px 0; color: var(--text-secondary); }
+    .mockup-frame { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; min-height: 760px; }
+    .change-note { margin-top: 12px; padding: 14px 16px; background: var(--bg-tertiary); border-radius: 10px; border: 1px solid var(--border-light); }
+    .change-note h3 { font-size: 13px; font-weight: 600; margin: 0 0 8px 0; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .change-note ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.7; }
+    .change-note code { font-family: var(--font-mono, monospace); font-size: 12px; background: var(--bg-secondary); padding: 1px 5px; border-radius: 4px; }
+
+    /* BEFORE (list view) — 간략 reproduce */
+    .before .all-tasks-header { margin-bottom: 14px; }
+    .before .all-tasks-header h2 { margin: 0; font-size: 18px; }
+    .before .all-tasks-summary { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .before .all-sub-tabs { display: flex; gap: 4px; padding: 4px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 12px; }
+    .before .all-sub-tab { flex: 1; padding: 6px 10px; background: transparent; border: none; color: var(--text-muted); font-family: inherit; font-size: 12px; font-weight: 500; border-radius: 6px; cursor: pointer; }
+    .before .all-sub-tab.active { background: var(--accent-primary); color: white; font-weight: 600; }
+    .before .all-category-section { background: var(--bg-tertiary); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+    .before .all-category-header { padding: 10px 14px; display: flex; justify-content: space-between; border-left: 4px solid; font-size: 13px; font-weight: 600; }
+    .before .all-category-header.본업 { border-left-color: var(--cat-본업); }
+    .before .all-category-header.부업 { border-left-color: var(--cat-부업); }
+    .before .all-category-header.일상 { border-left-color: var(--cat-일상); }
+    .before .all-task-list { background: var(--bg-secondary); padding: 4px 0; }
+    .before .all-task-item { padding: 8px 14px; border-left: 4px solid var(--task-cat-color); border-bottom: 1px solid var(--border-light); font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .before .all-task-item:last-child { border-bottom: none; }
+    .before .meta { font-size: 11px; color: var(--text-muted); }
+    .before .actions { display: flex; gap: 4px; }
+    .before .btn-small { padding: 3px 8px; font-size: 11px; border-radius: 4px; background: var(--bg-tertiary); border: none; cursor: pointer; }
+
+    /* AFTER (overview card grid) */
+    .after .overview-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; gap: 12px; }
+    .after .overview-title { margin: 0; font-size: 20px; font-weight: 700; }
+    .after .overview-summary { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .after .overview-summary strong { color: var(--text-primary); font-weight: 700; }
+    .after .overview-search { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; min-width: 200px; }
+    .after .overview-search svg { width: 14px; height: 14px; color: var(--text-muted); flex-shrink: 0; }
+    .after .overview-search input { flex: 1; background: transparent; border: none; color: var(--text-primary); font-family: inherit; font-size: 13px; outline: none; }
+
+    /* NEW: stable anchors widget row (Todoist immutable anchors pattern) */
+    .after .stable-anchors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    .after .anchor-widget { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 10px; cursor: pointer; transition: background-color 0.15s, border-color 0.15s; }
+    .after .anchor-widget:hover { background: var(--bg-secondary); border-color: var(--accent-primary); }
+    .after .anchor-widget.urgent { background: color-mix(in srgb, var(--accent-danger) 8%, var(--bg-tertiary)); border-color: color-mix(in srgb, var(--accent-danger) 25%, var(--border-light)); }
+    .after .anchor-widget.urgent:hover { border-color: var(--accent-danger); }
+    .after .anchor-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: var(--bg-secondary); color: var(--text-secondary); flex-shrink: 0; }
+    .after .anchor-widget.urgent .anchor-icon { background: color-mix(in srgb, var(--accent-danger) 18%, transparent); color: var(--accent-danger); }
+    .after .anchor-widget.streak .anchor-icon { background: color-mix(in srgb, var(--accent-celebration) 18%, transparent); color: var(--accent-celebration); }
+    .after .anchor-icon svg { width: 14px; height: 14px; }
+    .after .anchor-body { flex: 1; min-width: 0; }
+    .after .anchor-num { font-size: 18px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .after .anchor-widget.urgent .anchor-num { color: var(--accent-danger); }
+    .after .anchor-widget.streak .anchor-num { color: var(--accent-celebration); }
+    .after .anchor-label { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    .after .category-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 14px; }
+    .after .cat-card { padding: 14px 16px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 12px; border-left: 4px solid var(--task-cat-color); cursor: pointer; transition: background-color 0.15s, border-color 0.15s; }
+    .after .cat-card:hover { background: var(--bg-secondary); border-color: var(--task-cat-color); }
+    .after .cat-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .after .cat-card-name { font-size: 15px; font-weight: 700; color: var(--task-cat-color); display: inline-flex; align-items: center; gap: 6px; }
+    .after .cat-card-name svg { width: 14px; height: 14px; }
+    .after .cat-card-arrow { width: 22px; height: 22px; padding: 0; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; }
+    .after .cat-card:hover .cat-card-arrow { background: color-mix(in srgb, var(--task-cat-color) 15%, transparent); color: var(--task-cat-color); }
+    .after .cat-card-arrow svg { width: 14px; height: 14px; }
+
+    .after .cat-card-counts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+    .after .cat-count { text-align: left; }
+    .after .cat-count-num { font-size: 18px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+    .after .cat-count-num.todo { color: var(--task-cat-color); }
+    .after .cat-count-num.doing { color: var(--text-primary); }
+    .after .cat-count-num.done { color: var(--accent-success); }
+    .after .cat-count-label { font-size: 10px; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .after .cat-card-progress { height: 4px; background: var(--bg-primary); border-radius: 2px; overflow: hidden; margin-bottom: 10px; }
+    .after .cat-card-progress-fill { height: 100%; background: var(--task-cat-color); border-radius: 2px; }
+
+    .after .cat-card-alerts { display: flex; flex-direction: column; gap: 4px; }
+    .after .cat-alert { display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; background: var(--bg-secondary); border-radius: 6px; font-size: 11px; gap: 6px; }
+    .after .cat-alert-title { color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+    .after .cat-alert-time { color: var(--accent-warning); font-weight: 700; font-family: var(--font-mono, monospace); flex-shrink: 0; font-variant-numeric: tabular-nums; }
+    .after .cat-alert-time.urgent { color: var(--accent-danger); }
+    .after .cat-card-noalert { font-size: 11px; color: var(--text-muted); padding: 5px 8px; font-style: italic; }
+
+    /* NEW: alert time-axis subdivide (Things 3 Today + This Evening pattern) */
+    .after .cat-alert-group { margin-bottom: 6px; }
+    .after .cat-alert-group:last-child { margin-bottom: 0; }
+    .after .cat-alert-group-label { font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; padding-left: 2px; }
+    .after .cat-alert-group-label.today { color: var(--accent-danger); }
+    .after .cat-alert-group-label.this-week { color: var(--accent-warning); }
+
+    .after .cat-card.empty { border-left-style: dashed; opacity: 0.6; }
+    .after .cat-card.empty .cat-card-noalert { padding: 16px 8px; text-align: center; }
+
+    /* AFTER bottom — weekly distribution */
+    .after .week-distribution { background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 12px; padding: 14px 16px; }
+    .after .week-distribution-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; }
+    .after .week-distribution-label { color: var(--text-secondary); font-weight: 600; }
+    .after .week-distribution-period { color: var(--text-muted); font-family: var(--font-mono, monospace); font-variant-numeric: tabular-nums; }
+    .after .week-bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; align-items: end; min-height: 80px; }
+    .after .week-bar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .after .week-bar-stack { display: flex; flex-direction: column-reverse; width: 100%; height: 60px; gap: 1px; justify-content: flex-start; }
+    .after .week-bar-segment { width: 100%; min-height: 2px; }
+    .after .week-bar-segment.본업 { background: var(--cat-본업); }
+    .after .week-bar-segment.부업 { background: var(--cat-부업); }
+    .after .week-bar-segment.일상 { background: var(--cat-일상); }
+    .after .week-bar-segment.가족 { background: var(--cat-가족); }
+    .after .week-bar-label { font-size: 10px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .after .week-bar-label.today { color: var(--accent-celebration); font-weight: 700; }
+    .after .week-bar-count { font-size: 10px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+    .after .week-distribution-legend { display: flex; gap: 12px; margin-top: 10px; font-size: 10px; color: var(--text-muted); flex-wrap: wrap; }
+    .after .week-distribution-legend > span { display: inline-flex; align-items: center; gap: 4px; }
+    .after .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+    .after .legend-dot.본업 { background: var(--cat-본업); }
+    .after .legend-dot.부업 { background: var(--cat-부업); }
+    .after .legend-dot.일상 { background: var(--cat-일상); }
+    .after .legend-dot.가족 { background: var(--cat-가족); }
+
+    /* NEW: kanban columns (replaces card aggregate — "visible inventory" 의도 fit) */
+    .after .category-columns { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px; }
+    /* 2x2 grid: row 1 = 일 (본업/부업), row 2 = 생활 (일상/가족). semantic grouping via position */
+    .after .row-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; margin: 6px 4px 4px; grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; }
+    .after .row-label::after { content: ''; flex: 1; height: 1px; background: var(--border-light); }
+    /* 가족 = 별도 narrow widget (column 안 아닌 footer 형태). 일상과 분리 + 양 비대칭 해소 */
+    .after .family-widget { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 10px; border-left: 4px solid var(--cat-가족); margin-bottom: 4px; cursor: pointer; transition: background-color 0.15s, border-color 0.15s; }
+    .after .family-widget:hover { background: var(--bg-secondary); border-color: var(--cat-가족); }
+    .after .family-widget.empty { border-left-style: dashed; opacity: 0.7; }
+    .after .family-widget-name { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; color: var(--cat-가족); flex-shrink: 0; }
+    .after .family-widget-name svg { width: 12px; height: 12px; }
+    .after .family-widget-count { font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+    .after .family-widget-tasks { display: flex; gap: 6px; flex: 1; min-width: 0; overflow: hidden; }
+    .after .family-widget-task { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: var(--bg-secondary); border-radius: 8px; font-size: 11px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+    .after .family-widget-task-time { color: var(--text-muted); font-family: var(--font-mono, monospace); font-size: 10px; flex-shrink: 0; }
+    .after .family-widget-empty-text { font-size: 11px; color: var(--text-muted); font-style: italic; flex: 1; }
+    .after .family-widget-arrow { width: 22px; height: 22px; padding: 0; border: none; background: transparent; color: var(--text-muted); border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .after .family-widget:hover .family-widget-arrow { color: var(--cat-가족); background: color-mix(in srgb, var(--cat-가족) 15%, transparent); }
+    .after .family-widget-arrow svg { width: 13px; height: 13px; }
+    .after .cat-column { background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 12px; border-top: 4px solid var(--task-cat-color); padding: 12px; display: flex; flex-direction: column; gap: 8px; min-height: 320px; }
+    .after .cat-column.empty { border-top-style: dashed; opacity: 0.7; }
+    .after .cat-column-head { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border-light); }
+    .after .cat-column-name { font-size: 13px; font-weight: 700; color: var(--task-cat-color); display: inline-flex; align-items: center; gap: 5px; }
+    .after .cat-column-name svg { width: 12px; height: 12px; }
+    .after .cat-column-count { font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; font-weight: 600; }
+    .after .cat-column-navigate { width: 22px; height: 22px; padding: 0; border: none; background: transparent; color: var(--text-muted); border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+    .after .cat-column:hover .cat-column-navigate { color: var(--task-cat-color); }
+    .after .cat-column-navigate:hover { background: color-mix(in srgb, var(--task-cat-color) 15%, transparent); }
+    .after .cat-column-navigate svg { width: 13px; height: 13px; }
+    .after .cat-column-task-list { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .after .cat-column-task { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 7px 9px; background: var(--bg-secondary); border-left: 3px solid var(--task-cat-color); border-radius: 6px; font-size: 12px; cursor: pointer; transition: background-color 0.15s; }
+    .after .cat-column-task:hover { background: var(--bg-primary); }
+    .after .cat-column-task.urgent { background: color-mix(in srgb, var(--accent-danger) 8%, var(--bg-secondary)); }
+    .after .cat-column-task.completed-repeating { opacity: 0.5; }
+    .after .cat-column-task.completed-repeating .cat-column-task-title { text-decoration: line-through; color: var(--text-muted); }
+    .after .cat-column-task.completed-repeating .cat-column-task-time { color: var(--accent-success); font-weight: 700; }
+    .after .cat-column-task-check { width: 12px; height: 12px; color: var(--accent-success); flex-shrink: 0; }
+    .after .cat-column-task-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary); }
+    .after .cat-column-task-time { font-size: 11px; font-family: var(--font-mono, monospace); font-variant-numeric: tabular-nums; flex-shrink: 0; color: var(--text-muted); }
+    .after .cat-column-task-time.urgent { color: var(--accent-danger); font-weight: 700; }
+    .after .cat-column-task-time.warning { color: var(--accent-warning); font-weight: 600; }
+    .after .cat-column-more { text-align: center; font-size: 11px; color: var(--text-muted); padding: 5px; cursor: pointer; border-radius: 4px; margin-top: 2px; }
+    .after .cat-column-more:hover { background: color-mix(in srgb, var(--task-cat-color) 8%, transparent); color: var(--task-cat-color); }
+    .after .cat-column-empty { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted); font-style: italic; padding: 16px 8px; text-align: center; }
+
+    @media (max-width: 1000px) { .mockup-grid { grid-template-columns: 1fr; } .after .category-cards { grid-template-columns: 1fr; } }
+    @media (max-width: 700px) { .after .category-columns { grid-template-columns: 1fr; } .after .row-label { margin-top: 12px; } }
+  </style>
+</head>
+<body>
+  <div class="mockup-header">
+    <div>
+      <h1 class="mockup-title">할일 (전체 조망) 탭 v2</h1>
+      <div class="mockup-subtitle">list view (deep management) → overview cards (bird's eye + 진입점). 깊은 작업은 각 카테고리 탭에서</div>
+    </div>
+    <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.body.dataset.theme = document.documentElement.dataset.theme;">다크/라이트 전환</button>
+  </div>
+
+  <div class="mockup-grid">
+    <!-- BEFORE -->
+    <div class="mockup-col before">
+      <h2>이전 시안 (BEFORE) — list view = deep management surface</h2>
+      <div class="mockup-frame">
+        <div class="all-tasks-header">
+          <h2>전체 작업 목록</h2>
+          <div class="all-tasks-summary">총 15 · 진행 7 · 완료 2</div>
+        </div>
+        <div class="all-sub-tabs">
+          <button class="all-sub-tab active">전체 7</button>
+          <button class="all-sub-tab">오늘 2</button>
+          <button class="all-sub-tab">예정 3</button>
+          <button class="all-sub-tab">inbox 1</button>
+          <button class="all-sub-tab">다한 것 8</button>
+        </div>
+        <div class="all-category-section">
+          <div class="all-category-header 본업">본업 <span>3 진행 · 2 완료</span></div>
+          <div class="all-task-list">
+            <div class="all-task-item" style="--task-cat-color: var(--cat-본업);">
+              <span>주간 보고서 초안 작성</span><span class="meta">8h · 60분</span>
+            </div>
+            <div class="all-task-item" style="--task-cat-color: var(--cat-본업);">
+              <span>코드 리뷰 — feature/auth</span><span class="meta">내일 · 30분</span>
+            </div>
+            <div class="all-task-item" style="--task-cat-color: var(--cat-본업);">
+              <span>QA 회의 준비</span><span class="meta">3일 · 45분</span>
+            </div>
+          </div>
+        </div>
+        <div class="all-category-section">
+          <div class="all-category-header 부업">부업 <span>2 진행 · 4 완료</span></div>
+          <div class="all-task-list">
+            <div class="all-task-item" style="--task-cat-color: var(--cat-부업);">
+              <span>Polygon Quiz 3문제</span><span class="meta">6h · 10분 · 50,000원</span>
+            </div>
+            <div class="all-task-item" style="--task-cat-color: var(--cat-부업);">
+              <span>번역 작업 검수</span><span class="meta">5일 · 30분</span>
+            </div>
+          </div>
+        </div>
+        <div class="all-category-section">
+          <div class="all-category-header 일상">일상 <span>1 진행 · 2 완료</span></div>
+          <div class="all-task-list">
+            <div class="all-task-item" style="--task-cat-color: var(--cat-일상);">
+              <span>세탁기 돌리기</span><span class="meta">없음 · 5분</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="change-note">
+        <h3>이전 시안의 함정</h3>
+        <ul>
+          <li><strong>목적 미스</strong> — list view = "각 task 자세히 보고 조작" 패턴. 사용자 의도 "전체 조망" 과 어긋남</li>
+          <li>본업/일상 등 *깊은 management* 는 각 카테고리 섹션에 있음 — 할일 탭에서 중복</li>
+          <li>5 sub-view 가 task management surface 의 미세 axis — 조망에 필요 없음</li>
+          <li>task 1개씩 보이면 *전체 분포* 인지 X — 조망 surface가 아니라 *list* surface</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- AFTER -->
+    <div class="mockup-col after">
+      <h2>새 시안 (AFTER) — overview = aggregate + 진입점</h2>
+      <div class="mockup-frame">
+        <div class="overview-header">
+          <div>
+            <h2 class="overview-title">전체 조망</h2>
+            <div class="overview-summary">총 <strong>15개</strong> · 해야 <strong>7</strong> · 진행 <strong>6</strong> · 오늘 완료 <strong>2</strong></div>
+          </div>
+          <div class="overview-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input placeholder="제목 / 태그 검색">
+          </div>
+        </div>
+
+        <!-- NEW: stable anchors widget row -->
+        <div class="stable-anchors">
+          <div class="anchor-widget urgent">
+            <span class="anchor-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </span>
+            <div class="anchor-body">
+              <div class="anchor-num">2</div>
+              <div class="anchor-label">오늘 마감</div>
+            </div>
+          </div>
+          <div class="anchor-widget">
+            <span class="anchor-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+            </span>
+            <div class="anchor-body">
+              <div class="anchor-num">3</div>
+              <div class="anchor-label">마감 없음 (inbox)</div>
+            </div>
+          </div>
+          <div class="anchor-widget streak">
+            <span class="anchor-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+            </span>
+            <div class="anchor-body">
+              <div class="anchor-num">3일</div>
+              <div class="anchor-label">연속 달성</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NEW: 2x2 grid kanban — row 1 = 일 (본업/부업), row 2 = 생활 (일상/가족). semantic grouping via position -->
+        <div class="category-columns">
+          <div class="row-label">일</div>
+          <!-- 본업 column -->
+          <div class="cat-column" style="--task-cat-color: var(--cat-본업);">
+            <div class="cat-column-head">
+              <span class="cat-column-name">
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+                본업
+              </span>
+              <span class="cat-column-count">5</span>
+              <button class="cat-column-navigate" aria-label="본업 섹션 열기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+            </div>
+            <div class="cat-column-task-list">
+              <div class="cat-column-task urgent">
+                <span class="cat-column-task-title">주간 보고서 초안 작성</span>
+                <span class="cat-column-task-time warning">8h</span>
+              </div>
+              <div class="cat-column-task">
+                <span class="cat-column-task-title">코드 리뷰 — feature/auth</span>
+                <span class="cat-column-task-time">내일</span>
+              </div>
+              <div class="cat-column-task">
+                <span class="cat-column-task-title">QA 회의 준비</span>
+                <span class="cat-column-task-time">3일</span>
+              </div>
+              <div class="cat-column-task">
+                <span class="cat-column-task-title">디자인 review 참석</span>
+                <span class="cat-column-task-time">금</span>
+              </div>
+              <div class="cat-column-task">
+                <span class="cat-column-task-title">월간 정산 정리</span>
+                <span class="cat-column-task-time">31일</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 부업 column -->
+          <div class="cat-column" style="--task-cat-color: var(--cat-부업);">
+            <div class="cat-column-head">
+              <span class="cat-column-name">
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+                부업
+              </span>
+              <span class="cat-column-count">2</span>
+              <button class="cat-column-navigate" aria-label="부업 섹션 열기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+            </div>
+            <div class="cat-column-task-list">
+              <div class="cat-column-task urgent">
+                <span class="cat-column-task-title">Polygon Quiz 3문제</span>
+                <span class="cat-column-task-time urgent">6h</span>
+              </div>
+              <div class="cat-column-task">
+                <span class="cat-column-task-title">번역 작업 검수</span>
+                <span class="cat-column-task-time">5일</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row-label">생활</div>
+          <!-- 일상 column -->
+          <div class="cat-column" style="--task-cat-color: var(--cat-일상);">
+            <div class="cat-column-head">
+              <span class="cat-column-name">
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+                일상
+              </span>
+              <span class="cat-column-count">3</span>
+              <button class="cat-column-navigate" aria-label="일상 섹션 열기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+            </div>
+            <div class="cat-column-task-list">
+              <div class="cat-column-task">
+                <span class="cat-column-task-title">세탁기 돌리기</span>
+                <span class="cat-column-task-time">—</span>
+              </div>
+              <div class="cat-column-task">
+                <span class="cat-column-task-title">장보기 (계란 / 우유)</span>
+                <span class="cat-column-task-time">오늘</span>
+              </div>
+              <div class="cat-column-task">
+                <span class="cat-column-task-title">병원 예약 확인</span>
+                <span class="cat-column-task-time">월</span>
+              </div>
+              <div class="cat-column-task completed-repeating">
+                <svg class="cat-column-task-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span class="cat-column-task-title">아침 약 복용 (매일 반복)</span>
+                <span class="cat-column-task-time">07:30</span>
+              </div>
+              <div class="cat-column-task completed-repeating">
+                <svg class="cat-column-task-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span class="cat-column-task-title">스트레칭 (매일 반복)</span>
+                <span class="cat-column-task-time">완료</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 가족 column (생활 row) -->
+          <div class="cat-column" style="--task-cat-color: var(--cat-가족);">
+            <div class="cat-column-head">
+              <span class="cat-column-name">
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+                가족
+              </span>
+              <span class="cat-column-count">2</span>
+              <button class="cat-column-navigate" aria-label="가족 섹션 열기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+            </div>
+            <div class="cat-column-task-list">
+              <div class="cat-column-task">
+                <span class="cat-column-task-title">부모님 전화</span>
+                <span class="cat-column-task-time">일</span>
+              </div>
+              <div class="cat-column-task">
+                <span class="cat-column-task-title">조카 생일 선물</span>
+                <span class="cat-column-task-time warning">5/28</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- old card grid kept hidden for diff reference -->
+        <div class="category-cards" style="display: none;">
+          <!-- 본업 카드 -->
+          <div class="cat-card" style="--task-cat-color: var(--cat-본업);">
+            <div class="cat-card-head">
+              <span class="cat-card-name">
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+                본업
+              </span>
+              <button class="cat-card-arrow" aria-label="본업 섹션 열기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+            </div>
+            <div class="cat-card-counts">
+              <div class="cat-count"><div class="cat-count-num todo">3</div><div class="cat-count-label">해야</div></div>
+              <div class="cat-count"><div class="cat-count-num doing">2</div><div class="cat-count-label">진행</div></div>
+              <div class="cat-count"><div class="cat-count-num done">2</div><div class="cat-count-label">오늘 완료</div></div>
+            </div>
+            <div class="cat-card-progress"><div class="cat-card-progress-fill" style="width: 28%;"></div></div>
+            <div class="cat-card-alerts">
+              <div class="cat-alert-group">
+                <div class="cat-alert-group-label today">오늘</div>
+                <div class="cat-alert">
+                  <span class="cat-alert-title">주간 보고서 초안 작성</span>
+                  <span class="cat-alert-time urgent">8h</span>
+                </div>
+              </div>
+              <div class="cat-alert-group">
+                <div class="cat-alert-group-label this-week">이번 주</div>
+                <div class="cat-alert">
+                  <span class="cat-alert-title">코드 리뷰 — feature/auth</span>
+                  <span class="cat-alert-time">내일</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 부업 카드 -->
+          <div class="cat-card" style="--task-cat-color: var(--cat-부업);">
+            <div class="cat-card-head">
+              <span class="cat-card-name">
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+                부업
+              </span>
+              <button class="cat-card-arrow" aria-label="부업 섹션 열기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+            </div>
+            <div class="cat-card-counts">
+              <div class="cat-count"><div class="cat-count-num todo">2</div><div class="cat-count-label">해야</div></div>
+              <div class="cat-count"><div class="cat-count-num doing">0</div><div class="cat-count-label">진행</div></div>
+              <div class="cat-count"><div class="cat-count-num done">0</div><div class="cat-count-label">오늘 완료</div></div>
+            </div>
+            <div class="cat-card-progress"><div class="cat-card-progress-fill" style="width: 0%;"></div></div>
+            <div class="cat-card-alerts">
+              <div class="cat-alert-group">
+                <div class="cat-alert-group-label today">오늘</div>
+                <div class="cat-alert">
+                  <span class="cat-alert-title">Polygon Quiz 3문제</span>
+                  <span class="cat-alert-time urgent">6h</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 일상 카드 -->
+          <div class="cat-card" style="--task-cat-color: var(--cat-일상);">
+            <div class="cat-card-head">
+              <span class="cat-card-name">
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+                일상
+              </span>
+              <button class="cat-card-arrow" aria-label="일상 섹션 열기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+            </div>
+            <div class="cat-card-counts">
+              <div class="cat-count"><div class="cat-count-num todo">1</div><div class="cat-count-label">해야</div></div>
+              <div class="cat-count"><div class="cat-count-num doing">1</div><div class="cat-count-label">진행</div></div>
+              <div class="cat-count"><div class="cat-count-num done">0</div><div class="cat-count-label">오늘 완료</div></div>
+            </div>
+            <div class="cat-card-progress"><div class="cat-card-progress-fill" style="width: 33%;"></div></div>
+            <div class="cat-card-alerts">
+              <div class="cat-card-noalert">마감 임박 task 없음</div>
+            </div>
+          </div>
+
+          <!-- 가족 카드 (빈) -->
+          <div class="cat-card empty" style="--task-cat-color: var(--cat-가족);">
+            <div class="cat-card-head">
+              <span class="cat-card-name">
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+                가족
+              </span>
+              <button class="cat-card-arrow" aria-label="가족 섹션 열기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+            </div>
+            <div class="cat-card-noalert">task 없음 — 클릭해서 추가</div>
+          </div>
+        </div>
+
+        <!-- old week distribution kept hidden for diff reference (제거됨 — 사용자 피드백: 필요 없음) -->
+        <div class="week-distribution" style="display: none;">
+          <div class="week-distribution-header">
+            <span class="week-distribution-label">이번 주 분포</span>
+            <span class="week-distribution-period">5/19 ~ 5/25</span>
+          </div>
+          <div class="week-bars">
+            <div class="week-bar-col">
+              <div class="week-bar-count">3</div>
+              <div class="week-bar-stack">
+                <div class="week-bar-segment 본업" style="height: 30%;"></div>
+                <div class="week-bar-segment 일상" style="height: 10%;"></div>
+              </div>
+              <div class="week-bar-label">월</div>
+            </div>
+            <div class="week-bar-col">
+              <div class="week-bar-count">5</div>
+              <div class="week-bar-stack">
+                <div class="week-bar-segment 본업" style="height: 30%;"></div>
+                <div class="week-bar-segment 부업" style="height: 25%;"></div>
+                <div class="week-bar-segment 일상" style="height: 15%;"></div>
+              </div>
+              <div class="week-bar-label">화</div>
+            </div>
+            <div class="week-bar-col">
+              <div class="week-bar-count">4</div>
+              <div class="week-bar-stack">
+                <div class="week-bar-segment 본업" style="height: 50%;"></div>
+                <div class="week-bar-segment 일상" style="height: 15%;"></div>
+              </div>
+              <div class="week-bar-label today">수 (오늘)</div>
+            </div>
+            <div class="week-bar-col">
+              <div class="week-bar-count">2</div>
+              <div class="week-bar-stack">
+                <div class="week-bar-segment 본업" style="height: 25%;"></div>
+                <div class="week-bar-segment 부업" style="height: 10%;"></div>
+              </div>
+              <div class="week-bar-label">목</div>
+            </div>
+            <div class="week-bar-col">
+              <div class="week-bar-count">1</div>
+              <div class="week-bar-stack">
+                <div class="week-bar-segment 본업" style="height: 18%;"></div>
+              </div>
+              <div class="week-bar-label">금</div>
+            </div>
+            <div class="week-bar-col">
+              <div class="week-bar-count">0</div>
+              <div class="week-bar-stack"></div>
+              <div class="week-bar-label">토</div>
+            </div>
+            <div class="week-bar-col">
+              <div class="week-bar-count">2</div>
+              <div class="week-bar-stack">
+                <div class="week-bar-segment 가족" style="height: 35%;"></div>
+              </div>
+              <div class="week-bar-label">일</div>
+            </div>
+          </div>
+          <div class="week-distribution-legend">
+            <span><span class="legend-dot 본업"></span> 본업</span>
+            <span><span class="legend-dot 부업"></span> 부업</span>
+            <span><span class="legend-dot 일상"></span> 일상</span>
+            <span><span class="legend-dot 가족"></span> 가족</span>
+          </div>
+        </div>
+      </div>
+      <div class="change-note">
+        <h3>핵심 변경점 (v3 final — kanban column 패턴)</h3>
+        <ul>
+          <li><strong>2x2 grid kanban</strong> — row 1 = 일 (본업/부업), row 2 = 생활 (일상/가족). semantic grouping via position (Bento + Notion sub-grouping 영감). row label 작은 가이드 — 위치 자체가 hierarchy</li>
+          <li>상단 <strong>stable anchors</strong> 유지 — 오늘 마감 / inbox / streak (Todoist immutable anchors 패턴)</li>
+          <li>task item compact — 제목 + 마감 chip (오늘 빨강 / 이번 주 노랑 / —). cursor pointer, click → task detail (or 카테고리 섹션)</li>
+          <li>각 column 상단 = 카테고리 이름 + count + → arrow (섹션 navigate). 카드 click 진입점 패턴 유지</li>
+          <li>빈 카테고리 (가족) = dashed border-top + "task 없음 + 추가" affordance</li>
+          <li><strong>이번 주 분포 chart 제거</strong> (사용자 피드백: 필요 없음)</li>
+          <li>반응형 — PC 4 column / tablet 2 column / mobile 1 column vertical stack</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

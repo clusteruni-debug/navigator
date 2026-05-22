@@ -1,0 +1,2090 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Navigator — 9-tab 종합 design 시스템</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <style>
+    body { font-family: var(--font-body); background: var(--bg-primary); color: var(--text-primary); padding: 20px; margin: 0; min-height: 100vh; }
+    .page-header { max-width: 1400px; margin: 0 auto 16px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    .page-title { font-size: 22px; font-weight: 700; margin: 0; }
+    .page-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; max-width: 720px; line-height: 1.5; }
+    .theme-toggle { padding: 8px 14px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); cursor: pointer; font-size: 13px; font-family: inherit; }
+    .theme-toggle:hover { background: var(--bg-secondary); border-color: var(--accent-primary); }
+
+    .layout { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 220px 1fr; gap: 16px; }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+    /* ============ Tab nav (sidebar) ============ */
+    .tabnav { display: flex; flex-direction: column; gap: 3px; padding: 14px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; position: sticky; top: 16px; align-self: start; }
+    .tabnav-title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; padding: 0 8px; }
+    .tabnav-btn { padding: 9px 12px; background: transparent; border: none; border-radius: 8px; color: var(--text-secondary); font-size: 13px; font-family: inherit; cursor: pointer; display: flex; gap: 9px; align-items: center; transition: background-color 0.15s, color 0.15s; text-align: left; }
+    .tabnav-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .tabnav-btn.active { background: color-mix(in srgb, var(--accent-primary) 14%, var(--bg-tertiary)); color: var(--accent-primary); font-weight: 600; }
+    .tabnav-btn .shortcut { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+    .tabnav-btn .num-badge { background: var(--bg-tertiary); color: var(--text-muted); font-family: var(--font-mono); font-size: 11px; padding: 1px 6px; border-radius: 999px; margin-left: auto; }
+    .tabnav-divider { height: 1px; background: var(--border-light); margin: 6px 0; }
+    .tabnav-section { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 8px 2px; }
+    .icon { width: 14px; height: 14px; flex-shrink: 0; }
+    .icon-sm { width: 12px; height: 12px; flex-shrink: 0; }
+    .icon-lg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    /* ============ Tab content ============ */
+    .content { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; min-height: 720px; }
+    .tab-view { display: none; }
+    .tab-view.active { display: block; }
+
+    /* ============ Common: tab header ============ */
+    .tab-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .tab-head-title { font-size: 18px; font-weight: 700; display: inline-flex; gap: 8px; align-items: center; }
+    .title-bar { width: 3px; height: 18px; border-radius: 2px; }
+    .title-bar.cat-본업 { background: var(--cat-본업); }
+    .title-bar.cat-부업 { background: var(--cat-부업); }
+    .title-bar.cat-일상 { background: var(--cat-일상); }
+    .title-bar.cat-가족 { background: var(--cat-가족); }
+    .title-bar.multi { display: inline-flex; gap: 1px; width: auto; background: transparent; }
+    .title-bar.multi span { width: 3px; height: 18px; border-radius: 1px; }
+    .add-btn { padding: 6px 12px; background: color-mix(in srgb, var(--accent-primary) 14%, transparent); border: 1px solid color-mix(in srgb, var(--accent-primary) 40%, transparent); border-radius: 8px; color: var(--accent-primary); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; gap: 5px; align-items: center; }
+    .add-btn:hover { background: color-mix(in srgb, var(--accent-primary) 22%, transparent); }
+    .add-btn.cat-본업 { background: color-mix(in srgb, var(--cat-본업) 14%, transparent); border-color: color-mix(in srgb, var(--cat-본업) 40%, transparent); color: var(--cat-본업); }
+    .add-btn.cat-본업:hover { background: color-mix(in srgb, var(--cat-본업) 22%, transparent); }
+    .add-btn.cat-일상 { background: color-mix(in srgb, var(--cat-일상) 14%, transparent); border-color: color-mix(in srgb, var(--cat-일상) 40%, transparent); color: var(--cat-일상); }
+    .more-btn { width: 30px; height: 30px; padding: 0; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 8px; color: var(--text-muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+    .more-btn:hover { background: var(--bg-primary); color: var(--text-primary); }
+
+    /* ============ Common: anchors ============ */
+    .anchors { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+    .anchor { padding: 9px 11px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 9px; display: flex; flex-direction: column; gap: 2px; }
+    .anchor-label { font-size: 11px; color: var(--text-muted); display: inline-flex; gap: 4px; align-items: center; }
+    .anchor-value { font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .anchor.urgent .anchor-value { color: var(--accent-danger); }
+    .anchor.warn .anchor-value { color: var(--accent-warning); }
+    .anchor.success .anchor-value { color: var(--accent-success); }
+    .anchor.celebration .anchor-value { color: var(--accent-celebration); }
+    .anchor.cat-본업 .anchor-value { color: var(--cat-본업); }
+    .anchor.cat-일상 .anchor-value { color: var(--cat-일상); }
+    .anchor.cat-가족 .anchor-value { color: var(--cat-가족); }
+
+    /* ============ Common: sub-tab nav ============ */
+    .subtabs { display: inline-flex; gap: 3px; padding: 3px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 9px; margin-bottom: 12px; }
+    .subtab-btn { padding: 6px 12px; background: transparent; border: none; border-radius: 6px; color: var(--text-secondary); font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; display: inline-flex; gap: 5px; align-items: center; transition: background-color 0.15s, color 0.15s; }
+    .subtab-btn:hover { background: var(--bg-secondary); color: var(--text-primary); }
+    .subtab-btn.active { background: var(--bg-secondary); color: var(--accent-primary); font-weight: 600; }
+    .subtab-btn.active.cat-본업 { color: var(--cat-본업); }
+    .subtab-btn.active.cat-일상 { color: var(--cat-일상); }
+
+    /* ============ Common: view toggle (segmented) ============ */
+    .view-toggle { display: inline-flex; gap: 2px; padding: 2px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 8px; }
+    .view-tab { padding: 5px 10px; background: transparent; border: none; border-radius: 6px; color: var(--text-secondary); font-size: 11px; font-weight: 500; cursor: pointer; font-family: inherit; display: inline-flex; gap: 4px; align-items: center; }
+    .view-tab:hover { background: var(--bg-secondary); color: var(--text-primary); }
+    .view-tab.active { background: var(--bg-secondary); color: var(--accent-primary); font-weight: 600; }
+
+    /* ============ Common: filter chips ============ */
+    .chips { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+    .chip { padding: 4px 10px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 999px; font-size: 11px; color: var(--text-secondary); cursor: pointer; font-family: inherit; display: inline-flex; gap: 4px; align-items: center; }
+    .chip:hover { background: var(--bg-secondary); color: var(--text-primary); }
+    .chip.active { background: var(--bg-secondary); border-color: var(--accent-primary); color: var(--accent-primary); font-weight: 600; }
+    .chip .swatch { width: 7px; height: 7px; border-radius: 2px; }
+    .chip.cat-본업 .swatch { background: var(--cat-본업); }
+    .chip.cat-부업 .swatch { background: var(--cat-부업); }
+    .chip.cat-일상 .swatch { background: var(--cat-일상); }
+    .chip.cat-가족 .swatch { background: var(--cat-가족); }
+
+    .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .search { display: inline-flex; gap: 5px; align-items: center; padding: 5px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 8px; min-width: 200px; flex: 0 1 280px; }
+    .search:focus-within { border-color: var(--accent-primary); }
+    .search input { background: transparent; border: none; color: var(--text-primary); font-family: inherit; font-size: 13px; outline: none; flex: 1; width: 100%; min-width: 160px; }
+
+    /* ============ Common: section title ============ */
+    .section-title { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin: 14px 0 8px; display: flex; justify-content: space-between; align-items: center; }
+    .section-title .count { color: var(--text-muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+    .time-group-title { display: inline-flex; gap: 6px; align-items: center; }
+    .time-group-title.today { color: var(--accent-danger); }
+    .time-group-title.thisweek { color: var(--accent-warning); }
+
+    /* ============ Common: task-row (consistent across all tabs) ============ */
+    .task-row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 9px 13px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 9px; margin-bottom: 4px; position: relative; overflow: hidden; transition: background-color 0.15s, border-color 0.15s; }
+    .task-row::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px; }
+    .task-row.cat-본업::before { background: var(--cat-본업); }
+    .task-row.cat-부업::before { background: var(--cat-부업); }
+    .task-row.cat-일상::before { background: var(--cat-일상); }
+    .task-row.cat-가족::before { background: var(--cat-가족); }
+    .task-row:hover { background: var(--bg-tertiary); border-color: var(--border-color); }
+    .task-row.urgent { border-color: color-mix(in srgb, var(--accent-danger) 35%, var(--border-light)); }
+    .task-row.warn { border-color: color-mix(in srgb, var(--accent-warning) 30%, var(--border-light)); }
+    .check-btn { width: 19px; height: 19px; border: 2px solid var(--border-color); border-radius: 50%; background: transparent; cursor: pointer; padding: 0; margin-left: 4px; display: inline-flex; align-items: center; justify-content: center; transition: border-color 0.15s; }
+    .check-btn.cat-본업:hover { border-color: var(--cat-본업); }
+    .check-btn.cat-부업:hover { border-color: var(--cat-부업); }
+    .check-btn.cat-일상:hover { border-color: var(--cat-일상); }
+    .check-btn.cat-가족:hover { border-color: var(--cat-가족); }
+    .task-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-left: 4px; }
+    .task-title { font-size: 13px; font-weight: 500; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .task-meta { display: flex; gap: 8px; font-size: 11px; color: var(--text-muted); align-items: center; flex-wrap: wrap; }
+    .cat-tag { font-size: 10px; font-weight: 600; opacity: 0.85; }
+    .cat-tag.cat-본업 { color: var(--cat-본업); }
+    .cat-tag.cat-부업 { color: var(--cat-부업); }
+    .cat-tag.cat-일상 { color: var(--cat-일상); }
+    .cat-tag.cat-가족 { color: var(--cat-가족); }
+    .repeat-mark { display: inline-flex; gap: 3px; align-items: center; opacity: 0.7; }
+    .dday-chip { padding: 3px 9px; background: rgba(148,163,184,0.1); color: var(--text-secondary); border-radius: 999px; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .dday-chip.urgent { background: var(--accent-danger-alpha); color: var(--accent-danger); }
+    .dday-chip.warn { background: var(--accent-warning-alpha); color: var(--accent-warning); }
+    .dday-chip.none { color: var(--text-muted); background: transparent; }
+
+    /* ============ Common: toast (completion UX, NOT in-tab list) ============ */
+    .toast-preview { display: flex; gap: 10px; align-items: center; padding: 10px 14px; background: color-mix(in srgb, var(--accent-success) 14%, var(--bg-primary)); border: 1px solid color-mix(in srgb, var(--accent-success) 35%, transparent); border-radius: 10px; margin-top: 14px; font-size: 12px; }
+    .toast-icon { color: var(--accent-success); }
+    .toast-text { flex: 1; }
+    .toast-text b { font-weight: 600; }
+    .toast-undo { padding: 4px 10px; background: transparent; border: 1px solid color-mix(in srgb, var(--accent-success) 50%, transparent); border-radius: 7px; color: var(--accent-success); font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; }
+
+    /* ============ Tab-specific: focus card ============ */
+    .focus-card { padding: 10px 14px; border-radius: 10px; margin-bottom: 12px; display: flex; gap: 10px; align-items: center; }
+    .focus-card.cat-본업 { background: color-mix(in srgb, var(--cat-본업) 7%, var(--bg-primary)); border: 1px solid color-mix(in srgb, var(--cat-본업) 25%, transparent); border-left: 4px solid var(--cat-본업); }
+    .focus-card.urgent { background: color-mix(in srgb, var(--accent-danger) 7%, var(--bg-primary)); border: 1px solid color-mix(in srgb, var(--accent-danger) 25%, transparent); border-left: 4px solid var(--accent-danger); }
+    .focus-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .focus-main { flex: 1; min-width: 0; }
+    .focus-title { font-size: 14px; font-weight: 600; }
+    .focus-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .focus-cta { padding: 6px 12px; background: var(--cat-본업); color: white; border: none; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .focus-cta.urgent { background: var(--accent-danger); }
+
+    /* ============ Tab-specific: rhythm strip ============ */
+    .rhythm-strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-bottom: 12px; }
+    .rhythm-btn { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 9px 3px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 9px; color: var(--text-secondary); cursor: pointer; font-family: inherit; font-size: 10px; transition: background-color 0.15s, border-color 0.15s, color 0.15s; }
+    .rhythm-btn:hover { background: var(--bg-tertiary); border-color: var(--cat-일상); color: var(--cat-일상); }
+    .rhythm-btn.recorded { background: color-mix(in srgb, var(--cat-일상) 12%, transparent); border-color: var(--cat-일상); color: var(--cat-일상); }
+    .rhythm-btn svg { width: 16px; height: 16px; }
+    .rhythm-time { font-family: var(--font-mono); font-size: 9px; opacity: 0.85; }
+
+    /* ============ Tab-specific: project card (본업) ============ */
+    .project-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .project-card { padding: 11px 13px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 10px; cursor: pointer; position: relative; overflow: hidden; }
+    .project-card::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px; background: var(--cat-본업); opacity: 0.6; }
+    .project-card.urgent { border-color: color-mix(in srgb, var(--accent-danger) 35%, var(--border-light)); }
+    .project-card.urgent::before { background: var(--accent-danger); }
+    .project-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; padding-left: 8px; }
+    .project-name { font-size: 13px; font-weight: 600; flex: 1; min-width: 0; }
+    .stage-progress { display: flex; gap: 3px; padding-left: 8px; padding-right: 4px; margin-bottom: 6px; }
+    .stage-pill { flex: 1; height: 4px; background: var(--border-color); border-radius: 2px; }
+    .stage-pill.completed { background: var(--accent-success); }
+    .stage-pill.current { background: var(--cat-본업); }
+    .project-meta { display: flex; gap: 9px; padding-left: 8px; font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+
+    /* ============ Tab-specific: calendar grid (히스토리) ============ */
+    .cal-month { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 12px; }
+    .cal-cell { aspect-ratio: 1; padding: 5px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 6px; font-size: 11px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; }
+    .cal-cell:hover { background: var(--bg-tertiary); }
+    .cal-cell.today { border-color: var(--accent-primary); border-width: 2px; }
+    .cal-cell .num { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .cal-cell .dots { display: flex; gap: 1px; }
+    .cal-cell .dot { width: 4px; height: 4px; border-radius: 50%; }
+    .cal-cell .dot.cat-본업 { background: var(--cat-본업); }
+    .cal-cell .dot.cat-부업 { background: var(--cat-부업); }
+    .cal-cell .dot.cat-일상 { background: var(--cat-일상); }
+    .cal-cell .dot.cat-가족 { background: var(--cat-가족); }
+    .cal-head { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 4px; }
+    .cal-head-cell { text-align: center; font-size: 10px; color: var(--text-muted); }
+
+    /* ============ Reflection Q&A ============ */
+    .qa-card { padding: 14px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 10px; margin-bottom: 8px; }
+    .qa-q { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--accent-primary); }
+    .qa-a { width: 100%; min-height: 56px; padding: 8px 10px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 7px; color: var(--text-primary); font-family: inherit; font-size: 12px; resize: vertical; }
+
+    .empty-hint { padding: 14px; text-align: center; font-size: 12px; color: var(--text-muted); border: 1px dashed var(--border-light); border-radius: 9px; margin-top: 10px; font-style: italic; }
+
+    /* ============ Sub-tab content switching ============ */
+    .subtab-content { display: none; }
+    .subtab-content.active { display: block; }
+    .view-content { display: none; }
+    .view-content.active { display: block; }
+
+    /* ============ Empty state (explicit) ============ */
+    .empty-state { padding: 28px 14px; text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center; color: var(--text-muted); }
+    .empty-state-icon { width: 36px; height: 36px; opacity: 0.5; }
+    .empty-state-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+    .empty-state-hint { font-size: 11px; }
+
+    /* ============ Event type pills (4 types with distinct icon + color) ============ */
+    .ev-type { display: inline-flex; gap: 4px; align-items: center; padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 600; }
+    .ev-type svg { width: 11px; height: 11px; }
+    .ev-type.quiz { background: color-mix(in srgb, var(--chart-cyan) 14%, transparent); color: var(--chart-cyan); border: 1px solid color-mix(in srgb, var(--chart-cyan) 35%, transparent); }
+    .ev-type.airdrop { background: color-mix(in srgb, var(--cat-부업) 14%, transparent); color: var(--cat-부업); border: 1px solid color-mix(in srgb, var(--cat-부업) 35%, transparent); }
+    .ev-type.lottery { background: color-mix(in srgb, var(--accent-celebration) 14%, transparent); color: var(--accent-celebration); border: 1px solid color-mix(in srgb, var(--accent-celebration) 35%, transparent); }
+    .ev-type.whitelist { background: color-mix(in srgb, var(--cat-일상) 14%, transparent); color: var(--cat-일상); border: 1px solid color-mix(in srgb, var(--cat-일상) 35%, transparent); }
+    /* Override task-row stripe for events by type */
+    .task-row.ev-quiz::before { background: var(--chart-cyan); }
+    .task-row.ev-airdrop::before { background: var(--cat-부업); }
+    .task-row.ev-lottery::before { background: var(--accent-celebration); }
+    .task-row.ev-whitelist::before { background: var(--cat-일상); }
+
+    /* ============ Streak variants (task vs 자문 차별) ============ */
+    .streak-task { color: var(--accent-celebration); }
+    .streak-reflection { color: var(--accent-purple); }
+    .streak-icon { width: 11px; height: 11px; flex-shrink: 0; }
+
+    /* ============ Calendar dot shapes (a11y — color + shape) ============ */
+    .cal-cell .dot { width: 5px; height: 5px; flex-shrink: 0; }
+    .cal-cell .dot.cat-본업 { border-radius: 50%; } /* circle */
+    .cal-cell .dot.cat-부업 { transform: rotate(45deg); border-radius: 1px; } /* diamond */
+    .cal-cell .dot.cat-일상 { border-radius: 0; } /* square */
+    .cal-cell .dot.cat-가족 { clip-path: polygon(50% 0%, 0% 100%, 100% 100%); background-color: var(--cat-가족) !important; } /* triangle */
+
+    /* ============ Mobile responsive (sidebar → top tab bar) ============ */
+    @media (max-width: 900px) {
+      body { padding: 12px; }
+      .layout { grid-template-columns: 1fr; gap: 12px; }
+      .tabnav { position: static; flex-direction: row; gap: 3px; padding: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+      .tabnav::-webkit-scrollbar { display: none; }
+      .tabnav-title, .tabnav-divider, .tabnav-section { display: none; }
+      .tabnav-btn { flex-shrink: 0; padding: 8px 11px; font-size: 12px; white-space: nowrap; min-height: 44px; }
+      .tabnav-btn .shortcut { display: none; }
+      .content { padding: 14px; }
+      .tab-head { flex-wrap: wrap; gap: 8px; }
+      .anchors { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+      .anchor { padding: 8px 10px; }
+      .anchor-value { font-size: 17px; }
+      .project-grid, .alt-view-grid { grid-template-columns: 1fr; }
+      .rhythm-strip { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+      .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+      .search { width: 100%; }
+      .search input { flex: 1; width: 100%; }
+      .chips { flex-wrap: wrap; }
+      .cal-month { gap: 2px; }
+      .cal-cell { padding: 3px; font-size: 10px; min-height: 44px; }
+      .subtabs { width: 100%; overflow-x: auto; }
+      .view-toggle { width: 100%; }
+      .view-tab { flex: 1; justify-content: center; }
+      /* Action button always-visible on mobile */
+      .task-row [class*="task-actions"], .general-actions, .alt-task button { opacity: 1 !important; }
+    }
+    @media (max-width: 500px) {
+      .tab-head-title { font-size: 16px; }
+      .anchors { grid-template-columns: 1fr 1fr; }
+      .rhythm-strip { grid-template-columns: repeat(2, 1fr); }
+      .focus-card { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .focus-cta { width: 100%; padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Navigator — 9-tab 종합 design 시스템 (subtract-first 적용)</h1>
+      <p class="page-subtitle">사이드 nav 에서 탭 클릭 → 해당 탭 layout + sub-tab 구조 표시. 모든 완료는 히스토리 탭 단일 destination, 진행 탭은 active 만 표시 (toast + undo 가 즉시 피드백). cross-tab 동일 task-row pattern + Lucide + cat-stripe + anchor 4개.</p>
+    </div>
+    <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.body.dataset.theme = document.documentElement.dataset.theme;">테마 전환</button>
+  </header>
+
+  <div class="layout">
+    <!-- ===================== Sidebar nav ===================== -->
+    <nav class="tabnav">
+      <div class="tabnav-title">9-tab nav</div>
+      <button class="tabnav-btn active" data-tab="action">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        오늘<span class="shortcut">1</span>
+      </button>
+      <button class="tabnav-btn" data-tab="all">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        할일<span class="shortcut">2</span>
+      </button>
+      <button class="tabnav-btn" data-tab="work">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        본업<span class="shortcut">3</span>
+      </button>
+      <button class="tabnav-btn" data-tab="events">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        이벤트<span class="shortcut">4</span>
+      </button>
+      <button class="tabnav-btn" data-tab="life">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        일상<span class="shortcut">5</span>
+      </button>
+
+      <div class="tabnav-divider"></div>
+      <div class="tabnav-section">더보기</div>
+
+      <button class="tabnav-btn" data-tab="commute">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6M16 6v6M2 12h19.6M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+        통근<span class="shortcut">6</span>
+      </button>
+      <button class="tabnav-btn" data-tab="dashboard">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        통계<span class="shortcut">7</span>
+      </button>
+      <button class="tabnav-btn" data-tab="history">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        히스토리<span class="shortcut">8</span>
+      </button>
+      <button class="tabnav-btn" data-tab="reflection">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        자문<span class="shortcut">9</span>
+      </button>
+    </nav>
+
+    <main class="content" id="content">
+
+      <!-- ===================== Tab 1: 오늘 (action) ===================== -->
+      <section class="tab-view active" id="tab-action">
+        <div class="tab-head">
+          <div class="tab-head-title">
+            <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-primary);"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            오늘 <span style="font-size:12px;color:var(--text-muted);font-weight:500;margin-left:4px;">15:42 · 회사 모드</span>
+          </div>
+          <button class="add-btn">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            빠른 추가
+          </button>
+        </div>
+
+        <div class="anchors">
+          <div class="anchor urgent"><span class="anchor-label">오늘 마감</span><span class="anchor-value">3</span></div>
+          <div class="anchor warn"><span class="anchor-label">이번 주</span><span class="anchor-value">7</span></div>
+          <div class="anchor success"><span class="anchor-label">완료</span><span class="anchor-value">4</span></div>
+          <div class="anchor celebration"><span class="anchor-label">🔥 streak</span><span class="anchor-value">12</span></div>
+        </div>
+
+        <!-- C1 fix: 결심 트래커 mini summary on 오늘 (+1 trigger) -->
+        <div style="display:flex;gap:6px;margin-bottom:12px;padding:9px 12px;background:var(--bg-tertiary);border:1px solid var(--border-light);border-radius:10px;align-items:center;flex-wrap:wrap;">
+          <span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;font-weight:600;">오늘 결심</span>
+          <span style="font-size:12px;color:var(--text-secondary);">운동 24/100 · 책 7/24 · 부업 $430/500</span>
+          <button style="margin-left:auto;padding:3px 9px;background:color-mix(in srgb, var(--accent-primary) 14%, transparent);border:1px solid color-mix(in srgb, var(--accent-primary) 35%, transparent);border-radius:7px;color:var(--accent-primary);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;gap:4px;align-items:center;">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            기록
+          </button>
+        </div>
+
+        <!-- 오늘 핵심 — 라이프 리듬 + 약 복용 + 결심 (3 prominent strips) -->
+        <div class="section-title"><span>라이프 리듬</span><span class="count">3 / 6</span></div>
+        <div class="rhythm-strip">
+          <button class="rhythm-btn recorded"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2"/></svg>기상<span class="rhythm-time">7:20</span></button>
+          <button class="rhythm-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>오전<span class="rhythm-time">—</span></button>
+          <button class="rhythm-btn recorded"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>점심<span class="rhythm-time">12:30</span></button>
+          <button class="rhythm-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/></svg>오후<span class="rhythm-time">—</span></button>
+          <button class="rhythm-btn recorded"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>저녁<span class="rhythm-time">19:00</span></button>
+          <button class="rhythm-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>취침<span class="rhythm-time">—</span></button>
+        </div>
+
+        <!-- 약 복용 compact (오늘 탭 quick status — full 관리는 일상 탭) -->
+        <div class="section-title" style="margin-top:10px;"><span>약 복용</span><span class="count">2 / 5</span></div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:8px;padding:10px 12px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;margin-bottom:6px;">
+          <span style="font-size:11px;color:var(--cat-일상);font-weight:600;display:inline-flex;gap:5px;align-items:center;">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.5 20.5 21 10c1.5-1.5 1.5-4 0-5.5s-4-1.5-5.5 0L5 14.5"/><path d="M8.5 8.5 15 15"/></svg>
+            ADHD 약
+          </span>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
+            <button style="padding:7px 10px;background:color-mix(in srgb, var(--cat-일상) 12%, transparent);border:1px solid var(--cat-일상);border-radius:7px;color:var(--cat-일상);font-size:12px;cursor:pointer;font-family:inherit;display:flex;justify-content:space-between;align-items:center;">
+              <span style="display:inline-flex;gap:5px;align-items:center;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>아침</span>
+              <span style="font-family:var(--font-mono);font-size:11px;">7:30</span>
+            </button>
+            <button style="padding:7px 10px;background:color-mix(in srgb, var(--cat-일상) 12%, transparent);border:1px solid var(--cat-일상);border-radius:7px;color:var(--cat-일상);font-size:12px;cursor:pointer;font-family:inherit;display:flex;justify-content:space-between;align-items:center;">
+              <span style="display:inline-flex;gap:5px;align-items:center;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>점심</span>
+              <span style="font-family:var(--font-mono);font-size:11px;">12:40</span>
+            </button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:8px;padding:10px 12px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;margin-bottom:6px;">
+          <span style="font-size:11px;color:var(--text-secondary);font-weight:600;display:inline-flex;gap:5px;align-items:center;">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>
+            영양제
+          </span>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+            <button style="padding:6px 8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:7px;color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:inherit;display:flex;justify-content:space-between;align-items:center;">
+              <span>아</span><span style="font-family:var(--font-mono);font-size:10px;opacity:0.7;">—</span>
+            </button>
+            <button style="padding:6px 8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:7px;color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:inherit;display:flex;justify-content:space-between;align-items:center;">
+              <span>점</span><span style="font-family:var(--font-mono);font-size:10px;opacity:0.7;">—</span>
+            </button>
+            <button style="padding:6px 8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:7px;color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:inherit;display:flex;justify-content:space-between;align-items:center;">
+              <span>저</span><span style="font-family:var(--font-mono);font-size:10px;opacity:0.7;">—</span>
+            </button>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;text-align:right;"><a style="font-size:11px;color:var(--text-muted);cursor:pointer;">일상 탭 → 약 복용 전체 관리 →</a></div>
+
+        <div class="focus-card urgent" style="margin-top:6px;">
+          <span class="focus-label">지금</span>
+          <div class="focus-main">
+            <div class="focus-title">Q2 RO 리포트 초안 작성</div>
+            <div class="focus-meta">본업 · RO 프로젝트 #14 · ~45분 · D-Day</div>
+          </div>
+          <button class="focus-cta urgent">완료</button>
+        </div>
+
+        <div class="section-title"><span>오늘 task preview</span><span class="count">상위 3 / 진행 중 12</span></div>
+        <div class="task-row cat-부업 urgent">
+          <button class="check-btn cat-부업"></button>
+          <div class="task-main"><span class="task-title">OKX Airdrop Round 12</span><span class="task-meta"><span class="cat-tag cat-부업">부업</span>· @okx_official</span></div>
+          <span class="dday-chip urgent">2h</span>
+        </div>
+        <div class="task-row cat-본업">
+          <button class="check-btn cat-본업"></button>
+          <div class="task-main"><span class="task-title">팀 OKR 안건 정리</span><span class="task-meta"><span class="cat-tag cat-본업">본업</span>· ~30분</span></div>
+          <span class="dday-chip">D-1</span>
+        </div>
+        <div class="task-row cat-일상">
+          <button class="check-btn cat-일상"></button>
+          <div class="task-main"><span class="task-title">아침 약 복용</span><span class="task-meta"><span class="cat-tag cat-일상">일상</span><span class="repeat-mark">매일</span></span></div>
+          <span class="dday-chip">7:30</span>
+        </div>
+
+        <div class="toast-preview">
+          <svg class="toast-icon icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="toast-text"><b>회의록 정리</b> 완료 (5초 후 사라짐 — 누적 X)</span>
+          <button class="toast-undo">실행 취소</button>
+        </div>
+      </section>
+
+      <!-- ===================== Tab 2: 할일 (all) ===================== -->
+      <section class="tab-view" id="tab-all">
+        <div class="tab-head">
+          <div class="tab-head-title">
+            <span class="title-bar multi"><span style="background:var(--cat-본업)"></span><span style="background:var(--cat-부업)"></span><span style="background:var(--cat-일상)"></span><span style="background:var(--cat-가족)"></span></span>
+            할일
+          </div>
+          <button class="add-btn">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            할일 추가
+          </button>
+        </div>
+
+        <div class="anchors">
+          <div class="anchor urgent"><span class="anchor-label">오늘 마감</span><span class="anchor-value">3</span></div>
+          <div class="anchor warn"><span class="anchor-label">이번 주</span><span class="anchor-value">7</span></div>
+          <div class="anchor"><span class="anchor-label">inbox</span><span class="anchor-value">14</span></div>
+          <div class="anchor celebration"><span class="anchor-label">🔥 streak</span><span class="anchor-value">12</span></div>
+        </div>
+
+        <div class="view-toggle" style="margin-bottom:12px;">
+          <button class="view-tab active" data-view="time">시간순</button>
+          <button class="view-tab" data-view="category">카테고리</button>
+        </div>
+
+        <!-- ===== 시간순 view ===== -->
+        <div class="view-content active" data-view="time">
+        <div class="toolbar">
+          <div class="chips">
+            <button class="chip active">전체</button>
+            <button class="chip cat-본업"><span class="swatch"></span>본업</button>
+            <button class="chip cat-부업"><span class="swatch"></span>부업</button>
+            <button class="chip cat-일상"><span class="swatch"></span>일상</button>
+            <button class="chip cat-가족"><span class="swatch"></span>가족</button>
+          </div>
+          <div class="search"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--text-muted)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="검색…"></div>
+        </div>
+
+        <div class="section-title"><span class="time-group-title today">오늘</span><span class="count">3</span></div>
+        <div class="task-row cat-본업 urgent">
+          <button class="check-btn cat-본업"></button>
+          <div class="task-main"><span class="task-title">Q2 RO 리포트 초안 작성</span><span class="task-meta"><span class="cat-tag cat-본업">본업</span>· ~45분</span></div>
+          <span class="dday-chip urgent">D-Day</span>
+        </div>
+        <div class="task-row cat-부업 urgent">
+          <button class="check-btn cat-부업"></button>
+          <div class="task-main"><span class="task-title">OKX Airdrop Round 12</span><span class="task-meta"><span class="cat-tag cat-부업">부업</span>· @okx_official</span></div>
+          <span class="dday-chip urgent">2h</span>
+        </div>
+        <div class="task-row cat-일상">
+          <button class="check-btn cat-일상"></button>
+          <div class="task-main"><span class="task-title">아침 약 복용</span><span class="task-meta"><span class="cat-tag cat-일상">일상</span><span class="repeat-mark">매일</span></span></div>
+          <span class="dday-chip">7:30</span>
+        </div>
+
+        <div class="section-title"><span class="time-group-title thisweek">이번 주</span><span class="count">7</span></div>
+        <div class="task-row cat-본업 warn">
+          <button class="check-btn cat-본업"></button>
+          <div class="task-main"><span class="task-title">상반기 회의록 정리</span><span class="task-meta"><span class="cat-tag cat-본업">본업</span>· 9일 정체</span></div>
+          <span class="dday-chip warn">D-3</span>
+        </div>
+        <div class="task-row cat-가족">
+          <button class="check-btn cat-가족"></button>
+          <div class="task-main"><span class="task-title">엄마 안부 전화</span><span class="task-meta"><span class="cat-tag cat-가족">가족</span><span class="repeat-mark">주말</span></span></div>
+          <span class="dday-chip">토</span>
+        </div>
+
+        <div class="section-title"><span>다음 주</span><span class="count">5 (접힘)</span></div>
+        <div class="section-title"><span>나중</span><span class="count">12 (접힘)</span></div>
+        <div class="section-title"><span>마감 없음 (inbox)</span><span class="count">14 (접힘)</span></div>
+
+        <div class="empty-hint">완료된 할일은 히스토리 탭 단일 destination — 진행 탭 누적 X. 방금 완료한 거는 toast + undo (5초) 로 즉시 피드백.</div>
+        </div><!-- /시간순 view -->
+
+        <!-- ===== 카테고리 view (kanban) ===== -->
+        <div class="view-content" data-view="category">
+          <div class="toolbar">
+            <div class="chips">
+              <button class="chip active">전체</button>
+              <button class="chip">활성만</button>
+              <button class="chip">마감 임박</button>
+            </div>
+            <div class="search"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--text-muted)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="검색…"></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <!-- 본업 col -->
+            <div style="padding:11px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;border-top:3px solid var(--cat-본업);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;">
+                <span style="color:var(--cat-본업);font-weight:600;">본업</span>
+                <span style="color:var(--text-muted);font-variant-numeric:tabular-nums;">5</span>
+              </div>
+              <div style="display:grid;gap:4px;">
+                <div class="task-row cat-본업 urgent" style="padding:7px 10px;margin:0;">
+                  <button class="check-btn cat-본업" style="width:16px;height:16px;"></button>
+                  <div class="task-main"><span class="task-title" style="font-size:12px;">Q2 RO 리포트</span></div>
+                  <span class="dday-chip urgent" style="padding:2px 7px;font-size:10px;">D-Day</span>
+                </div>
+                <div class="task-row cat-본업 warn" style="padding:7px 10px;margin:0;">
+                  <button class="check-btn cat-본업" style="width:16px;height:16px;"></button>
+                  <div class="task-main"><span class="task-title" style="font-size:12px;">회의록 정리</span></div>
+                  <span class="dday-chip warn" style="padding:2px 7px;font-size:10px;">D-3</span>
+                </div>
+                <div class="task-row cat-본업" style="padding:7px 10px;margin:0;">
+                  <button class="check-btn cat-본업" style="width:16px;height:16px;"></button>
+                  <div class="task-main"><span class="task-title" style="font-size:12px;">OKR 안건 정리</span></div>
+                  <span class="dday-chip" style="padding:2px 7px;font-size:10px;">D-1</span>
+                </div>
+                <div style="font-size:10px;color:var(--text-muted);text-align:center;padding:4px;">+ 2개 더</div>
+              </div>
+            </div>
+
+            <!-- 부업 col -->
+            <div style="padding:11px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;border-top:3px solid var(--cat-부업);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;">
+                <span style="color:var(--cat-부업);font-weight:600;">부업</span>
+                <span style="color:var(--text-muted);font-variant-numeric:tabular-nums;">4</span>
+              </div>
+              <div style="display:grid;gap:4px;">
+                <div class="task-row cat-부업 urgent" style="padding:7px 10px;margin:0;">
+                  <button class="check-btn cat-부업" style="width:16px;height:16px;"></button>
+                  <div class="task-main"><span class="task-title" style="font-size:12px;">OKX Airdrop</span></div>
+                  <span class="dday-chip urgent" style="padding:2px 7px;font-size:10px;">2h</span>
+                </div>
+                <div class="task-row cat-부업 warn" style="padding:7px 10px;margin:0;">
+                  <button class="check-btn cat-부업" style="width:16px;height:16px;"></button>
+                  <div class="task-main"><span class="task-title" style="font-size:12px;">LayerZero WL</span></div>
+                  <span class="dday-chip warn" style="padding:2px 7px;font-size:10px;">D-4</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 일상 col -->
+            <div style="padding:11px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;border-top:3px solid var(--cat-일상);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;">
+                <span style="color:var(--cat-일상);font-weight:600;">일상</span>
+                <span style="color:var(--text-muted);font-variant-numeric:tabular-nums;">3</span>
+              </div>
+              <div style="display:grid;gap:4px;">
+                <div class="task-row cat-일상" style="padding:7px 10px;margin:0;">
+                  <button class="check-btn cat-일상" style="width:16px;height:16px;"></button>
+                  <div class="task-main"><span class="task-title" style="font-size:12px;">아침 약 복용</span></div>
+                  <span class="dday-chip" style="padding:2px 7px;font-size:10px;">매일</span>
+                </div>
+                <div class="task-row cat-일상" style="padding:7px 10px;margin:0;">
+                  <button class="check-btn cat-일상" style="width:16px;height:16px;"></button>
+                  <div class="task-main"><span class="task-title" style="font-size:12px;">빨래 돌리기</span></div>
+                  <span class="dday-chip" style="padding:2px 7px;font-size:10px;">오늘</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 가족 col -->
+            <div style="padding:11px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;border-top:3px solid var(--cat-가족);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;">
+                <span style="color:var(--cat-가족);font-weight:600;">가족</span>
+                <span style="color:var(--text-muted);font-variant-numeric:tabular-nums;">2</span>
+              </div>
+              <div style="display:grid;gap:4px;">
+                <div class="task-row cat-가족 urgent" style="padding:7px 10px;margin:0;">
+                  <button class="check-btn cat-가족" style="width:16px;height:16px;"></button>
+                  <div class="task-main"><span class="task-title" style="font-size:12px;">아빠 생신 선물</span></div>
+                  <span class="dday-chip urgent" style="padding:2px 7px;font-size:10px;">D-3</span>
+                </div>
+                <div class="task-row cat-가족" style="padding:7px 10px;margin:0;">
+                  <button class="check-btn cat-가족" style="width:16px;height:16px;"></button>
+                  <div class="task-main"><span class="task-title" style="font-size:12px;">엄마 안부</span></div>
+                  <span class="dday-chip" style="padding:2px 7px;font-size:10px;">토</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty-hint">카테고리 view = 같은 task 데이터의 다른 shape. 시간순 view 와 같은 task-row pattern 일관 + 완료는 동일하게 히스토리 destination.</div>
+        </div>
+      </section>
+
+      <!-- ===================== Tab 3: 본업 (work) ===================== -->
+      <section class="tab-view" id="tab-work">
+        <div class="tab-head">
+          <div class="tab-head-title">
+            <span class="title-bar cat-본업"></span>
+            본업 <span style="font-size:12px;color:var(--text-muted);font-weight:500;margin-left:4px;">프로젝트 4 활성</span>
+          </div>
+          <div style="display:inline-flex;gap:6px;align-items:center;">
+            <button class="add-btn cat-본업">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              새 프로젝트
+            </button>
+            <button class="more-btn" title="더보기 — RO v3 / 템플릿 / 리포트">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="subtabs">
+          <button class="subtab-btn cat-본업" data-sub="all">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            전체
+          </button>
+          <button class="subtab-btn active cat-본업" data-sub="projects">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+            프로젝트
+          </button>
+          <button class="subtab-btn" data-sub="general">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            일반 업무
+          </button>
+        </div>
+
+        <div class="anchors">
+          <div class="anchor urgent"><span class="anchor-label">마감 임박</span><span class="anchor-value">2</span></div>
+          <div class="anchor warn"><span class="anchor-label">정체 7일+</span><span class="anchor-value">1</span></div>
+          <div class="anchor cat-본업"><span class="anchor-label">활성 프로젝트</span><span class="anchor-value">4</span></div>
+          <div class="anchor success"><span class="anchor-label">이번 주 완료</span><span class="anchor-value">7</span></div>
+        </div>
+
+        <!-- ============ 전체 sub-tab (cross-cutting view) ============ -->
+        <div class="subtab-content" data-sub="all">
+          <div class="toolbar">
+            <div class="chips">
+              <button class="chip active">전체</button>
+              <button class="chip">프로젝트 task</button>
+              <button class="chip">일반 업무</button>
+            </div>
+            <div class="search"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--text-muted)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="본업 검색…"></div>
+          </div>
+
+          <div class="focus-card cat-본업">
+            <span class="focus-label" style="color: var(--cat-본업);">지금 집중</span>
+            <div class="focus-main">
+              <div class="focus-title">Q2 RO 리포트 초안 작성</div>
+              <div class="focus-meta">RO 프로젝트 #14 · 2단계 본조사 · ~45분 · D-2</div>
+            </div>
+            <button class="focus-cta">완료</button>
+          </div>
+
+          <div class="section-title"><span class="time-group-title today">오늘</span><span class="count">3</span></div>
+          <div class="task-row cat-본업 urgent">
+            <button class="check-btn cat-본업"></button>
+            <div class="task-main"><span class="task-title">Q2 RO 리포트 초안 작성</span><span class="task-meta">RO 프로젝트 #14 · 2단계 · 45분</span></div>
+            <span class="dday-chip urgent">D-Day</span>
+          </div>
+          <div class="task-row cat-본업 urgent">
+            <button class="check-btn cat-본업"></button>
+            <div class="task-main"><span class="task-title">Q2 보고서 외부 검토 요청</span><span class="task-meta">일반 업무 · 30분</span></div>
+            <span class="dday-chip urgent">D-1</span>
+          </div>
+          <div class="task-row cat-본업">
+            <button class="check-btn cat-본업"></button>
+            <div class="task-main"><span class="task-title">팀 OKR 안건 정리</span><span class="task-meta">일반 업무 · 30분</span></div>
+            <span class="dday-chip">D-1</span>
+          </div>
+
+          <div class="section-title"><span class="time-group-title thisweek">이번 주</span><span class="count">5</span></div>
+          <div class="task-row cat-본업 warn">
+            <button class="check-btn cat-본업"></button>
+            <div class="task-main"><span class="task-title">상반기 회의록 정리</span><span class="task-meta">회의록 프로젝트 · 3단계 · 9일 정체</span></div>
+            <span class="dday-chip warn">D-3</span>
+          </div>
+          <div class="task-row cat-본업">
+            <button class="check-btn cat-본업"></button>
+            <div class="task-main"><span class="task-title">신규 RFP 시장 분석</span><span class="task-meta">신규 클라이언트 RFP · 1단계 · 60분</span></div>
+            <span class="dday-chip">D-5</span>
+          </div>
+
+          <div class="section-title"><span>다음 주</span><span class="count">4 (접힘)</span></div>
+          <div class="section-title"><span>나중</span><span class="count">8 (접힘)</span></div>
+
+          <div class="empty-hint">전체 = 본업 task cross-cutting view (프로젝트 task + 일반 업무 mix). 프로젝트 sub-tab 으로 가면 프로젝트 단위 카드, 일반 업무 sub-tab 으로 가면 그 만 list.</div>
+        </div>
+
+        <!-- ============ 프로젝트 sub-tab (project grid + drill-in) — DEFAULT ============ -->
+        <div class="subtab-content active" data-sub="projects">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;" class="view-container">
+            <div class="section-title" style="margin:0;"><span>진행 중 프로젝트</span><span class="count">3</span></div>
+            <div class="view-toggle">
+              <button class="view-tab active" data-view="cards">카드</button>
+              <button class="view-tab" data-view="calendar">캘린더</button>
+              <button class="view-tab" data-view="timeline">타임라인</button>
+            </div>
+          </div>
+
+          <div class="view-container">
+            <!-- 카드 view -->
+            <div class="view-content active" data-view="cards">
+              <div class="focus-card cat-본업">
+                <span class="focus-label" style="color: var(--cat-본업);">지금 집중</span>
+                <div class="focus-main">
+                  <div class="focus-title">Q2 RO 리포트 초안 작성</div>
+                  <div class="focus-meta">RO 프로젝트 #14 · 2단계 본조사 · ~45분 · D-2</div>
+                </div>
+                <button class="focus-cta">완료</button>
+              </div>
+
+              <div class="project-grid">
+                <div class="project-card urgent">
+                  <div class="project-card-head"><div class="project-name">RO 프로젝트 #14</div><span class="dday-chip urgent">D-2</span></div>
+                  <div class="stage-progress">
+                    <span class="stage-pill completed"></span><span class="stage-pill current"></span><span class="stage-pill"></span><span class="stage-pill"></span><span class="stage-pill"></span><span class="stage-pill"></span>
+                  </div>
+                  <div class="project-meta"><span>12/28 항목</span><span>1/6 단계</span></div>
+                </div>
+                <div class="project-card">
+                  <div class="project-card-head"><div class="project-name">상반기 회의록 정리</div><span class="dday-chip warn">D-7</span></div>
+                  <div class="stage-progress">
+                    <span class="stage-pill completed"></span><span class="stage-pill completed"></span><span class="stage-pill current"></span><span class="stage-pill"></span>
+                  </div>
+                  <div class="project-meta"><span>8/15 항목</span><span>2/4 단계</span><span style="color:var(--accent-warning)">9일 정체</span></div>
+                </div>
+                <div class="project-card">
+                  <div class="project-card-head"><div class="project-name">신규 클라이언트 RFP</div><span class="dday-chip">D-12</span></div>
+                  <div class="stage-progress">
+                    <span class="stage-pill current"></span><span class="stage-pill"></span><span class="stage-pill"></span>
+                  </div>
+                  <div class="project-meta"><span>3/9 항목</span><span>0/3 단계</span></div>
+                </div>
+              </div>
+
+              <div class="empty-hint">카드 클릭 시 프로젝트 상세 (단계 → 중분류 → task 4-level 계층) 진입. 화살표 키 / 1-N 단축키로 카드 탐색 가능.</div>
+            </div>
+
+            <!-- 캘린더 view -->
+            <div class="view-content" data-view="calendar">
+              <div class="section-title"><span>2026년 5월 — 프로젝트 마감 캘린더</span></div>
+              <div class="cal-head">
+                <div class="cal-head-cell">월</div><div class="cal-head-cell">화</div><div class="cal-head-cell">수</div><div class="cal-head-cell">목</div><div class="cal-head-cell">금</div><div class="cal-head-cell">토</div><div class="cal-head-cell" style="color:var(--accent-danger);">일</div>
+              </div>
+              <div class="cal-month">
+                <div class="cal-cell"><span class="num" style="color:var(--text-muted);">28</span></div>
+                <div class="cal-cell"><span class="num" style="color:var(--text-muted);">29</span></div>
+                <div class="cal-cell"><span class="num" style="color:var(--text-muted);">30</span></div>
+                <div class="cal-cell"><span class="num">1</span></div>
+                <div class="cal-cell"><span class="num">2</span></div>
+                <div class="cal-cell"><span class="num">3</span></div>
+                <div class="cal-cell"><span class="num">4</span></div>
+                <div class="cal-cell"><span class="num">5</span></div>
+                <div class="cal-cell"><span class="num">6</span></div>
+                <div class="cal-cell"><span class="num">7</span></div>
+                <div class="cal-cell"><span class="num">8</span></div>
+                <div class="cal-cell"><span class="num">9</span></div>
+                <div class="cal-cell"><span class="num">10</span></div>
+                <div class="cal-cell"><span class="num">11</span></div>
+                <div class="cal-cell"><span class="num">12</span></div>
+                <div class="cal-cell"><span class="num">13</span></div>
+                <div class="cal-cell"><span class="num">14</span></div>
+                <div class="cal-cell" style="background:color-mix(in srgb, var(--accent-danger) 18%, var(--bg-primary));border-color:var(--accent-danger);"><span class="num" style="color:var(--accent-danger);font-weight:700;">23</span><span style="font-size:9px;color:var(--accent-danger);">RO #14</span></div>
+                <div class="cal-cell" style="background:color-mix(in srgb, var(--accent-warning) 12%, var(--bg-primary));border-color:var(--accent-warning);"><span class="num" style="color:var(--accent-warning);font-weight:700;">28</span><span style="font-size:9px;color:var(--accent-warning);">회의록</span></div>
+                <div class="cal-cell"><span class="num">15</span></div>
+                <div class="cal-cell"><span class="num">16</span></div>
+                <div class="cal-cell today"><span class="num" style="color:var(--accent-primary);">21</span></div>
+                <div class="cal-cell"><span class="num">17</span></div>
+                <div class="cal-cell"><span class="num">18</span></div>
+                <div class="cal-cell"><span class="num">22</span></div>
+                <div class="cal-cell"><span class="num">19</span></div>
+                <div class="cal-cell"><span class="num">20</span></div>
+                <div class="cal-cell"><span class="num">24</span></div>
+                <div class="cal-cell"><span class="num">25</span></div>
+                <div class="cal-cell"><span class="num">26</span></div>
+                <div class="cal-cell"><span class="num">27</span></div>
+                <div class="cal-cell" style="background:color-mix(in srgb, var(--accent-primary) 8%, var(--bg-primary));"><span class="num">6/2</span><span style="font-size:9px;">RFP</span></div>
+              </div>
+              <div class="empty-hint">캘린더 = 프로젝트 마감 시각화. 셀 클릭 시 해당 일자 마감 프로젝트 detail.</div>
+            </div>
+
+            <!-- 타임라인 view -->
+            <div class="view-content" data-view="timeline">
+              <div class="section-title"><span>프로젝트 타임라인</span><span class="count">5월 ~ 6월</span></div>
+              <div style="display:grid;gap:8px;">
+                <div style="position:relative;padding:10px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;"><span style="font-weight:600;">RO 프로젝트 #14</span><span style="color:var(--accent-danger);font-variant-numeric:tabular-nums;">5/15 ~ 5/23 (D-2)</span></div>
+                  <div style="position:relative;height:20px;background:var(--bg-tertiary);border-radius:4px;overflow:hidden;">
+                    <div style="position:absolute;left:0;top:0;bottom:0;width:25%;background:color-mix(in srgb, var(--cat-본업) 60%, transparent);"></div>
+                    <div style="position:absolute;left:0;top:0;bottom:0;width:50%;background:color-mix(in srgb, var(--accent-warning) 30%, transparent);border-right:1px dashed var(--accent-warning);"></div>
+                    <div style="position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--accent-danger);"></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:var(--text-muted);"><span>1단계 ✓</span><span>2단계 진행</span><span>3~6단계 예정</span></div>
+                </div>
+
+                <div style="position:relative;padding:10px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;"><span style="font-weight:600;">상반기 회의록 정리</span><span style="color:var(--accent-warning);font-variant-numeric:tabular-nums;">5/10 ~ 5/28 (D-7)</span></div>
+                  <div style="position:relative;height:20px;background:var(--bg-tertiary);border-radius:4px;overflow:hidden;">
+                    <div style="position:absolute;left:0;top:0;bottom:0;width:50%;background:color-mix(in srgb, var(--cat-본업) 60%, transparent);"></div>
+                    <div style="position:absolute;left:50%;top:0;bottom:0;width:25%;background:color-mix(in srgb, var(--accent-warning) 30%, transparent);"></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:var(--text-muted);"><span>1~2단계 ✓</span><span>3단계 정체 9일</span><span>4단계 예정</span></div>
+                </div>
+
+                <div style="position:relative;padding:10px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;"><span style="font-weight:600;">신규 클라이언트 RFP</span><span style="color:var(--text-secondary);font-variant-numeric:tabular-nums;">5/18 ~ 6/2 (D-12)</span></div>
+                  <div style="position:relative;height:20px;background:var(--bg-tertiary);border-radius:4px;overflow:hidden;">
+                    <div style="position:absolute;left:0;top:0;bottom:0;width:15%;background:color-mix(in srgb, var(--cat-본업) 60%, transparent);"></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:var(--text-muted);"><span>1단계 진행</span><span>2~3단계 예정</span></div>
+                </div>
+              </div>
+              <div style="margin-top:10px;display:flex;gap:10px;font-size:10px;color:var(--text-muted);">
+                <span style="display:inline-flex;gap:4px;align-items:center;"><span style="width:10px;height:10px;background:color-mix(in srgb, var(--cat-본업) 60%, transparent);border-radius:2px;"></span>완료</span>
+                <span style="display:inline-flex;gap:4px;align-items:center;"><span style="width:10px;height:10px;background:color-mix(in srgb, var(--accent-warning) 30%, transparent);border-radius:2px;"></span>진행</span>
+                <span style="display:inline-flex;gap:4px;align-items:center;"><span style="width:10px;height:10px;background:var(--bg-tertiary);border-radius:2px;"></span>예정</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ 일반 업무 sub-tab ============ -->
+        <div class="subtab-content" data-sub="general">
+          <div class="toolbar">
+            <div class="chips">
+              <span style="font-size:11px;color:var(--text-muted);margin-right:4px;">정렬</span>
+              <button class="chip active">마감</button>
+              <button class="chip">최근</button>
+              <button class="chip">시간</button>
+            </div>
+            <button class="add-btn cat-본업">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              빠른 추가
+            </button>
+          </div>
+
+          <div style="display:grid;gap:5px;">
+            <div class="task-row cat-본업 urgent">
+              <button class="check-btn cat-본업"></button>
+              <div class="task-main"><span class="task-title">Q2 보고서 외부 검토 요청</span><span class="task-meta">~30분 · 5/22</span></div>
+              <span class="dday-chip urgent">D-1</span>
+            </div>
+            <div class="task-row cat-본업">
+              <button class="check-btn cat-본업"></button>
+              <div class="task-main"><span class="task-title">팀 OKR 회의 안건 정리</span><span class="task-meta">~30분 · 5/22</span></div>
+              <span class="dday-chip">D-1</span>
+            </div>
+            <div class="task-row cat-본업">
+              <button class="check-btn cat-본업"></button>
+              <div class="task-main"><span class="task-title">월간 정산서 검토</span><span class="task-meta">~15분 · 5/24</span></div>
+              <span class="dday-chip">D-3</span>
+            </div>
+            <div class="task-row cat-본업">
+              <button class="check-btn cat-본업"></button>
+              <div class="task-main"><span class="task-title">팀 회의록 작성 (수요일 분)</span><span class="task-meta">~20분 · 매주</span></div>
+              <span class="dday-chip">수</span>
+            </div>
+            <div class="task-row cat-본업">
+              <button class="check-btn cat-본업"></button>
+              <div class="task-main"><span class="task-title">사이드 리서치 자료 정리</span><span class="task-meta">~45분 · 마감 없음</span></div>
+              <span class="dday-chip none">—</span>
+            </div>
+          </div>
+
+          <div style="padding:8px 12px;margin-top:6px;text-align:center;font-size:11px;color:var(--text-muted);border:1px dashed var(--border-light);border-radius:8px;cursor:pointer;">+ 3개 더 보기</div>
+
+          <!-- 최근 7일 완료 mini expander (히스토리 deep link) -->
+          <div style="margin-top:12px;padding:9px 12px;background:var(--bg-tertiary);border:1px solid var(--border-light);border-radius:9px;cursor:pointer;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+              <span style="color:var(--text-secondary);display:inline-flex;gap:6px;align-items:center;">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                최근 7일 완료 <span style="color:var(--text-muted);font-variant-numeric:tabular-nums;">3</span>
+              </span>
+              <span style="color:var(--text-muted);font-size:10px;">▼</span>
+            </div>
+            <div style="margin-top:8px;display:grid;gap:3px;">
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);padding:4px 8px;background:var(--bg-primary);border-radius:6px;opacity:0.85;">
+                <span style="text-decoration:line-through;">주간 보고서 제출</span>
+                <span style="font-variant-numeric:tabular-nums;">5/20</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);padding:4px 8px;background:var(--bg-primary);border-radius:6px;opacity:0.85;">
+                <span style="text-decoration:line-through;">회의록 작성 (수요일 분)</span>
+                <span style="font-variant-numeric:tabular-nums;">5/19</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);padding:4px 8px;background:var(--bg-primary);border-radius:6px;opacity:0.85;">
+                <span style="text-decoration:line-through;">분기 KPI 정리</span>
+                <span style="font-variant-numeric:tabular-nums;">5/17</span>
+              </div>
+            </div>
+            <div style="margin-top:6px;text-align:right;">
+              <a style="font-size:11px;color:var(--cat-본업);font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;gap:3px;align-items:center;">
+                전체 일반 업무 히스토리 →
+              </a>
+            </div>
+          </div>
+
+          <div class="empty-hint">일반 업무 = 프로젝트 미연결 본업 task. 정렬 chip 으로 마감/최근/시간 별 정렬. 최근 7일 expander = transient 확인용 (히스토리 탭이 full archive single destination).</div>
+        </div>
+
+        <!-- Global hint at bottom -->
+        <div style="margin-top:14px;padding:8px 12px;background:var(--bg-tertiary);border-radius:8px;font-size:11px;color:var(--text-muted);">
+          <strong style="color:var(--text-secondary);">사용 안내:</strong> sub-tab 클릭 시 content 전환됨. 전체 = cross-cutting overview / 프로젝트 = 깊이 탐색 (4-level 계층 + view 전환 카드·캘린더·타임라인) / 일반 업무 = project 미연결 task.
+        </div>
+      </section>
+
+      <!-- ===================== Tab 4: 이벤트 (events) ===================== -->
+      <section class="tab-view" id="tab-events">
+        <div class="tab-head">
+          <div class="tab-head-title">
+            <span class="title-bar cat-부업"></span>
+            이벤트 <span style="font-size:12px;color:var(--text-muted);font-weight:500;margin-left:4px;">수신 + 로컬</span>
+          </div>
+          <div style="display:inline-flex;gap:6px;">
+            <button class="add-btn" style="background:color-mix(in srgb, var(--cat-부업) 14%, transparent); border-color: color-mix(in srgb, var(--cat-부업) 40%, transparent); color: var(--cat-부업);">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              이벤트 추가
+            </button>
+          </div>
+        </div>
+
+        <div class="anchors">
+          <div class="anchor urgent"><span class="anchor-label">오늘 마감</span><span class="anchor-value">3</span></div>
+          <div class="anchor warn"><span class="anchor-label">이번 주</span><span class="anchor-value">7</span></div>
+          <div class="anchor"><span class="anchor-label">미참여</span><span class="anchor-value">12</span></div>
+          <div class="anchor cat-부업"><span class="anchor-label">오늘 신규 수신</span><span class="anchor-value">2</span></div>
+        </div>
+
+        <div class="toolbar">
+          <div class="chips">
+            <button class="chip active">전체</button>
+            <button class="chip">수신</button>
+            <button class="chip">로컬</button>
+            <button class="chip">★ 즐겨찾기</button>
+          </div>
+          <div class="search"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--text-muted)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="검색…"></div>
+        </div>
+
+        <div class="section-title"><span class="time-group-title today">오늘</span><span class="count">3</span></div>
+        <div class="task-row cat-부업 ev-quiz urgent">
+          <button class="check-btn cat-부업"></button>
+          <div class="task-main"><span class="task-title">Polygon Quiz Event — 50 USDT</span><span class="task-meta">
+            <span class="ev-type quiz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Quiz</span>
+            <span>· @cryptodrops</span><span style="color:var(--accent-celebration);font-weight:600;">$50</span>
+          </span></div>
+          <span class="dday-chip urgent">D-Day</span>
+        </div>
+        <div class="task-row cat-부업 ev-airdrop urgent">
+          <button class="check-btn cat-부업"></button>
+          <div class="task-main"><span class="task-title">OKX Airdrop Round 12</span><span class="task-meta">
+            <span class="ev-type airdrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M22 12 12 22 2 12"/><path d="M12 12a10 10 0 1 0-10-10v10"/></svg>Airdrop</span>
+            <span>· @okx_official</span><span style="color:var(--accent-celebration);font-weight:600;">$30</span>
+          </span></div>
+          <span class="dday-chip urgent">2h</span>
+        </div>
+
+        <div class="section-title"><span class="time-group-title thisweek">이번 주</span><span class="count">4</span></div>
+        <div class="task-row cat-부업 ev-lottery warn">
+          <button class="check-btn cat-부업"></button>
+          <div class="task-main"><span class="task-title">Binance Lottery Weekly</span><span class="task-meta">
+            <span class="ev-type lottery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 17v2M13 11v2"/></svg>Lottery</span>
+            <span>· @binance_kr</span><span style="color:var(--accent-celebration);font-weight:600;">$100</span>
+          </span></div>
+          <span class="dday-chip warn">D-3</span>
+        </div>
+        <div class="task-row cat-부업 ev-whitelist">
+          <button class="check-btn cat-부업"></button>
+          <div class="task-main"><span class="task-title">LayerZero Cohort 3 Whitelist</span><span class="task-meta">
+            <span class="ev-type whitelist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>Whitelist</span>
+            <span>· @layerzero_news</span>
+          </span></div>
+          <span class="dday-chip">D-4</span>
+        </div>
+
+        <div class="section-title"><span>다음 주</span><span class="count">3 (접힘)</span></div>
+        <div class="section-title"><span>나중</span><span class="count">12 (접힘)</span></div>
+        <div class="section-title"><span>마감 없음</span><span class="count">5 (접힘)</span></div>
+
+        <div class="empty-hint">완료 / 건너뜀 / 휴지통 → 히스토리 탭 단일 destination. Supabase cache = localStorage 영속화 (reload 후 즉시 표시, background 갱신).</div>
+      </section>
+
+      <!-- ===================== Tab 5: 일상 (life) ===================== -->
+      <section class="tab-view" id="tab-life">
+        <div class="tab-head">
+          <div class="tab-head-title">
+            <span class="title-bar cat-일상"></span>
+            일상 <span style="font-size:12px;color:var(--text-muted);font-weight:500;margin-left:4px;">리듬 + 약 + 습관 + task</span>
+          </div>
+          <button class="add-btn cat-일상">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            추가
+          </button>
+        </div>
+
+        <div class="anchors">
+          <div class="anchor cat-일상"><span class="anchor-label">오늘 리듬</span><span class="anchor-value">3/6</span></div>
+          <div class="anchor success"><span class="anchor-label">약 복용</span><span class="anchor-value">2/3</span></div>
+          <div class="anchor cat-가족"><span class="anchor-label">가족 task</span><span class="anchor-value">2</span></div>
+          <div class="anchor celebration"><span class="anchor-label">🔥 습관</span><span class="anchor-value">12</span></div>
+        </div>
+
+        <!-- Primary: 라이프 리듬 (가장 prominent) -->
+        <div class="section-title"><span>라이프 리듬</span><span class="count">3 / 6</span></div>
+        <div class="rhythm-strip">
+          <button class="rhythm-btn recorded"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2"/></svg>기상<span class="rhythm-time">7:20</span></button>
+          <button class="rhythm-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5z"/></svg>오전<span class="rhythm-time">—</span></button>
+          <button class="rhythm-btn recorded"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>점심<span class="rhythm-time">12:30</span></button>
+          <button class="rhythm-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/></svg>오후<span class="rhythm-time">—</span></button>
+          <button class="rhythm-btn recorded"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>저녁<span class="rhythm-time">19:00</span></button>
+          <button class="rhythm-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>취침<span class="rhythm-time">—</span></button>
+        </div>
+
+        <!-- 약 복용 (full-width, ADHD 2-slot + 영양제 3-slot + edit/delete hover) -->
+        <div class="section-title" style="margin-top:6px;"><span>약 복용</span><span class="count">2 / 5</span></div>
+        <div style="display:grid;gap:6px;">
+          <!-- ADHD group: 아침 + 점심 default required -->
+          <div style="padding:10px 12px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="display:inline-flex;gap:6px;align-items:center;color:var(--cat-일상);font-weight:600;font-size:12px;">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.5 20.5 21 10c1.5-1.5 1.5-4 0-5.5s-4-1.5-5.5 0L5 14.5"/><path d="M8.5 8.5 15 15"/></svg>
+                ADHD 약 <span style="font-size:10px;color:var(--text-muted);font-weight:500;">(필수)</span>
+              </span>
+              <span style="font-size:11px;color:var(--accent-success);font-weight:600;font-variant-numeric:tabular-nums;">2 / 2 완료</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
+              <div style="position:relative;display:flex;align-items:center;gap:8px;padding:9px 28px 9px 10px;background:color-mix(in srgb, var(--cat-일상) 12%, transparent);border:1px solid var(--cat-일상);border-radius:8px;color:var(--cat-일상);font-size:12px;cursor:pointer;">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                아침
+                <span style="margin-left:auto;font-family:var(--font-mono);font-size:11px;font-variant-numeric:tabular-nums;">7:30</span>
+                <button title="삭제" style="position:absolute;top:4px;right:4px;width:18px;height:18px;border:1px solid var(--border-color);background:var(--bg-secondary);border-radius:50%;color:var(--text-muted);opacity:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'"><svg class="icon-sm" style="width:9px;height:9px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+              </div>
+              <div style="position:relative;display:flex;align-items:center;gap:8px;padding:9px 28px 9px 10px;background:color-mix(in srgb, var(--cat-일상) 12%, transparent);border:1px solid var(--cat-일상);border-radius:8px;color:var(--cat-일상);font-size:12px;cursor:pointer;">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                점심
+                <span style="margin-left:auto;font-family:var(--font-mono);font-size:11px;font-variant-numeric:tabular-nums;">12:40</span>
+              </div>
+            </div>
+            <div style="margin-top:6px;font-size:10px;color:var(--text-muted);text-align:right;">호버 시 시간 수정 / 삭제 가능 · + ADHD 슬롯 추가</div>
+          </div>
+
+          <!-- 영양제 group: 아침 / 점심 / 저녁 3-slot default -->
+          <div style="padding:10px 12px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="display:inline-flex;gap:6px;align-items:center;color:var(--text-secondary);font-weight:600;font-size:12px;">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/></svg>
+                영양제
+              </span>
+              <span style="font-size:11px;color:var(--text-muted);font-variant-numeric:tabular-nums;">0 / 3</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+              <div style="position:relative;display:flex;align-items:center;gap:6px;padding:9px 24px 9px 10px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);font-size:12px;cursor:pointer;">
+                <span style="width:13px;height:13px;border:2px solid currentColor;border-radius:50%;flex-shrink:0;"></span>
+                아침
+                <span style="margin-left:auto;font-family:var(--font-mono);font-size:11px;opacity:0.7;">—</span>
+              </div>
+              <div style="position:relative;display:flex;align-items:center;gap:6px;padding:9px 24px 9px 10px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);font-size:12px;cursor:pointer;">
+                <span style="width:13px;height:13px;border:2px solid currentColor;border-radius:50%;flex-shrink:0;"></span>
+                점심
+                <span style="margin-left:auto;font-family:var(--font-mono);font-size:11px;opacity:0.7;">—</span>
+              </div>
+              <div style="position:relative;display:flex;align-items:center;gap:6px;padding:9px 24px 9px 10px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);font-size:12px;cursor:pointer;">
+                <span style="width:13px;height:13px;border:2px solid currentColor;border-radius:50%;flex-shrink:0;"></span>
+                저녁
+                <span style="margin-left:auto;font-family:var(--font-mono);font-size:11px;opacity:0.7;">—</span>
+              </div>
+            </div>
+            <div style="margin-top:6px;display:flex;justify-content:flex-end;">
+              <button style="padding:3px 10px;background:transparent;border:1px dashed var(--border-color);border-radius:7px;color:var(--text-muted);font-size:10px;cursor:pointer;font-family:inherit;display:inline-flex;gap:4px;align-items:center;">
+                <svg class="icon-sm" style="width:10px;height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                영양제 슬롯 추가
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 오늘 습관 (full-width) -->
+        <div class="section-title" style="margin-top:12px;"><span>오늘 습관</span><span class="count">1 / 3</span></div>
+        <div style="display:grid;gap:5px;">
+          <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:9px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--cat-일상);opacity:0.55;"></div>
+            <span style="padding-left:6px;font-size:13px;font-weight:500;">스트레칭 10분</span>
+            <span style="color:var(--accent-celebration);font-size:11px;font-variant-numeric:tabular-nums;display:inline-flex;gap:3px;align-items:center;">🔥 12</span>
+            <button style="width:32px;height:32px;background:var(--cat-일상);border:none;border-radius:6px;color:white;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:9px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--cat-일상);opacity:0.55;"></div>
+            <span style="padding-left:6px;font-size:13px;font-weight:500;">물 2L 마시기</span>
+            <span style="color:var(--accent-celebration);font-size:11px;font-variant-numeric:tabular-nums;display:inline-flex;gap:3px;align-items:center;">🔥 5</span>
+            <button style="width:32px;height:32px;border:2px solid var(--border-color);background:transparent;border-radius:6px;cursor:pointer;"></button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:9px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--cat-일상);opacity:0.55;"></div>
+            <span style="padding-left:6px;font-size:13px;font-weight:500;">일기 쓰기</span>
+            <span style="color:var(--accent-celebration);font-size:11px;font-variant-numeric:tabular-nums;display:inline-flex;gap:3px;align-items:center;">🔥 8</span>
+            <button style="width:32px;height:32px;border:2px solid var(--border-color);background:transparent;border-radius:6px;cursor:pointer;"></button>
+          </div>
+        </div>
+
+        <!-- 결심 트래커 (full-width) — appState.resolutions destination 복원 -->
+        <div class="section-title" style="margin-top:12px;"><span>결심 트래커</span><span class="count">분기 / 연간</span></div>
+        <div style="display:grid;gap:6px;">
+          <div style="padding:11px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-left:3px solid var(--accent-primary);border-radius:9px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:13px;font-weight:600;">올해 운동 100회</span>
+              <span style="font-size:11px;color:var(--accent-primary);font-weight:600;font-variant-numeric:tabular-nums;">24 / 100 · 24%</span>
+            </div>
+            <div style="height:6px;background:var(--bg-tertiary);border-radius:3px;overflow:hidden;margin-bottom:6px;">
+              <div style="width:24%;height:100%;background:var(--accent-primary);"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);">
+              <span>이번 주 +2 · 최근 5/19</span>
+              <button style="padding:2px 8px;background:color-mix(in srgb, var(--accent-primary) 14%, transparent);border:1px solid color-mix(in srgb, var(--accent-primary) 35%, transparent);border-radius:6px;color:var(--accent-primary);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;">+1 기록</button>
+            </div>
+          </div>
+          <div style="padding:11px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-left:3px solid var(--cat-일상);border-radius:9px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:13px;font-weight:600;">올해 책 24권 읽기</span>
+              <span style="font-size:11px;color:var(--cat-일상);font-weight:600;font-variant-numeric:tabular-nums;">7 / 24 · 29%</span>
+            </div>
+            <div style="height:6px;background:var(--bg-tertiary);border-radius:3px;overflow:hidden;margin-bottom:6px;">
+              <div style="width:29%;height:100%;background:var(--cat-일상);"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);">
+              <span>이번 달 +1 · 최근 5/18 "원피스 1권"</span>
+              <button style="padding:2px 8px;background:color-mix(in srgb, var(--cat-일상) 14%, transparent);border:1px solid color-mix(in srgb, var(--cat-일상) 35%, transparent);border-radius:6px;color:var(--cat-일상);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;">+1 기록</button>
+            </div>
+          </div>
+          <div style="padding:11px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-left:3px solid var(--cat-부업);border-radius:9px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:13px;font-weight:600;">Q2 부업 수익 $500</span>
+              <span style="font-size:11px;color:var(--cat-부업);font-weight:600;font-variant-numeric:tabular-nums;">$430 / $500 · 86%</span>
+            </div>
+            <div style="height:6px;background:var(--bg-tertiary);border-radius:3px;overflow:hidden;margin-bottom:6px;">
+              <div style="width:86%;height:100%;background:var(--cat-부업);"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);">
+              <span>이번 주 +$80 · 최근 5/21 "OKX Airdrop $30"</span>
+              <span style="color:var(--cat-부업);font-weight:600;">D-40 마감</span>
+            </div>
+          </div>
+          <button style="padding:7px;background:transparent;border:1px dashed var(--border-color);border-radius:9px;color:var(--text-muted);font-size:11px;cursor:pointer;font-family:inherit;display:inline-flex;gap:5px;align-items:center;justify-content:center;">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            결심 추가
+          </button>
+        </div>
+
+        <!-- Tertiary: 일상 / 가족 task list (filter chips, mix display) -->
+        <div class="section-title" style="margin-top:14px;">
+          <span>일상 + 가족 task</span>
+          <div class="chips">
+            <button class="chip active">전체</button>
+            <button class="chip cat-일상"><span class="swatch"></span>일상</button>
+            <button class="chip cat-가족"><span class="swatch"></span>가족</button>
+          </div>
+        </div>
+        <div class="task-row cat-일상">
+          <button class="check-btn cat-일상"></button>
+          <div class="task-main"><span class="task-title">빨래 돌리기</span><span class="task-meta"><span class="cat-tag cat-일상">일상</span></span></div>
+          <span class="dday-chip">오늘</span>
+        </div>
+        <div class="task-row cat-가족">
+          <button class="check-btn cat-가족"></button>
+          <div class="task-main"><span class="task-title">엄마 안부 전화</span><span class="task-meta"><span class="cat-tag cat-가족">가족</span><span class="repeat-mark">주말</span></span></div>
+          <span class="dday-chip">토</span>
+        </div>
+        <div class="task-row cat-가족 urgent">
+          <button class="check-btn cat-가족"></button>
+          <div class="task-main"><span class="task-title">아빠 생신 선물</span><span class="task-meta"><span class="cat-tag cat-가족">가족</span></span></div>
+          <span class="dday-chip urgent">D-3</span>
+        </div>
+
+        <div class="empty-hint">"일상 ⊃ 가족" resolved IA — 같은 task list 안에 색 stripe 만 차별. 완료된 task / 약 / 습관 모두 히스토리 destination.</div>
+      </section>
+
+      <!-- ===================== Tab 6: 통근 (commute) ===================== -->
+      <section class="tab-view" id="tab-commute">
+        <div class="tab-head">
+          <div class="tab-head-title">
+            <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-primary);"><path d="M8 6v6M16 6v6M2 12h19.6M18 18h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+            통근 <span style="font-size:12px;color:var(--text-muted);font-weight:500;margin-left:4px;">셔틀 ✓ · 출근 모드</span>
+          </div>
+        </div>
+
+        <div class="subtabs">
+          <button class="subtab-btn active" data-sub="today">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            오늘
+          </button>
+          <button class="subtab-btn" data-sub="routes">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            경로
+          </button>
+          <button class="subtab-btn" data-sub="log">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>
+            기록
+          </button>
+        </div>
+
+        <div class="anchors">
+          <div class="anchor success"><span class="anchor-label">셔틀 상태</span><span class="anchor-value">성공</span></div>
+          <div class="anchor cat-본업"><span class="anchor-label">출근 모드</span><span class="anchor-value">활성</span></div>
+          <div class="anchor"><span class="anchor-label">이번 주 통근</span><span class="anchor-value">4/5</span></div>
+          <div class="anchor warn"><span class="anchor-label">셔틀 출발</span><span class="anchor-value">7:42</span></div>
+        </div>
+
+        <!-- ===== 오늘 sub-tab ===== -->
+        <div class="subtab-content active" data-sub="today">
+        <div class="focus-card cat-본업" style="border-left-color: var(--accent-success); background: color-mix(in srgb, var(--accent-success) 8%, var(--bg-primary)); border-color: color-mix(in srgb, var(--accent-success) 30%, transparent);">
+          <span class="focus-label" style="color: var(--accent-success);">오늘 셔틀</span>
+          <div class="focus-main">
+            <div class="focus-title">강남 → 판교 셔틀 7:42 출발</div>
+            <div class="focus-meta">예상 도착 8:20 · 5시간 보너스 확보 (저녁 모드 자동 전환)</div>
+          </div>
+          <button class="focus-cta" style="background: var(--accent-success);">탑승 완료</button>
+        </div>
+
+        <div class="section-title"><span>오늘 통근 로그</span><span class="count">아침 1 / 저녁 미발생</span></div>
+        <div class="task-row cat-본업">
+          <button class="check-btn cat-본업"></button>
+          <div class="task-main"><span class="task-title">강남 → 판교</span><span class="task-meta"><span class="cat-tag cat-본업">출근</span>· 셔틀 · 42분 · 도착 8:20</span></div>
+          <span class="dday-chip">완료</span>
+        </div>
+        <div class="task-row" style="opacity:0.5;border-style:dashed;">
+          <button class="check-btn" style="opacity:0.5;"></button>
+          <div class="task-main"><span class="task-title">판교 → 강남 (저녁 예정)</span><span class="task-meta">· 18:30 셔틀 · 미발생</span></div>
+          <span class="dday-chip none">예정</span>
+        </div>
+
+        <div class="empty-hint">"경로" sub-tab = route CRUD / "기록" sub-tab = trip log. 완료된 통근은 히스토리 탭 destination (출처 = "통근" filter).</div>
+        </div><!-- /오늘 -->
+
+        <!-- ===== 경로 sub-tab ===== -->
+        <div class="subtab-content" data-sub="routes">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div class="section-title" style="margin:0;"><span>등록 경로</span><span class="count">4</span></div>
+            <button class="add-btn" style="background:color-mix(in srgb, var(--cat-본업) 14%, transparent); border-color: color-mix(in srgb, var(--cat-본업) 40%, transparent); color: var(--cat-본업);">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              경로 추가
+            </button>
+          </div>
+
+          <div style="display:grid;gap:6px;">
+            <div style="padding:11px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-left:3px solid var(--cat-본업);border-radius:9px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:13px;">
+                <span style="font-weight:600;">강남 → 판교 (출근)</span>
+                <span style="font-size:11px;color:var(--accent-success);font-weight:600;">기본</span>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted);display:flex;gap:8px;flex-wrap:wrap;">
+                <span>셔틀 7:42 / 7:55</span>
+                <span>· 평균 42분</span>
+                <span>· 이번 주 4회</span>
+              </div>
+            </div>
+            <div style="padding:11px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-left:3px solid var(--cat-본업);border-radius:9px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:13px;">
+                <span style="font-weight:600;">판교 → 강남 (퇴근)</span>
+                <span style="font-size:11px;color:var(--text-muted);">대중교통 fallback</span>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted);display:flex;gap:8px;flex-wrap:wrap;">
+                <span>셔틀 18:30 / 19:00</span>
+                <span>· 평균 55분</span>
+                <span>· 이번 주 3회</span>
+              </div>
+            </div>
+            <div style="padding:11px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-left:3px solid var(--accent-warning);border-radius:9px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:13px;">
+                <span style="font-weight:600;">출장 — 강남 → 시청</span>
+                <span style="font-size:11px;color:var(--text-muted);">월 1-2회</span>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted);display:flex;gap:8px;flex-wrap:wrap;">
+                <span>지하철 2호선</span>
+                <span>· 평균 28분</span>
+              </div>
+            </div>
+            <div style="padding:11px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-left:3px dashed var(--text-muted);border-radius:9px;opacity:0.7;">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;">
+                <span style="font-weight:500;color:var(--text-muted);">파트너 픽업 (보관중)</span>
+                <span style="font-size:11px;color:var(--text-muted);">최근 사용 5월 4일</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty-hint">경로 = 색상 customize + 셔틀 시간 / 대중교통 fallback / 평균 시간 통계. 활성 / 보관 separation.</div>
+        </div>
+
+        <!-- ===== 기록 sub-tab ===== -->
+        <div class="subtab-content" data-sub="log">
+          <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+            <button class="chip active">이번 주</button>
+            <button class="chip">이번 달</button>
+            <button class="chip">전체</button>
+            <span style="margin-left:auto;font-size:11px;color:var(--text-muted);">이번 주 7 trip</span>
+          </div>
+
+          <div class="section-title"><span class="time-group-title today">오늘 — 5/21</span><span class="count">1</span></div>
+          <div class="task-row cat-본업">
+            <button class="check-btn cat-본업" style="background:var(--accent-success);border-color:var(--accent-success);color:white;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+            <div class="task-main"><span class="task-title">강남 → 판교 (셔틀 7:42)</span><span class="task-meta">출근 · 42분 · 도착 8:24</span></div>
+            <span class="dday-chip">아침</span>
+          </div>
+
+          <div class="section-title"><span>어제 — 5/20</span><span class="count">2</span></div>
+          <div class="task-row cat-본업">
+            <button class="check-btn cat-본업" style="background:var(--accent-success);border-color:var(--accent-success);color:white;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+            <div class="task-main"><span class="task-title">강남 → 판교 (셔틀 7:42)</span><span class="task-meta">출근 · 40분 · 도착 8:22</span></div>
+            <span class="dday-chip">아침</span>
+          </div>
+          <div class="task-row cat-본업">
+            <button class="check-btn cat-본업" style="background:var(--accent-success);border-color:var(--accent-success);color:white;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+            <div class="task-main"><span class="task-title">판교 → 강남 (셔틀 19:00)</span><span class="task-meta">퇴근 · 58분 · 여유 모드</span></div>
+            <span class="dday-chip">저녁</span>
+          </div>
+
+          <div class="section-title"><span>5/18 (월) ~ 5/19 (화)</span><span class="count">4 (접힘)</span></div>
+
+          <div style="padding:12px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;margin-top:14px;">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">이번 주 평균</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+              <div>출근: <span style="font-weight:600;color:var(--cat-본업);font-variant-numeric:tabular-nums;">42분</span></div>
+              <div>퇴근: <span style="font-weight:600;color:var(--cat-본업);font-variant-numeric:tabular-nums;">55분</span></div>
+              <div>셔틀 성공률: <span style="font-weight:600;color:var(--accent-success);font-variant-numeric:tabular-nums;">100%</span></div>
+              <div>여유 모드 전환: <span style="font-weight:600;color:var(--accent-success);font-variant-numeric:tabular-nums;">3회</span></div>
+            </div>
+          </div>
+
+          <div class="empty-hint">전체 통근 history = 히스토리 탭 → 리스트 → 출처 "통근" + 카테고리 필터.</div>
+        </div>
+      </section>
+
+      <!-- ===================== Tab 7: 통계 (dashboard) ===================== -->
+      <section class="tab-view" id="tab-dashboard">
+        <div class="tab-head">
+          <div class="tab-head-title">
+            <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-primary);"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            통계
+          </div>
+        </div>
+
+        <div class="subtabs">
+          <button class="subtab-btn active" data-sub="all">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            전체
+          </button>
+          <button class="subtab-btn" data-sub="revenue">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            수익
+          </button>
+          <button class="subtab-btn" data-sub="health">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+            건강
+          </button>
+          <button class="subtab-btn" data-sub="pattern">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            패턴
+          </button>
+        </div>
+
+        <div class="anchors">
+          <div class="anchor success"><span class="anchor-label">오늘 완료율</span><span class="anchor-value">67%</span></div>
+          <div class="anchor celebration"><span class="anchor-label">🔥 streak</span><span class="anchor-value">12</span></div>
+          <div class="anchor cat-부업"><span class="anchor-label">이번 주 수익</span><span class="anchor-value">$180</span></div>
+          <div class="anchor warn"><span class="anchor-label">수면 부채</span><span class="anchor-value">-3h</span></div>
+        </div>
+
+        <!-- ===== 전체 sub-tab ===== -->
+        <div class="subtab-content active" data-sub="all">
+        <div class="section-title"><span>Hero — 오늘의 한 줄</span><span class="count">15:42</span></div>
+        <div class="focus-card cat-본업">
+          <div class="focus-main">
+            <div class="focus-title">완료 4 / 진행 중 12 · 7일째 연속 본업 task 완료</div>
+            <div class="focus-meta">평균 완료 시각 16:30 · 이번 주 12개 (전주 +3)</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="padding:11px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">월 목표 진행률</div>
+            <div style="font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;">82 / 120 (68%)</div>
+            <div style="height:6px;background:var(--bg-tertiary);border-radius:3px;margin-top:8px;overflow:hidden;"><div style="width:68%;height:100%;background:var(--cat-본업);"></div></div>
+          </div>
+          <div style="padding:11px 13px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">카테고리 분포 (이번 주)</div>
+            <div style="display:flex;gap:3px;height:24px;align-items:flex-end;">
+              <div style="width:14px;background:var(--cat-본업);height:70%;border-radius:3px 3px 0 0;"></div>
+              <div style="width:14px;background:var(--cat-본업);height:90%;"></div>
+              <div style="width:14px;background:var(--cat-부업);height:50%;"></div>
+              <div style="width:14px;background:var(--cat-일상);height:60%;"></div>
+              <div style="width:14px;background:var(--cat-본업);height:80%;"></div>
+              <div style="width:14px;background:var(--cat-가족);height:30%;"></div>
+              <div style="width:14px;background:var(--cat-일상);height:40%;"></div>
+            </div>
+            <div style="display:flex;gap:6px;font-size:10px;color:var(--text-muted);margin-top:6px;">월 화 수 목 금 토 일</div>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:14px;"><span>패턴 인사이트</span></div>
+        <div style="display:grid;gap:5px;">
+          <div class="task-row" style="border-left:3px solid var(--accent-warning);">
+            <div style="width:19px;display:flex;align-items:center;justify-content:center;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+            <div class="task-main"><span class="task-title">반복 미루기 — "회의록 정리" 3주째 진행 중</span><span class="task-meta">stale 9일 · 분할 또는 폐기 권고</span></div>
+          </div>
+          <div class="task-row" style="border-left:3px solid var(--accent-success);">
+            <div style="width:19px;display:flex;align-items:center;justify-content:center;color:var(--accent-success);"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="task-main"><span class="task-title">아침 7-9시 완료율 92% — 골든 타임</span><span class="task-meta">중요 task 이 시간대 배치 권고</span></div>
+          </div>
+        </div>
+
+        <div class="empty-hint">전체 sub-tab = 모든 카테고리 cross-cutting overview. 다른 sub-tab 클릭 시 각 axis 별 deep dive.</div>
+        </div><!-- /전체 -->
+
+        <!-- ===== 수익 sub-tab ===== -->
+        <div class="subtab-content" data-sub="revenue">
+          <div style="padding:14px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:11px;margin-bottom:10px;">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">이번 달 부업 수익</div>
+            <div style="font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--cat-부업);">$430<span style="font-size:14px;color:var(--text-muted);font-weight:500;"> / $500</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">전월 대비 <span style="color:var(--accent-success);font-weight:600;">+$80 (23% ↑)</span> · 분기 결심 86%</div>
+            <div style="height:6px;background:var(--bg-tertiary);border-radius:3px;margin-top:10px;overflow:hidden;"><div style="width:86%;height:100%;background:var(--cat-부업);"></div></div>
+          </div>
+
+          <div class="section-title"><span>출처 별 수익</span></div>
+          <div style="display:grid;gap:5px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg-primary);border-left:3px solid var(--cat-부업);border-radius:8px;font-size:12px;">
+              <span>이벤트 (15회)</span>
+              <span style="color:var(--accent-celebration);font-weight:600;font-variant-numeric:tabular-nums;">$280</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg-primary);border-left:3px solid var(--cat-부업);border-radius:8px;font-size:12px;">
+              <span>Asset Manager (clipboard)</span>
+              <span style="color:var(--accent-celebration);font-weight:600;font-variant-numeric:tabular-nums;">$120</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg-primary);border-left:3px solid var(--cat-부업);border-radius:8px;font-size:12px;">
+              <span>기타 (3회)</span>
+              <span style="color:var(--accent-celebration);font-weight:600;font-variant-numeric:tabular-nums;">$30</span>
+            </div>
+          </div>
+
+          <div class="section-title" style="margin-top:14px;"><span>최근 4주 추이</span></div>
+          <div style="padding:12px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;">
+            <div style="display:flex;gap:6px;height:60px;align-items:flex-end;">
+              <div style="flex:1;background:color-mix(in srgb, var(--cat-부업) 60%, transparent);height:45%;border-radius:3px 3px 0 0;" title="4주 전 $180"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--cat-부업) 60%, transparent);height:30%;" title="3주 전 $120"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--cat-부업) 60%, transparent);height:65%;" title="2주 전 $260"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--cat-부업) 60%, transparent);height:55%;" title="지난 주 $220"></div>
+              <div style="flex:1;background:var(--cat-부업);height:85%;" title="이번 주 $340"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--text-muted);"><span>-4주</span><span>-3주</span><span>-2주</span><span>지난주</span><span>이번주</span></div>
+          </div>
+          <div class="empty-hint">이벤트 탭 + Asset Manager clipboard = 부업 수익 소스. 결심 트래커 "Q2 부업 수익 $500" 연동.</div>
+        </div>
+
+        <!-- ===== 건강 sub-tab ===== -->
+        <div class="subtab-content" data-sub="health">
+          <div class="anchors" style="margin-top:8px;">
+            <div class="anchor cat-일상"><span class="anchor-label">평균 수면</span><span class="anchor-value">6.2h</span></div>
+            <div class="anchor warn"><span class="anchor-label">수면 부채</span><span class="anchor-value">-3h</span></div>
+            <div class="anchor success"><span class="anchor-label">약 복용률</span><span class="anchor-value">94%</span></div>
+            <div class="anchor celebration"><span class="anchor-label">습관 streak</span><span class="anchor-value">12</span></div>
+          </div>
+
+          <div class="section-title"><span>이번 주 수면</span></div>
+          <div style="padding:12px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;margin-bottom:10px;">
+            <div style="display:flex;gap:6px;height:60px;align-items:flex-end;">
+              <div style="flex:1;background:color-mix(in srgb, var(--cat-일상) 60%, transparent);height:70%;border-radius:3px 3px 0 0;" title="월 7h"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--cat-일상) 60%, transparent);height:60%;" title="화 6h"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--accent-warning) 60%, transparent);height:45%;" title="수 4.5h ⚠"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--cat-일상) 60%, transparent);height:62%;" title="목 6.2h"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--cat-일상) 60%, transparent);height:65%;" title="금 6.5h"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--cat-일상) 60%, transparent);height:80%;" title="토 8h"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--cat-일상) 60%, transparent);height:55%;" title="일 5.5h"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--text-muted);"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span></div>
+            <div style="font-size:11px;color:var(--accent-warning);margin-top:6px;">수요일 4.5h 위험 — 권장 7h 미달</div>
+          </div>
+
+          <div class="section-title"><span>리듬 + 약 완료율 (지난 7일)</span></div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
+            <div style="text-align:center;padding:8px 2px;background:var(--bg-primary);border-radius:7px;font-size:11px;">월<div style="font-weight:600;color:var(--accent-success);font-variant-numeric:tabular-nums;">6/6</div></div>
+            <div style="text-align:center;padding:8px 2px;background:var(--bg-primary);border-radius:7px;font-size:11px;">화<div style="font-weight:600;color:var(--accent-success);font-variant-numeric:tabular-nums;">5/6</div></div>
+            <div style="text-align:center;padding:8px 2px;background:var(--bg-primary);border-radius:7px;font-size:11px;">수<div style="font-weight:600;color:var(--accent-warning);font-variant-numeric:tabular-nums;">3/6</div></div>
+            <div style="text-align:center;padding:8px 2px;background:var(--bg-primary);border-radius:7px;font-size:11px;">목<div style="font-weight:600;color:var(--accent-success);font-variant-numeric:tabular-nums;">6/6</div></div>
+            <div style="text-align:center;padding:8px 2px;background:var(--bg-primary);border-radius:7px;font-size:11px;">금<div style="font-weight:600;color:var(--accent-success);font-variant-numeric:tabular-nums;">5/6</div></div>
+            <div style="text-align:center;padding:8px 2px;background:var(--bg-primary);border-radius:7px;font-size:11px;">토<div style="font-weight:600;color:var(--accent-success);font-variant-numeric:tabular-nums;">4/6</div></div>
+            <div style="text-align:center;padding:8px 2px;background:var(--bg-primary);border-radius:7px;font-size:11px;">일<div style="font-weight:600;color:var(--accent-celebration);font-variant-numeric:tabular-nums;">3/6</div></div>
+          </div>
+          <div class="empty-hint">일상 탭 라이프 리듬 + 약 복용 + 습관 데이터 통합. 결심 트래커 "운동 100회" 도 여기서 진척 표시.</div>
+        </div>
+
+        <!-- ===== 패턴 sub-tab ===== -->
+        <div class="subtab-content" data-sub="pattern">
+          <div class="section-title"><span>발견된 패턴 (지난 30일)</span></div>
+          <div style="display:grid;gap:5px;margin-bottom:10px;">
+            <div class="task-row" style="border-left:3px solid var(--accent-success);">
+              <div style="width:19px;display:flex;align-items:center;justify-content:center;color:var(--accent-success);"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="task-main"><span class="task-title">아침 9-12시 골든타임</span><span class="task-meta">완료율 92% · 중요 task 배치 권고</span></div>
+              <span style="font-size:11px;color:var(--accent-success);font-weight:600;">+</span>
+            </div>
+            <div class="task-row" style="border-left:3px solid var(--accent-warning);">
+              <div style="width:19px;display:flex;align-items:center;justify-content:center;color:var(--accent-warning);"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+              <div class="task-main"><span class="task-title">반복 미루기 — "회의록 정리" 3주째</span><span class="task-meta">stale 9일 · 분할 / 폐기 권고</span></div>
+              <span style="font-size:11px;color:var(--accent-warning);font-weight:600;">⚠</span>
+            </div>
+            <div class="task-row" style="border-left:3px solid var(--cat-부업);">
+              <div style="width:19px;display:flex;align-items:center;justify-content:center;color:var(--cat-부업);"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+              <div class="task-main"><span class="task-title">부업 이벤트 D-Day 참여율 100%</span><span class="task-meta">15/15 · 즉시 처리 패턴 안정</span></div>
+              <span style="font-size:11px;color:var(--cat-부업);font-weight:600;">+</span>
+            </div>
+            <div class="task-row" style="border-left:3px solid var(--accent-purple);">
+              <div style="width:19px;display:flex;align-items:center;justify-content:center;color:var(--accent-purple);"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div class="task-main"><span class="task-title">아침 자문 → 본업 완료 상관 강함</span><span class="task-meta">자문 한 날 본업 완료 +35% · 아침 7-8시 권고</span></div>
+              <span style="font-size:11px;color:var(--accent-purple);font-weight:600;">+</span>
+            </div>
+          </div>
+
+          <div class="section-title"><span>요일 × 카테고리 heatmap</span></div>
+          <div style="padding:10px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;">
+            <div style="display:grid;grid-template-columns:60px repeat(7, 1fr);gap:3px;font-size:10px;">
+              <div></div>
+              <div style="text-align:center;color:var(--text-muted);">월</div>
+              <div style="text-align:center;color:var(--text-muted);">화</div>
+              <div style="text-align:center;color:var(--text-muted);">수</div>
+              <div style="text-align:center;color:var(--text-muted);">목</div>
+              <div style="text-align:center;color:var(--text-muted);">금</div>
+              <div style="text-align:center;color:var(--text-muted);">토</div>
+              <div style="text-align:center;color:var(--text-muted);">일</div>
+
+              <div style="color:var(--cat-본업);font-weight:600;">본업</div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-본업) 60%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-본업) 80%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-본업) 70%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-본업) 75%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-본업) 85%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-본업) 25%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-본업) 15%, transparent);border-radius:3px;"></div>
+
+              <div style="color:var(--cat-부업);font-weight:600;">부업</div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-부업) 30%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-부업) 40%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-부업) 50%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-부업) 45%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-부업) 60%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-부업) 80%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-부업) 70%, transparent);border-radius:3px;"></div>
+
+              <div style="color:var(--cat-일상);font-weight:600;">일상</div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-일상) 70%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-일상) 60%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-일상) 65%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-일상) 70%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-일상) 55%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-일상) 85%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-일상) 90%, transparent);border-radius:3px;"></div>
+
+              <div style="color:var(--cat-가족);font-weight:600;">가족</div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-가족) 10%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-가족) 15%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-가족) 20%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-가족) 15%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-가족) 20%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-가족) 70%, transparent);border-radius:3px;"></div>
+              <div style="height:18px;background:color-mix(in srgb, var(--cat-가족) 80%, transparent);border-radius:3px;"></div>
+            </div>
+          </div>
+          <div class="empty-hint">본업 = 평일 집중. 부업 = 주말 집중. 가족 = 주말. 패턴 알면 의도적 분배 가능.</div>
+        </div>
+      </section>
+
+      <!-- ===================== Tab 8: 히스토리 (history) — 완료 단일 destination ===================== -->
+      <section class="tab-view" id="tab-history">
+        <div class="tab-head">
+          <div class="tab-head-title">
+            <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-primary);"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            히스토리 <span style="font-size:12px;color:var(--text-muted);font-weight:500;margin-left:4px;">모든 완료의 단일 destination</span>
+          </div>
+        </div>
+
+        <div class="subtabs">
+          <button class="subtab-btn active" data-sub="calendar">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            캘린더
+          </button>
+          <button class="subtab-btn" data-sub="list">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>
+            리스트
+          </button>
+          <button class="subtab-btn" data-sub="stats">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            통계
+          </button>
+        </div>
+
+        <div class="anchors">
+          <div class="anchor success"><span class="anchor-label">오늘 완료</span><span class="anchor-value">4</span></div>
+          <div class="anchor cat-본업"><span class="anchor-label">이번 주</span><span class="anchor-value">19</span></div>
+          <div class="anchor celebration"><span class="anchor-label">이번 달</span><span class="anchor-value">82</span></div>
+          <div class="anchor"><span class="anchor-label">평생</span><span class="anchor-value">1,247</span></div>
+        </div>
+
+        <!-- ========== 캘린더 sub-tab ========== -->
+        <div class="subtab-content active" data-sub="calendar">
+
+        <div class="toolbar">
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button class="more-btn" title="이전 달"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+            <span style="font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;">2026년 5월</span>
+            <button class="more-btn" title="다음 달"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          </div>
+          <div class="chips">
+            <button class="chip active">전체</button>
+            <button class="chip cat-본업"><span class="swatch"></span>본업</button>
+            <button class="chip cat-부업"><span class="swatch"></span>부업</button>
+            <button class="chip cat-일상"><span class="swatch"></span>일상</button>
+            <button class="chip cat-가족"><span class="swatch"></span>가족</button>
+          </div>
+        </div>
+
+        <!-- Calendar grid -->
+        <div class="cal-head">
+          <div class="cal-head-cell">월</div><div class="cal-head-cell">화</div><div class="cal-head-cell">수</div><div class="cal-head-cell">목</div><div class="cal-head-cell">금</div><div class="cal-head-cell">토</div><div class="cal-head-cell" style="color:var(--accent-danger);">일</div>
+        </div>
+        <div class="cal-month">
+          <div class="cal-cell"><span class="num" style="color:var(--text-muted);">28</span></div>
+          <div class="cal-cell"><span class="num" style="color:var(--text-muted);">29</span></div>
+          <div class="cal-cell"><span class="num" style="color:var(--text-muted);">30</span></div>
+          <div class="cal-cell"><span class="num">1</span><div class="dots"><div class="dot cat-본업"></div><div class="dot cat-일상"></div></div></div>
+          <div class="cal-cell"><span class="num">2</span><div class="dots"><div class="dot cat-본업"></div><div class="dot cat-부업"></div></div></div>
+          <div class="cal-cell"><span class="num">3</span><div class="dots"><div class="dot cat-일상"></div></div></div>
+          <div class="cal-cell"><span class="num">4</span></div>
+
+          <div class="cal-cell"><span class="num">5</span><div class="dots"><div class="dot cat-본업"></div><div class="dot cat-본업"></div><div class="dot cat-가족"></div></div></div>
+          <div class="cal-cell"><span class="num">6</span><div class="dots"><div class="dot cat-본업"></div><div class="dot cat-일상"></div></div></div>
+          <div class="cal-cell"><span class="num">7</span><div class="dots"><div class="dot cat-본업"></div><div class="dot cat-부업"></div></div></div>
+          <div class="cal-cell"><span class="num">8</span><div class="dots"><div class="dot cat-일상"></div></div></div>
+          <div class="cal-cell"><span class="num">9</span><div class="dots"><div class="dot cat-본업"></div><div class="dot cat-부업"></div><div class="dot cat-일상"></div></div></div>
+          <div class="cal-cell"><span class="num">10</span><div class="dots"><div class="dot cat-가족"></div></div></div>
+          <div class="cal-cell"><span class="num">11</span></div>
+
+          <div class="cal-cell"><span class="num">12</span><div class="dots"><div class="dot cat-본업"></div><div class="dot cat-본업"></div></div></div>
+          <div class="cal-cell"><span class="num">13</span><div class="dots"><div class="dot cat-부업"></div></div></div>
+          <div class="cal-cell"><span class="num">14</span><div class="dots"><div class="dot cat-본업"></div><div class="dot cat-일상"></div></div></div>
+          <div class="cal-cell"><span class="num">15</span><div class="dots"><div class="dot cat-본업"></div><div class="dot cat-부업"></div></div></div>
+          <div class="cal-cell"><span class="num">16</span><div class="dots"><div class="dot cat-일상"></div></div></div>
+          <div class="cal-cell"><span class="num">17</span><div class="dots"><div class="dot cat-가족"></div></div></div>
+          <div class="cal-cell"><span class="num">18</span></div>
+
+          <div class="cal-cell"><span class="num">19</span><div class="dots"><div class="dot cat-본업"></div></div></div>
+          <div class="cal-cell"><span class="num">20</span><div class="dots"><div class="dot cat-본업"></div><div class="dot cat-일상"></div></div></div>
+          <div class="cal-cell today"><span class="num" style="color:var(--accent-primary);">21</span><div class="dots"><div class="dot cat-본업"></div><div class="dot cat-부업"></div><div class="dot cat-일상"></div><div class="dot cat-가족"></div></div></div>
+          <div class="cal-cell"><span class="num" style="color:var(--text-muted);">22</span></div>
+          <div class="cal-cell"><span class="num" style="color:var(--text-muted);">23</span></div>
+          <div class="cal-cell"><span class="num" style="color:var(--text-muted);">24</span></div>
+          <div class="cal-cell"><span class="num" style="color:var(--text-muted);">25</span></div>
+        </div>
+
+        <!-- Selected day detail -->
+        <div class="section-title"><span>5월 21일 (오늘) 완료 task</span><span class="count">4</span></div>
+        <div class="task-row cat-본업" style="opacity:0.7;">
+          <button class="check-btn cat-본업" style="background: var(--accent-success); border-color: var(--accent-success); color:white;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+          <div class="task-main"><span class="task-title" style="text-decoration:line-through;">팀 회의록 작성</span><span class="task-meta"><span class="cat-tag cat-본업">본업</span>· 16:30 완료 · 35분</span></div>
+          <span class="dday-chip">5/21</span>
+        </div>
+        <div class="task-row cat-부업" style="opacity:0.7;">
+          <button class="check-btn cat-부업" style="background: var(--accent-success); border-color: var(--accent-success); color:white;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+          <div class="task-main"><span class="task-title" style="text-decoration:line-through;">Polygon Quiz 참여</span><span class="task-meta"><span class="cat-tag cat-부업">부업</span>· 14:20 완료 · $50</span></div>
+          <span class="dday-chip">5/21</span>
+        </div>
+        <div class="task-row cat-일상" style="opacity:0.7;">
+          <button class="check-btn cat-일상" style="background: var(--accent-success); border-color: var(--accent-success); color:white;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+          <div class="task-main"><span class="task-title" style="text-decoration:line-through;">아침 약 복용</span><span class="task-meta"><span class="cat-tag cat-일상">일상</span>· 7:30 · 반복</span></div>
+          <span class="dday-chip">5/21</span>
+        </div>
+
+        <div class="empty-hint">캘린더 dot = 카테고리 색 + shape (a11y) — 4 shape: 본업 ● 부업 ◆ 일상 ■ 가족 ▲. 셀 클릭 시 해당 일자 detail 표시 (현재 5/21).</div>
+
+        </div><!-- /캘린더 sub-tab -->
+
+        <!-- ========== 리스트 sub-tab — origin + category dual filter ========== -->
+        <div class="subtab-content" data-sub="list">
+          <!-- Filter row 1: origin -->
+          <div class="toolbar" style="margin-bottom:6px;">
+            <div class="chips">
+              <span style="font-size:11px;color:var(--text-muted);margin-right:4px;font-weight:600;">출처</span>
+              <button class="chip active">전체</button>
+              <button class="chip">프로젝트 task</button>
+              <button class="chip">일반 업무</button>
+              <button class="chip">이벤트</button>
+              <button class="chip">일상 task</button>
+              <button class="chip">약·습관·결심</button>
+              <button class="chip">자문</button>
+              <button class="chip">통근</button>
+            </div>
+          </div>
+          <!-- Filter row 2: category -->
+          <div class="toolbar" style="margin-bottom:10px;">
+            <div class="chips">
+              <span style="font-size:11px;color:var(--text-muted);margin-right:4px;font-weight:600;">카테고리</span>
+              <button class="chip active">전체</button>
+              <button class="chip cat-본업"><span class="swatch"></span>본업</button>
+              <button class="chip cat-부업"><span class="swatch"></span>부업</button>
+              <button class="chip cat-일상"><span class="swatch"></span>일상</button>
+              <button class="chip cat-가족"><span class="swatch"></span>가족</button>
+            </div>
+            <div class="search"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--text-muted)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="히스토리 검색…"></div>
+          </div>
+
+          <!-- Date controls -->
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+            <button class="more-btn" title="이전 기간"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+            <span style="font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;">2026년 5월</span>
+            <button class="more-btn" title="다음 기간"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+            <span style="margin-left:8px;display:inline-flex;gap:4px;">
+              <button class="chip">이번 주</button>
+              <button class="chip active">이번 달</button>
+              <button class="chip">지난 30일</button>
+              <button class="chip">전체</button>
+            </span>
+          </div>
+
+          <!-- Date-grouped list -->
+          <div class="section-title"><span class="time-group-title today">오늘 — 5월 21일</span><span class="count">4</span></div>
+          <div class="task-row cat-본업" style="opacity:0.75;">
+            <button class="check-btn cat-본업" style="background:var(--accent-success);border-color:var(--accent-success);color:white;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+            <div class="task-main"><span class="task-title" style="text-decoration:line-through;">팀 회의록 작성</span><span class="task-meta"><span class="cat-tag cat-본업">본업</span>· 일반 업무 · 16:30 완료 · 35분</span></div>
+            <span class="dday-chip">5/21</span>
+          </div>
+          <div class="task-row cat-부업" style="opacity:0.75;">
+            <button class="check-btn cat-부업" style="background:var(--accent-success);border-color:var(--accent-success);color:white;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+            <div class="task-main"><span class="task-title" style="text-decoration:line-through;">Polygon Quiz 참여</span><span class="task-meta"><span class="cat-tag cat-부업">부업</span>· 이벤트 · 14:20 완료 · $50</span></div>
+            <span class="dday-chip">5/21</span>
+          </div>
+          <div class="task-row cat-일상" style="opacity:0.75;">
+            <button class="check-btn cat-일상" style="background:var(--accent-success);border-color:var(--accent-success);color:white;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+            <div class="task-main"><span class="task-title" style="text-decoration:line-through;">아침 약 복용</span><span class="task-meta"><span class="cat-tag cat-일상">일상</span>· 약·ADHD · 7:30 · 반복</span></div>
+            <span class="dday-chip">5/21</span>
+          </div>
+          <div class="task-row" style="opacity:0.75;border-left:3px solid var(--accent-purple);">
+            <button class="check-btn" style="background:var(--accent-success);border-color:var(--accent-success);color:white;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+            <div class="task-main"><span class="task-title" style="text-decoration:line-through;">아침 자문 완료</span><span class="task-meta">· 자문 · 7:25 · "오늘 가장 중요한 한 가지는"</span></div>
+            <span class="dday-chip">5/21</span>
+          </div>
+
+          <div class="section-title"><span class="time-group-title">어제 — 5월 20일</span><span class="count">5</span></div>
+          <div class="task-row cat-본업" style="opacity:0.65;">
+            <button class="check-btn cat-본업" style="background:var(--accent-success);border-color:var(--accent-success);color:white;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+            <div class="task-main"><span class="task-title" style="text-decoration:line-through;">RO 프로젝트 #14 — 1단계 마무리</span><span class="task-meta"><span class="cat-tag cat-본업">본업</span>· 프로젝트 task · 18:40 · 120분</span></div>
+            <span class="dday-chip">5/20</span>
+          </div>
+          <div class="task-row cat-본업" style="opacity:0.65;">
+            <button class="check-btn cat-본업" style="background:var(--accent-success);border-color:var(--accent-success);color:white;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+            <div class="task-main"><span class="task-title" style="text-decoration:line-through;">주간 보고서 제출</span><span class="task-meta"><span class="cat-tag cat-본업">본업</span>· 일반 업무 · 11:00 · 25분</span></div>
+            <span class="dday-chip">5/20</span>
+          </div>
+          <div class="task-row cat-가족" style="opacity:0.65;">
+            <button class="check-btn cat-가족" style="background:var(--accent-success);border-color:var(--accent-success);color:white;"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+            <div class="task-main"><span class="task-title" style="text-decoration:line-through;">엄마 안부 전화</span><span class="task-meta"><span class="cat-tag cat-가족">가족</span>· 일상 task · 19:30 · 반복 주말</span></div>
+            <span class="dday-chip">5/20</span>
+          </div>
+
+          <div class="section-title"><span class="time-group-title">이번 주 (5/18~20)</span><span class="count">10</span></div>
+          <div class="empty-hint" style="margin-top:4px;">10개 task collapse — 가상 스크롤 (Virtual scroll) 로 100개+ 시에도 view 안 늘어남. 클릭 시 일자별 펼침.</div>
+
+          <div class="section-title" style="margin-top:14px;"><span>지난 주 (5/11~17)</span><span class="count">23</span></div>
+          <div class="section-title"><span>5/1 ~ 5/10</span><span class="count">45</span></div>
+
+          <div style="margin-top:14px;padding:8px 12px;background:var(--bg-tertiary);border-radius:8px;font-size:11px;color:var(--text-muted);">
+            <strong style="color:var(--text-secondary);">filter routing:</strong> "출처=일반 업무" + "카테고리=본업" 조합 = 본업 일반 업무 히스토리 만. "출처=프로젝트 task" + "카테고리=본업" = 본업 프로젝트 task 히스토리. cross-tab 검색 단일 surface.
+          </div>
+        </div>
+
+        <!-- ========== 통계 sub-tab — 시간/패턴 analytics ========== -->
+        <div class="subtab-content" data-sub="stats">
+          <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+            <button class="chip">주</button>
+            <button class="chip active">월</button>
+            <button class="chip">분기</button>
+            <button class="chip">연</button>
+          </div>
+
+          <!-- Hero — 이번 달 요약 -->
+          <div style="padding:14px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:11px;margin-bottom:10px;">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">2026년 5월 누적</div>
+            <div style="font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;">82<span style="font-size:14px;color:var(--text-muted);font-weight:500;"> 완료</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">전월 대비 <span style="color:var(--accent-success);font-weight:600;">+12 (17% ↑)</span> · 일평균 3.9</div>
+          </div>
+
+          <!-- 카테고리 분포 -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+            <div style="padding:12px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;">
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">카테고리 mix</div>
+              <div style="height:8px;display:flex;border-radius:4px;overflow:hidden;margin-bottom:8px;">
+                <div style="width:48%;background:var(--cat-본업);" title="본업 39 (48%)"></div>
+                <div style="width:18%;background:var(--cat-부업);" title="부업 15 (18%)"></div>
+                <div style="width:24%;background:var(--cat-일상);" title="일상 20 (24%)"></div>
+                <div style="width:10%;background:var(--cat-가족);" title="가족 8 (10%)"></div>
+              </div>
+              <div style="font-size:10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                <span style="color:var(--cat-본업);">● 본업 39</span>
+                <span style="color:var(--cat-부업);">◆ 부업 15</span>
+                <span style="color:var(--cat-일상);">■ 일상 20</span>
+                <span style="color:var(--cat-가족);">▲ 가족 8</span>
+              </div>
+            </div>
+            <div style="padding:12px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;">
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">출처 별</div>
+              <div style="display:grid;gap:3px;font-size:11px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;"><span>프로젝트 task</span><span style="color:var(--text-muted);font-variant-numeric:tabular-nums;">24</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;"><span>일반 업무</span><span style="color:var(--text-muted);font-variant-numeric:tabular-nums;">15</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;"><span>이벤트</span><span style="color:var(--text-muted);font-variant-numeric:tabular-nums;">15</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;"><span>약·습관·결심</span><span style="color:var(--text-muted);font-variant-numeric:tabular-nums;">12</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;"><span>자문</span><span style="color:var(--text-muted);font-variant-numeric:tabular-nums;">8</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;"><span>일상 + 가족 task</span><span style="color:var(--text-muted);font-variant-numeric:tabular-nums;">8</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 시간대 분포 -->
+          <div style="padding:12px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;margin-bottom:10px;">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">완료 시간대 분포</div>
+            <div style="display:flex;gap:3px;height:48px;align-items:flex-end;">
+              <div style="flex:1;background:color-mix(in srgb, var(--accent-primary) 30%, transparent);height:25%;border-radius:2px 2px 0 0;" title="0-3시"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--accent-primary) 30%, transparent);height:10%;" title="3-6시"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--accent-success) 60%, transparent);height:75%;" title="6-9시 골든타임"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--accent-success) 70%, transparent);height:90%;" title="9-12시"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--accent-success) 60%, transparent);height:80%;" title="12-15시"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--accent-warning) 50%, transparent);height:65%;" title="15-18시"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--accent-warning) 40%, transparent);height:55%;" title="18-21시"></div>
+              <div style="flex:1;background:color-mix(in srgb, var(--accent-primary) 30%, transparent);height:30%;" title="21-24시"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:var(--text-muted);"><span>0</span><span>3</span><span>6</span><span>9</span><span>12</span><span>15</span><span>18</span><span>21</span><span>24</span></div>
+            <div style="font-size:11px;color:var(--accent-success);margin-top:4px;">골든 타임: 9-12시 (완료율 92%)</div>
+          </div>
+
+          <!-- Streak history -->
+          <div style="padding:12px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;">streak 변화 (지난 30일)</span>
+              <span style="font-size:11px;color:var(--accent-celebration);font-weight:600;">현재 🔥 12일</span>
+            </div>
+            <div style="display:flex;gap:1px;height:24px;align-items:flex-end;">
+              <div style="flex:1;background:var(--accent-celebration);height:30%;" title="5일"></div>
+              <div style="flex:1;background:var(--accent-celebration);height:45%;" title="7일"></div>
+              <div style="flex:1;background:var(--accent-celebration);height:60%;" title="9일"></div>
+              <div style="flex:1;background:var(--accent-celebration);height:25%;opacity:0.4;" title="4일 (끊김)"></div>
+              <div style="flex:1;background:var(--accent-celebration);height:35%;" title="5일"></div>
+              <div style="flex:1;background:var(--accent-celebration);height:50%;" title="7일"></div>
+              <div style="flex:1;background:var(--accent-celebration);height:65%;" title="9일"></div>
+              <div style="flex:1;background:var(--accent-celebration);height:80%;" title="11일"></div>
+              <div style="flex:1;background:var(--accent-celebration);height:90%;" title="12일"></div>
+            </div>
+          </div>
+
+          <div class="empty-hint" style="margin-top:10px;">통계 탭 vs 히스토리 통계 sub-tab 차별: 통계 = 진행 중 패턴 (오늘/추세) / 히스토리 통계 = 완료 누적 (시간/카테고리/streak 분석). 같은 raw data, 다른 axis.</div>
+        </div>
+      </section>
+
+      <!-- ===================== Tab 9: 자문 (reflection) ===================== -->
+      <section class="tab-view" id="tab-reflection">
+        <div class="tab-head">
+          <div class="tab-head-title">
+            <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-primary);"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            자문 <span style="font-size:12px;color:var(--text-muted);font-weight:500;margin-left:4px;">아침 / 저녁 회고</span>
+          </div>
+        </div>
+
+        <div class="subtabs">
+          <button class="subtab-btn active" data-sub="today">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            오늘
+          </button>
+          <button class="subtab-btn" data-sub="recent">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>
+            최근
+          </button>
+          <button class="subtab-btn" data-sub="stats">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            통계
+          </button>
+        </div>
+
+        <div class="anchors">
+          <div class="anchor"><span class="anchor-label"><svg class="streak-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-purple)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> 자문 streak</span><span class="anchor-value streak-reflection">8</span></div>
+          <div class="anchor success"><span class="anchor-label">최장</span><span class="anchor-value">14</span></div>
+          <div class="anchor"><span class="anchor-label">이번 달</span><span class="anchor-value">22</span></div>
+          <div class="anchor cat-본업"><span class="anchor-label">전체</span><span class="anchor-value">147</span></div>
+        </div>
+
+        <!-- ===== 오늘 sub-tab ===== -->
+        <div class="subtab-content active" data-sub="today">
+        <div class="section-title"><span>오늘 아침 회고</span><span class="count">완료 7:25</span></div>
+        <div class="qa-card">
+          <div class="qa-q">오늘 가장 중요한 한 가지는?</div>
+          <div style="padding:8px 10px;background:color-mix(in srgb, var(--accent-success) 8%, var(--bg-tertiary));border-left:3px solid var(--accent-success);border-radius:0 7px 7px 0;font-size:12px;line-height:1.5;">Q2 RO 리포트 초안 완성 — 마감 D-Day, 본조사 결과 정리</div>
+        </div>
+
+        <div class="section-title"><span>오늘 저녁 회고</span><span class="count">예정 21:00</span></div>
+        <div class="qa-card" style="border:1px dashed var(--border-color);">
+          <div class="qa-q">오늘 잘한 일 1가지 / 다시 해본다면?</div>
+          <textarea class="qa-a" placeholder="저녁 자문 시간에 입력…"></textarea>
+        </div>
+
+        <div class="section-title" style="margin-top:14px;"><span>최근 자문 — 5월 18-20</span></div>
+        <div style="display:grid;gap:5px;">
+          <div class="task-row">
+            <div style="width:19px;display:flex;align-items:center;justify-content:center;color:var(--accent-primary);"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="task-main"><span class="task-title">5월 20일 아침 — "이번 주 마감 task 1순위 정리"</span><span class="task-meta">2 답변 · 14자</span></div>
+          </div>
+          <div class="task-row">
+            <div style="width:19px;display:flex;align-items:center;justify-content:center;color:var(--accent-primary);"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="task-main"><span class="task-title">5월 19일 저녁 — "회의록 정체 원인 파악"</span><span class="task-meta">1 답변 · 33자</span></div>
+          </div>
+        </div>
+
+        <div class="empty-hint">아침 / 저녁 2 trigger (push 알림 + 시간대 detection). 자문 streak ★ purple = task streak 🔥 와 시각 분리.</div>
+        </div><!-- /오늘 -->
+
+        <!-- ===== 최근 sub-tab ===== -->
+        <div class="subtab-content" data-sub="recent">
+          <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+            <button class="chip active">전체</button>
+            <button class="chip">아침</button>
+            <button class="chip">저녁</button>
+            <button class="chip">분기 회고</button>
+            <span style="margin-left:auto;font-size:11px;color:var(--text-muted);">최근 30일 22개</span>
+          </div>
+
+          <!-- 5/20 -->
+          <div style="padding:12px;background:var(--bg-primary);border:1px solid var(--border-light);border-left:3px solid var(--accent-purple);border-radius:9px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px;">
+              <span style="font-weight:600;color:var(--accent-purple);">5월 20일 아침</span>
+              <span style="font-size:11px;color:var(--text-muted);">7:30 · 2 답변</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;line-height:1.5;">
+              <div style="margin-bottom:4px;"><b style="color:var(--text-primary);">Q.</b> 이번 주 마감 task 1순위는?</div>
+              <div style="padding:6px 10px;background:color-mix(in srgb, var(--accent-purple) 8%, var(--bg-tertiary));border-radius:6px;">RO 프로젝트 #14 본조사 완성. 2단계 도식화 우선.</div>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">
+              <div style="margin-bottom:4px;"><b style="color:var(--text-primary);">Q.</b> 지금 가장 큰 걸림돌?</div>
+              <div style="padding:6px 10px;background:color-mix(in srgb, var(--accent-purple) 8%, var(--bg-tertiary));border-radius:6px;">회의록 정리 9일째 정체 — 분할 또는 폐기 결정 필요.</div>
+            </div>
+          </div>
+
+          <!-- 5/19 저녁 -->
+          <div style="padding:12px;background:var(--bg-primary);border:1px solid var(--border-light);border-left:3px solid var(--accent-purple);border-radius:9px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px;">
+              <span style="font-weight:600;color:var(--accent-purple);">5월 19일 저녁</span>
+              <span style="font-size:11px;color:var(--text-muted);">21:30 · 1 답변</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;">
+              <div style="margin-bottom:4px;"><b style="color:var(--text-primary);">Q.</b> 회의록 정체 원인은?</div>
+              <div style="padding:6px 10px;background:color-mix(in srgb, var(--accent-purple) 8%, var(--bg-tertiary));border-radius:6px;">자료 조사 단계에서 분량 추정 실패. 다음에는 1차 outline 부터 작성.</div>
+            </div>
+          </div>
+
+          <!-- 5/18 -->
+          <div style="padding:12px;background:var(--bg-primary);border:1px solid var(--border-light);border-left:3px solid var(--accent-purple);border-radius:9px;margin-bottom:6px;opacity:0.85;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+              <span style="font-weight:600;color:var(--accent-purple);">5월 18일 아침 + 저녁</span>
+              <span style="font-size:11px;color:var(--text-muted);">3 답변 · 펼쳐서 보기 ▼</span>
+            </div>
+          </div>
+
+          <div class="section-title" style="margin-top:14px;"><span>4월 (지난 달)</span><span class="count">28 개 (접힘)</span></div>
+          <div class="section-title"><span>3월</span><span class="count">24 개 (접힘)</span></div>
+
+          <div class="empty-hint">답변 본문 검색 가능 (Ctrl+F). 분기 회고는 별도 modal에서 누적 답변 종합 review.</div>
+        </div>
+
+        <!-- ===== 통계 sub-tab ===== -->
+        <div class="subtab-content" data-sub="stats">
+          <div style="padding:14px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:11px;margin-bottom:10px;">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">이번 달 자문</div>
+            <div style="font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent-purple);">22<span style="font-size:14px;color:var(--text-muted);font-weight:500;"> 회</span></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">아침 12 / 저녁 10 · 평균 답변 41자 · streak 최장 14일</div>
+          </div>
+
+          <div class="section-title"><span>지난 30일 streak 변화</span></div>
+          <div style="padding:12px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;margin-bottom:10px;">
+            <div style="display:flex;gap:1px;height:32px;align-items:flex-end;">
+              <div style="flex:1;background:var(--accent-purple);height:30%;" title="3일"></div>
+              <div style="flex:1;background:var(--accent-purple);height:50%;" title="5일"></div>
+              <div style="flex:1;background:var(--accent-purple);height:70%;opacity:0.3;" title="끊김"></div>
+              <div style="flex:1;background:var(--accent-purple);height:40%;" title="4일"></div>
+              <div style="flex:1;background:var(--accent-purple);height:60%;" title="6일"></div>
+              <div style="flex:1;background:var(--accent-purple);height:90%;" title="9일"></div>
+              <div style="flex:1;background:var(--accent-purple);height:100%;" title="14일 최장"></div>
+              <div style="flex:1;background:var(--accent-purple);height:75%;" title="현재 8일"></div>
+            </div>
+            <div style="font-size:11px;color:var(--accent-purple);margin-top:6px;">최장 14일 (5/8~21) · 현재 8일 (5/14 이후)</div>
+          </div>
+
+          <div class="section-title"><span>자주 등장하는 키워드</span></div>
+          <div style="padding:14px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;">
+            <span style="font-size:22px;font-weight:700;color:var(--accent-purple);">프로젝트</span>
+            <span style="font-size:18px;font-weight:600;color:var(--cat-본업);">우선순위</span>
+            <span style="font-size:16px;font-weight:500;color:var(--text-secondary);">분할</span>
+            <span style="font-size:14px;font-weight:500;color:var(--text-secondary);">정체</span>
+            <span style="font-size:20px;font-weight:600;color:var(--accent-purple);">회의록</span>
+            <span style="font-size:13px;font-weight:500;color:var(--text-muted);">집중</span>
+            <span style="font-size:15px;font-weight:500;color:var(--cat-부업);">수익</span>
+            <span style="font-size:12px;font-weight:500;color:var(--text-muted);">시간</span>
+            <span style="font-size:14px;color:var(--text-secondary);">패턴</span>
+          </div>
+
+          <div class="section-title" style="margin-top:14px;"><span>자문 → 본업 완료 상관</span></div>
+          <div style="padding:12px;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:10px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;">
+              <span>자문 한 날</span>
+              <span style="color:var(--accent-success);font-weight:600;font-variant-numeric:tabular-nums;">평균 4.2 완료</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;">
+              <span>자문 안 한 날</span>
+              <span style="color:var(--text-muted);font-variant-numeric:tabular-nums;">평균 3.1 완료</span>
+            </div>
+            <div style="font-size:11px;color:var(--accent-purple);margin-top:8px;">자문 = 본업 완료 +35% (통계 패턴 인사이트와 연결)</div>
+          </div>
+
+          <div class="empty-hint">자문 데이터는 통계 탭 → 패턴 sub-tab 에도 surface (cross-tab insight).</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tabnav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.tabnav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+        const target = document.getElementById('tab-' + tab);
+        if (target) target.classList.add('active');
+      });
+    });
+
+    // Sub-tab switching + content swap
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('.subtab-btn');
+      if (!btn) return;
+      const group = btn.closest('.subtabs');
+      if (!group) return;
+      group.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const key = btn.dataset.sub;
+      const tabView = btn.closest('.tab-view');
+      if (tabView && key) {
+        tabView.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
+        const target = tabView.querySelector('.subtab-content[data-sub="' + key + '"]');
+        if (target) target.classList.add('active');
+      }
+    });
+
+    // View toggle + content swap
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('.view-tab');
+      if (!btn) return;
+      const group = btn.closest('.view-toggle');
+      if (!group) return;
+      group.querySelectorAll('.view-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const key = btn.dataset.view;
+      const container = group.closest('.view-container') || group.closest('.subtab-content') || group.closest('.tab-view');
+      if (container && key) {
+        container.querySelectorAll('.view-content').forEach(c => c.classList.remove('active'));
+        const target = container.querySelector('.view-content[data-view="' + key + '"]');
+        if (target) target.classList.add('active');
+      }
+    });
+  </script>
+</body>
+</html>

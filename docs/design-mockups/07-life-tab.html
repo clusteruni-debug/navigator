@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Navigator — 일상 탭 재설계 시안</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <link rel="stylesheet" href="../../css/base.css">
+  <style>
+    body { font-family: var(--font-body); background: var(--bg-primary); color: var(--text-primary); padding: 24px; margin: 0; min-height: 100vh; }
+    .mockup-header { max-width: 1320px; margin: 0 auto 24px; display: flex; justify-content: space-between; align-items: center; }
+    .mockup-title { font-size: 22px; font-weight: 700; margin: 0; }
+    .mockup-subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+    .theme-toggle { padding: 8px 16px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); cursor: pointer; font-size: 13px; font-family: inherit; }
+    .theme-toggle:hover { background: var(--bg-secondary); border-color: var(--accent-primary); }
+    .mockup-grid { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .mockup-col h2 { font-size: 16px; font-weight: 600; margin: 0 0 12px 0; color: var(--text-secondary); }
+    .mockup-frame { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px; min-height: 920px; }
+    .change-note { margin-top: 12px; padding: 14px 16px; background: var(--bg-tertiary); border-radius: 10px; border: 1px solid var(--border-light); }
+    .change-note h3 { font-size: 13px; font-weight: 600; margin: 0 0 8px 0; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .change-note ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.7; color: var(--text-primary); }
+    .change-note code { font-family: var(--font-mono); font-size: 12px; background: var(--bg-secondary); padding: 1px 5px; border-radius: 4px; }
+    .icon { width: 14px; height: 14px; flex-shrink: 0; }
+    .icon-sm { width: 12px; height: 12px; flex-shrink: 0; }
+    .icon-lg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    /* ============= BEFORE (현재 추정) ============= */
+    .before .head { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+    .before .mixed-section { padding: 10px; background: var(--bg-tertiary); border-radius: 10px; margin-bottom: 8px; }
+    .before .mixed-section h3 { font-size: 14px; margin: 0 0 8px; font-weight: 600; }
+    .before .rhythm-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+    .before .r-btn { padding: 6px 2px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; font-size: 10px; text-align: center; }
+    .before .r-btn.done { background: color-mix(in srgb, var(--accent-success) 12%, transparent); border-color: var(--accent-success); color: var(--accent-success); }
+    .before .habit-list { display: grid; gap: 4px; }
+    .before .habit-row { display: flex; gap: 6px; align-items: center; padding: 6px 10px; background: var(--bg-primary); border-radius: 6px; font-size: 12px; }
+    .before .h-check { width: 14px; height: 14px; border: 2px solid var(--border-color); border-radius: 3px; }
+    .before .family-list { display: grid; gap: 4px; }
+    .before .family-row { display: flex; gap: 6px; align-items: center; padding: 6px 10px; background: var(--bg-primary); border-left: 3px solid var(--cat-가족); border-radius: 6px; font-size: 12px; }
+    .before .basic-task { display: flex; gap: 6px; align-items: center; padding: 6px 10px; background: var(--bg-primary); border-left: 3px solid var(--cat-일상); border-radius: 6px; font-size: 12px; margin-bottom: 4px; }
+
+    /* ============= AFTER ============= */
+    .after .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .after .header-title { font-size: 18px; font-weight: 700; display: inline-flex; gap: 8px; align-items: center; }
+    .after .title-bar { width: 3px; height: 18px; background: var(--cat-일상); border-radius: 2px; }
+    .after .add-btn { padding: 6px 12px; background: color-mix(in srgb, var(--cat-일상) 14%, transparent); border: 1px solid color-mix(in srgb, var(--cat-일상) 40%, transparent); border-radius: 8px; color: var(--cat-일상); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; gap: 5px; align-items: center; }
+    .after .add-btn:hover { background: color-mix(in srgb, var(--cat-일상) 22%, transparent); }
+
+    .after .anchors { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+    .after .anchor { padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 10px; display: flex; flex-direction: column; gap: 2px; }
+    .after .anchor-label { font-size: 11px; color: var(--text-muted); display: inline-flex; gap: 4px; align-items: center; }
+    .after .anchor-value { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .after .anchor.cat-일상 .anchor-value { color: var(--cat-일상); }
+    .after .anchor.cat-가족 .anchor-value { color: var(--cat-가족); }
+    .after .anchor.success .anchor-value { color: var(--accent-success); }
+    .after .anchor.celebration .anchor-value { color: var(--accent-celebration); }
+
+    .after .section-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin: 14px 0 8px 0; display: flex; justify-content: space-between; align-items: center; }
+    .after .section-title .count { color: var(--text-muted); font-weight: 500; }
+
+    /* Rhythm strip 6 slot */
+    .after .rhythm-strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 12px; }
+    .after .rhythm-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 10px; color: var(--text-secondary); cursor: pointer; font-family: inherit; font-size: 11px; transition: background-color 0.15s, border-color 0.15s, color 0.15s; }
+    .after .rhythm-btn:hover { background: var(--bg-tertiary); border-color: var(--cat-일상); color: var(--cat-일상); }
+    .after .rhythm-btn.recorded { background: color-mix(in srgb, var(--cat-일상) 12%, transparent); border-color: var(--cat-일상); color: var(--cat-일상); }
+    .after .rhythm-btn svg { width: 18px; height: 18px; }
+    .after .rhythm-time { font-family: var(--font-mono); font-size: 10px; font-variant-numeric: tabular-nums; opacity: 0.85; }
+    .after .rhythm-label { font-weight: 500; }
+
+    /* Medication groups */
+    .after .med-group { padding: 10px 12px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 10px; margin-bottom: 6px; }
+    .after .med-group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; }
+    .after .med-group-label { display: inline-flex; gap: 6px; align-items: center; color: var(--text-secondary); font-weight: 600; }
+    .after .med-group-label.required { color: var(--cat-일상); }
+    .after .med-group-count { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .after .med-group-count.complete { color: var(--accent-success); font-weight: 600; }
+    .after .med-slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .after .med-btn { display: flex; align-items: center; gap: 8px; padding: 7px 9px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; font-family: inherit; font-size: 12px; }
+    .after .med-btn:hover { background: var(--bg-secondary); border-color: var(--cat-일상); }
+    .after .med-btn.taken { background: color-mix(in srgb, var(--accent-success) 12%, transparent); border-color: var(--accent-success); color: var(--accent-success); }
+    .after .med-btn.taken.required { background: color-mix(in srgb, var(--cat-일상) 12%, transparent); border-color: var(--cat-일상); color: var(--cat-일상); }
+    .after .med-time { margin-left: auto; font-family: var(--font-mono); font-size: 11px; font-variant-numeric: tabular-nums; }
+
+    /* Habit grid */
+    .after .habit-grid { display: grid; gap: 6px; }
+    .after .habit-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 9px 12px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 9px; position: relative; overflow: hidden; transition: background-color 0.15s, border-color 0.15s; }
+    .after .habit-row::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px; background: var(--cat-일상); opacity: 0.55; }
+    .after .habit-row:hover { background: var(--bg-tertiary); border-color: var(--border-color); }
+    .after .habit-name { padding-left: 6px; font-size: 13px; font-weight: 500; }
+    .after .habit-streak { font-size: 11px; color: var(--accent-celebration); font-variant-numeric: tabular-nums; display: inline-flex; gap: 3px; align-items: center; }
+    .after .habit-toggle { width: 22px; height: 22px; border: 2px solid var(--border-color); border-radius: 6px; background: transparent; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center; transition: border-color 0.15s, background-color 0.15s; }
+    .after .habit-toggle:hover { border-color: var(--cat-일상); color: var(--cat-일상); }
+    .after .habit-toggle.done { background: var(--cat-일상); border-color: var(--cat-일상); color: white; }
+
+    /* Task list (일상 + 가족 mix) */
+    .after .life-task-list { display: grid; gap: 4px; }
+    .after .life-task { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 9px 12px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 9px; position: relative; overflow: hidden; transition: background-color 0.15s, border-color 0.15s; }
+    .after .life-task::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px; }
+    .after .life-task.cat-일상::before { background: var(--cat-일상); }
+    .after .life-task.cat-가족::before { background: var(--cat-가족); }
+    .after .life-task:hover { background: var(--bg-tertiary); border-color: var(--border-color); }
+    .after .life-task.completed { opacity: 0.55; }
+    .after .life-task.completed .life-task-title { text-decoration: line-through; }
+    .after .life-check { width: 18px; height: 18px; border: 2px solid var(--border-color); border-radius: 50%; background: transparent; cursor: pointer; padding: 0; margin-left: 4px; display: inline-flex; align-items: center; justify-content: center; transition: border-color 0.15s; }
+    .after .life-check.cat-일상:hover { border-color: var(--cat-일상); color: var(--cat-일상); }
+    .after .life-check.cat-가족:hover { border-color: var(--cat-가족); color: var(--cat-가족); }
+    .after .life-check.checked { background: var(--accent-success); border-color: var(--accent-success); color: white; }
+    .after .life-task-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-left: 4px; }
+    .after .life-task-title { font-size: 13px; font-weight: 500; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .after .life-task-meta { display: flex; gap: 8px; font-size: 11px; color: var(--text-muted); align-items: center; }
+    .after .cat-tag { font-size: 10px; font-weight: 600; opacity: 0.85; }
+    .after .cat-tag.cat-일상 { color: var(--cat-일상); }
+    .after .cat-tag.cat-가족 { color: var(--cat-가족); }
+    .after .repeat-mark { display: inline-flex; align-items: center; gap: 3px; opacity: 0.7; }
+    .after .dday-chip { padding: 3px 9px; background: rgba(148,163,184,0.1); color: var(--text-secondary); border-radius: 999px; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .after .dday-chip.urgent { background: var(--accent-danger-alpha); color: var(--accent-danger); }
+    .after .dday-chip.none { color: var(--text-muted); background: transparent; }
+
+    .after .filter-chips { display: inline-flex; gap: 4px; }
+    .after .chip { padding: 4px 10px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 999px; font-size: 11px; color: var(--text-secondary); cursor: pointer; font-family: inherit; display: inline-flex; gap: 4px; align-items: center; }
+    .after .chip:hover { background: var(--bg-secondary); color: var(--text-primary); }
+    .after .chip.active { background: var(--bg-secondary); border-color: var(--cat-일상); color: var(--cat-일상); font-weight: 600; }
+    .after .chip .swatch { width: 8px; height: 8px; border-radius: 2px; }
+    .after .chip.cat-일상 .swatch { background: var(--cat-일상); }
+    .after .chip.cat-가족 .swatch { background: var(--cat-가족); }
+
+    .after .archive-section { margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-light); }
+    .after .archive-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 4px; cursor: pointer; font-size: 12px; color: var(--text-muted); }
+    .after .archive-row:hover { color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+  <div class="mockup-header">
+    <div>
+      <h1 class="mockup-title">일상 탭 재설계 시안 — 4-section 명확 분리</h1>
+      <p class="mockup-subtitle">rhythm + 약 복용 + 습관 + 일상/가족 task / cat-일상 emerald + cat-가족 amber stripe 차별 / resolved IA "일상 ⊃ 가족 inline"</p>
+    </div>
+    <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.body.dataset.theme = document.documentElement.dataset.theme;">테마 전환</button>
+  </div>
+
+  <div class="mockup-grid">
+    <!-- ===================== BEFORE ===================== -->
+    <div class="mockup-col before">
+      <h2>BEFORE — 추정 (rhythm + habits + family 혼합 + 우선순위 불명확)</h2>
+      <div class="mockup-frame">
+        <div class="head">🏠 일상</div>
+
+        <div class="mixed-section">
+          <h3>🌱 라이프 리듬</h3>
+          <div class="rhythm-grid">
+            <div class="r-btn done">기상<br/>7:20</div>
+            <div class="r-btn">오전</div>
+            <div class="r-btn done">점심<br/>12:30</div>
+            <div class="r-btn">오후</div>
+            <div class="r-btn">저녁</div>
+            <div class="r-btn">취침</div>
+          </div>
+        </div>
+
+        <div class="mixed-section">
+          <h3>💊 약 복용</h3>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; font-size: 11px;">
+            <div class="r-btn done">아침</div>
+            <div class="r-btn">점심</div>
+            <div class="r-btn done">저녁</div>
+            <div class="r-btn">자기 전</div>
+          </div>
+        </div>
+
+        <div class="mixed-section">
+          <h3>📋 습관</h3>
+          <div class="habit-list">
+            <div class="habit-row"><span class="h-check"></span> <span>스트레칭 10분</span></div>
+            <div class="habit-row"><span class="h-check"></span> <span>물 2L 마시기</span></div>
+            <div class="habit-row"><span class="h-check"></span> <span>일기 쓰기</span></div>
+          </div>
+        </div>
+
+        <div class="mixed-section">
+          <h3>👨‍👩‍👦 가족 + 일상 task</h3>
+          <div class="basic-task">○ 빨래 돌리기 (일상)</div>
+          <div class="family-row">○ 엄마 안부 전화 (가족)</div>
+          <div class="basic-task">○ 장보기 (일상)</div>
+          <div class="family-row">○ 아빠 생신 선물 (가족)</div>
+        </div>
+      </div>
+
+      <div class="change-note">
+        <h3>현재 패턴 — 추정 문제</h3>
+        <ul>
+          <li>4 sub-surface (rhythm / 약 / 습관 / task) 가 똑같은 무게 — 시각 우선순위 부재</li>
+          <li>이모지 4종 (<code>🏠🌱💊📋👨‍👩‍👦</code>) — Standing rule 위반</li>
+          <li>가족 + 일상 task 가 같은 섹션에 mix — resolved IA "일상 ⊃ 가족 inline" 지만 시각 분리 약함 (stripe 색만 차이)</li>
+          <li>안정 앵커 부재 — 오늘 리듬 진행률 / 약 완료 / 습관 streak 한 눈에 안 보임</li>
+          <li>완료된 task / 습관 streak 시각 단서 없음</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ===================== AFTER ===================== -->
+    <div class="mockup-col after">
+      <h2>AFTER — 4-section 명확 + cat-일상 identity + 가족 stripe 차별</h2>
+      <div class="mockup-frame">
+
+        <!-- 헤더 -->
+        <div class="header-row">
+          <div class="header-title">
+            <span class="title-bar"></span>
+            일상
+          </div>
+          <button class="add-btn">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            추가
+          </button>
+        </div>
+
+        <!-- 안정 앵커 4개 -->
+        <div class="anchors">
+          <div class="anchor cat-일상">
+            <span class="anchor-label">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              오늘 리듬
+            </span>
+            <span class="anchor-value">3/6</span>
+          </div>
+          <div class="anchor success">
+            <span class="anchor-label">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+              약 복용
+            </span>
+            <span class="anchor-value">2/3</span>
+          </div>
+          <div class="anchor cat-가족">
+            <span class="anchor-label">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              가족
+            </span>
+            <span class="anchor-value">2</span>
+          </div>
+          <div class="anchor celebration">
+            <span class="anchor-label">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/><circle cx="12" cy="8" r="7"/></svg>
+              습관 streak
+            </span>
+            <span class="anchor-value">🔥 12</span>
+          </div>
+        </div>
+
+        <!-- 1. 라이프 리듬 -->
+        <div class="section-title">
+          <span>라이프 리듬</span>
+          <span class="count">3 / 6</span>
+        </div>
+        <div class="rhythm-strip">
+          <button class="rhythm-btn recorded">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            <span class="rhythm-label">기상</span>
+            <span class="rhythm-time">7:20</span>
+          </button>
+          <button class="rhythm-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            <span class="rhythm-label">오전</span>
+            <span class="rhythm-time">—</span>
+          </button>
+          <button class="rhythm-btn recorded">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            <span class="rhythm-label">점심</span>
+            <span class="rhythm-time">12:30</span>
+          </button>
+          <button class="rhythm-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            <span class="rhythm-label">오후</span>
+            <span class="rhythm-time">—</span>
+          </button>
+          <button class="rhythm-btn recorded">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+            <span class="rhythm-label">저녁</span>
+            <span class="rhythm-time">19:00</span>
+          </button>
+          <button class="rhythm-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <span class="rhythm-label">취침</span>
+            <span class="rhythm-time">—</span>
+          </button>
+        </div>
+
+        <!-- 2. 약 복용 -->
+        <div class="section-title">
+          <span>약 복용</span>
+          <span class="count">2 / 3</span>
+        </div>
+        <div class="med-group">
+          <div class="med-group-header">
+            <span class="med-group-label required">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 20.5 21 10c1.5-1.5 1.5-4 0-5.5s-4-1.5-5.5 0L5 14.5"/><path d="M8.5 8.5 15 15"/></svg>
+              ADHD 약
+            </span>
+            <span class="med-group-count complete">2 / 2 완료</span>
+          </div>
+          <div class="med-slots">
+            <button class="med-btn taken required">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              아침
+              <span class="med-time">7:30</span>
+            </button>
+            <button class="med-btn taken required">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              점심
+              <span class="med-time">12:40</span>
+            </button>
+          </div>
+        </div>
+        <div class="med-group">
+          <div class="med-group-header">
+            <span class="med-group-label">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>
+              영양제
+            </span>
+            <span class="med-group-count">0 / 1</span>
+          </div>
+          <div class="med-slots">
+            <button class="med-btn">
+              <span style="width:14px; height:14px; border:2px solid currentColor; border-radius:50%;"></span>
+              저녁
+              <span class="med-time">—</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. 습관 -->
+        <div class="section-title">
+          <span>오늘의 습관</span>
+          <span class="count">1 / 3</span>
+        </div>
+        <div class="habit-grid">
+          <div class="habit-row">
+            <span class="habit-name">스트레칭 10분</span>
+            <span class="habit-streak">🔥 12</span>
+            <button class="habit-toggle done">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+          </div>
+          <div class="habit-row">
+            <span class="habit-name">물 2L 마시기</span>
+            <span class="habit-streak">🔥 5</span>
+            <button class="habit-toggle"></button>
+          </div>
+          <div class="habit-row">
+            <span class="habit-name">일기 쓰기</span>
+            <span class="habit-streak">🔥 8</span>
+            <button class="habit-toggle"></button>
+          </div>
+        </div>
+
+        <!-- 4. 일상 + 가족 task (cat color stripe 차별) -->
+        <div class="section-title">
+          <span>일상 task</span>
+          <div class="filter-chips">
+            <button class="chip active">전체</button>
+            <button class="chip cat-일상"><span class="swatch"></span>일상</button>
+            <button class="chip cat-가족"><span class="swatch"></span>가족</button>
+          </div>
+        </div>
+
+        <div class="life-task-list">
+          <div class="life-task cat-일상">
+            <button class="life-check cat-일상" aria-label="완료"></button>
+            <div class="life-task-main">
+              <span class="life-task-title">빨래 돌리기</span>
+              <span class="life-task-meta">
+                <span class="cat-tag cat-일상">일상</span>
+              </span>
+            </div>
+            <span class="dday-chip none">오늘</span>
+          </div>
+          <div class="life-task cat-가족">
+            <button class="life-check cat-가족" aria-label="완료"></button>
+            <div class="life-task-main">
+              <span class="life-task-title">엄마 안부 전화</span>
+              <span class="life-task-meta">
+                <span class="cat-tag cat-가족">가족</span>
+                <span class="repeat-mark">
+                  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                  주말
+                </span>
+              </span>
+            </div>
+            <span class="dday-chip">토</span>
+          </div>
+          <div class="life-task cat-일상">
+            <button class="life-check cat-일상" aria-label="완료"></button>
+            <div class="life-task-main">
+              <span class="life-task-title">장보기</span>
+              <span class="life-task-meta">
+                <span class="cat-tag cat-일상">일상</span>
+              </span>
+            </div>
+            <span class="dday-chip">D-1</span>
+          </div>
+          <div class="life-task cat-가족">
+            <button class="life-check cat-가족" aria-label="완료"></button>
+            <div class="life-task-main">
+              <span class="life-task-title">아빠 생신 선물</span>
+              <span class="life-task-meta">
+                <span class="cat-tag cat-가족">가족</span>
+              </span>
+            </div>
+            <span class="dday-chip urgent">D-3</span>
+          </div>
+        </div>
+
+        <!-- 완료 collapsed -->
+        <div class="archive-section">
+          <div class="archive-row">
+            <span>오늘 완료 (3)</span>
+            <span>▶</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="change-note">
+        <h3>변경 요지 — 4-section 시각 위계 + 카테고리 stripe 차별</h3>
+        <ul>
+          <li><b>4-section 명확 분리</b>: 라이프 리듬 → 약 복용 → 습관 → 일상/가족 task (시간순 + 의무 priority 순). uppercase section-title 로 위계 표시</li>
+          <li><b>안정 앵커 4개</b>: 오늘 리듬 3/6 / 약 복용 2/3 / 가족 2 / 습관 streak — 매 진입 시 진행률 한 눈에</li>
+          <li><b>cat-일상 (emerald) identity</b>: 제목 좌측 bar / rhythm hover / habit stripe / 추가 버튼 soft-tint — 본업의 indigo 와 차별</li>
+          <li><b>가족 task = cat-가족 (amber) stripe</b> 차별 — 일상 task 와 같은 list 안에 mix 되지만 시각 즉시 구분. resolved IA "일상 ⊃ 가족 inline" 시각 구현</li>
+          <li><b>filter chip 카테고리</b> (전체/일상/가족) — task list 내부 필터, navigation axis X. 4-section 안에선 카테고리가 peripheral 만</li>
+          <li><b>약 복용 2-group</b> (ADHD / 영양제) — 액션 탭 mockup 01 패턴 차용, cross-tab 일관</li>
+          <li><b>habit streak inline</b> — 🔥 N 옆에 명시. ADHD dopamine + 완료 토글 우측 정렬 (44pt 터치 타깃)</li>
+          <li>이모지 → Lucide 인라인 SVG (clock / pill / users / award / sun / leaf / coffee / moon / activity / check / repeat / smile)</li>
+          <li>Hover bg/border only — Standing rule 준수</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

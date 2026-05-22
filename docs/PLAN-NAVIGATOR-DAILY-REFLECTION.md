@@ -1,6 +1,32 @@
+---
+plan_id: NAVIGATOR-DAILY-REFLECTION
+project: navigator
+status: SHIPPED
+status_reason: "Phase 0.5~12 implemented (14 commits in feature/daily-reflection branch) + Codex peer review round 2 applied + pushed to GitHub origin 2026-05-09 Session 5. Visual contrast hotfix + Node logic test (40 assertion / 15 tests) added in Session 8."
+milestones:
+  - { id: P0.5, label: "Pre-flight findings via Codex read-only review", done: true }
+  - { id: P1, label: "State schema (dailyReflection field in user state)", done: true }
+  - { id: P2, label: "Load/save (state.js + firebase-sync explicit field)", done: true }
+  - { id: P3, label: "Core logic + streak + compaction + quarterly markdown export", done: true }
+  - { id: P4, label: "Bottom-sheet modal UI (separate from .modal)", done: true }
+  - { id: P5.5, label: "Multi-device listener (initial load + onSnapshot merge)", done: true }
+  - { id: P6, label: "Onboarding + a11y + focus-trap", done: true }
+  - { id: P7, label: "Settings UI (toggle + time picker)", done: true }
+  - { id: P8, label: "Tab integration (history view)", done: true }
+  - { id: P9, label: "Auto trigger (22:00 PWA push) + push notification permission flow", done: true }
+  - { id: P10, label: "sw.js cache list + html script tag drift fix", done: true }
+  - { id: P11, label: "Pre-existing work-ro-template.js cache drift fix (Phase 9 merge gate)", done: true }
+  - { id: P12, label: "Verify (npm run verify + npm test) + Codex peer review rounds 1/2/2.1", done: true }
+decisions_pending: []
+blockers: []
+depends_on: ["NAVIGATOR-LIFEOS-INTEGRATION"]
+git_strategy: retired-mono
+last_verified: 2026-05-09
+---
+
 # PLAN-NAVIGATOR-DAILY-REFLECTION
 
-> Status: **PROPOSED — ready for Codex dispatch (single-tool deep integration)**
+> Status: **SHIPPED v1 (2026-05-09)** — Phase 0.5~12 implemented in `feature/daily-reflection` branch, Codex peer review round 2 applied (cloud merge HIGH + import merge MEDIUM hotfixed), pushed to GitHub origin. Session 8 added Node logic test (40 assertion / 15 tests) + light-theme contrast fix + sw.js activate scope guard.
 > Owner: navigator project (user is owner)
 > Source plan: `/c/vibe/docs/plans/PLAN-NAVIGATOR-LIFEOS-INTEGRATION.md` v4 mental model — this is the *implementation plan* for the navigator side
 > Created: 2026-05-09
@@ -474,12 +500,18 @@ Verification per phase (plan §Verification + §Phase 12 edge cases). E2E flow o
 dev server (npx serve -p 5000) — first install → onboarding → 22:00 modal →
 answer → streak → quarterly markdown clipboard → settings disable/enable.
 
-Commit per phase atomic, format: `<scope>(reflection): Phase X — <subject>`
-e.g., `feat(reflection): Phase 1-3 — state schema + core logic`. Conventional
-commits style (navigator repo follows it, not workspace AGENTS.md §16 TASK-ID format).
+Commit per phase atomic. **2026-05-09 sub-repo retired — workspace mono-repo
+정책 적용**. 향후 commits 는 workspace AGENTS.md §16 TASK-ID prefix 사용
+(예: `PLAN-NAVIGATOR-DAILY-REFLECTION-PHASE-N: <subject>`).
 
-Branch: feature branch `feature/daily-reflection` recommended for review,
-merge to main after Phase 9 verification (cache + script load order critical).
+Historical: Phase 1-12 + 2 review rounds (총 13 commits) 는 sub-repo 시기
+conventional commits 형식 (`feat(reflection): Phase X — <subject>`) 으로
+진행됨. 이 history 는 navigator GitHub origin (`clusteruni-debug/navigator`)
+에 backup 으로 보존됨 (sub-repo retire 후에도 archive 형태로 남음).
+
+Branch: workspace mono-repo 통합 후엔 단일 repo cycle. feature branch 도입
+여부는 workspace 작업 흐름 재량 (single-dev + pm2 restart-tolerant 환경에서
+대부분 master 직접 작업 OK — MO-6).
 
 Out of scope:
 - Server-side push notification (Firebase Cloud Functions)
