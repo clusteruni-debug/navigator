@@ -192,8 +192,21 @@
       padding-bottom: 100px;
     }
 
-    /* PC 레이아웃 (1024px 이상) */
+    /* PC 레이아웃 (1024px 이상) — 폰트 토큰 전반 확대 (live user feedback 2026-05-22) */
     @media (min-width: 1024px) {
+      :root {
+        --font-xs: 15px;
+        --font-sm: 16px;
+        --font-base: 17px;
+        --font-md: 18px;
+        --font-lg: 20px;
+        --font-xl: 24px;
+      }
+
+      body {
+        font-size: 17px;
+      }
+
       .app {
         padding: 30px 40px;
         max-width: calc(1600px - var(--sidebar-width));
