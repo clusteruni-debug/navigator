@@ -138,6 +138,27 @@
       white-space: nowrap;
     }
 
+    /* PC (>=1024px) 라이프 리듬 button 확대 — 라이브 사용자 피드백 */
+    @media (min-width: 1024px) {
+      .life-rhythm-buttons {
+        gap: 12px;
+      }
+      .life-rhythm-btn {
+        padding: 16px 8px;
+        gap: 5px;
+      }
+      .life-rhythm-icon {
+        font-size: 24px;
+      }
+      .life-rhythm-label {
+        font-size: 15px;
+        font-weight: 500;
+      }
+      .life-rhythm-time {
+        font-size: 14px;
+      }
+    }
+
     .life-rhythm-time {
       font-size: 14px;
       font-weight: 500;

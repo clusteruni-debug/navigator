@@ -352,6 +352,80 @@
       border-color: var(--border-light);
     }
 
+    /* PC (>=1024px) 사이즈 확대 — 라이브 사용자 피드백: 가로 stretch + 폰트 작음 */
+    @media (min-width: 1024px) {
+      .med-compact-row {
+        grid-template-columns: minmax(120px, auto) 1fr;
+        padding: 14px 18px;
+        gap: 14px;
+      }
+      .med-compact-group-label {
+        font-size: 14px;
+      }
+      .med-compact-group-label svg {
+        width: 18px;
+        height: 18px;
+      }
+      .med-compact-tag {
+        font-size: 11px;
+        padding: 2px 7px;
+      }
+      .med-compact-slot {
+        min-height: 48px;
+        padding: 10px 14px;
+        font-size: 15px;
+        gap: 10px;
+      }
+      .med-compact-slot svg {
+        width: 16px;
+        height: 16px;
+      }
+      .med-compact-slot-time {
+        font-size: 13px;
+      }
+      .med-compact-link {
+        font-size: 13px;
+        padding: 6px 12px;
+      }
+
+      .action-anchors {
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .action-anchors .anchor {
+        padding: 13px 16px;
+      }
+      .action-anchors .anchor-label {
+        font-size: 13px;
+      }
+      .action-anchors .anchor-value {
+        font-size: 26px;
+      }
+
+      .action-section-title {
+        font-size: 14px;
+        margin-top: 16px;
+        margin-bottom: 10px;
+      }
+      .action-section-title .count {
+        font-size: 13px;
+      }
+
+      .resolutions-mini {
+        padding: 14px 18px;
+      }
+      .resolutions-mini-label {
+        font-size: 13px;
+      }
+      .resolutions-mini-list {
+        font-size: 14px;
+      }
+      .resolutions-mini-btn {
+        font-size: 13px;
+        padding: 7px 14px;
+      }
+    }
+
     .today-task-preview {
       display: grid;
       gap: 6px;
