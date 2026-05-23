@@ -429,23 +429,6 @@ function _renderStageTabs(project, activeIdx) {
   }).join('') + '</div>';
 }
 
-function _renderV3Task(project, stageIdx, subcatIdx, task, taskIdx) {
-  return _renderWorkTaskRow({
-    source: 'project',
-    id: task.id || project.id + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx,
-    title: task.title || '',
-    deadline: task.deadline || null,
-    estimatedTime: task.estimatedTime || null,
-    updatedAt: task.updatedAt || project.updatedAt || project.createdAt || '',
-    projectId: project.id,
-    projectName: project.name || '',
-    stageName: getStageName(project, stageIdx),
-    stageIdx,
-    subcatIdx,
-    taskIdx
-  });
-}
-
 function _renderSubcategory(project, stageIdx, subcat, subcatIdx) {
   const key = project.id + '-' + stageIdx + '-' + subcatIdx;
   const val = appState.collapsedSubcategories && appState.collapsedSubcategories[key];
@@ -457,7 +440,7 @@ function _renderSubcategory(project, stageIdx, subcat, subcatIdx) {
     '<button class="work-v3-subcat-head" aria-expanded="' + expanded + '" aria-controls="' + bodyId + '" onclick="toggleSubcategoryCollapse(\'' + escapeAttr(project.id) + '\',' + stageIdx + ',' + subcatIdx + ')">' +
       '<span>' + _workIcon(expanded ? 'chevron-down' : 'menu', 13) + escapeHtml(subcat.name || '중분류') + '</span><strong>' + done + '/' + total + '</strong>' +
     '</button>' +
-    (expanded ? '<div id="' + bodyId + '" class="work-v3-subcat-body">' + ((subcat.tasks || []).map((task, taskIdx) => _renderV3Task(project, stageIdx, subcatIdx, task, taskIdx)).join('') || '<div class="work-empty-inline">항목 없음</div>') + '</div>' : '') +
+    (expanded ? '<div id="' + bodyId + '" class="work-v3-subcat-body">' + ((subcat.tasks || []).map((task, taskIdx) => renderWorkTask(project.id, stageIdx, subcatIdx, task, taskIdx)).join('') || '<div class="work-empty-inline">항목 없음</div>') + '</div>' : '') +
   '</section>';
 }
 
