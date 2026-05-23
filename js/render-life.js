@@ -12,7 +12,10 @@ const LIFE_RHYTHM_ITEMS = [
 ];
 
 function _lifeIcon(name, size = 16, className = 'life-svg-icon') {
-  if (typeof _renderActionIcon === 'function') return _renderActionIcon(name, size, className);
+  if (typeof _renderActionIcon === 'function') {
+    const icon = _renderActionIcon(name, size, className);
+    if (icon) return icon;
+  }
   if (typeof svgIcon === 'function') return svgIcon(name, size);
   return '';
 }
@@ -176,10 +179,11 @@ function _renderLifeDeadlineChip(task) {
   return `<span class="life-dday-chip ${urgency || 'none'}">${escapeHtml(text)}</span>`;
 }
 
-function _renderLifeSectionHeading(label, countText, iconName) {
+function _renderLifeSectionHeading(label, countText, iconName, labelId) {
+  const idAttr = labelId ? ` id="${escapeAttr(labelId)}"` : '';
   return `
     <div class="life-section-heading">
-      <span class="life-section-label">${iconName ? _lifeIcon(iconName, 14) : ''}${escapeHtml(label)}</span>
+      <span${idAttr} class="life-section-label">${iconName ? _lifeIcon(iconName, 14) : ''}${escapeHtml(label)}</span>
       ${countText ? `<span class="life-section-count">${escapeHtml(countText)}</span>` : ''}
     </div>
   `;
@@ -189,7 +193,7 @@ function _renderLifeRhythmSection(rhythmItems) {
   const recordedCount = rhythmItems.filter(item => item.value).length;
   return `
     <section class="life-section-card life-rhythm-primary" aria-labelledby="life-rhythm-title">
-      ${_renderLifeSectionHeading('라이프 리듬', recordedCount + ' / ' + rhythmItems.length, 'clock')}
+      ${_renderLifeSectionHeading('라이프 리듬', recordedCount + ' / ' + rhythmItems.length, 'clock', 'life-rhythm-title')}
       <div class="rhythm-strip life-rhythm-strip" role="group" aria-labelledby="life-rhythm-title">
         ${rhythmItems.map(item => `
           <button class="rhythm-btn life-rhythm-strip-btn ${item.value ? 'recorded' : ''}"
@@ -254,7 +258,7 @@ function _renderLifeMedicationGroup(label, iconName, items, records, requiredGro
 function _renderLifeMedicationSection(summary) {
   return `
     <section class="life-section-card life-medication-section" aria-labelledby="life-medication-title">
-      ${_renderLifeSectionHeading('약 복용', summary.taken + ' / ' + summary.total, 'pill')}
+      ${_renderLifeSectionHeading('약 복용', summary.taken + ' / ' + summary.total, 'pill', 'life-medication-title')}
       <div class="life-med-grid">
         ${_renderLifeMedicationGroup('ADHD 약', 'pill', summary.required, summary.records, true)}
         ${_renderLifeMedicationGroup('영양제', 'leaf', summary.optional, summary.records, false)}
@@ -273,7 +277,7 @@ function _renderLifeHabitSection(habitRows) {
   const doneCount = habitRows.filter(row => row.done).length;
   return `
     <section class="life-section-card life-habit-section" aria-labelledby="life-habit-title">
-      ${_renderLifeSectionHeading('오늘 습관', doneCount + ' / ' + habitRows.length, 'target')}
+      ${_renderLifeSectionHeading('오늘 습관', doneCount + ' / ' + habitRows.length, 'target', 'life-habit-title')}
       ${habitRows.length > 0 ? `
         <div class="life-habit-grid" role="list">
           ${habitRows.map(row => `
@@ -395,7 +399,7 @@ function _renderLifeTaskSection(pendingTasks, completedTasks) {
   return `
     <section class="life-section-card life-task-section" aria-labelledby="life-task-title">
       <div class="life-section-heading split">
-        <span class="life-section-label">${_lifeIcon('list', 14)}일상 task</span>
+        <span id="life-task-title" class="life-section-label">${_lifeIcon('list', 14)}일상 task</span>
         ${_renderLifeTaskFilter(activeFilter)}
       </div>
       <div class="life-task-count-row">
@@ -429,7 +433,7 @@ function _renderResolutionSection() {
 
   return `
     <section class="life-section-card resolution-section" aria-labelledby="life-resolution-title">
-      ${_renderLifeSectionHeading('결심 트래커', resolutions.length ? resolutions.length + '개' : '', 'target')}
+      ${_renderLifeSectionHeading('결심 트래커', resolutions.length ? resolutions.length + '개' : '', 'target', 'life-resolution-title')}
       ${resolutions.length > 0 ? `
         <div class="resolution-list">
           ${resolutions.map(r => {
@@ -546,7 +550,6 @@ function addResolution() {
   const title = prompt('결심 이름을 입력하세요 (예: 간식 끊기)');
   if (!title || !title.trim()) return;
 
-  const icon = prompt('아이콘 이모지 (기본: 🎯)', '🎯') || '🎯';
   const startDateInput = prompt('시작일 (YYYY-MM-DD, 비우면 오늘)', '');
   const startDate = startDateInput && /^\d{4}-\d{2}-\d{2}$/.test(startDateInput)
     ? startDateInput
@@ -558,7 +561,7 @@ function addResolution() {
     id: generateId(),
     title: title.trim(),
     startDate,
-    icon,
+    icon: '',
     createdAt: now,
     updatedAt: now
   });
@@ -597,9 +600,6 @@ function editResolution(id) {
   const newTitle = prompt('결심 이름', r.title);
   if (newTitle === null) return;
   if (newTitle.trim()) r.title = newTitle.trim();
-
-  const newIcon = prompt('아이콘 이모지', r.icon);
-  if (newIcon !== null && newIcon.trim()) r.icon = newIcon.trim();
 
   const newDate = prompt('시작일 (YYYY-MM-DD)', r.startDate);
   if (newDate !== null && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) r.startDate = newDate;

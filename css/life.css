@@ -1,374 +1,784 @@
-/* life.css - 일상/가족 탭 스타일 (work.css에서 분리) */
+/* life.css - 일상 탭 rhythm-primary redesign */
 
-    /* 결심 트래커 */
-    .resolution-section {
-      margin-bottom: 16px;
-      padding: 12px;
-      background: var(--bg-secondary);
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-color);
-    }
+.life-shell {
+  display: grid;
+  gap: 12px;
+}
 
-    .resolution-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
+.life-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
 
-    .resolution-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
+.life-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
 
-    .resolution-add-btn {
-      width: 44px;
-      height: 44px;
-      background: var(--accent-success);
-      border: none;
-      border-radius: var(--radius-sm);
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.life-title-bar {
+  width: 4px;
+  height: 34px;
+  background: var(--cat-일상);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
 
-    .resolution-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+.life-title {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 750;
+  line-height: 1.2;
+}
 
-    .resolution-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      background: var(--bg-primary);
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-color);
-      cursor: pointer;
-    }
+.life-subtitle {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.3;
+}
 
-    .resolution-icon {
-      font-size: 24px;
-      flex-shrink: 0;
-    }
+.life-add-focus,
+.life-soft-action,
+.life-quick-btn,
+.life-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 34px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
 
-    .resolution-info {
-      flex: 1;
-      min-width: 0;
-    }
+.life-add-focus {
+  padding: 7px 11px;
+  color: var(--cat-일상);
+  border-color: color-mix(in srgb, var(--cat-일상) 38%, var(--border-light));
+  background: color-mix(in srgb, var(--cat-일상) 10%, transparent);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
 
-    .resolution-name {
-      font-size: 15px;
-      color: var(--text-primary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+.life-add-focus:hover,
+.life-soft-action:hover,
+.life-quick-btn:hover,
+.life-icon-btn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
 
-    .resolution-days {
-      font-size: 14px;
-      color: var(--text-tertiary);
-      margin-top: 2px;
-    }
+.life-anchors {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
 
-    .resolution-day-count {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
+.life-anchor,
+.life-section-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+}
 
-    .resolution-actions {
-      display: flex;
-      gap: 4px;
-      opacity: 0.5;
-    }
+.life-anchor {
+  min-width: 0;
+  padding: 10px 12px;
+  background: var(--bg-tertiary);
+  display: grid;
+  gap: 4px;
+}
 
-    .resolution-card:hover .resolution-actions {
-      opacity: 1;
-    }
+.life-anchor-label,
+.life-section-label,
+.life-med-group-label,
+.life-med-slot-main,
+.life-meta-chip,
+.life-habit-streak,
+.life-filter-chip,
+.life-task-meta,
+.life-subtask-chip {
+  display: inline-flex;
+  align-items: center;
+}
 
-    .resolution-empty {
-      text-align: center;
-      padding: 12px;
-      color: var(--text-muted);
-      font-size: 14px;
-    }
+.life-anchor-label {
+  gap: 5px;
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
 
-    /* 일상/가족 탭 스타일 */
-    .life-header {
-      margin-bottom: 16px;
-    }
+.life-anchor-value {
+  color: var(--text-primary);
+  font-size: 21px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
 
-    .life-title {
-      font-size: 18px;
-      font-weight: 600;
-    }
+.life-anchor.cat-life .life-anchor-value { color: var(--cat-일상); }
+.life-anchor.cat-family .life-anchor-value { color: var(--cat-가족); }
+.life-anchor.success .life-anchor-value { color: var(--accent-success); }
+.life-anchor.celebration .life-anchor-value { color: var(--accent-celebration); }
 
-    .life-quick-add {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-      padding: 12px;
-      background: var(--bg-secondary);
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-color);
-    }
+.life-shell .life-quick-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40px;
+  gap: 8px;
+  margin: 0;
+  padding: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+}
 
-    .life-quick-input {
-      flex: 1;
-      padding: 10px 14px;
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      color: var(--text-primary);
-      font-size: 16px;
-    }
+.life-shell .life-quick-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 11px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+}
 
-    .life-quick-input::placeholder {
-      color: var(--text-tertiary);
-    }
+.life-shell .life-quick-input:focus {
+  outline: 2px solid color-mix(in srgb, var(--cat-일상) 45%, transparent);
+  outline-offset: 1px;
+}
 
-    .life-quick-btn {
-      width: 40px;
-      height: 40px;
-      background: var(--accent-success);
-      border: none;
-      border-radius: var(--radius-sm);
-      color: white;
-      font-size: 20px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.life-shell .life-quick-btn {
+  width: 40px;
+  height: 40px;
+  color: var(--cat-일상);
+  border-color: color-mix(in srgb, var(--cat-일상) 35%, var(--border-light));
+  background: color-mix(in srgb, var(--cat-일상) 10%, transparent);
+}
 
-    .life-summary {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
+.life-section-card {
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
 
-    .life-summary-item {
-      flex: 1;
-      text-align: center;
-      padding: 12px;
-      background: var(--bg-secondary);
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-color);
-    }
+.life-rhythm-primary {
+  border-color: color-mix(in srgb, var(--cat-일상) 32%, var(--border-light));
+}
 
-    .life-summary-value {
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--text-primary);
-    }
+.life-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
 
-    .life-summary-label {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-top: 4px;
-    }
+.life-section-heading.split {
+  align-items: flex-start;
+}
 
-    .life-section {
-      margin-bottom: 20px;
-    }
+.life-section-label {
+  gap: 6px;
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
 
-    .life-section-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 10px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border-light);
-    }
+.life-section-count,
+.life-med-count {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 
-    .life-section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border-light);
-    }
+.life-med-grid,
+.life-habit-grid,
+.life-task-list,
+.life-shell .resolution-list {
+  display: grid;
+  gap: 6px;
+}
 
-    .life-section-header .life-section-title {
-      margin-bottom: 0;
-      padding-bottom: 0;
-      border-bottom: none;
-    }
+.life-med-group,
+.life-habit-row,
+.life-task-row,
+.life-shell .resolution-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
 
-    .life-reset-btn {
-      font-size: 14px;
-      padding: 4px 10px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    }
+.life-med-group {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
 
-    .life-reset-btn:hover {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
+.life-med-group.required {
+  border-color: color-mix(in srgb, var(--cat-일상) 30%, var(--border-light));
+}
 
-    .life-all-done {
-      padding: 16px;
-      text-align: center;
-      color: var(--success);
-      font-size: 15px;
-      background: color-mix(in srgb, var(--accent-success) 10%, transparent);
-      border-radius: 8px;
-    }
+.life-med-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 
-    .life-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+.life-med-group-label {
+  gap: 6px;
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 800;
+}
 
-    .life-item {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      padding: 12px;
-      background: var(--bg-secondary);
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-color);
-      border-left: 4px solid var(--task-cat-color, var(--border-color));
-    }
+.life-med-group-label.required,
+.life-med-count.complete {
+  color: var(--cat-일상);
+}
 
-    .life-item .subtask-chips {
-      width: 100%;
-      padding-top: 4px;
-    }
+.life-med-tag {
+  padding: 1px 6px;
+  border: 1px solid color-mix(in srgb, var(--cat-일상) 34%, var(--border-light));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cat-일상) 10%, transparent);
+  color: var(--cat-일상);
+  font-size: 10px;
+  font-weight: 800;
+}
 
-    .life-item-content {
-      flex: 1;
-      cursor: pointer;
-    }
+.life-med-slots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
 
-    .life-item-title {
-      font-size: 16px;
-      color: var(--text-primary);
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
+.life-med-slots.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 
-    .life-item-meta {
-      font-size: 14px;
-      color: var(--text-tertiary);
-      margin-top: 4px;
-    }
+.life-med-slot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 9px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
 
-    .life-item-actions {
-      display: flex;
-      gap: 4px;
-      opacity: 0.5;
-      transition: opacity 0.2s;
-    }
+.life-med-slot:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-light);
+}
 
-    .life-item:hover .life-item-actions {
-      opacity: 1;
-    }
+.life-med-slot.taken {
+  background: color-mix(in srgb, var(--cat-일상) 12%, transparent);
+  border-color: var(--cat-일상);
+  color: var(--cat-일상);
+}
 
-    @media (hover: none) {
-      .life-item-actions {
-        opacity: 1;
-      }
-    }
+.life-med-slot-main,
+.life-meta-chip {
+  gap: 5px;
+  min-width: 0;
+}
 
-    .life-action-btn {
-      width: 32px;
-      height: 32px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background-color 0.2s, border-color 0.2s;
-    }
+.life-med-slot-label,
+.life-task-title,
+.life-habit-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-    .life-action-btn:hover {
-      background: var(--bg-secondary);
-    }
+.life-med-slot-time {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 
-    .life-action-btn.delete:hover {
-      background: color-mix(in srgb, var(--accent-danger) 20%, transparent);
-      border-color: var(--accent-danger);
-    }
+.life-section-foot {
+  display: flex;
+  justify-content: flex-end;
+}
 
-    .life-empty {
-      text-align: center;
-      padding: 40px;
-      color: var(--text-muted);
-    }
+.life-soft-action {
+  min-height: 30px;
+  padding: 4px 9px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+}
 
-    .life-empty-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-    }
+.life-habit-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 32px;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 10px 8px 14px;
+  overflow: hidden;
+}
 
-    .life-empty-text {
-      font-size: 16px;
-    }
+.life-habit-row::before,
+.life-task-row::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--task-cat-color, var(--cat-일상));
+}
 
-    /* 백데이트 메뉴 (롱프레스) */
-    .backdate-menu {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      box-shadow: 0 4px 16px var(--shadow-color);
-      overflow: hidden;
-      min-width: 140px;
-      animation: backdate-menu-in 0.15s ease-out;
-    }
+.life-habit-row::before {
+  background: var(--cat-일상);
+}
 
-    @keyframes backdate-menu-in {
-      from { opacity: 0; transform: translateY(-4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+.life-habit-row:hover,
+.life-task-row:hover,
+.life-shell .resolution-card:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+}
 
-    .backdate-menu-item {
-      padding: 12px 16px;
-      font-size: 15px;
-      color: var(--text-primary);
-      cursor: pointer;
-    }
+.life-habit-name,
+.life-task-title,
+.life-shell .resolution-name {
+  min-width: 0;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 650;
+}
 
-    .backdate-menu-item:not(:last-child) {
-      border-bottom: 1px solid var(--border-light);
-    }
+.life-habit-streak {
+  gap: 4px;
+  color: var(--accent-celebration);
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
 
-    .backdate-menu-item:hover {
-      background: var(--bg-tertiary);
-    }
+.life-habit-toggle,
+.life-task-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: 2px solid var(--border-color);
+  color: var(--task-cat-color, var(--cat-일상));
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
 
-    .backdate-menu-item:active {
-      background: color-mix(in srgb, var(--accent-primary) 15%, transparent);
-    }
+.life-habit-toggle {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--cat-일상);
+}
 
-    .backdate-menu-custom {
-      padding: 8px 12px;
-    }
+.life-task-check {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
 
-    .backdate-date-input {
-      width: 100%;
-      padding: 8px 10px;
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      color: var(--text-primary);
-      font-size: 14px;
-      color-scheme: dark light;
-    }
+.life-habit-toggle:hover,
+.life-task-check:hover {
+  background: var(--bg-secondary);
+  border-color: var(--task-cat-color, var(--cat-일상));
+}
+
+.life-habit-toggle.done {
+  background: var(--cat-일상);
+  border-color: var(--cat-일상);
+  color: var(--bg-primary);
+}
+
+.life-task-check.checked {
+  background: var(--accent-success);
+  border-color: var(--accent-success);
+  color: var(--bg-primary);
+}
+
+.life-task-count-row {
+  display: flex;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.life-filter-chips {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.life-filter-chip {
+  gap: 5px;
+  min-height: 28px;
+  padding: 4px 9px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.life-filter-chip:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.life-filter-chip.active {
+  background: color-mix(in srgb, var(--cat-일상) 10%, transparent);
+  border-color: var(--cat-일상);
+  color: var(--cat-일상);
+  font-weight: 800;
+}
+
+.life-filter-chip.cat-가족.active {
+  background: color-mix(in srgb, var(--cat-가족) 12%, transparent);
+  border-color: var(--cat-가족);
+  color: var(--cat-가족);
+}
+
+.life-filter-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--cat-일상);
+}
+
+.life-filter-chip.cat-가족 .life-filter-swatch {
+  background: var(--cat-가족);
+}
+
+.life-task-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 50px;
+  padding: 8px 10px 8px 14px;
+  overflow: hidden;
+}
+
+.life-task-row.urgent {
+  border-color: color-mix(in srgb, var(--accent-danger) 34%, var(--border-light));
+}
+
+.life-task-row.warn {
+  border-color: color-mix(in srgb, var(--accent-warning) 34%, var(--border-light));
+}
+
+.life-task-row.completed {
+  opacity: 0.68;
+}
+
+.life-task-main {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.life-task-title {
+  line-height: 1.35;
+}
+
+.life-task-row.completed .life-task-title {
+  text-decoration: line-through;
+}
+
+.life-task-meta {
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.life-dday-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.life-dday-chip.urgent {
+  background: color-mix(in srgb, var(--accent-danger) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent-danger) 36%, var(--border-light));
+  color: var(--accent-danger);
+}
+
+.life-dday-chip.warn {
+  background: color-mix(in srgb, var(--accent-warning) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent-warning) 36%, var(--border-light));
+  color: var(--accent-warning);
+}
+
+.life-dday-chip.none {
+  color: var(--text-muted);
+}
+
+.life-task-actions,
+.resolution-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.life-icon-btn {
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  padding: 0;
+  color: var(--text-muted);
+}
+
+.life-icon-btn.danger {
+  color: var(--accent-danger);
+}
+
+.life-icon-btn.danger:hover {
+  background: color-mix(in srgb, var(--accent-danger) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent-danger) 36%, var(--border-light));
+}
+
+.life-subtasks {
+  grid-column: 2 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding-top: 2px;
+}
+
+.life-subtask-chip {
+  gap: 4px;
+  min-height: 26px;
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.life-subtask-chip:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.life-subtask-chip.done {
+  background: color-mix(in srgb, var(--accent-success) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent-success) 36%, var(--border-light));
+  color: var(--accent-success);
+}
+
+.life-completed-details {
+  border-top: 1px dashed var(--border-light);
+  padding-top: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.life-completed-details summary {
+  cursor: pointer;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+}
+
+.life-empty-inline,
+.resolution-empty {
+  padding: 12px;
+  background: var(--bg-primary);
+  border: 1px dashed var(--border-light);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.life-shell .resolution-section {
+  margin: 0;
+}
+
+.life-shell .resolution-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 10px;
+  cursor: pointer;
+}
+
+.life-shell .resolution-days {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.life-shell .resolution-day-count {
+  color: var(--cat-일상);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.backdate-menu {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 16px var(--shadow-color);
+  overflow: hidden;
+  min-width: 140px;
+  animation: backdate-menu-in 0.15s ease-out;
+}
+
+@keyframes backdate-menu-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.backdate-menu-item {
+  padding: 12px 16px;
+  font-size: 15px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.backdate-menu-item:not(:last-child) {
+  border-bottom: 1px solid var(--border-light);
+}
+
+.backdate-menu-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.backdate-menu-item:active {
+  background: color-mix(in srgb, var(--accent-primary) 15%, transparent);
+}
+
+.backdate-menu-custom {
+  padding: 8px 12px;
+}
+
+.backdate-date-input {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 14px;
+  color-scheme: dark light;
+}
+
+@media (min-width: 760px) {
+  .life-med-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 8px;
+  }
+}
+
+@media (max-width: 720px) {
+  .life-anchors {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .life-section-heading.split {
+    display: grid;
+    justify-items: stretch;
+  }
+
+  .life-filter-chips {
+    justify-content: flex-start;
+  }
+
+  .life-task-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .life-task-actions {
+    grid-column: 2 / -1;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .life-topbar {
+    align-items: flex-start;
+  }
+
+  .life-add-focus span {
+    display: none;
+  }
+
+  .life-med-slots,
+  .life-med-slots.three {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .life-shell *,
+  .life-shell *::before,
+  .life-shell *::after,
+  .backdate-menu {
+    animation: none;
+    transition: none;
+  }
+}

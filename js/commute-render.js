@@ -272,14 +272,14 @@ function renderCommuteDayView(direction, dayTrips, rhythm, routes, viewDate) {
     let cls = 'good';
     if (trip.duration > expected * 1.2) cls = 'bad';
     else if (trip.duration > expected) cls = 'normal';
-    html += '<div style="text-align:center"><span class="commute-duration-badge ' + cls + '">⏱️ ' + trip.duration + '분</span></div>';
+    html += '<div style="text-align:center"><span class="commute-duration-badge ' + cls + '">' + _commuteIcon('clock', 14) + trip.duration + '분</span></div>';
   }
   html += '</div>';
 
   if (trip && trip.routeId) {
     const currentCondition = trip.conditions || 'clear';
     html += '<div class="commute-conditions-row">';
-    [['clear','☀️ 맑음'],['rain','🌧️ 비'],['snow','❄️ 눈']].forEach(function(pair) {
+    [['clear','맑음'],['rain','비'],['snow','눈']].forEach(function(pair) {
       html += '<button class="commute-condition-btn' + (currentCondition === pair[0] ? ' selected' : '') + '" onclick="setCommuteCondition(\'' + escapeAttr(pair[0]) + '\')">' + pair[1] + '</button>';
     });
     html += '</div><div style="height:12px"></div>';
@@ -289,7 +289,7 @@ function renderCommuteDayView(direction, dayTrips, rhythm, routes, viewDate) {
     const rec = getCommuteRecommendation(selectedRouteId, 'morning');
     if (rec) {
       const confLabels = { high: '높음 (10회+)', medium: '중간 (5회+)', low: '낮음 (<5회)' };
-      html += '<div class="commute-recommend-card"><div class="commute-recommend-title">💡 추천 출발시간</div>';
+      html += '<div class="commute-recommend-card"><div class="commute-recommend-title">추천 출발시간</div>';
       html += '<div class="commute-recommend-time">' + rec.recommendedDepartTime + '</div>';
       html += '<div class="commute-recommend-detail">평균 ' + rec.avgDuration + '분 · 안전값 ' + rec.safeDuration + '분 · 버퍼 ' + appState.commuteTracker.settings.bufferMinutes + '분</div>';
       html += '<span class="commute-recommend-confidence ' + rec.confidence + '">신뢰도: ' + confLabels[rec.confidence] + '</span></div>';
@@ -305,15 +305,15 @@ function renderCommuteDayView(direction, dayTrips, rhythm, routes, viewDate) {
     html += '<div class="commute-route-info"><div class="commute-route-name">' + escapeHtml(r.name) + '</div>';
     if (r.description) html += '<div class="commute-route-desc">' + escapeHtml(r.description) + '</div>';
     html += '</div><span class="commute-route-time">' + r.expectedDuration + '분</span>';
-    html += '<div class="commute-route-actions"><button class="commute-route-action-btn" onclick="event.stopPropagation();duplicateCommuteRoute(\'' + escapeAttr(r.id) + '\')" title="복사" aria-label="루트 복사">📋</button><button class="commute-route-action-btn" onclick="event.stopPropagation();openCommuteRouteModal(\'' + escapeAttr(r.id) + '\')" title="수정" aria-label="루트 수정">✏️</button></div></div>';
+    html += '<div class="commute-route-actions"><button class="commute-route-action-btn" onclick="event.stopPropagation();duplicateCommuteRoute(\'' + escapeAttr(r.id) + '\')" title="복사" aria-label="루트 복사">' + _commuteIcon('list', 14) + '</button><button class="commute-route-action-btn" onclick="event.stopPropagation();openCommuteRouteModal(\'' + escapeAttr(r.id) + '\')" title="수정" aria-label="루트 수정">' + _commuteIcon('edit', 14) + '</button></div></div>';
   });
   html += '</div>';
 
   const recentDetail = getRecentCommuteDetail(direction);
   if (recentDetail.length > 0) {
-    html += '<div class="commute-recent-summary"><div class="commute-recent-title">📊 최근 7일 ' + dirLabel + '</div>';
+    html += '<div class="commute-recent-summary"><div class="commute-recent-title">최근 7일 ' + dirLabel + '</div>';
     recentDetail.forEach(function(r) {
-      const condIcon = r.conditions === 'rain' ? '🌧️' : (r.conditions === 'snow' ? '❄️' : '');
+      const condIcon = r.conditions === 'rain' ? '비' : (r.conditions === 'snow' ? '눈' : '');
       const timeRange = (r.depart && r.arrive) ? (r.depart + ' → ' + r.arrive) : (r.depart || r.arrive || '-');
       html += '<div class="commute-recent-detail-row">';
       html += '<div class="commute-recent-day">' + escapeHtml(r.dayLabel) + '</div>';
@@ -342,7 +342,7 @@ function renderCommuteHistoryView() {
   const allDates = Object.keys(trips).sort((a,b) => b.localeCompare(a)); // 최신순
 
   if (allDates.length === 0) {
-    return '<div class="commute-empty"><div class="commute-empty-icon">📋</div><div class="commute-empty-text">통근 기록이 없습니다</div></div>';
+    return '<div class="commute-empty"><div class="commute-empty-icon">' + _commuteIcon('list', 28) + '</div><div class="commute-empty-text">통근 기록이 없습니다</div></div>';
   }
 
   let html = '<div class="commute-history-list">';
@@ -368,14 +368,14 @@ function renderCommuteHistoryView() {
       const route = appState.commuteTracker.routes.find(r => r.id === morning.routeId);
       const depart = rhythmData?.homeDepart || '-';
       const arrive = rhythmData?.workArrive || '-';
-      const condIcon = morning.conditions === 'rain' ? '🌧️' : (morning.conditions === 'snow' ? '❄️' : '');
+      const condIcon = morning.conditions === 'rain' ? '비' : (morning.conditions === 'snow' ? '눈' : '');
       html += '<div class="commute-history-trip morning">';
-      html += '<span class="commute-history-dir">🌅 출근</span>';
+      html += '<span class="commute-history-dir">출근</span>';
       html += '<span class="commute-history-route" style="color:' + escapeHtml(route?.color || 'var(--text-muted)') + '">' + escapeHtml(route?.name || '-') + '</span>';
       html += '<span class="commute-history-times">' + depart + ' → ' + arrive + '</span>';
       html += '<span class="commute-history-dur">' + morning.duration + '분' + (condIcon ? ' ' + condIcon : '') + '</span>';
-      html += '<button class="commute-history-edit-btn" onclick="event.stopPropagation(); editCommuteTrip(\'' + escapeAttr(dateStr) + '\', \'morning\')" title="수정">✏️</button>';
-      html += '<button class="commute-history-edit-btn" onclick="event.stopPropagation(); deleteCommuteTrip(\'' + escapeAttr(dateStr) + '\', \'morning\')" title="삭제" style="color:var(--accent-danger);">🗑️</button>';
+      html += '<button class="commute-history-edit-btn" onclick="event.stopPropagation(); editCommuteTrip(\'' + escapeAttr(dateStr) + '\', \'morning\')" title="수정">' + _commuteIcon('edit', 14) + '</button>';
+      html += '<button class="commute-history-edit-btn" onclick="event.stopPropagation(); deleteCommuteTrip(\'' + escapeAttr(dateStr) + '\', \'morning\')" title="삭제" style="color:var(--accent-danger);">' + _commuteIcon('trash', 14) + '</button>';
       html += '</div>';
     }
 
@@ -383,14 +383,14 @@ function renderCommuteHistoryView() {
       const route = appState.commuteTracker.routes.find(r => r.id === evening.routeId);
       const depart = rhythmData?.workDepart || '-';
       const arrive = rhythmData?.homeArrive || '-';
-      const condIcon = evening.conditions === 'rain' ? '🌧️' : (evening.conditions === 'snow' ? '❄️' : '');
+      const condIcon = evening.conditions === 'rain' ? '비' : (evening.conditions === 'snow' ? '눈' : '');
       html += '<div class="commute-history-trip evening">';
-      html += '<span class="commute-history-dir">🌆 퇴근</span>';
+      html += '<span class="commute-history-dir">퇴근</span>';
       html += '<span class="commute-history-route" style="color:' + escapeHtml(route?.color || 'var(--text-muted)') + '">' + escapeHtml(route?.name || '-') + '</span>';
       html += '<span class="commute-history-times">' + depart + ' → ' + arrive + '</span>';
       html += '<span class="commute-history-dur">' + evening.duration + '분' + (condIcon ? ' ' + condIcon : '') + '</span>';
-      html += '<button class="commute-history-edit-btn" onclick="event.stopPropagation(); editCommuteTrip(\'' + escapeAttr(dateStr) + '\', \'evening\')" title="수정">✏️</button>';
-      html += '<button class="commute-history-edit-btn" onclick="event.stopPropagation(); deleteCommuteTrip(\'' + escapeAttr(dateStr) + '\', \'evening\')" title="삭제" style="color:var(--accent-danger);">🗑️</button>';
+      html += '<button class="commute-history-edit-btn" onclick="event.stopPropagation(); editCommuteTrip(\'' + escapeAttr(dateStr) + '\', \'evening\')" title="수정">' + _commuteIcon('edit', 14) + '</button>';
+      html += '<button class="commute-history-edit-btn" onclick="event.stopPropagation(); deleteCommuteTrip(\'' + escapeAttr(dateStr) + '\', \'evening\')" title="삭제" style="color:var(--accent-danger);">' + _commuteIcon('trash', 14) + '</button>';
       html += '</div>';
     }
 
@@ -398,10 +398,10 @@ function renderCommuteHistoryView() {
     if (!hasMorning || !hasEvening) {
       html += '<div class="commute-history-add-row">';
       if (!hasMorning) {
-        html += '<button class="commute-history-add-btn" onclick="goToCommuteDate(\'' + escapeAttr(dateStr) + '\', \'morning\')" title="출근 기록 추가">+ 🌅 출근</button>';
+        html += '<button class="commute-history-add-btn" onclick="goToCommuteDate(\'' + escapeAttr(dateStr) + '\', \'morning\')" title="출근 기록 추가">+ 출근</button>';
       }
       if (!hasEvening) {
-        html += '<button class="commute-history-add-btn" onclick="goToCommuteDate(\'' + escapeAttr(dateStr) + '\', \'evening\')" title="퇴근 기록 추가">+ 🌆 퇴근</button>';
+        html += '<button class="commute-history-add-btn" onclick="goToCommuteDate(\'' + escapeAttr(dateStr) + '\', \'evening\')" title="퇴근 기록 추가">+ 퇴근</button>';
       }
       html += '</div>';
     }
@@ -424,13 +424,13 @@ function renderCommuteStatsView(routes) {
   let html = '';
   const allStats = routes.map(function(r) { return { route: r, stats: getCommuteRouteStats(r.id) }; }).filter(function(s) { return s.stats; });
   if (allStats.length === 0) {
-    return '<div class="commute-empty"><div class="commute-empty-icon">📊</div><div class="commute-empty-text">통근 기록을 쌓으면 여기에 통계가 표시됩니다</div></div>';
+    return '<div class="commute-empty"><div class="commute-empty-icon">' + _commuteIcon('bar-chart', 28) + '</div><div class="commute-empty-text">통근 기록을 쌓으면 여기에 통계가 표시됩니다</div></div>';
   }
   const sorted = allStats.slice().sort(function(a, b) { return a.stats.avg - b.stats.avg; });
   const best = sorted[0];
   const maxTrips = Math.max.apply(null, allStats.map(function(s) { return s.stats.totalTrips; }));
 
-  html += '<div class="commute-stats-card"><div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:12px">📊 이용 빈도</div>';
+  html += '<div class="commute-stats-card"><div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:12px">이용 빈도</div>';
   allStats.forEach(function(s) {
     const pct = maxTrips > 0 ? Math.round(s.stats.totalTrips / maxTrips * 100) : 0;
     html += '<div class="commute-freq-bar-wrap"><span class="commute-freq-bar-label">' + escapeHtml(s.route.name) + '</span>';
@@ -443,7 +443,7 @@ function renderCommuteStatsView(routes) {
     const isBest = s.route.id === best.route.id && allStats.length > 1;
     html += '<div class="commute-stats-card"><div class="commute-stats-header"><div class="commute-route-dot" style="background:' + escapeHtml(s.route.color) + '"></div>';
     html += '<span class="commute-stats-route-name">' + escapeHtml(s.route.name) + '</span><span class="commute-stats-count">' + s.stats.totalTrips + '회</span>';
-    if (isBest) html += '<span class="commute-best-badge">🏆 추천</span>';
+    if (isBest) html += '<span class="commute-best-badge">추천</span>';
     html += '</div><div class="commute-stats-grid">';
     html += '<div class="commute-stat-item"><div class="commute-stat-value">' + s.stats.avg + '분</div><div class="commute-stat-label">평균</div></div>';
     html += '<div class="commute-stat-item"><div class="commute-stat-value">' + s.stats.min + '분</div><div class="commute-stat-label">최단</div></div>';
@@ -460,7 +460,7 @@ function renderCommuteStatsView(routes) {
     });
   });
   if (Object.keys(weekdayData).length > 0) {
-    html += '<div class="commute-stats-card"><div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:12px">📅 요일별 평균</div>';
+    html += '<div class="commute-stats-card"><div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:12px">요일별 평균</div>';
     html += '<div class="commute-weekday-grid">';
     for (var i = 0; i < 7; i++) {
       var durations = weekdayData[i] || [];

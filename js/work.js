@@ -401,17 +401,25 @@ function _stageIndexFor(project) {
 
 function _renderProjectMaster(activeProjects) {
   const selected = appState.activeWorkProject;
-  const list = activeProjects.map(project => {
-    const stats = _projectStats(project);
-    const active = project.id === selected;
-    const stale = getProjectStaleDays(project);
-    return '<button class="work-master-project ' + (active ? 'active ' : '') + _deadlineClass(project.deadline) + '" onclick="openWorkProjectDetail(\'' + escapeAttr(project.id) + '\')" aria-current="' + active + '">' +
-      '<span class="work-master-project-head"><strong>' + escapeHtml(project.name || '제목 없음') + '</strong>' + _renderDdayChip(project.deadline) + '</span>' +
-      _renderStageProgress(project, stats) +
-      '<small>' + stats.completedTasks + '/' + stats.totalTasks + ' 항목 · ' + stats.completedStages + '/' + stats.totalStages + ' 단계' + (stale >= 7 ? ' · ' + stale + '일 정체' : '') + '</small>' +
-    '</button>';
-  }).join('');
-  return '<aside class="work-master-panel">' + _renderProjectViewToggle() + '<div class="work-master-list" data-view="' + escapeAttr(appState.workProjectView) + '">' + (list || '<div class="work-empty-inline">활성 프로젝트 없음</div>') + '</div></aside>';
+  let content;
+  if (appState.workProjectView === 'calendar' && typeof renderWorkCalendarView === 'function') {
+    content = renderWorkCalendarView();
+  } else if (appState.workProjectView === 'timeline' && typeof renderWorkTimeline === 'function') {
+    content = renderWorkTimeline();
+  } else {
+    const list = activeProjects.map(project => {
+      const stats = _projectStats(project);
+      const active = project.id === selected;
+      const stale = getProjectStaleDays(project);
+      return '<button class="work-master-project ' + (active ? 'active ' : '') + _deadlineClass(project.deadline) + '" onclick="openWorkProjectDetail(\'' + escapeAttr(project.id) + '\')" aria-current="' + active + '">' +
+        '<span class="work-master-project-head"><strong>' + escapeHtml(project.name || '제목 없음') + '</strong>' + _renderDdayChip(project.deadline) + '</span>' +
+        _renderStageProgress(project, stats) +
+        '<small>' + stats.completedTasks + '/' + stats.totalTasks + ' 항목 · ' + stats.completedStages + '/' + stats.totalStages + ' 단계' + (stale >= 7 ? ' · ' + stale + '일 정체' : '') + '</small>' +
+      '</button>';
+    }).join('');
+    content = list || '<div class="work-empty-inline">활성 프로젝트 없음</div>';
+  }
+  return '<aside class="work-master-panel">' + _renderProjectViewToggle() + '<div class="work-master-list" data-view="' + escapeAttr(appState.workProjectView) + '">' + content + '</div></aside>';
 }
 
 function _stageStats(stage) {

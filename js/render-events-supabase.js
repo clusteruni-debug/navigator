@@ -103,7 +103,8 @@ function _syncSupabaseHighlightCard() {
     if (!targetCard) return;
 
     targetCard.classList.add('event-card--highlight');
-    targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    targetCard.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
   });
 }
 

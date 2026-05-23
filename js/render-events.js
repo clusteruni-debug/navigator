@@ -1,5 +1,5 @@
 // ============================================
-// 렌더링 - 이벤트 탭 오케스트레이터 + 📌 내 이벤트 (로컬)
+// 렌더링 - 이벤트 탭 오케스트레이터 + 내 이벤트 (로컬)
 // Supabase 수신 이벤트는 render-events-supabase.js에서 처리
 // ============================================
 
@@ -233,9 +233,10 @@ function _renderUnifiedEventCard(event) {
   const action = event.source === 'received'
     ? `completeSupabaseEvent('${escapeAttr(event.rawId)}')`
     : `completeTask('${escapeAttr(event.rawId)}')`;
+  const sourceClass = event.source === 'received' ? 'supabase-event-card' : 'local-event-card';
 
   return `
-    <article class="event-card event-source-${event.source} ${urgency}" data-event-id="${escapeAttr(event.rawId)}" data-event-source="${escapeAttr(event.source)}">
+    <article class="event-card ${sourceClass} event-source-${event.source} ${urgency}" data-event-id="${escapeAttr(event.rawId)}" data-event-source="${escapeAttr(event.source)}">
       <div class="event-card-main">
         <div class="event-card-row">
           <span class="event-source-pill ${event.source}">${escapeHtml(event.sourceLabel)}</span>
@@ -312,7 +313,7 @@ function setEventSourceFilter(filter) {
 window.setEventSourceFilter = setEventSourceFilter;
 
 // ============================================
-// ✅ 참여 완료 통합 로그 (수신 + 로컬, 페이지네이션)
+// 참여 완료 통합 로그 (수신 + 로컬, 페이지네이션)
 // ============================================
 
 function _renderCompletedLog(completedEvents, localSubmitted) {
@@ -404,15 +405,14 @@ function changeCompletedLogPage(page) {
 window.changeCompletedLogPage = changeCompletedLogPage;
 
 // ============================================
-// 📌 내 이벤트 섹션 (로컬)
+// 내 이벤트 섹션 (로컬)
 // ============================================
 
 function _renderLocalEventsSection(pendingEvents) {
+  if (_eventSourceFilter === 'received') return '';
   const localIds = pendingEvents.map(event => String(event.id));
   const visibleSelectArgs = localIds.map(id => "'" + escapeAttr(id) + "'").join(',');
-  const eventTrash = _eventSourceFilter === 'received'
-    ? []
-    : (appState.trash || []).filter(t => t.category === '부업');
+  const eventTrash = (appState.trash || []).filter(t => t.category === '부업');
   let trashContent = '';
   if (eventTrash.length > 0) {
     const isCollapsed = _collapsedEventGroups.has('local_trash');
@@ -470,59 +470,5 @@ function _renderLocalEventsSection(pendingEvents) {
 }
 
 function _renderLocalEventCard(task) {
-  const days = getDaysLeft(task.deadline);
-  const startDateStr = task.startDate ? new Date(task.startDate + (task.startDate.length === 10 ? 'T00:00:00' : '')).toLocaleDateString('ko-KR', {month:'short', day:'numeric'}) : '';
-  const deadlineStr = task.deadline ? new Date(task.deadline + (task.deadline.length === 10 ? 'T00:00:00' : '')).toLocaleDateString('ko-KR', {month:'short', day:'numeric'}) : '';
-  let dateDisplay = '';
-  if (startDateStr && deadlineStr) dateDisplay = startDateStr + '~' + deadlineStr;
-  else if (deadlineStr) dateDisplay = '~' + deadlineStr;
-  else if (startDateStr) dateDisplay = startDateStr + '~';
-
-  const metaItems = [];
-  if (task.organizer) metaItems.push(task.organizer);
-  if (task.eventType) metaItems.push(task.eventType);
-  if (task.expectedRevenue) metaItems.push('💰 ' + Number(task.expectedRevenue).toLocaleString() + '원');
-  const metaStr = metaItems.join(' · ');
-
-  const hasSubtasks = task.subtasks && task.subtasks.length > 0;
-  const stDone = hasSubtasks ? task.subtasks.filter(s => s.completed).length : 0;
-  const stTotal = hasSubtasks ? task.subtasks.length : 0;
-
-  return `
-    <div class="event-card ${days !== null && days <= 1 ? 'urgent' : (days !== null && days <= 3 ? 'warning' : '')}" style="${_eventBulkSelectMode ? 'display:flex;align-items:center' : ''}">
-      ${_eventBulkSelectMode ? '<div class="event-check-col"><input type="checkbox" ' + (_eventBulkSelectedIds.has(task.id) ? 'checked' : '') + ' onchange="toggleEventSelection(\'' + escapeAttr(task.id) + '\')"></div>' : ''}
-      <div style="flex:1;min-width:0">
-        <div class="event-card-main">
-          <div class="event-title">${escapeHtml(task.title)}${hasSubtasks ? ' <span class="event-subtask-badge">' + stDone + '/' + stTotal + '</span>' : ''}</div>
-          ${metaStr ? '<div class="event-meta-info">' + escapeHtml(metaStr) + '</div>' : ''}
-          ${task.description ? '<div class="event-description" title="' + escapeAttr(task.description) + '">' + escapeHtml(task.description) + '</div>' : ''}
-        </div>
-        ${dateDisplay ? '<span class="event-compact-date">' + dateDisplay + '</span>' : ''}
-        ${_eventBulkSelectMode ? '' : `<div class="event-actions">
-          ${sanitizeUrl(task.link) ? '<a href="' + escapeHtml(sanitizeUrl(task.link)) + '" target="_blank" rel="noopener" class="btn btn-small btn-link">🔗</a>' : ''}
-          <button class="btn btn-small btn-submit" onclick="completeTask('${escapeAttr(task.id)}')" aria-label="완료">✓</button>
-          <button class="btn btn-small btn-edit" onclick="editTask('${escapeAttr(task.id)}')">${svgIcon('edit', 14)}</button>
-          <button class="btn btn-small btn-delete" onclick="deleteTask('${escapeAttr(task.id)}')">${svgIcon('trash', 14)}</button>
-        </div>`}
-        <div class="event-dday">${formatDday(days)}</div>
-        ${hasSubtasks ? `
-        <div onclick="event.stopPropagation();">
-          <button class="subtask-progress-indicator${task.subtasks.filter(s=>s.completed).length === task.subtasks.length ? ' all-done' : ''}" onclick="toggleSubtaskChips('${escapeAttr(task.id)}')" style="display:inline-block; margin: 4px 0 2px 0;" title="서브태스크 접기/펼치기" aria-label="서브태스크 ${task.subtasks.filter(s=>s.completed).length}/${task.subtasks.length} 접기/펼치기">${task.subtasks.filter(s=>s.completed).length}/${task.subtasks.length} ${appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id] ? '▶' : '▼'}</button>
-          ${!(appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id]) ? `
-            <div class="subtask-chips event-subtask-chips">
-              ${task.subtasks.map((st, idx) => `
-                <span class="subtask-chip ${st.completed ? 'done' : ''}" onclick="if(this._longPressed){this._longPressed=false;return;}toggleSubtaskComplete('${escapeAttr(task.id)}', ${idx})"
-                  onpointerdown="this._lpTimer = setTimeout(() => { this._longPressed = true; showSubtaskBackdateMenu('${escapeAttr(task.id)}', ${idx}, this); }, 500)"
-                  onpointerup="clearTimeout(this._lpTimer)"
-                  onpointerleave="clearTimeout(this._lpTimer)">
-                  <span class="subtask-chip-check">${st.completed ? '✓' : '○'}</span>${escapeHtml(st.text)}
-                </span>
-              `).join('')}
-            </div>
-          ` : ''}
-        </div>
-        ` : ''}
-      </div>
-    </div>
-  `;
+  return _renderUnifiedEventCard(_buildUnifiedEvents([], [task])[0]);
 }

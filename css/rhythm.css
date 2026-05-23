@@ -363,3 +363,33 @@
       text-align: right;
     }
 
+    /* 일상 탭에서 오늘 탭과 공유하는 6-slot rhythm strip */
+    .life-shell .rhythm-strip {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin-bottom: 0;
+    }
+
+    @media (min-width: 640px) {
+      .life-shell .rhythm-strip {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+    }
+
+    .life-shell .rhythm-btn {
+      min-height: 74px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      color: var(--text-secondary);
+    }
+
+    .life-shell .rhythm-btn:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--cat-일상);
+    }
+
+    .life-shell .rhythm-btn.recorded {
+      background: color-mix(in srgb, var(--cat-일상) 12%, transparent);
+      border-color: var(--cat-일상);
+      color: var(--cat-일상);
+    }
