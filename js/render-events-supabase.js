@@ -13,9 +13,9 @@ function getDaysLeft(deadline) {
 
 function formatDday(days) {
   if (days === null) return '';
-  if (days < 0) return '<span style="color:var(--accent-danger)">D+' + Math.abs(days) + '</span>';
-  if (days === 0) return '<span style="color:var(--accent-danger)">D-Day</span>';
-  if (days <= 3) return '<span style="color:var(--accent-warning)">D-' + days + '</span>';
+  if (days < 0) return 'D+' + Math.abs(days);
+  if (days === 0) return 'D-Day';
+  if (days <= 3) return 'D-' + days;
   return 'D-' + days;
 }
 
@@ -27,6 +27,45 @@ function getEffectiveSupabaseEventStatus(event) {
 
 let _supabaseHighlightRetryId = null;
 let _supabaseHighlightFrame = null;
+const SUPABASE_EVENT_CACHE_STORAGE_KEY = 'navigator-supabase-events-cache-v1';
+
+function _hydrateSupabaseEventCache() {
+  try {
+    const cached = safeParseJSON(SUPABASE_EVENT_CACHE_STORAGE_KEY, null);
+    if (!cached || !Array.isArray(cached.data)) return;
+    _supabaseEventCache.data = cached.data.map(event => ({
+      ...event,
+      effectiveStatus: event.effectiveStatus || getEffectiveSupabaseEventStatus(event)
+    }));
+    _supabaseEventCache.fetchedAt = typeof cached.fetchedAt === 'number' ? cached.fetchedAt : null;
+  } catch (error) {
+    console.warn('Supabase 이벤트 캐시 복원 실패:', error);
+  }
+}
+
+function _persistSupabaseEventCache() {
+  try {
+    localStorage.setItem(SUPABASE_EVENT_CACHE_STORAGE_KEY, JSON.stringify({
+      data: _supabaseEventCache.data || [],
+      fetchedAt: _supabaseEventCache.fetchedAt || Date.now()
+    }));
+  } catch (error) {
+    console.warn('Supabase 이벤트 캐시 저장 실패:', error);
+  }
+}
+
+function _installSupabaseEventRevalidator() {
+  if (window._supabaseEventRevalidatorInstalled) return;
+  window._supabaseEventRevalidatorInstalled = true;
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    if (appState.currentTab !== 'events') return;
+    if (_needsSupabaseFetch()) refreshSupabaseEvents();
+  });
+}
+
+_hydrateSupabaseEventCache();
+_installSupabaseEventRevalidator();
 
 function _syncSupabaseHighlightCard() {
   const highlightId = _supabaseEventCache.highlightId ? String(_supabaseEventCache.highlightId) : null;
@@ -133,6 +172,7 @@ async function fetchSupabaseEvents() {
       };
     });
     _supabaseEventCache.fetchedAt = Date.now();
+    _persistSupabaseEventCache();
   } catch (error) {
     console.error('Supabase 이벤트 조회 실패:', error);
     _supabaseEventCache.error = '이벤트를 불러올 수 없습니다';
@@ -156,10 +196,11 @@ window.refreshSupabaseEvents = refreshSupabaseEvents;
 async function completeSupabaseEvent(supabaseId) {
   const event = (_supabaseEventCache.data || []).find(e => String(e.supabaseId) === String(supabaseId));
   if (!event) return;
+  const encodedId = encodeURIComponent(String(supabaseId));
 
   try {
     const res = await fetch(
-      `${TG_SUPABASE_URL}/rest/v1/telegram_messages?id=eq.${supabaseId}`,
+      `${TG_SUPABASE_URL}/rest/v1/telegram_messages?id=eq.${encodedId}`,
       {
         method: 'PATCH',
         headers: {
@@ -181,11 +222,13 @@ async function completeSupabaseEvent(supabaseId) {
     if (!appState.completionLog[dateKey]) appState.completionLog[dateKey] = [];
     appState.completionLog[dateKey].push({ t: event.title, c: '부업', at: timeStr, rv: rv || undefined });
     saveCompletionLog();
+    saveState();
 
     // 캐시 로컬 업데이트
     event.status = 'done';
     event.effectiveStatus = 'done';
-    showToast('✅ 참여 완료!', 'success');
+    _persistSupabaseEventCache();
+    showToast('참여 완료', 'success');
     renderStatic();
   } catch (error) {
     console.error('Supabase 이벤트 완료 실패:', error);
@@ -197,10 +240,11 @@ window.completeSupabaseEvent = completeSupabaseEvent;
 async function uncompleteSupabaseEvent(supabaseId) {
   const event = (_supabaseEventCache.data || []).find(e => String(e.supabaseId) === String(supabaseId));
   if (!event) return;
+  const encodedId = encodeURIComponent(String(supabaseId));
 
   try {
     const res = await fetch(
-      `${TG_SUPABASE_URL}/rest/v1/telegram_messages?id=eq.${supabaseId}`,
+      `${TG_SUPABASE_URL}/rest/v1/telegram_messages?id=eq.${encodedId}`,
       {
         method: 'PATCH',
         headers: {
@@ -216,6 +260,7 @@ async function uncompleteSupabaseEvent(supabaseId) {
 
     event.status = 'pending';
     event.effectiveStatus = 'pending';
+    _persistSupabaseEventCache();
 
     // completionLog에서 해당 엔트리 찾아서 splice + soft-delete
     const title = event.title || '';
@@ -233,7 +278,10 @@ async function uncompleteSupabaseEvent(supabaseId) {
         break;
       }
     }
-    if (removed) saveCompletionLog();
+    if (removed) {
+      saveCompletionLog();
+      saveState();
+    }
 
     showToast('참여 완료 취소됨', 'info');
     renderStatic();

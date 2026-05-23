@@ -24,8 +24,68 @@ function loadCommuteTracker() {
   }
 }
 
-function setCommuteSubTab(tab) { appState.commuteSubTab = tab; renderStatic(); }
+const COMMUTE_SUB_TAB_ALIASES = { morning: 'today', evening: 'today', history: 'log', stats: 'log' };
+const COMMUTE_SUB_TABS = ['today', 'routes', 'log'];
+const COMMUTE_COLOR_OPTIONS = [
+  'var(--accent-primary)',
+  'var(--accent-purple)',
+  'var(--accent-danger)',
+  'var(--accent-warning-hover)',
+  'var(--accent-success)',
+  'var(--chart-blue)',
+  'var(--chart-lavender)',
+  'var(--chart-teal)'
+];
+
+function normalizeCommuteSubTab(tab) {
+  const candidate = COMMUTE_SUB_TAB_ALIASES[tab] || tab;
+  return COMMUTE_SUB_TABS.includes(candidate) ? candidate : 'today';
+}
+
+function getCommuteSubTab() {
+  const normalized = normalizeCommuteSubTab(appState.commuteSubTab);
+  if (appState.commuteSubTab !== normalized) appState.commuteSubTab = normalized;
+  return normalized;
+}
+window.getCommuteSubTab = getCommuteSubTab;
+
+function setCommuteSubTab(tab) { appState.commuteSubTab = normalizeCommuteSubTab(tab); renderStatic(); }
 window.setCommuteSubTab = setCommuteSubTab;
+
+function getCommuteDirection(direction) {
+  return direction === 'evening' ? 'evening' : 'morning';
+}
+
+function getCommuteActiveDirection() {
+  return getCommuteDirection(appState.commuteActiveDirection);
+}
+window.getCommuteActiveDirection = getCommuteActiveDirection;
+
+function setCommuteDirection(direction) {
+  appState.commuteActiveDirection = getCommuteDirection(direction);
+  renderStatic();
+}
+window.setCommuteDirection = setCommuteDirection;
+
+function getCommuteColorOptions() {
+  return COMMUTE_COLOR_OPTIONS.slice();
+}
+window.getCommuteColorOptions = getCommuteColorOptions;
+
+function getCommuteSafeColor(color) {
+  return COMMUTE_COLOR_OPTIONS.includes(color) ? color : 'var(--accent-primary)';
+}
+window.getCommuteSafeColor = getCommuteSafeColor;
+
+function triggerCommuteMode() {
+  appState.shuttleSuccess = true;
+  saveState();
+  if (typeof srAnnounce === 'function') srAnnounce('셔틀 성공 상태가 반영되었습니다. 오늘 탭으로 이동합니다.');
+  showToast('셔틀 성공 상태가 오늘 모드에 반영되었습니다', 'success');
+  if (typeof switchTab === 'function') switchTab('action');
+  else renderStatic();
+}
+window.triggerCommuteMode = triggerCommuteMode;
 
 function getCommuteViewDate() {
   return appState.commuteViewDate || getLocalDateStr();
@@ -86,19 +146,19 @@ function saveCommuteRoute() {
     name: name, type: typeEl ? typeEl.value : 'both',
     description: descEl ? descEl.value.trim() : '',
     expectedDuration: parseInt(durationEl ? durationEl.value : '45') || 45,
-    color: colorEl ? colorEl.dataset.color : 'var(--accent-primary)',
+    color: getCommuteSafeColor(colorEl ? colorEl.dataset.color : null),
     isActive: true, createdAt: now, updatedAt: now
   };
   if (appState.commuteRouteModal === 'add') {
     appState.commuteTracker.routes.push(route);
-    showToast('🚌 루트 추가됨', 'success');
+    showToast('루트가 추가되었습니다', 'success');
   } else {
     const idx = appState.commuteTracker.routes.findIndex(r => r.id === route.id);
     if (idx >= 0) {
       route.createdAt = appState.commuteTracker.routes[idx].createdAt;
       route.updatedAt = now; // 수정 시점 기록 — 기기 간 병합에서 최신 판별용
       appState.commuteTracker.routes[idx] = route;
-      showToast('✏️ 루트 수정됨', 'success');
+      showToast('루트가 수정되었습니다', 'success');
     }
   }
   appState.commuteRouteModal = null;
@@ -115,12 +175,12 @@ function deleteCommuteRoute(routeId) {
   appState.deletedIds.commuteRoutes[routeId] = new Date().toISOString();
   appState.commuteRouteModal = null;
   saveCommuteTracker(); renderStatic();
-  showToast('🗑️ 루트 삭제됨', 'success');
+  showToast('루트가 삭제되었습니다', 'success');
 }
 window.deleteCommuteRoute = deleteCommuteRoute;
 
 function selectCommuteRoute(routeId, direction) {
-  const dir = direction || appState.commuteSubTab;
+  const dir = getCommuteDirection(direction || appState.commuteActiveDirection);
   const dateStr = getCommuteViewDate();
   const today = getLocalDateStr();
   if (!appState.commuteTracker.trips[dateStr]) appState.commuteTracker.trips[dateStr] = {};
@@ -153,18 +213,20 @@ function selectCommuteRoute(routeId, direction) {
     routeId: routeId, departTime: departTime, arriveTime: arriveTime,
     duration: duration, conditions: (appState.commuteTracker.trips[dateStr][dir] || {}).conditions || 'clear'
   };
+  appState.commuteActiveDirection = dir;
   appState.commuteSelectedRoute[dir] = routeId;
   saveCommuteTracker(); renderStatic();
   const label = dateStr === today ? '오늘' : dateStr;
-  showToast('🚌 ' + label + ' 루트가 기록되었습니다', 'success');
+  showToast(label + ' 루트가 기록되었습니다', 'success');
 }
 window.selectCommuteRoute = selectCommuteRoute;
 
-function setCommuteCondition(condition) {
+function setCommuteCondition(condition, direction) {
   const dateStr = getCommuteViewDate();
-  const dir = appState.commuteSubTab;
+  const dir = getCommuteDirection(direction || appState.commuteActiveDirection);
   if (appState.commuteTracker.trips[dateStr] && appState.commuteTracker.trips[dateStr][dir]) {
     appState.commuteTracker.trips[dateStr][dir].conditions = condition;
+    appState.commuteActiveDirection = dir;
     saveCommuteTracker(); renderStatic();
   }
 }
@@ -183,8 +245,8 @@ function showCommuteTagPrompt(direction) {
   promptEl.id = 'commute-tag-prompt';
   promptEl.className = 'commute-tag-prompt';
   const dirLabel = direction === 'morning' ? '출근' : '퇴근';
-  let btns = routes.map(r => '<button class="commute-tag-prompt-btn" onclick="tagCommuteRoute(\'' + escapeAttr(r.id) + '\', \'' + escapeAttr(direction) + '\')" style="border-left:3px solid ' + escapeAttr(r.color) + '">' + escapeHtml(r.name) + '</button>').join('');
-  promptEl.innerHTML = '<div class="commute-tag-prompt-title">🚌 어느 루트로 ' + dirLabel + '하셨나요?</div><div class="commute-tag-prompt-routes">' + btns + '</div><div class="commute-tag-prompt-later" onclick="dismissCommuteTag()">나중에</div>';
+  let btns = routes.map(r => '<button class="commute-tag-prompt-btn" onclick="tagCommuteRoute(\'' + escapeAttr(r.id) + '\', \'' + escapeAttr(direction) + '\')" style="border-left:3px solid ' + escapeAttr(getCommuteSafeColor(r.color)) + '">' + escapeHtml(r.name) + '</button>').join('');
+  promptEl.innerHTML = '<div class="commute-tag-prompt-title">어느 루트로 ' + dirLabel + '하셨나요?</div><div class="commute-tag-prompt-routes">' + btns + '</div><div class="commute-tag-prompt-later" onclick="dismissCommuteTag()">나중에</div>';
   document.body.appendChild(promptEl);
   if (window._commuteTagTimeout) clearTimeout(window._commuteTagTimeout);
   window._commuteTagTimeout = setTimeout(() => { window._commuteTagTimeout = null; const el = document.getElementById('commute-tag-prompt'); if (el) el.remove(); }, 10000);
@@ -318,9 +380,9 @@ function getRecentCommuteDetail(direction) {
 
 function showCommuteOnboarding() {
   var presets = [
-    { name: '🚐 셔틀버스', type: 'morning', description: '회사 셔틀버스', expectedDuration: 30, color: 'var(--accent-success)' },
-    { name: '🚇 지하철+버스', type: 'both', description: '지하철 → 환승 → 버스', expectedDuration: 55, color: 'var(--accent-primary)' },
-    { name: '🚌 버스 직행', type: 'both', description: '직행 버스', expectedDuration: 45, color: 'var(--accent-warning-hover)' }
+    { name: '셔틀버스', type: 'morning', description: '회사 셔틀버스', expectedDuration: 30, color: 'var(--accent-success)' },
+    { name: '지하철+버스', type: 'both', description: '지하철 -> 환승 -> 버스', expectedDuration: 55, color: 'var(--accent-primary)' },
+    { name: '버스 직행', type: 'both', description: '직행 버스', expectedDuration: 45, color: 'var(--accent-warning-hover)' }
   ];
   presets.forEach(function(p) {
     appState.commuteTracker.routes.push({
@@ -331,7 +393,7 @@ function showCommuteOnboarding() {
     });
   });
   saveCommuteTracker(); renderStatic();
-  showToast('🚌 기본 루트 3개가 추가되었습니다', 'success');
+  showToast('기본 루트 3개가 추가되었습니다', 'success');
 }
 window.showCommuteOnboarding = showCommuteOnboarding;
 
@@ -358,7 +420,7 @@ function deleteCommuteTrip(dateStr, direction) {
       delete appState.commuteTracker.trips[dateStr];
     }
     saveCommuteTracker(); saveState(); renderStatic();
-    showToast('🗑️ ' + dirLabel + ' 기록이 삭제되었습니다', 'success');
+    showToast(dirLabel + ' 기록이 삭제되었습니다', 'success');
   }
 }
 window.deleteCommuteTrip = deleteCommuteTrip;
@@ -383,7 +445,7 @@ function editCommuteTrip(dateStr, direction) {
 
   trip.routeId = routes[idx].id;
   saveCommuteTracker(); renderStatic();
-  showToast('✏️ 루트가 변경되었습니다: ' + routes[idx].name, 'success');
+  showToast('루트가 변경되었습니다: ' + routes[idx].name, 'success');
 }
 window.editCommuteTrip = editCommuteTrip;
 
@@ -403,6 +465,6 @@ function duplicateCommuteRoute(routeId) {
   };
   appState.commuteTracker.routes.push(newRoute);
   saveCommuteTracker(); renderStatic();
-  showToast('📋 루트가 복사되었습니다: ' + newRoute.name, 'success');
+  showToast('루트가 복사되었습니다: ' + newRoute.name, 'success');
 }
 window.duplicateCommuteRoute = duplicateCommuteRoute;

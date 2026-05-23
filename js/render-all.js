@@ -255,7 +255,7 @@ function _renderAllTaskToolbar(query, categoryFilter) {
       <div class="chips all-filter-chips" role="group" aria-label="할일 카테고리 필터">${chips}</div>
       <label class="search all-task-search" aria-label="할일 검색">
         ${_allTasksIcon('search', 14)}
-        <input id="all-overview-search-input" type="search" placeholder="검색" value="${escapeAttr(appState.allTasksSearch || '')}" oninput="setAllTasksSearch(this.value)">
+        <input id="all-overview-search-input" type="search" aria-label="할일 검색" placeholder="검색" value="${escapeAttr(appState.allTasksSearch || '')}" oninput="setAllTasksSearch(this.value)">
       </label>
       ${query ? `<span class="search-results-count">검색어: ${escapeHtml(query)}</span>` : ''}
     </div>`;
