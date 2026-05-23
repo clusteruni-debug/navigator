@@ -436,7 +436,7 @@
 }
 .commute-shell .commute-sub-tab.active { background: color-mix(in srgb, var(--accent-primary) 14%, transparent); border-color: var(--accent-primary); color: var(--text-primary);
 }
-.commute-anchors, .commute-today-grid, .commute-log-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;
+.commute-anchors, .commute-today-grid, .commute-log-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;
 }
 .commute-anchor, .commute-shuttle-card, .commute-mode-card, .commute-log-stats > div { min-width: 0; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-secondary);
 }
