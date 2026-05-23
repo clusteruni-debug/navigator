@@ -71,15 +71,15 @@
       --font-h2: 22px;    /* h2 semantic */
       --font-h3: 18px;    /* h3 semantic */
 
-      /* Typography roles — semantic shorthand: weight size/line-height tracking */
-      --text-display:    700 32px/1.2 -0.02em;     /* hero clock, big stat */
-      --text-title-1:    700 24px/1.3 -0.02em;     /* page title, NextAction hero */
-      --text-title-2:    700 18px/1.4 -0.01em;     /* section title, card heading */
-      --text-body-emph:  600 17px/1.5 -0.01em;     /* task title, primary list-item */
-      --text-body:       400 16px/1.6 -0.005em;    /* default body */
-      --text-label:      500 14px/1.4 0;           /* form label, chip label */
-      --text-caption:    500 13px/1.35 0;          /* meta, deadline chip text */
-      --text-micro:      600 12px/1.3 0.02em;      /* badge, count chip, UPPERCASE */
+      /* Typography roles — font shorthand: weight size/line-height font-family. letter-spacing dropped from shorthand (CSS spec: font-family required, letter-spacing not part of shorthand). */
+      --text-display:    700 32px/1.2 var(--font-body);     /* hero clock, big stat */
+      --text-title-1:    700 24px/1.3 var(--font-body);     /* page title, NextAction hero */
+      --text-title-2:    700 18px/1.4 var(--font-body);     /* section title, card heading */
+      --text-body-emph:  600 17px/1.5 var(--font-body);     /* task title, primary list-item */
+      --text-body:       400 16px/1.6 var(--font-body);     /* default body */
+      --text-label:      500 14px/1.4 var(--font-body);     /* form label, chip label */
+      --text-caption:    500 13px/1.35 var(--font-body);    /* meta, deadline chip text */
+      --text-micro:      600 12px/1.3 var(--font-body);     /* badge, count chip, UPPERCASE */
 
       /* Weight utility tokens */
       --weight-bold:    700;
@@ -239,15 +239,15 @@
         --font-lg: 20px;
         --font-xl: 24px;
 
-        /* Typography role PC override (modular ~1.25) + +1-4px font boost per user 2026-05-23 */
-        --text-display:    700 44px/1.2 -0.02em;
-        --text-title-1:    700 32px/1.3 -0.02em;
-        --text-title-2:    700 22px/1.4 -0.01em;
-        --text-body-emph:  600 20px/1.5 -0.01em;
-        --text-body:       400 18px/1.6 -0.005em;
-        --text-label:      500 16px/1.4 0;
-        --text-caption:    500 15px/1.35 0;
-        --text-micro:      600 14px/1.3 0.02em;
+        /* Typography role PC override (modular ~1.25) + +1-4px font boost per user 2026-05-23. font-family required for valid shorthand. */
+        --text-display:    700 44px/1.2 var(--font-body);
+        --text-title-1:    700 32px/1.3 var(--font-body);
+        --text-title-2:    700 22px/1.4 var(--font-body);
+        --text-body-emph:  600 20px/1.5 var(--font-body);
+        --text-body:       400 18px/1.6 var(--font-body);
+        --text-label:      500 16px/1.4 var(--font-body);
+        --text-caption:    500 15px/1.35 var(--font-body);
+        --text-micro:      600 14px/1.3 var(--font-body);
       }
 
       body {

@@ -181,6 +181,11 @@
   background: color-mix(in srgb, var(--cat-일상) 5%, var(--bg-secondary));
 }
 
+/* Light theme: 5% tint over #ffffff barely visible — bump to 12% for visible primary axis */
+body[data-theme="light"] .life-rhythm-primary {
+  background: color-mix(in srgb, var(--cat-일상) 12%, var(--bg-secondary));
+}
+
 .life-section-heading {
   display: flex;
   align-items: center;

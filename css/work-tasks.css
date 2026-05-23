@@ -736,3 +736,9 @@
     .work-task-item:focus-within .work-task-header .task-meta-badge {
       opacity: 1;
     }
+    /* Touch devices (no hover): keep badges fully visible — a11y */
+    @media (hover: none) and (pointer: coarse) {
+      .work-task-header .task-meta-badge {
+        opacity: 1;
+      }
+    }

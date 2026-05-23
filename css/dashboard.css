@@ -109,12 +109,17 @@
       transition: border-color 0.2s;
     }
 
-    /* Phase B3: 통계 탭 weight tier — primary (Hero / Urgent) stronger visual emphasis */
-    .dashboard-section.primary-tier {
+    /* Phase B3: 통계 탭 weight tier — primary (Hero / Urgent) stronger visual emphasis. Specificity bumped (.dashboard-redesign descendant) to win over .dashboard-redesign .dashboard-section at line 450. */
+    .dashboard-redesign .dashboard-section.primary-tier {
       border-left-width: 4px;
       border-left-color: var(--accent-primary);
       background: var(--bg-secondary);
       padding: var(--space-comfortable);
+    }
+
+    /* Light theme override — bg-secondary is #ffffff in light, same as parent. Use bg-tertiary for visible primary tier. */
+    body[data-theme="light"] .dashboard-redesign .dashboard-section.primary-tier {
+      background: var(--bg-tertiary);
     }
 
     .dashboard-redesign .dashboard-section.revenue-dashboard {
