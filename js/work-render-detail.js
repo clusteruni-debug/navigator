@@ -465,7 +465,7 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
               title="클릭하여 상태 변경">
           ${statusInfo.label}
         </span>
-        <span class="work-task-priority${(task.priority || 0) > 0 ? ' has-stars' : ''}" onclick="event.stopPropagation(); cycleTaskPriority('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="클릭으로 우선순위 변경 (★0~5, 현재 ${task.priority || 0})">${(task.priority || 0) > 0 ? '★'.repeat(task.priority) + '☆'.repeat(5 - task.priority) : '★'}</span>
+        <span class="work-task-priority${(task.priority || 0) > 0 ? ' has-stars' : ''}" onclick="event.stopPropagation(); cycleTaskPriority('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="클릭으로 우선순위 변경 (★0~5, 현재 ${task.priority || 0})">${(task.priority || 0) > 0 ? '★ ' + task.priority : '★'}</span>
         ${task.isNewFromV2 ? '<span class="task-meta-badge new-v2" title="v3 신규 항목">v3</span>' : ''}
         ${task.rationaleRef ? '<span class="task-meta-badge rationale" title="근거: ' + escapeAttr(task.rationaleRef) + '">' + escapeHtml(task.rationaleRef) + '</span>' : ''}
         ${task.notes ? '<span class="task-meta-badge note" title="' + escapeAttr(task.notes) + '">ⓘ</span>' : ''}

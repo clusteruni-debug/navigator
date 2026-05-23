@@ -726,3 +726,13 @@
       .work-master-detail:not(.full-width-view) .work-master-panel,
       .work-master-detail:not(.full-width-view) .work-detail-panel { max-height: 900px; }
     }
+
+    /* Phase B2: 본업 task header — meta badge collapse to hover (cognitive load reduction 2026-05-23) */
+    .work-task-header .task-meta-badge {
+      opacity: 0.4;
+      transition: opacity 0.15s;
+    }
+    .work-task-item:hover .work-task-header .task-meta-badge,
+    .work-task-item:focus-within .work-task-header .task-meta-badge {
+      opacity: 1;
+    }
