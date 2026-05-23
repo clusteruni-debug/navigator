@@ -1,14 +1,18 @@
 // ============================================
-// 📡 수신 이벤트 — Supabase fetch/cache/render
+// 수신 이벤트 — Supabase fetch/cache/render
 // render-events.js에서 분리 (코드 분할 규칙: 500줄 이하)
 // ============================================
 
 // D-day 계산 (로컬 섹션에서도 사용)
 function getDaysLeft(deadline) {
   if (!deadline) return null;
-  const now = new Date();
-  const d = new Date(deadline);
-  return Math.ceil((d - now) / (1000 * 60 * 60 * 24));
+  const todayKey = typeof getLogicalDate === 'function' ? getLogicalDate() : getLocalDateStr();
+  const today = new Date(todayKey + 'T00:00:00');
+  const raw = String(deadline);
+  const d = new Date(raw.length === 10 ? raw + 'T00:00:00' : raw);
+  if (isNaN(d.getTime())) return null;
+  d.setHours(0, 0, 0, 0);
+  return Math.round((d - today) / (1000 * 60 * 60 * 24));
 }
 
 function formatDday(days) {
@@ -294,95 +298,13 @@ async function uncompleteSupabaseEvent(supabaseId) {
 window.uncompleteSupabaseEvent = uncompleteSupabaseEvent;
 
 // ============================================
-// 📡 수신 이벤트 섹션 렌더링
+// 수신 이벤트 섹션 렌더링
 // ============================================
 
 function _renderSupabaseSection(pending, _, isLoading, error) {
-  const staleMinutes = _supabaseEventCache.fetchedAt ? Math.floor((Date.now() - _supabaseEventCache.fetchedAt) / 60000) : null;
-  const staleText = staleMinutes !== null ? `<span style="font-size:12px;color:var(--text-muted);margin-left:8px;">(${staleMinutes}분 전 동기화)</span>` : '';
-
-  let content = '';
-
-  if (isLoading && pending.length === 0) {
-    content = '<div class="events-empty"><div class="events-empty-icon">⏳</div><div class="events-empty-text">수신 이벤트 불러오는 중...</div></div>';
-  } else if (error && pending.length === 0) {
-    content = `<div class="events-empty"><div class="events-empty-icon">📴</div><div class="events-empty-text">${escapeHtml(error)}</div><button class="btn btn-secondary" onclick="refreshSupabaseEvents()" style="margin-top:8px;">🔄 다시 시도</button></div>`;
-  } else {
-    const urgent = pending.filter(e => { const d = getDaysLeft(e.deadline); return d !== null && d <= 1; });
-    const approaching = pending.filter(e => { const d = getDaysLeft(e.deadline); return d !== null && d >= 2 && d <= 5; });
-    const rest = pending.filter(e => { const d = getDaysLeft(e.deadline); return d === null || d > 5; });
-
-    const renderGroup = (groupId, title, icon, events) => {
-      if (events.length === 0) return '';
-      const isCollapsed = _collapsedEventGroups.has('sb_' + groupId);
-      return `
-        <div class="events-group">
-          <div class="events-group-header" onclick="toggleEventGroup('sb_${groupId}')">
-            <span>${icon} ${title} (${events.length})</span>
-            <span class="toggle-icon">${isCollapsed ? '▶' : '▼'}</span>
-          </div>
-          <div class="events-list ${isCollapsed ? 'collapsed' : ''}">
-            ${events.map(_renderSupabaseCard).join('')}
-          </div>
-        </div>
-      `;
-    };
-
-    content = renderGroup('urgent', '긴급', '🚨', urgent) +
-      renderGroup('approaching', '마감 전', '⚡', approaching) +
-      renderGroup('pending', '미제출', '📅', rest);
-
-    if (pending.length === 0 && !isLoading) {
-      content = '<div class="events-empty" style="padding:20px"><div class="events-empty-text">미제출 수신 이벤트 없음</div></div>';
-    }
-
-    // 참여완료는 renderEventsTab()의 통합 로그에서 렌더링
-  }
-
-  _syncSupabaseHighlightCard();
-
-  return `
-    <div class="events-section">
-      <div class="events-section-header">
-        <span>📡 수신 이벤트${staleText}</span>
-      </div>
-      ${content}
-    </div>
-    <div class="events-section-divider"></div>
-  `;
+  return _renderEventsToolbar(isLoading, error);
 }
 
 function _renderSupabaseCard(event) {
-  const days = getDaysLeft(event.deadline);
-  const deadlineStr = event.deadline ? new Date(event.deadline + 'T00:00:00').toLocaleDateString('ko-KR', {month:'short', day:'numeric'}) : '';
-  const metaChips = [];
-  if (event.organizer) metaChips.push(event.organizer);
-  if (event.type) metaChips.push(event.type);
-  const revenueStr = event.expectedRevenue ? '💰 ' + event.expectedRevenue : '';
-  const cardClasses = ['event-card', 'supabase-event-card'];
-
-  if (String(_supabaseEventCache.highlightId || '') === String(event.supabaseId)) {
-    cardClasses.push('event-card--highlight');
-  }
-  if (days !== null && days <= 1) {
-    cardClasses.push('urgent');
-  } else if (days !== null && days <= 3) {
-    cardClasses.push('warning');
-  }
-
-  return `
-    <div class="${cardClasses.join(' ')}" data-event-id="${escapeAttr(String(event.supabaseId))}">
-      <div style="flex:1;min-width:0">
-        <div class="event-card-main">
-          <div class="event-title"><span class="supabase-badge">📡</span>${escapeHtml(event.title)}${revenueStr ? ' <span class="event-revenue-inline">' + revenueStr + '</span>' : ''}</div>
-          ${metaChips.length ? '<div class="event-meta-info">' + escapeHtml(metaChips.join(' · ')) + (deadlineStr ? ' · ~' + deadlineStr : '') + '</div>' : (deadlineStr ? '<div class="event-meta-info">~' + deadlineStr + '</div>' : '')}
-        </div>
-        <div class="event-actions">
-          ${event.link ? '<a href="' + escapeHtml(sanitizeUrl(event.link) || '') + '" target="_blank" rel="noopener" class="btn btn-small btn-link">🔗</a>' : ''}
-          <button class="btn btn-small btn-submit" onclick="completeSupabaseEvent('${escapeAttr(String(event.supabaseId))}')" aria-label="참여 완료">✓</button>
-        </div>
-        <div class="event-dday">${formatDday(days)}</div>
-      </div>
-    </div>
-  `;
+  return _renderUnifiedEventCard(_buildUnifiedEvents([event], [])[0]);
 }

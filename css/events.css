@@ -58,7 +58,7 @@
       background: var(--accent-pink);
       border: none;
       border-radius: var(--radius-sm);
-      color: white;
+      color: var(--bg-primary);
       font-size: 20px;
       font-weight: bold;
       cursor: pointer;
@@ -86,7 +86,7 @@
       font-size: 15px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
-      background: transparent;
+      background: var(--bg-secondary);
       color: var(--text-secondary);
       cursor: pointer;
       min-height: 44px;
@@ -99,7 +99,7 @@
     }
     .event-bulk-select-btn.active {
       background: var(--accent-primary);
-      color: white;
+      color: var(--bg-primary);
       border-color: var(--accent-primary);
     }
     .event-bulk-actions {
@@ -117,7 +117,7 @@
       font-size: 15px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
-      background: transparent;
+      background: var(--bg-secondary);
       color: var(--text-secondary);
       cursor: pointer;
       min-height: 44px;
@@ -125,7 +125,7 @@
     }
     .event-bulk-actions .bulk-delete-btn {
       background: var(--accent-danger);
-      color: white;
+      color: var(--bg-primary);
       border-color: var(--accent-danger);
     }
     .event-bulk-actions .bulk-delete-btn:disabled {
@@ -167,12 +167,12 @@
 
     .event-card.urgent .event-dday {
       background: var(--accent-danger);
-      color: white;
+      color: var(--bg-primary);
     }
 
     .event-card.warning .event-dday {
       background: var(--accent-warning);
-      color: white;
+      color: var(--bg-primary);
     }
 
     /* ── Event subtask badge & chips ── */
@@ -212,13 +212,13 @@
     .event-tag.organizer {
       background: var(--accent-primary-alpha);
       color: var(--accent-primary);
-      border: 1px solid color-mix(in srgb, var(--accent-primary) 27%, transparent);
+      border: 1px solid var(--accent-primary);
     }
 
     .event-tag.type {
-      background: color-mix(in srgb, var(--cat-부업) 13%, transparent);
+      background: var(--bg-tertiary);
       color: var(--cat-부업);
-      border: 1px solid color-mix(in srgb, var(--cat-부업) 27%, transparent);
+      border: 1px solid var(--cat-부업);
     }
 
     .event-date {
@@ -359,7 +359,7 @@
 
     .completed-log-undo {
       flex-shrink: 0;
-      background: transparent;
+      background: var(--bg-secondary);
       border: none;
       color: var(--text-muted);
       cursor: pointer;
@@ -396,7 +396,7 @@
     }
 
     .completed-log-pagination button {
-      background: transparent;
+      background: var(--bg-secondary);
       border: 1px solid var(--border-color);
       border-radius: 6px;
       color: var(--text-secondary);
@@ -548,6 +548,10 @@
   gap: 12px;
 }
 
+.events-shell > * { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.events-shell * { box-sizing: border-box; }
+.events-local-controls > *, .events-time-axis > *, .events-archive-section > *, .events-list > * { min-width: 0; max-width: 100%; }
+
 .events-time-group,
 .events-archive-section {
   display: grid;
@@ -567,11 +571,30 @@
 }
 
 .events-time-title,
-.events-archive-header > span:first-child {
+.events-archive-header > span:first-child,
+.events-archive-toggle > span:first-child {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   min-width: 0;
+}
+
+.events-archive-toggle {
+  flex: 1;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 0;
+  background: var(--bg-secondary);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.events-trash-header {
+  padding-right: 6px;
 }
 
 .events-time-header.today { border-left: 3px solid var(--accent-danger); }
@@ -596,7 +619,6 @@
   border: 1px solid var(--border-color);
   border-left: 3px solid var(--cat-부업);
   border-radius: 8px;
-  box-shadow: none;
 }
 
 .event-card-main {
@@ -638,6 +660,7 @@
   border-left-color: var(--accent-warning);
   background: var(--accent-warning-alpha);
 }
+.events-shell .event-card--highlight { outline: 2px solid var(--accent-color); outline-offset: 2px; }
 
 .event-card-row,
 .event-card-side,
@@ -701,6 +724,7 @@
 .event-action-btn:hover,
 .events-filter-chip:hover,
 .events-archive-header:hover,
+.events-archive-toggle:hover,
 .events-time-header:hover,
 .events-empty-trash:hover {
   background: var(--bg-tertiary);
@@ -716,12 +740,6 @@
   padding: 14px;
   text-align: left;
   border-radius: 8px;
-}
-
-.events-archive-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .events-empty-trash {
@@ -755,6 +773,10 @@
     grid-template-columns: 1fr;
   }
 
+  .events-shell .event-card {
+    flex-direction: column;
+  }
+
   .events-toolbar,
   .event-card {
     align-items: stretch;
@@ -766,6 +788,7 @@
   .event-action-btn,
   .events-filter-chip,
   .events-archive-header,
+  .events-archive-toggle,
   .events-time-header,
   .events-empty-trash {
     transition: none;

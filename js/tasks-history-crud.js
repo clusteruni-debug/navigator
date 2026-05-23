@@ -137,7 +137,7 @@ function editCompletionLogEntry(dateStr, index) {
   modal.innerHTML = `
     <div class="modal" style="max-width:340px">
       <div class="modal-header">
-        <h3 style="margin:0;font-size:16px">📝 기록 수정</h3>
+        <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:6px">${svgIcon('edit', 16)} 기록 수정</h3>
         <button class="modal-close" onclick="document.getElementById('${modalId}').remove()" aria-label="닫기">×</button>
       </div>
       <div class="modal-body" style="padding:16px">
@@ -252,7 +252,7 @@ function showClearLogRangeModal() {
   modal.innerHTML = `
     <div class="modal" style="max-width:360px">
       <div class="modal-header">
-        <h3 style="margin:0;font-size:16px">🗑️ 기록 기간 삭제</h3>
+        <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:6px">${svgIcon('trash', 16)} 기록 기간 삭제</h3>
         <button class="modal-close" onclick="document.getElementById('${modalId}').remove()" aria-label="닫기">×</button>
       </div>
       <div class="modal-body" style="padding:16px">

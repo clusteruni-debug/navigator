@@ -60,18 +60,13 @@
       border: 2px solid var(--border-color);
       border-radius: 10px;
       cursor: pointer;
-      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+      transition: background-color var(--transition-fast), border-color var(--transition-fast);
       color: var(--text-primary);
     }
 
     .life-rhythm-btn:hover {
       background: var(--bg-primary);
       border-color: var(--primary);
-      color: var(--text-primary);
-    }
-
-    .life-rhythm-btn:active {
-      transform: scale(0.95);
     }
 
     .life-rhythm-btn.recorded {
@@ -249,17 +244,13 @@
       border: 2px solid var(--border-color);
       border-radius: 10px;
       cursor: pointer;
-      transition: background-color 0.2s, border-color 0.2s;
+      transition: background-color var(--transition-fast), border-color var(--transition-fast);
       color: var(--text-primary);
     }
 
     .medication-btn:hover {
       background: var(--bg-primary);
       border-color: var(--primary);
-    }
-
-    .medication-btn:active {
-      transform: scale(0.95);
     }
 
     .medication-btn.taken {
@@ -324,7 +315,7 @@
       cursor: pointer;
       padding: 2px 6px;
       border-radius: 6px;
-      transition: background 0.2s;
+      transition: background-color var(--transition-fast);
     }
 
     .rhythm-history-med:hover {
@@ -392,4 +383,13 @@
       background: color-mix(in srgb, var(--cat-일상) 12%, transparent);
       border-color: var(--cat-일상);
       color: var(--cat-일상);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .life-rhythm-tracker,
+      .life-rhythm-btn,
+      .medication-btn,
+      .rhythm-history-med {
+        transition: none;
+      }
     }

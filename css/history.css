@@ -1,885 +1,168 @@
-/* history.css - PWA 배너, 히스토리, 미니 캘린더, 본업 달력, 일별 상세 */
-    /* PWA 설치 배너 */
-    .install-banner {
-      background: var(--accent-primary);
-      padding: 15px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      display: none;
-    }
-
-    .install-banner.show {
-      display: block;
-    }
-
-    .install-banner-content {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .install-banner-text {
-      font-size: 16px;
-    }
-
-    .install-banner-btn {
-      padding: 10px 20px;
-      background: white;
-      border: none;
-      border-radius: 8px;
-      color: var(--accent-primary);
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .install-banner-close {
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-      padding: 5px;
-    }
-
-    /* ============================================
-       히스토리 / 캘린더 스타일
-       ============================================ */
-
-    /* 히스토리 헤더 */
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .history-header h2 {
-      font-size: 20px;
-      margin: 0;
-    }
-
-    .history-summary {
-      font-size: 16px;
-      color: var(--text-secondary);
-    }
-
-    /* 히스토리 뷰 탭 */
-    .history-view-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-
-    .history-view-tab {
-      flex: 1;
-      padding: 12px 16px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      color: var(--text-secondary);
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-    }
-
-    .history-view-tab:hover {
-      background: var(--bg-secondary);
-    }
-
-    .history-view-tab.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: white;
-      font-weight: 600;
-    }
-
-    /* 리듬 통계 카드 그리드 */
-    .rhythm-stats-container {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md, 12px);
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .rhythm-stats-header {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 14px;
-    }
-
-    .rhythm-stats-meta {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .rhythm-stat-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    @media (min-width: 480px) {
-      .rhythm-stat-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    .rhythm-stat-grid-wide {
-      margin-bottom: 8px;
-    }
-
-    .rhythm-stat-card {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-light);
-      border-radius: 10px;
-      padding: 12px;
-      text-align: center;
-    }
-
-    .rhythm-stat-card-wide {
-      width: 100%;
-    }
-
-    .rhythm-stat-icon {
-      font-size: 20px;
-      margin-bottom: 4px;
-    }
-
-    .rhythm-stat-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-    }
-
-    .rhythm-stat-value {
-      font-size: 18px;
-      font-weight: 700;
-      font-family: 'SF Mono', Monaco, monospace;
-      color: var(--text-primary);
-    }
-
-    .rhythm-stat-sub {
-      margin-top: 6px;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .rhythm-stat-sub-item {
-      font-size: 11px;
-      color: var(--text-secondary);
-    }
-
-    .rhythm-stat-med-items {
-      font-size: 13px;
-      font-weight: 600;
-      margin-top: 4px;
-    }
-
-    /* 리듬 히스토리 툴바 */
-    .rhythm-history-toolbar {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    /* 최근 7일 미니 스트립 */
-    .rhythm-recent-strip {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-
-    .rhythm-recent-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-    }
-
-    .rhythm-recent-days {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-    }
-
-    .rhythm-recent-day {
-      text-align: center;
-      padding: 6px 2px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
-      border: 1px solid transparent;
-    }
-
-    .rhythm-recent-day:hover {
-      background: var(--bg-tertiary);
-    }
-
-    .rhythm-recent-day.selected {
-      border-color: var(--primary);
-      background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
-    }
-
-    .rhythm-recent-day.today {
-      font-weight: 700;
-    }
-
-    .rhythm-recent-day-label {
-      display: block;
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-    }
-
-    .rhythm-recent-wake,
-    .rhythm-recent-sleep {
-      display: block;
-      font-size: 11px;
-      font-family: 'SF Mono', Monaco, monospace;
-      line-height: 1.4;
-    }
-
-    .rhythm-recent-wake.empty,
-    .rhythm-recent-sleep.empty {
-      color: var(--text-muted);
-      opacity: 0.5;
-    }
-
-    /* 리듬 캘린더 */
-    .rhythm-calendar {
-      margin-bottom: 12px;
-    }
-
-    .rhythm-calendar .calendar-day {
-      min-height: 36px;
-    }
-
-    /* 라이프 리듬 히스토리 */
-    .rhythm-history-empty {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
-    }
-
-    .rhythm-history-empty-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-    }
-
-    .rhythm-history-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .rhythm-history-item {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 16px;
-    }
-
-    .rhythm-history-item.today {
-      border-color: var(--primary);
-      background: var(--bg-secondary);
-    }
-
-    .rhythm-history-date {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .rhythm-history-day {
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .rhythm-history-date-num {
-      color: var(--text-secondary);
-      font-size: 16px;
-    }
-
-    .rhythm-history-today-badge {
-      font-size: 14px;
-      background: var(--primary);
-      color: white;
-      padding: 2px 8px;
-      border-radius: 10px;
-    }
-
-    .rhythm-history-timeline {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .rhythm-history-timeline.six-items {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-    }
-
-    @media (min-width: 600px) {
-      .rhythm-history-timeline.six-items {
-        grid-template-columns: repeat(6, 1fr);
-      }
-    }
-
-    .rhythm-history-time {
-      font-family: 'SF Mono', Monaco, monospace;
-      font-size: 14px;
-      cursor: pointer;
-      padding: 4px 6px;
-      border-radius: 6px;
-      transition: background 0.2s;
-      text-align: center;
-    }
-
-    .rhythm-history-time:hover {
-      background: var(--bg-tertiary);
-    }
-
-    .rhythm-history-time .empty {
-      color: var(--text-muted);
-    }
-
-    .rhythm-history-arrow {
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
-    .rhythm-history-summary {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-
-    .rhythm-history-summary span {
-      background: var(--bg-tertiary);
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-
-    .rhythm-history-summary span.total {
-      background: var(--accent-primary-alpha);
-      color: var(--primary);
-    }
-
-    @media (max-width: 480px) {
-      .rhythm-history-timeline {
-        justify-content: center;
-      }
-
-      .rhythm-history-summary {
-        justify-content: center;
-      }
-    }
-
-    /* 주간 요약 카드 */
-    .week-summary {
-      background: var(--accent-primary);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
-      color: white;
-    }
-
-    .week-summary-title {
-      font-size: 16px;
-      opacity: 0.9;
-      margin-bottom: 10px;
-    }
-
-    .week-summary-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-    }
-
-    .week-stat {
-      text-align: center;
-    }
-
-    .week-stat-value {
-      font-size: 28px;
-      font-weight: bold;
-    }
-
-    .week-stat-label {
-      font-size: 14px;
-      opacity: 0.85;
-    }
-
-    /* 미니 캘린더 */
-    .calendar-container {
-      background: var(--bg-secondary);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
-      border: 1px solid var(--border-light);
-      transition: border-color var(--transition-normal);
-    }
-
-    .calendar-container:hover {
-      border-color: var(--border-color);
-    }
-
-    .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .calendar-title {
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    .calendar-nav {
-      display: flex;
-      gap: 10px;
-    }
-
-    .calendar-nav-btn {
-      width: 36px;
-      height: 36px;
-      border: 1px solid var(--border-color);
-      background: var(--bg-tertiary);
-      border-radius: 8px;
-      color: var(--text-primary);
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.2s, border-color 0.2s;
-    }
-
-    .calendar-nav-btn:hover {
-      background: var(--accent-primary);
-      border-color: var(--accent-primary);
-    }
-
-    .calendar-weekdays {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-      margin-bottom: 10px;
-    }
-
-    .calendar-weekday {
-      text-align: center;
-      font-size: 14px;
-      color: var(--text-muted);
-      padding: 8px 0;
-    }
-
-    .calendar-weekday:first-child {
-      color: var(--accent-danger);
-    }
-
-    .calendar-weekday:last-child {
-      color: var(--accent-primary);
-    }
-
-    .calendar-days {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-    }
-
-    .calendar-day {
-      aspect-ratio: unset;
-      min-height: 36px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-      font-size: 13px;
-      cursor: pointer;
-      transition: border-color 0.2s;
-      position: relative;
-      background: var(--bg-tertiary);
-      border: 1px solid transparent;
-      padding: 4px 2px;
-    }
-
-    .calendar-day:hover {
-      border-color: var(--accent-primary);
-    }
-
-    .calendar-day.empty {
-      background: transparent;
-      cursor: default;
-    }
-
-    .calendar-day.today {
-      border: 2px solid var(--accent-primary);
-      font-weight: bold;
-    }
-
-    .calendar-day.selected {
-      background: var(--accent-primary);
-      color: white;
-    }
-
-    .calendar-day.has-activity {
-      background: color-mix(in srgb, var(--accent-primary) 20%, transparent);
-    }
-
-    .calendar-day.has-activity.level-1 {
-      background: color-mix(in srgb, var(--accent-primary) 20%, transparent);
-    }
-
-    .calendar-day.has-activity.level-2 {
-      background: color-mix(in srgb, var(--accent-primary) 40%, transparent);
-    }
-
-    .calendar-day.has-activity.level-3 {
-      background: color-mix(in srgb, var(--accent-primary) 60%, transparent);
-    }
-
-    .calendar-day.has-activity.level-4 {
-      background: color-mix(in srgb, var(--accent-primary) 80%, transparent);
-      color: white;
-    }
-
-    .calendar-day-number {
-      font-size: 13px;
-    }
-
-    .calendar-day-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent-success);
-      position: absolute;
-      bottom: 4px;
-    }
-
-    /* 본업 달력 전용 — 작업 제목 표시 */
-    .work-calendar .calendar-days {
-      gap: 4px;
-    }
-
-    .work-calendar .calendar-day {
-      aspect-ratio: unset;
-      min-height: 48px;
-      align-items: stretch;
-      justify-content: flex-start;
-      padding: 4px;
-      overflow: hidden;
-    }
-
-    .work-calendar .calendar-day.empty {
-      min-height: 0;
-    }
-
-    .work-calendar .calendar-day.today {
-      font-weight: normal;
-    }
-
-    .work-calendar .calendar-day.selected {
-      background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
-      color: inherit;
-    }
-
-    .work-calendar .calendar-day.has-activity {
-      background: var(--bg-tertiary);
-    }
-
-    .work-calendar .calendar-day-number {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 2px;
-      line-height: 1;
-    }
-
-    .work-calendar .calendar-day.today .calendar-day-number {
-      color: var(--accent-primary);
-      font-weight: 700;
-    }
-
-    .work-calendar .calendar-day.selected .calendar-day-number {
-      color: var(--accent-primary);
-    }
-
-    .calendar-day-tasks {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      flex: 1;
-      overflow: hidden;
-    }
-
-    .calendar-day-task {
-      font-size: 14px;
-      line-height: 1.3;
-      padding: 2px 4px;
-      border-radius: 3px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: var(--text-primary);
-    }
-
-    .calendar-day-more {
-      font-size: 12px;
-      color: var(--text-muted);
-      text-align: center;
-      padding-top: 1px;
-    }
-
-    /* 캘린더 범례 */
-    .calendar-legend {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid var(--border-color);
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-
-    .legend-box {
-      width: 14px;
-      height: 14px;
-      border-radius: 3px;
-    }
-
-    .legend-box.empty {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-    }
-
-    .legend-box.level-1 { background: color-mix(in srgb, var(--accent-primary) 20%, transparent); }
-    .legend-box.level-2 { background: color-mix(in srgb, var(--accent-primary) 40%, transparent); }
-    .legend-box.level-3 { background: color-mix(in srgb, var(--accent-primary) 60%, transparent); }
-    .legend-box.level-4 { background: color-mix(in srgb, var(--accent-primary) 80%, transparent); }
-
-    /* 일별 상세 */
-    .day-detail {
-      background: var(--bg-secondary);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
-      border: 1px solid var(--border-color);
-    }
-
-    .day-detail-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .day-detail-date {
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    .day-detail-stats {
-      display: flex;
-      gap: 15px;
-      font-size: 16px;
-      color: var(--text-secondary);
-    }
-
-    .day-detail-stat {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .day-detail-stat.completed {
-      color: var(--accent-success);
-    }
-
-    .day-detail-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .day-task-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 12px;
-      background: var(--bg-tertiary);
-      border-radius: 10px;
-    }
-
-    .day-task-time {
-      font-size: 15px;
-      color: var(--text-muted);
-      white-space: nowrap;
-      min-width: 50px;
-    }
-
-    .day-task-content {
-      flex: 1;
-    }
-
-    .day-task-title {
-      font-weight: 500;
-      margin-bottom: 4px;
-    }
-
-    .day-task-title.completed {
-      color: var(--accent-success);
-    }
-
-    .day-task-title.incomplete {
-      color: var(--text-muted);
-      text-decoration: line-through;
-    }
-
-    .day-task-meta {
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-
-    .day-task-status {
-      font-size: 20px;
-    }
-
-    /* 빈 상태 */
-    .day-empty {
-      text-align: center;
-      padding: 30px;
-      color: var(--text-muted);
-    }
-
-    .day-empty-icon {
-      font-size: 40px;
-      margin-bottom: 10px;
-    }
-
-    /* 히스토리 리스트 (최근 기록) */
-    .history-list {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .history-date-group {
-      background: var(--bg-secondary);
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border-color);
-    }
-
-    .history-date-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px;
-      background: var(--bg-tertiary);
-      cursor: pointer;
-    }
-
-    .history-date-header:hover {
-      background: var(--accent-primary-alpha);
-    }
-
-    .history-date-title {
-      font-weight: bold;
-    }
-
-    .history-date-count {
-      font-size: 16px;
-      color: var(--text-secondary);
-    }
-
-    .history-date-tasks {
-      padding: 10px 15px;
-      display: none;
-    }
-
-    .history-date-tasks.show {
-      display: block;
-    }
-
-    .history-task {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    .history-task:last-child {
-      border-bottom: none;
-    }
-
-    .history-task-check {
-      color: var(--accent-success);
-      font-size: 16px;
-    }
-
-    .history-task-title {
-      flex: 1;
-      font-size: 16px;
-    }
-
-    .history-task-time {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-
-    /* 모바일 최적화 */
-    @media (max-width: 767px) {
-      .week-summary-stats {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-      }
-
-      .week-stat-value {
-        font-size: 22px;
-      }
-
-      .calendar-day {
-        font-size: 14px;
-      }
-
-      .work-calendar .calendar-day {
-        min-height: 40px;
-      }
-
-      .calendar-day-task {
-        font-size: 12px;
-      }
-
-      .calendar-legend {
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-    }
-
+.install-banner{display:none;margin-bottom:20px;padding:15px;border-radius:var(--radius-md);background:var(--accent-primary)}
+.install-banner.show{display:block}
+.install-banner-content{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.install-banner-text{font-size:16px}
+.install-banner-btn{padding:10px 20px;border:0;border-radius:var(--radius-sm);background:var(--bg-primary);color:var(--accent-primary);font-size:16px;font-weight:700;cursor:pointer;white-space:nowrap}
+.install-banner-close{padding:5px;border:0;background:transparent;color:var(--text-primary);font-size:20px;cursor:pointer}
+.rhythm-stats-container, .rhythm-recent-strip, .rhythm-history-item{margin-bottom:12px;padding:14px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--bg-secondary)}
+.rhythm-stats-header{margin-bottom:12px;font-size:15px;font-weight:800}
+.rhythm-stats-meta, .rhythm-recent-title{color:var(--text-muted);font-size:12px}
+.rhythm-stat-grid{display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:8px;margin-bottom:8px}
+.rhythm-stat-card{min-width:0;padding:11px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--bg-tertiary);text-align:center}
+.rhythm-stat-card-wide{width:100%}
+.rhythm-stat-icon{margin-bottom:3px;font-size:18px}
+.rhythm-stat-label{margin-bottom:4px;color:var(--text-muted);font-size:12px}
+.rhythm-stat-value{color:var(--text-primary);font-family:'SF Mono', Monaco, monospace;font-size:18px;font-weight:800}
+.rhythm-stat-sub{display:grid;gap:2px;margin-top:6px}
+.rhythm-stat-sub-item{color:var(--text-secondary);font-size:11px}
+.rhythm-stat-med-items{margin-top:4px;font-size:13px;font-weight:700}
+.rhythm-history-toolbar{display:flex;justify-content:center;gap:8px;padding:12px;border-bottom:1px solid var(--border-light)}
+.rhythm-recent-title{margin-bottom:8px;font-weight:800}
+.rhythm-recent-days{display:grid;grid-template-columns:repeat(7, minmax(0, 1fr));gap:4px}
+.rhythm-recent-day{min-width:0;padding:6px 2px;border:1px solid transparent;border-radius:var(--radius-sm);text-align:center;cursor:pointer;transition:background-color 0.15s, border-color 0.15s}
+.rhythm-recent-day:hover{background:var(--bg-tertiary)}
+.rhythm-recent-day.selected{border-color:var(--accent-primary);background:var(--accent-primary-alpha)}
+.rhythm-recent-day.today{font-weight:800}
+.rhythm-recent-day-label, .rhythm-recent-wake, .rhythm-recent-sleep{display:block;font-size:11px;line-height:1.35}
+.rhythm-recent-day-label, .rhythm-recent-wake.empty, .rhythm-recent-sleep.empty{color:var(--text-muted)}
+.rhythm-calendar{margin-bottom:12px}
+.rhythm-calendar .calendar-day{min-height:36px}
+.rhythm-history-empty{padding:50px 20px;color:var(--text-muted);text-align:center}
+.rhythm-history-empty-icon{margin-bottom:12px;font-size:40px}
+.rhythm-history-list{display:grid;gap:12px}
+.rhythm-history-item.today{border-color:var(--accent-primary)}
+.rhythm-history-date{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.rhythm-history-day{color:var(--text-primary);font-weight:800}
+.rhythm-history-date-num{color:var(--text-secondary);font-size:15px}
+.rhythm-history-today-badge{padding:2px 8px;border-radius:999px;background:var(--accent-primary);color:var(--text-primary);font-size:12px;font-weight:800}
+.rhythm-history-timeline{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.rhythm-history-timeline.six-items{display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:6px}
+.rhythm-history-time{padding:5px 6px;border-radius:var(--radius-sm);font-family:'SF Mono', Monaco, monospace;font-size:13px;text-align:center;cursor:pointer;transition:background-color 0.15s}
+.rhythm-history-time:hover{background:var(--bg-tertiary)}
+.rhythm-history-time .empty, .rhythm-history-arrow{color:var(--text-muted)}
+.rhythm-history-meds, .rhythm-history-summary{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.rhythm-history-med, .rhythm-history-summary span{padding:3px 7px;border-radius:var(--radius-sm);background:var(--bg-tertiary);color:var(--text-secondary);font-size:12px}
+.rhythm-history-med.taken, .rhythm-history-summary span.total{color:var(--accent-primary);background:var(--accent-primary-alpha)}
+.history-redesign{display:grid;gap:14px}
+.history-topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--border-light)}
+.history-title{display:flex;align-items:center;gap:8px;margin:0 0 4px;font-size:22px;line-height:1.2;letter-spacing:0}
+.history-summary{color:var(--text-secondary);font-size:13px}
+.history-actions, .day-detail-actions, .history-task-actions, .history-filter-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.history-action, .history-row-action, .history-page-btn, .calendar-nav-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:32px;padding:6px 10px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--bg-secondary);color:var(--text-secondary);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:background-color 0.15s, border-color 0.15s, color 0.15s}
+.history-action:hover, .history-row-action:hover, .history-page-btn:hover, .calendar-nav-btn:hover{background:var(--bg-tertiary);border-color:var(--border-color)}
+.history-action.danger, .history-row-action.danger{color:var(--accent-danger);border-color:color-mix(in srgb, var(--accent-danger) 25%, var(--border-light))}
+.history-row-action{width:30px;padding:0}
+.history-page-btn:disabled{opacity:0.45;cursor:default}
+.history-subtabs{display:inline-grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:4px;width:min(100%, 420px);padding:4px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--bg-secondary)}
+.history-subtab{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:6px 10px;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--text-secondary);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:background-color 0.15s, border-color 0.15s, color 0.15s}
+.history-subtab:hover{background:var(--bg-tertiary);border-color:var(--border-color)}
+.history-subtab.active{border-color:var(--accent-primary);background:var(--bg-tertiary);color:var(--accent-primary)}
+.history-metrics-row, .history-stats-grid{display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:8px}
+.history-metric, .history-retro-panel, .history-stat-panel, .history-toolbar, .calendar-container, .day-detail, .history-date-group{min-width:0;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--bg-secondary)}
+.history-metric{display:flex;align-items:center;gap:9px;padding:11px}
+.history-metric.active{border-color:color-mix(in srgb, var(--accent-primary) 35%, var(--border-light))}
+.history-metric-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:var(--bg-tertiary);color:var(--accent-primary);flex:0 0 auto}
+.history-metric-value{color:var(--text-primary);font-size:18px;font-weight:800;line-height:1.1;overflow-wrap:anywhere}
+.history-metric-label{margin-top:2px;color:var(--text-muted);font-size:12px}
+.history-calendar-layout{display:grid;grid-template-columns:minmax(0, 1.45fr) minmax(260px, 0.75fr);gap:12px;align-items:start}
+.history-retro-panel, .history-stat-panel, .history-toolbar, .calendar-container, .day-detail{padding:14px}
+.history-panel-title{margin:0 0 10px;color:var(--text-secondary);font-size:13px;font-weight:800}
+.history-week-bars{display:grid;grid-template-columns:repeat(7, minmax(0, 1fr));align-items:end;gap:6px;height:120px;margin-bottom:16px}
+.history-week-bar{min-width:0;height:100%;display:grid;grid-template-rows:18px 1fr 18px;align-items:end;gap:4px;text-align:center}
+.history-week-value, .history-week-label{color:var(--text-muted);font-size:11px;line-height:1}
+.history-week-label.today{color:var(--accent-primary);font-weight:800}
+.history-week-fill{width:100%;min-height:8px;border-radius:5px 5px 2px 2px;background:color-mix(in srgb, var(--accent-primary) 30%, var(--bg-tertiary))}
+.history-week-fill.today, .history-breakdown-track span{background:var(--accent-primary)}
+.history-breakdown{display:grid;gap:8px}
+.history-breakdown-row{display:grid;grid-template-columns:minmax(56px, 0.7fr) minmax(80px, 1fr) 32px 38px;align-items:center;gap:8px;color:var(--text-secondary);font-size:12px}
+.history-breakdown-track{height:8px;overflow:hidden;border-radius:999px;background:var(--bg-tertiary)}
+.history-breakdown-track span{display:block;height:100%;border-radius:inherit}
+.history-breakdown-row strong, .history-streak-panel strong{color:var(--text-primary)}
+.history-breakdown-row strong, .history-breakdown-row em{text-align:right}
+.history-breakdown-row em{color:var(--text-muted);font-style:normal}
+.history-toolbar{display:grid;gap:8px;margin-bottom:10px}
+.history-search{display:flex;align-items:center;gap:8px;min-height:36px;padding:6px 10px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--bg-tertiary);color:var(--text-muted)}
+.history-search input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--text-primary);font:inherit;font-size:14px}
+.history-chip{min-height:28px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.history-chip.active{border-color:var(--accent-primary);background:var(--bg-tertiary);color:var(--accent-primary)}
+.history-stats-grid{grid-template-columns:repeat(2, minmax(0, 1fr));gap:12px}
+.history-stat-calendar{grid-column:1 / -1}
+.history-streak-panel{display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:8px}
+.history-streak-panel div{min-width:0;padding:12px 8px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--bg-tertiary);text-align:center}
+.history-streak-panel strong{display:block;font-size:22px;line-height:1.1}
+.history-streak-panel span{display:block;margin-top:4px;color:var(--text-muted);font-size:12px}
+.calendar-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.calendar-title{font-size:17px;font-weight:800}
+.calendar-nav{display:flex;gap:6px}
+.calendar-nav-btn{width:34px;padding:0;font-size:15px}
+.calendar-weekdays, .calendar-days{display:grid;grid-template-columns:repeat(7, minmax(0, 1fr));gap:5px}
+.calendar-weekdays{margin-bottom:8px}
+.calendar-weekday{padding:6px 0;color:var(--text-muted);font-size:12px;text-align:center}
+.calendar-weekday:first-child{color:var(--accent-danger)}
+.calendar-weekday:last-child{color:var(--accent-primary)}
+.calendar-day{position:relative;min-height:38px;display:flex;align-items:center;justify-content:center;padding:4px 2px;border:1px solid transparent;border-radius:var(--radius-sm);background:var(--bg-tertiary);color:var(--text-primary);font:inherit;font-size:13px;cursor:pointer;transition:border-color 0.15s, background-color 0.15s}
+.calendar-day:hover{border-color:var(--accent-primary)}
+.calendar-day.empty{background:transparent;cursor:default}
+.calendar-day.today{border-color:var(--accent-primary);font-weight:800}
+.calendar-day.selected{background:var(--accent-primary);color:var(--text-primary)}
+.calendar-day.has-activity.level-1{background:color-mix(in srgb, var(--accent-primary) 18%, var(--bg-tertiary))}
+.calendar-day.has-activity.level-2{background:color-mix(in srgb, var(--accent-primary) 34%, var(--bg-tertiary))}
+.calendar-day.has-activity.level-3{background:color-mix(in srgb, var(--accent-primary) 52%, var(--bg-tertiary))}
+.calendar-day.has-activity.level-4{background:color-mix(in srgb, var(--accent-primary) 70%, var(--bg-tertiary));color:var(--text-primary)}
+.calendar-day-number{font-size:13px}
+.calendar-day-count{position:absolute;right:4px;bottom:3px;color:var(--accent-primary);font-size:10px;font-weight:800}
+.calendar-day.level-4 .calendar-day-count, .calendar-day.selected .calendar-day-count{color:inherit}
+.calendar-day-dot{position:absolute;bottom:4px;width:6px;height:6px;border-radius:50%;background:var(--accent-success)}
+.calendar-legend{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border-light)}
+.legend-item{display:flex;align-items:center;gap:5px;color:var(--text-secondary);font-size:12px}
+.legend-box{width:12px;height:12px;border-radius:3px}
+.legend-box.empty{background:var(--bg-tertiary);border:1px solid var(--border-color)}
+.legend-box.level-1{background:color-mix(in srgb, var(--accent-primary) 18%, var(--bg-tertiary))}
+.legend-box.level-2{background:color-mix(in srgb, var(--accent-primary) 34%, var(--bg-tertiary))}
+.legend-box.level-3{background:color-mix(in srgb, var(--accent-primary) 52%, var(--bg-tertiary))}
+.legend-box.level-4{background:color-mix(in srgb, var(--accent-primary) 70%, var(--bg-tertiary))}
+.work-calendar .calendar-day{min-height:48px;align-items:stretch;justify-content:flex-start;padding:4px;overflow:hidden}
+.work-calendar .calendar-day.empty{min-height:0}
+.work-calendar .calendar-day.today{font-weight:400}
+.work-calendar .calendar-day.selected{background:var(--accent-primary-alpha);color:inherit}
+.work-calendar .calendar-day.has-activity{background:var(--bg-tertiary)}
+.work-calendar .calendar-day-number{margin-bottom:2px;color:var(--text-muted);font-size:13px;font-weight:700;line-height:1}
+.calendar-day-tasks{display:flex;flex:1;flex-direction:column;gap:2px;overflow:hidden}
+.calendar-day-task{overflow:hidden;padding:2px 4px;border-radius:3px;color:var(--text-primary);font-size:12px;line-height:1.3;text-overflow:ellipsis;white-space:nowrap}
+.calendar-day-more{padding-top:1px;color:var(--text-muted);font-size:11px;text-align:center}
+.day-detail.empty{border-style:dashed}
+.day-detail-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border-light)}
+.day-detail-date{color:var(--text-primary);font-size:17px;font-weight:800}
+.day-detail-stats, .day-detail-rhythm, .history-task-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:5px;color:var(--text-muted);font-size:12px}
+.day-detail-rhythm span{padding:3px 7px;border-radius:var(--radius-sm);background:var(--bg-tertiary)}
+.day-detail-list, .history-list{display:grid;gap:10px}
+.day-empty{padding:26px 16px;color:var(--text-muted);text-align:center}
+.history-date-group{overflow:hidden}
+.history-date-header{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border:0;background:var(--bg-tertiary);color:var(--text-primary);font:inherit;text-align:left;cursor:pointer;transition:background-color 0.15s}
+.history-date-header:hover{background:var(--accent-primary-alpha)}
+.history-date-title{font-weight:800}
+.history-date-count{display:inline-flex;align-items:center;gap:6px;color:var(--text-secondary);font-size:13px}
+.history-date-tasks{display:none;padding:8px 12px}
+.history-date-tasks.show{display:block}
+.history-task{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-light)}
+.history-task:last-child{border-bottom:0}
+.history-task-check{color:var(--accent-success)}
+.history-task-main{min-width:0;flex:1}
+.history-task-title{color:var(--text-primary);font-size:15px;font-weight:700;overflow-wrap:anywhere}
+.history-task-time{color:var(--text-muted);font-size:13px;white-space:nowrap}
+.history-pill{display:inline-flex;align-items:center;min-height:20px;padding:2px 7px;border:1px solid color-mix(in srgb, var(--task-cat-color) 35%, var(--border-light));border-radius:999px;color:var(--task-cat-color);font-size:11px;font-weight:800}
+.history-task-actions{flex-wrap:nowrap}
+.history-pagination{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 0 4px;color:var(--text-muted);font-size:13px}
+@media (min-width:480px){.rhythm-stat-grid{grid-template-columns:repeat(3, minmax(0, 1fr))}
+.rhythm-history-timeline.six-items{grid-template-columns:repeat(6, minmax(0, 1fr))}
+}
+@media (max-width:767px){.history-topbar, .day-detail-header{flex-direction:column;align-items:stretch}
+.history-actions, .day-detail-actions{justify-content:flex-start}
+.history-metrics-row, .history-calendar-layout, .history-stats-grid{grid-template-columns:1fr}
+.history-subtabs{width:100%}
+.history-breakdown-row{grid-template-columns:minmax(48px, 0.7fr) minmax(70px, 1fr) 28px 34px}
+.history-task{align-items:flex-start}
+.calendar-day{font-size:14px}
+.work-calendar .calendar-day{min-height:40px}
+.calendar-day-task{font-size:12px}
+}

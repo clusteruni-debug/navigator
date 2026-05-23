@@ -635,9 +635,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: var(--bg-tertiary);
+  padding: 2px 0 0;
 }
 
 .dash-hero-completion-num,

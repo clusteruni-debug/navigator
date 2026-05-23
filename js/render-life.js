@@ -71,13 +71,20 @@ function _lifeShortMedicationLabel(slot) {
 
 function _getLifeHabitTitles() {
   const titles = new Set();
-  if (typeof getRecurringHabits === 'function') {
+  const tasks = appState.tasks || [];
+  tasks.forEach(task => {
+    if (task.category === '일상' && task.repeatType && task.repeatType !== 'none' && task.title) {
+      titles.add(task.title);
+    }
+  });
+  Object.keys(appState.habitStreaks || {}).forEach(title => {
+    if (!title) return;
+    const linkedTask = tasks.find(task => task.title === title);
+    if (!linkedTask || linkedTask.category === '일상') titles.add(title);
+  });
+  if (titles.size === 0 && typeof getRecurringHabits === 'function') {
     getRecurringHabits().forEach(title => { if (title) titles.add(title); });
   }
-  (appState.tasks || []).forEach(task => {
-    if (task.repeatType && task.repeatType !== 'none' && task.title) titles.add(task.title);
-  });
-  Object.keys(appState.habitStreaks || {}).forEach(title => { if (title) titles.add(title); });
   return Array.from(titles).sort();
 }
 
@@ -87,9 +94,9 @@ function _isLifeHabitDoneToday(title) {
   const entries = []
     .concat((appState.completionLog || {})[logicalToday] || [])
     .concat(localToday === logicalToday ? [] : ((appState.completionLog || {})[localToday] || []));
-  if (entries.some(entry => entry && entry.t === title)) return true;
+  if (entries.some(entry => entry && entry.t === title && (!entry.c || entry.c === '일상'))) return true;
   return (appState.tasks || []).some(task => {
-    if (task.title !== title || !task.completed || !task.completedAt) return false;
+    if (task.category !== '일상' || task.title !== title || !task.completed || !task.completedAt) return false;
     const completedAt = new Date(task.completedAt);
     return !isNaN(completedAt.getTime()) && getLogicalDate(completedAt) === logicalToday;
   });
@@ -106,6 +113,7 @@ function _getLifeHabitRows() {
 function toggleLifeHabit(title) {
   const logicalToday = getLogicalDate();
   const matching = (appState.tasks || []).filter(task =>
+    task.category === '일상' &&
     task.title === title &&
     task.repeatType &&
     task.repeatType !== 'none'
@@ -147,7 +155,7 @@ function _sortLifeTasks(a, b) {
   if (a.deadline && b.deadline) return new Date(a.deadline) - new Date(b.deadline);
   if (a.deadline) return -1;
   if (b.deadline) return 1;
-  if (a.category !== b.category) return a.category === '가족' ? -1 : 1;
+  if (a.category !== b.category) return a.category === '일상' ? -1 : 1;
   return String(a.title || '').localeCompare(String(b.title || ''), 'ko');
 }
 
@@ -313,6 +321,7 @@ function _renderLifeTaskItem(task) {
   const repeatLabel = task.repeatType && task.repeatType !== 'none'
     ? getRepeatLabel(task.repeatType, task)
     : '';
+  const estimatedMinutes = Number(task.estimatedTime);
   const urgencyClass = _lifeTaskUrgencyClass(task);
   const checkAction = task.completed ? 'uncompleteTask' : 'completeTask';
   const checkLabel = task.completed ? '완료 되돌리기' : '완료';
@@ -337,7 +346,7 @@ function _renderLifeTaskItem(task) {
         <span class="life-task-meta">
           <span class="cat-tag cat-${category}">${escapeHtml(task.category || '일상')}</span>
           ${repeatLabel ? `<span class="life-meta-chip">${_lifeIcon('repeat', 12)}${escapeHtml(repeatLabel)}</span>` : ''}
-          ${task.estimatedTime ? `<span class="life-meta-chip">${_lifeIcon('clock', 12)}${Number(task.estimatedTime)}분</span>` : ''}
+          ${Number.isFinite(estimatedMinutes) && estimatedMinutes > 0 ? `<span class="life-meta-chip">${_lifeIcon('clock', 12)}${estimatedMinutes}분</span>` : ''}
           ${hasSubtasks ? `<span class="life-meta-chip">${doneCount}/${totalCount}</span>` : ''}
         </span>
       </div>
@@ -403,6 +412,7 @@ function _renderLifeTaskSection(pendingTasks, completedTasks) {
         ${_renderLifeTaskFilter(activeFilter)}
       </div>
       <div class="life-task-count-row">
+        <span class="life-task-hierarchy">일상 ⊃ 가족</span>
         <span>일상 ${lifeCount}</span>
         <span>가족 ${familyCount}</span>
       </div>
@@ -441,7 +451,8 @@ function _renderResolutionSection() {
             const startMs = sy ? new Date(sy, sm - 1, sd).getTime() : todayMs;
             const days = isNaN(startMs) ? 0 : Math.max(0, Math.floor((todayMs - startMs) / 86400000));
             return `
-              <div class="resolution-card" role="button" tabindex="0" onclick="editResolution('${escapeAttr(r.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();editResolution('${escapeAttr(r.id)}')}">
+              <div class="resolution-card ${r.icon ? 'has-icon' : ''}" role="button" tabindex="0" onclick="editResolution('${escapeAttr(r.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();editResolution('${escapeAttr(r.id)}')}">
+                ${r.icon ? `<div class="resolution-icon" aria-hidden="true">${escapeHtml(r.icon)}</div>` : ''}
                 <div class="resolution-info">
                   <div class="resolution-name">${escapeHtml(r.title)}</div>
                   <div class="resolution-days"><span class="resolution-day-count">${days}</span>일째</div>
@@ -521,6 +532,10 @@ function renderLifeTab() {
         </div>
       </div>
 
+      ${_renderLifeRhythmSection(rhythmItems)}
+      ${_renderLifeMedicationSection(medicationSummary)}
+      ${_renderLifeHabitSection(habitRows)}
+      ${_renderResolutionSection()}
       <div class="life-quick-add">
         <input
           type="text"
@@ -532,11 +547,6 @@ function renderLifeTab() {
         >
         <button class="life-quick-btn" type="button" onclick="quickAddLifeTask()" aria-label="빠른 작업 추가">${_lifeIcon('plus', 16)}</button>
       </div>
-
-      ${_renderLifeRhythmSection(rhythmItems)}
-      ${_renderLifeMedicationSection(medicationSummary)}
-      ${_renderLifeHabitSection(habitRows)}
-      ${_renderResolutionSection()}
       ${_renderLifeTaskSection(pendingTasks, completedTasks)}
     </div>
   `;
@@ -550,6 +560,7 @@ function addResolution() {
   const title = prompt('결심 이름을 입력하세요 (예: 간식 끊기)');
   if (!title || !title.trim()) return;
 
+  const icon = prompt('아이콘 이모지 (비우면 없음)', '🎯') || '';
   const startDateInput = prompt('시작일 (YYYY-MM-DD, 비우면 오늘)', '');
   const startDate = startDateInput && /^\d{4}-\d{2}-\d{2}$/.test(startDateInput)
     ? startDateInput
@@ -561,7 +572,7 @@ function addResolution() {
     id: generateId(),
     title: title.trim(),
     startDate,
-    icon: '',
+    icon: icon.trim(),
     createdAt: now,
     updatedAt: now
   });
@@ -600,6 +611,9 @@ function editResolution(id) {
   const newTitle = prompt('결심 이름', r.title);
   if (newTitle === null) return;
   if (newTitle.trim()) r.title = newTitle.trim();
+
+  const newIcon = prompt('아이콘 이모지 (비우면 없음)', r.icon || '');
+  if (newIcon !== null) r.icon = newIcon.trim();
 
   const newDate = prompt('시작일 (YYYY-MM-DD)', r.startDate);
   if (newDate !== null && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) r.startDate = newDate;

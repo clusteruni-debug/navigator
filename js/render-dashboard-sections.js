@@ -359,21 +359,27 @@ function getCategoryTimeHeatmap() {
   }));
   const rowMap = Object.fromEntries(rows.map(row => [row.category, row]));
 
-  Object.values(appState.completionLog || {}).forEach(entries => {
+  const loggedDates = new Set();
+  Object.entries(appState.completionLog || {}).forEach(([dateKey, entries]) => {
+    if (!Array.isArray(entries) || entries.length === 0) return;
+    let hasDetailedEntry = false;
     (entries || []).forEach(entry => {
       if (entry._summary || !entry.at) return;
+      hasDetailedEntry = true;
       const category = DASHBOARD_CATEGORIES.includes(entry.c) ? entry.c : '일상';
       const hour = parseInt(String(entry.at).split(':')[0], 10);
       const periodKey = _periodKeyFromHour(hour);
       const cell = rowMap[category].cells.find(item => item.key === periodKey);
       if (cell) cell.count++;
     });
+    if (hasDetailedEntry) loggedDates.add(dateKey);
   });
 
   _safeTasks().forEach(task => {
     if (!task.completedAt || !DASHBOARD_CATEGORIES.includes(task.category)) return;
     const d = _safeDate(task.completedAt);
     if (!d) return;
+    if (loggedDates.has(getLocalDateStr(d))) return;
     const periodKey = _periodKeyFromHour(d.getHours());
     const cell = rowMap[task.category].cells.find(item => item.key === periodKey);
     if (cell) cell.count++;
@@ -406,7 +412,7 @@ function getDeferredTasks(limit) {
       id: task.id,
       title: task.title || '작업',
       category: task.category || '기타',
-      count: _num(task.postponeCount)
+      count: Math.max(_num(task.postponeCount), _num(task.postponedCount))
     }))
     .filter(task => task.count > 0)
     .sort((a, b) => b.count - a.count)
@@ -432,7 +438,7 @@ function _renderDashHero(ctx) {
   const urgentTasks = ctx.urgentTasks || [];
   const now = new Date();
   const mode = _getModeProgress(now);
-  const totalGoal = Math.max(stats.total, _num((appState.settings || {}).dailyGoal, 5), 1);
+  const totalGoal = Math.max(_num((appState.settings || {}).dailyGoal, 5), 1);
   const pct = Math.min(Math.round((stats.completed / totalGoal) * 100), 100);
   const streak = appState.streak || { current: 0, best: 0 };
 
@@ -757,7 +763,7 @@ function _renderDashHealthPanel(ctx) {
   const med30 = _getMedicationDashboardStats(30);
   const medStreak = typeof getMedicationStreak === 'function' ? getMedicationStreak() : 0;
   const corr = getSleepCompletionCorrelation();
-  const debt = getSleepDebt(7, 7);
+  const debt = getSleepDebt(7);
 
   return `
     <div class="dash-panel active" role="tabpanel">

@@ -9,7 +9,48 @@
  */
 function getReflectionToday() {
   const todayKey = getLocalDateStr();
-  return appState.dailyReflection.history[todayKey] || { evening: null, morning: null };
+  return {
+    ...createEmptyReflectionDay(),
+    ...(appState.dailyReflection.history[todayKey] || {})
+  };
+}
+
+function createEmptyReflectionDay() {
+  return { evening: null, morning: null, weekly: null };
+}
+
+function normalizeReflectionAspect(aspect) {
+  if (aspect === 'morning' || aspect === 'weekly') return aspect;
+  return 'evening';
+}
+
+function getReflectionQuestions(aspect) {
+  const key = normalizeReflectionAspect(aspect);
+  const questions = appState.dailyReflection.settings?.questions?.[key];
+  if (Array.isArray(questions) && questions.length > 0) {
+    return questions.slice(0, 3);
+  }
+  if (key === 'weekly') {
+    return [
+      '이번 주 반복된 압력이나 충동은 무엇이었나?',
+      '다음 주 지켜야 할 한계선 하나는?',
+      '다음 주 작게 완료할 하나는?'
+    ];
+  }
+  return [];
+}
+
+function getReflectionAspectKeys(...days) {
+  const keys = ['evening', 'morning', 'weekly'];
+  days.forEach(day => {
+    if (!day || day.compact) return;
+    Object.keys(day).forEach(key => {
+      if (!['compact', 'answeredAt'].includes(key) && !keys.includes(key)) {
+        keys.push(key);
+      }
+    });
+  });
+  return keys;
 }
 
 /**
@@ -18,12 +59,18 @@ function getReflectionToday() {
  * @param {{q1:string, q2:string, q3:string, skipped?:boolean}} answers
  */
 function saveReflectionAnswer(timeOfDay, answers) {
+  const aspect = normalizeReflectionAspect(timeOfDay);
   const todayKey = getLocalDateStr();
   const history = appState.dailyReflection.history;
   if (!history[todayKey]) {
-    history[todayKey] = { evening: null, morning: null };
+    history[todayKey] = createEmptyReflectionDay();
+  } else {
+    history[todayKey] = {
+      ...createEmptyReflectionDay(),
+      ...history[todayKey]
+    };
   }
-  history[todayKey][timeOfDay] = {
+  history[todayKey][aspect] = {
     q1: answers.q1 || '',
     q2: answers.q2 || '',
     q3: answers.q3 || '',
@@ -104,11 +151,14 @@ function getReflectionHistory(days = 30) {
  * @returns {boolean}
  */
 function shouldShowReflectionModal(timeOfDay = 'evening') {
+  const aspect = normalizeReflectionAspect(timeOfDay);
+  if (aspect === 'weekly') return false;
+
   const settings = appState.dailyReflection.settings;
   if (!settings.autoModalEnabled) return false;
-  if (timeOfDay === 'morning' && !settings.morningTime) return false;
+  if (aspect === 'morning' && !settings.morningTime) return false;
 
-  const targetTime = timeOfDay === 'evening' ? settings.eveningTime : settings.morningTime;
+  const targetTime = aspect === 'evening' ? settings.eveningTime : settings.morningTime;
   if (!targetTime) return false;
 
   const [hh, mm] = targetTime.split(':').map(Number);
@@ -123,7 +173,7 @@ function shouldShowReflectionModal(timeOfDay = 'evening') {
   // 오늘 해당 슬롯에 entry 있으면 (답했든 건너뛰기든) 그 날은 처리 완료 — 재노출 차단
   // (review fix Phase 6/8.5: skipped=true 상태에서 5min interval/visibilitychange 재출현 방지)
   const today = getReflectionToday();
-  if (today[timeOfDay]) return false;
+  if (today[aspect]) return false;
 
   return true;
 }
@@ -146,15 +196,17 @@ function compactOldReflectionLog() {
 
     const eveningAnswered = !!(day.evening && !day.evening.skipped);
     const morningAnswered = !!(day.morning && !day.morning.skipped);
+    const weeklyAnswered = !!(day.weekly && !day.weekly.skipped);
 
-    if (!eveningAnswered && !morningAnswered) {
+    if (!eveningAnswered && !morningAnswered && !weeklyAnswered) {
       delete history[date];
     } else {
       history[date] = {
         compact: true,
         eveningAnswered,
         morningAnswered,
-        answeredAt: day.evening?.answeredAt || day.morning?.answeredAt || ''
+        weeklyAnswered,
+        answeredAt: day.evening?.answeredAt || day.morning?.answeredAt || day.weekly?.answeredAt || ''
       };
     }
     compactedCount++;
@@ -174,9 +226,11 @@ function extractReflectionPatterns(days = 90) {
   const now = new Date();
   let answeredCount = 0;
   let skippedCount = 0;
+  let weeklyCount = 0;
   let totalDays = 0;
   const eveningTexts = [];
   const morningTexts = [];
+  const weeklyTexts = [];
 
   for (let i = 0; i < days; i++) {
     const cursor = new Date(now);
@@ -188,6 +242,7 @@ function extractReflectionPatterns(days = 90) {
 
     if (day.compact) {
       if (day.eveningAnswered) answeredCount++;
+      if (day.weeklyAnswered) weeklyCount++;
       continue;
     }
     if (day.evening) {
@@ -201,16 +256,22 @@ function extractReflectionPatterns(days = 90) {
     if (day.morning && !day.morning.skipped) {
       morningTexts.push(day.morning.q1, day.morning.q2, day.morning.q3);
     }
+    if (day.weekly && !day.weekly.skipped) {
+      weeklyCount++;
+      weeklyTexts.push(day.weekly.q1, day.weekly.q2, day.weekly.q3);
+    }
   }
 
   return {
     answeredCount,
     skippedCount,
+    weeklyCount,
     totalDays,
     streakBest: appState.dailyReflection.streak.best || 0,
     streakCurrent: appState.dailyReflection.streak.current || 0,
     eveningKeywords: extractReflectionKeywords(eveningTexts),
-    morningKeywords: extractReflectionKeywords(morningTexts)
+    morningKeywords: extractReflectionKeywords(morningTexts),
+    weeklyKeywords: extractReflectionKeywords(weeklyTexts)
   };
 }
 
@@ -250,6 +311,8 @@ function exportQuarterlyMarkdown(days = 90) {
     .map(k => `${k.word} ×${k.count}`).join(', ') || '(없음)';
   const morningTop = patterns.morningKeywords.slice(0, 5)
     .map(k => `${k.word} ×${k.count}`).join(', ') || '(없음)';
+  const weeklyTop = patterns.weeklyKeywords.slice(0, 5)
+    .map(k => `${k.word} ×${k.count}`).join(', ') || '(없음)';
 
   const answerRate = patterns.totalDays > 0
     ? Math.round((patterns.answeredCount / patterns.totalDays) * 100)
@@ -261,6 +324,7 @@ function exportQuarterlyMarkdown(days = 90) {
 
 - 답변 일수: ${patterns.answeredCount}/${patterns.totalDays} (${answerRate}%)
 - 저녁 자문 답변: ${patterns.answeredCount}회 / 건너뛰기: ${patterns.skippedCount}회
+- 주간 자문 답변: ${patterns.weeklyCount}회
 - streak best: ${patterns.streakBest}일 / current: ${patterns.streakCurrent}일
 
 ## 패턴 (저녁 자문 빈도 키워드 TOP 5)
@@ -270,6 +334,10 @@ ${eveningTop}
 ## 패턴 (아침 자문 빈도 키워드 TOP 5)
 
 ${morningTop}
+
+## 패턴 (주간 자문 빈도 키워드 TOP 5)
+
+${weeklyTop}
 
 ## 분기 결정 갱신 후보
 
@@ -329,6 +397,7 @@ function mergeDailyReflection(local, other) {
         compact: true,
         eveningAnswered: !!(otherDay.eveningAnswered || localDay.eveningAnswered),
         morningAnswered: !!(otherDay.morningAnswered || localDay.morningAnswered),
+        weeklyAnswered: !!(otherDay.weeklyAnswered || localDay.weeklyAnswered),
         answeredAt: (otherDay.answeredAt || '') > (localDay.answeredAt || '')
           ? otherDay.answeredAt
           : localDay.answeredAt
@@ -337,11 +406,8 @@ function mergeDailyReflection(local, other) {
     }
 
     // 일반 day — evening + morning slot 별 answeredAt 비교 last-write-wins
-    const merged = {
-      evening: localDay.evening || null,
-      morning: localDay.morning || null
-    };
-    for (const slot of ['evening', 'morning']) {
+    const merged = { ...createEmptyReflectionDay(), ...localDay };
+    for (const slot of getReflectionAspectKeys(localDay, otherDay)) {
       const localAns = localDay[slot];
       const otherAns = otherDay[slot];
       if (!localAns && otherAns) {

@@ -16,7 +16,7 @@ function renderEventsTab() {
   const isLoading = _supabaseEventCache.loading;
   const error = _supabaseEventCache.error;
 
-  const localEvents = (appState.tasks || []).filter(t => t.category === '부업' && !(t.source && t.source.type === 'telegram-event'));
+  const localEvents = _getLocalEventTasks();
   const events = _filterEventsBySource(_buildUnifiedEvents(supabaseEvents, localEvents));
   const pendingEvents = events.filter(event => event.status === 'pending');
   const completedEvents = events.filter(event => event.status === 'done');
@@ -58,6 +58,10 @@ const EVENT_TIME_GROUPS = [
   { id: 'next_week', label: '다음 주', icon: 'calendar' },
   { id: 'later', label: '나중', icon: 'list' }
 ];
+
+function _getLocalEventTasks() {
+  return (appState.tasks || []).filter(t => t.category === '부업' && !(t.source && t.source.type === 'telegram-event'));
+}
 
 function _buildUnifiedEvents(supabaseEvents, localEvents) {
   const received = (supabaseEvents || []).map(event => ({
@@ -125,7 +129,8 @@ function _getEventBucket(event) {
   const deadline = _parseEventDate(event.deadline);
   if (!deadline) return 'later';
 
-  const today = new Date();
+  const todayKey = typeof getLogicalDate === 'function' ? getLogicalDate() : getLocalDateStr();
+  const today = _parseEventDate(todayKey) || new Date();
   today.setHours(0, 0, 0, 0);
   const eventDay = new Date(deadline);
   eventDay.setHours(0, 0, 0, 0);
@@ -234,9 +239,14 @@ function _renderUnifiedEventCard(event) {
     ? `completeSupabaseEvent('${escapeAttr(event.rawId)}')`
     : `completeTask('${escapeAttr(event.rawId)}')`;
   const sourceClass = event.source === 'received' ? 'supabase-event-card' : 'local-event-card';
+  const showBulkCheck = event.source === 'local' && _eventBulkSelectMode;
+  const bulkCheck = showBulkCheck
+    ? `<div class="event-check-col"><input type="checkbox" ${_eventBulkSelectedIds.has(event.rawId) ? 'checked' : ''} onchange="toggleEventSelection('${escapeAttr(event.rawId)}')" aria-label="${ariaTitle} 선택"></div>`
+    : '';
 
   return `
-    <article class="event-card ${sourceClass} event-source-${event.source} ${urgency}" data-event-id="${escapeAttr(event.rawId)}" data-event-source="${escapeAttr(event.source)}">
+    <article class="event-card ${sourceClass} event-source-${event.source} ${urgency} ${showBulkCheck ? 'bulk-selecting' : ''}" data-event-id="${escapeAttr(event.rawId)}" data-event-source="${escapeAttr(event.source)}">
+      ${bulkCheck}
       <div class="event-card-main">
         <div class="event-card-row">
           <span class="event-source-pill ${event.source}">${escapeHtml(event.sourceLabel)}</span>
@@ -308,6 +318,7 @@ function setEventSourceFilter(filter) {
   if (!EVENT_SOURCE_FILTERS.some(item => item.id === filter)) return;
   _eventSourceFilter = filter;
   window._eventSourceFilter = filter;
+  _completedLogPage = 0;
   renderStatic();
 }
 window.setEventSourceFilter = setEventSourceFilter;
@@ -395,7 +406,7 @@ function _renderCompletedLog(completedEvents, localSubmitted) {
 }
 
 function changeCompletedLogPage(page) {
-  const localEvents = (appState.tasks || []).filter(t => t.category === '부업' && !(t.source && t.source.type === 'telegram-event'));
+  const localEvents = _getLocalEventTasks();
   const total = _filterEventsBySource(_buildUnifiedEvents(_supabaseEventCache.data || [], localEvents))
     .filter(event => event.status === 'done').length;
   const maxPage = Math.max(0, Math.ceil(total / COMPLETED_LOG_PAGE_SIZE) - 1);
@@ -418,13 +429,13 @@ function _renderLocalEventsSection(pendingEvents) {
     const isCollapsed = _collapsedEventGroups.has('local_trash');
     trashContent = `
       <section class="events-archive-section events-trash-section" aria-label="휴지통">
-        <button class="events-archive-header" type="button" onclick="toggleEventGroup('local_trash')" aria-expanded="${isCollapsed ? 'false' : 'true'}">
-          <span>${svgIcon('trash', 15)} 휴지통 (${eventTrash.length})</span>
-          <span class="events-archive-actions">
-            <span class="events-empty-trash" onclick="event.stopPropagation(); emptyTrash()" role="button" tabindex="0" aria-label="휴지통 비우기">비우기</span>
+        <div class="events-archive-header events-trash-header">
+          <button class="events-archive-toggle" type="button" onclick="toggleEventGroup('local_trash')" aria-expanded="${isCollapsed ? 'false' : 'true'}">
+            <span>${svgIcon('trash', 15)} 휴지통 (${eventTrash.length})</span>
             <span class="toggle-icon" aria-hidden="true">${isCollapsed ? '›' : '⌄'}</span>
-          </span>
-        </button>
+          </button>
+          <button class="events-empty-trash" type="button" onclick="emptyTrash()" aria-label="휴지통 비우기">비우기</button>
+        </div>
         <div class="events-list events-archive-body ${isCollapsed ? 'collapsed' : ''}">
           ${[...eventTrash].sort((a, b) => (b.deletedAt || '').localeCompare(a.deletedAt || '')).map(task => {
             const deletedDate = task.deletedAt ? new Date(task.deletedAt) : null;

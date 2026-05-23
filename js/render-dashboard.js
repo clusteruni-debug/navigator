@@ -7,7 +7,7 @@
  * renderStatic()에서 계산된 변수들을 인자로 받는다.
  */
 function renderDashboardTab(ctx) {
-  const views = ['전체', '수익', '건강', '패턴'];
+  const views = typeof DASHBOARD_VIEWS !== 'undefined' ? DASHBOARD_VIEWS : ['전체', '수익', '건강', '패턴'];
   const sub = views.includes(appState.dashboardSubView) ? appState.dashboardSubView : _getDashboardSubView();
   appState.dashboardSubView = views.includes(sub) ? sub : '전체';
 
@@ -26,9 +26,12 @@ function renderDashboardTab(ctx) {
         ${views.map(view => `
           <button
             type="button"
+            id="dashboard-subtab-${view}"
             class="dash-sub-tab ${appState.dashboardSubView === view ? 'active' : ''}"
+            data-dashboard-subtab="${view}"
             onclick="setDashboardSubView('${view}')"
             role="tab"
+            aria-label="${view} 분석 패널"
             aria-selected="${appState.dashboardSubView === view ? 'true' : 'false'}">
             ${_dashIcon(view === '전체' ? 'layout-grid' : view === '수익' ? 'dollar' : view === '건강' ? 'activity' : 'bar-chart', 14)}
             <span>${view}</span>

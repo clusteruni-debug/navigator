@@ -442,6 +442,11 @@
   font-variant-numeric: tabular-nums;
 }
 
+.life-task-hierarchy {
+  color: var(--cat-가족);
+  font-weight: 700;
+}
+
 .life-filter-chips {
   display: inline-flex;
   align-items: center;
@@ -664,6 +669,16 @@
   align-items: center;
   padding: 9px 10px;
   cursor: pointer;
+}
+
+.life-shell .resolution-card.has-icon { grid-template-columns: 28px minmax(0, 1fr) auto; }
+
+.life-shell .resolution-icon {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 28px;
+  block-size: 28px;
+  font-size: 18px;
 }
 
 .life-shell .resolution-days {
