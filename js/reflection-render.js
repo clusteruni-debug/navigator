@@ -221,20 +221,20 @@ function renderReflectionOverview() {
   const weeklyCount = getReflectionHistory(30).filter(({ day }) => _isReflectionAspectDone(day, 'weekly')).length;
 
   return `
-    <section class="reflection-overview" aria-label="자문 현황">
-      <div class="reflection-stat">
+    <section class="reflection-overview tab-anchor-row" aria-label="자문 현황">
+      <div class="reflection-stat tab-anchor">
         <span class="reflection-stat-label">현재</span>
         <strong aria-live="polite">${streak.current || 0}일</strong>
       </div>
-      <div class="reflection-stat">
+      <div class="reflection-stat tab-anchor">
         <span class="reflection-stat-label">최고</span>
         <strong>${streak.best || 0}일</strong>
       </div>
-      <div class="reflection-stat">
+      <div class="reflection-stat tab-anchor">
         <span class="reflection-stat-label">7일 저녁</span>
         <strong>${eveningCount}/7</strong>
       </div>
-      <div class="reflection-stat">
+      <div class="reflection-stat tab-anchor">
         <span class="reflection-stat-label">30일 주간</span>
         <strong>${weeklyCount}</strong>
       </div>

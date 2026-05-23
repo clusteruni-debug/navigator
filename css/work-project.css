@@ -939,9 +939,13 @@
       transition: opacity 0.2s;
     }
 
-    .work-stage:hover .work-stage-actions {
+    .work-stage:hover .work-stage-actions,
+.work-stage:focus-within .work-stage-actions {
       opacity: 1;
     }
+@media (hover: none) and (pointer: coarse) {
+  .work-stage .work-stage-actions { opacity: 1; pointer-events: auto; }
+}
 
     /* Task 2-3: 프로젝트 메타 정보 접기/펼치기 */
     .work-meta-collapse {

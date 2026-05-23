@@ -541,7 +541,7 @@
       color: var(--text-primary);
       font-weight: 700;
       font-size: var(--font-md);
-      min-height: 32px;
+      min-height: var(--touch-target-min);
     }
 
     .work-section-heading .count {
@@ -559,7 +559,7 @@
     }
 
     .work-calendar-weekdays div {
-      min-height: 30px;
+      min-height: var(--touch-target-min);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -650,7 +650,7 @@
     .work-phase-track {
       display: flex;
       align-items: stretch;
-      min-height: 28px;
+      min-height: var(--touch-target-min);
       border-radius: 7px;
       overflow: hidden;
       background: var(--bg-tertiary);
@@ -658,7 +658,7 @@
     }
 
     .work-phase-bar {
-      min-width: 40px;
+      min-width: var(--touch-target-min);
       display: inline-flex;
       align-items: center;
       justify-content: center;

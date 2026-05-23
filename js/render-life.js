@@ -538,7 +538,7 @@ function renderLifeTab() {
         </button>
       </div>
 
-      <div class="life-anchors" aria-label="일상 안정 앵커">
+      <div class="life-anchors tab-anchor-row" aria-label="일상 안정 앵커">
         <div class="life-anchor cat-life">
           <span class="life-anchor-label">${_lifeIcon('clock', 13)}오늘 리듬</span>
           <span class="life-anchor-value">${rhythmDone}/6</span>

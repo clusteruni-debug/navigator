@@ -162,7 +162,7 @@ function _renderEventsSummary(summary) {
     { label: '참여완료', value: summary.done, tone: 'success', icon: 'check' }
   ];
   return `
-    <div class="events-summary" role="status" aria-label="이벤트 요약">
+    <div class="events-summary tab-anchor-row" role="status" aria-label="이벤트 요약">
       ${items.map(item => `
         <div class="events-summary-item ${item.tone}">
           <div class="events-summary-label">${svgIcon(item.icon, 15)} ${item.label}</div>

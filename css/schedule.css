@@ -420,7 +420,7 @@
 }
 .commute-top-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0;
 }
-.commute-icon-action, .commute-mode-btn, .commute-route-manage-actions button, .commute-log-row button, .commute-expand-direction { min-height: 36px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; transition: background-color var(--transition-fast), border-color var(--transition-fast);
+.commute-icon-action, .commute-mode-btn, .commute-route-manage-actions button, .commute-log-row button, .commute-expand-direction { min-height: var(--touch-target-min); border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 .commute-icon-action { width: 36px; display: inline-flex; align-items: center; justify-content: center;
 }
@@ -430,7 +430,7 @@
 }
 .commute-shell .commute-sub-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin: 0; padding: 4px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-secondary);
 }
-.commute-shell .commute-sub-tab { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 8px 10px; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); font-size: var(--font-sm); font-weight: 700; cursor: pointer; transition: background-color var(--transition-fast), border-color var(--transition-fast);
+.commute-shell .commute-sub-tab { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: var(--touch-target-min); padding: 8px 10px; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); font-size: var(--font-sm); font-weight: 700; cursor: pointer; transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 .commute-shell .commute-sub-tab:hover { background: var(--bg-tertiary); border-color: var(--border-color);
 }
@@ -438,7 +438,7 @@
 }
 .commute-anchors, .commute-today-grid, .commute-log-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;
 }
-.commute-anchor, .commute-shuttle-card, .commute-mode-card, .commute-log-stats > div { min-width: 0; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-secondary);
+.commute-anchor, .commute-shuttle-card, .commute-mode-card, .commute-log-stats > div { min-width: 0; min-height: var(--touch-target-min); padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-secondary);
 }
 .commute-anchor span, .commute-shuttle-card span, .commute-mode-card span, .commute-log-stats span { display: block; color: var(--text-muted); font-size: var(--font-xs); font-weight: 700; letter-spacing: 0;
 }
@@ -458,7 +458,7 @@
 }
 .commute-direction-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 4px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-secondary);
 }
-.commute-direction-tab { min-height: 38px; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); font-size: var(--font-sm); font-weight: 700; cursor: pointer; transition: background-color var(--transition-fast), border-color var(--transition-fast);
+.commute-direction-tab { min-height: var(--touch-target-min); border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); font-size: var(--font-sm); font-weight: 700; cursor: pointer; transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 .commute-direction-tab:hover { background: var(--bg-tertiary); border-color: var(--border-color);
 }
@@ -496,7 +496,7 @@
 }
 .commute-route-manage-actions { display: flex; gap: 4px;
 }
-.commute-route-manage-actions button, .commute-log-row button { width: 34px; min-height: 34px;
+.commute-route-manage-actions button, .commute-log-row button { width: 34px; min-height: var(--touch-target-min);
 }
 .commute-log-day h4 { margin: 0 0 8px; color: var(--text-primary); font-size: var(--font-sm);
 }

@@ -119,6 +119,7 @@
     }
 
     .action-anchors .anchor {
+      cursor: pointer;
       min-width: 0;
       padding: 9px 10px;
       background: var(--bg-tertiary);
@@ -199,7 +200,7 @@
       align-items: center;
       justify-content: center;
       gap: 5px;
-      min-height: 32px;
+      min-height: var(--touch-target-min);
       padding: 4px 10px;
       background: var(--accent-primary-alpha);
       border: 1px solid color-mix(in srgb, var(--accent-primary) 35%, var(--border-light));
@@ -274,7 +275,7 @@
       justify-content: space-between;
       gap: 8px;
       min-width: 0;
-      min-height: 32px;
+      min-height: var(--touch-target-min);
       padding: 6px 9px;
       background: var(--bg-tertiary);
       border: 1px solid var(--border-color);
@@ -326,7 +327,7 @@
     }
 
     .med-compact-link {
-      min-height: 32px;
+      min-height: var(--touch-target-min);
       padding: 4px 8px;
       background: transparent;
       border: 1px solid transparent;
@@ -424,6 +425,7 @@
     }
 
     .task-row.action-task-preview-row {
+      cursor: pointer;
       display: grid;
       grid-template-columns: auto minmax(0, 1fr) auto;
       align-items: center;
@@ -530,7 +532,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 26px;
+      min-height: var(--touch-target-min);
       padding: 2px 8px;
       background: color-mix(in srgb, var(--text-muted) 12%, transparent);
       border: 1px solid transparent;
@@ -1681,9 +1683,13 @@
       transition: opacity 0.2s;
     }
 
-    .task-item:hover .task-quick-actions {
+    .task-item:hover .task-quick-actions,
+.task-item:focus-within .task-quick-actions {
       opacity: 1;
     }
+@media (hover: none) and (pointer: coarse) {
+  .task-item .task-quick-actions { opacity: 1; pointer-events: auto; }
+}
 
     /* 호버 시 예상 시간 하이라이트 */
     .task-item:hover .meta-item {
@@ -1825,9 +1831,16 @@
       box-shadow: 0 2px 12px var(--shadow-color);
       margin-bottom: 0;
     }
-    .task-list .task-item:hover .task-item-actions {
+    .task-list .task-item:hover .task-item-actions,
+    .task-list .task-item:focus-within .task-item-actions {
       opacity: 1;
       pointer-events: auto;
+    }
+    @media (hover: none) and (pointer: coarse) {
+      .task-list .task-item .task-item-actions {
+        opacity: 1;
+        pointer-events: auto;
+      }
     }
     .task-list .task-item .task-item-actions .btn-small {
       opacity: 1 !important;
@@ -1932,3 +1945,5 @@
         gap: 4px 8px;
       }
     }
+
+/* P0d focus-visible (a11y 2026-05-24) — .task-item-mini removed (no matching JS element, dead on arrival per Round 1 review) */

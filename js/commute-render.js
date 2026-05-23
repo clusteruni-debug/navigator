@@ -34,7 +34,7 @@ function renderCommuteTab() {
   });
   content += '</div>';
 
-  content += '<div class="commute-anchors" aria-label="통근 요약">';
+  content += '<div class="commute-anchors tab-anchor-row" aria-label="통근 요약">';
   content += _renderCommuteAnchor('셔틀 상태', appState.shuttleSuccess ? '성공' : '미탑승', appState.shuttleSuccess ? 'success' : 'warn');
   content += _renderCommuteAnchor('현재 모드', summary.modeLabel, 'work');
   content += _renderCommuteAnchor('이번 주', summary.weekTrips + ' trip', '');

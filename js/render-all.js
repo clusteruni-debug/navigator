@@ -365,7 +365,7 @@ function renderAllTasksTab() {
 
       ${_renderAllViewToggle(view)}
 
-      <div class="stable-anchors all-anchor-row" aria-label="할일 고정 지표">
+      <div class="stable-anchors all-anchor-row tab-anchor-row" aria-label="할일 고정 지표">
         ${_renderAllAnchor(anchors.todayDeadline ? 'urgent' : 'neutral', 'clock', '오늘 마감', anchors.todayDeadline)}
         ${_renderAllAnchor(anchors.thisWeek ? 'warn' : 'neutral', 'calendar', '이번 주', anchors.thisWeek)}
         ${_renderAllAnchor('neutral', 'list', 'inbox', anchors.inbox)}

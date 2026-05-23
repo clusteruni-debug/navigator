@@ -59,7 +59,7 @@
       font-size: 16px !important;
       resize: none;
       overflow: hidden;
-      min-height: 40px;
+      min-height: var(--touch-target-min);
       line-height: 1.4;
       font-family: inherit;
     }
@@ -316,7 +316,7 @@
       font-size: var(--font-xs);
       font-weight: 600;
       color: var(--text-muted);
-      min-width: 22px;
+      min-width: var(--touch-target-min);
       height: 22px;
       display: flex;
       align-items: center;
@@ -355,7 +355,7 @@
       color: var(--text-primary);
       resize: none;
       overflow: hidden;
-      min-height: 32px;
+      min-height: var(--touch-target-min);
       line-height: 1.4;
       font-family: inherit;
     }
@@ -398,7 +398,7 @@
       color: var(--text-primary);
       resize: none;
       overflow: hidden;
-      min-height: 32px;
+      min-height: var(--touch-target-min);
       line-height: 1.4;
       font-family: inherit;
     }

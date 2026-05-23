@@ -15,28 +15,7 @@
       margin-bottom: 0;
     }
 
-    .btn-export-asset {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 6px 12px;
-      background: var(--accent-primary);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.15s, opacity 0.15s;
-    }
-
-    .btn-export-asset:hover {
-      opacity: 0.9;
-    }
-
-    .btn-export-asset:active {
-      transform: translateY(0);
-    }
+    /* .btn-export-asset definition removed 2026-05-24 (P0 a11y batch) — dashboard.css:963 outline style is canonical (per 5-agent audit Fix 6) */
 
     .revenue-summary {
       display: grid;

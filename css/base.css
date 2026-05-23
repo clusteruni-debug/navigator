@@ -687,7 +687,7 @@
       .tab-btn {
         padding: 10px 8px;
         font-size: var(--font-sm);
-        min-height: 42px;
+        min-height: var(--touch-target-min);
         white-space: nowrap;
         flex-shrink: 0;
       }
@@ -713,4 +713,85 @@
         gap: 12px;
       }
     }
+
+/* ============================================================
+   P1 primitive — anchor-row (Option B 5-agent design audit 2026-05-24)
+   Consolidates 7 classes → 1 primitive:
+     .action-anchors .anchor / .anchor-widget / .life-anchor /
+     .commute-anchor / .events-summary-item / .reflection-stat /
+     .history-metric
+   See PLAN-NAVIGATOR-DESIGN-OPTB-PRIMITIVE-20260524-01.md M1
+   ============================================================ */
+.tab-anchor-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.tab-anchor {
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.tab-anchor:hover {
+  border-color: var(--accent-primary);
+}
+
+.tab-anchor:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.tab-anchor-label {
+  display: block;
+  color: var(--text-muted);
+  font: var(--text-micro);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab-anchor-value {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-0);
+  margin-top: 3px;
+  color: var(--text-primary);
+  font: var(--text-title-2);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Tone modifiers */
+.tab-anchor.urgent {
+  background: color-mix(in srgb, var(--accent-danger) 8%, var(--bg-tertiary));
+  border-color: color-mix(in srgb, var(--accent-danger) 24%, var(--border-light));
+}
+
+.tab-anchor.warn {
+  background: color-mix(in srgb, var(--accent-warning) 8%, var(--bg-tertiary));
+  border-color: color-mix(in srgb, var(--accent-warning) 24%, var(--border-light));
+}
+
+.tab-anchor.success {
+  background: color-mix(in srgb, var(--accent-success) 8%, var(--bg-tertiary));
+  border-color: color-mix(in srgb, var(--accent-success) 24%, var(--border-light));
+}
+
+.tab-anchor.celebration {
+  background: color-mix(in srgb, var(--accent-celebration) 8%, var(--bg-tertiary));
+  border-color: color-mix(in srgb, var(--accent-celebration) 24%, var(--border-light));
+}
+
+.tab-anchor.active {
+  background: color-mix(in srgb, var(--accent-primary) 12%, var(--bg-tertiary));
+  border-color: var(--accent-primary);
+}
 

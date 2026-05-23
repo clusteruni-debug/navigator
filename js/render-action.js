@@ -116,20 +116,20 @@ function _getActionAnchors(filteredTasks, completedToday) {
 function _renderActionAnchors(filteredTasks, completedToday) {
   const anchors = _getActionAnchors(filteredTasks, completedToday);
   return `
-    <div class="anchors action-anchors" aria-label="오늘 안정 앵커">
-      <div class="anchor urgent">
+    <div class="anchors action-anchors tab-anchor-row" aria-label="오늘 안정 앵커">
+      <div class="anchor urgent tab-anchor">
         <span class="anchor-label">오늘 마감</span>
         <span class="anchor-value">${anchors.todayDeadline}</span>
       </div>
-      <div class="anchor warn">
+      <div class="anchor warn tab-anchor">
         <span class="anchor-label">이번 주</span>
         <span class="anchor-value">${anchors.thisWeek}</span>
       </div>
-      <div class="anchor success">
+      <div class="anchor success tab-anchor">
         <span class="anchor-label">완료</span>
         <span class="anchor-value">${anchors.completed}</span>
       </div>
-      <div class="anchor celebration">
+      <div class="anchor celebration tab-anchor">
         <span class="anchor-label">streak</span>
         <span class="anchor-value">${_renderActionIcon('flame', 15)}${anchors.streak}</span>
       </div>

@@ -39,7 +39,7 @@
 
     .habit-cell {
       aspect-ratio: 1;
-      min-width: 14px;
+      min-width: var(--touch-target-min);
       max-width: 28px;
       background: var(--bg-tertiary);
       border-radius: 3px;

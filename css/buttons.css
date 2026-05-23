@@ -48,6 +48,16 @@
       filter: brightness(0.9);
     }
 
+    /* Disabled state global (P0 a11y 2026-05-24) — 5-agent audit Fix 5 */
+    button:disabled,
+    .btn:disabled,
+    .btn-small:disabled,
+    [role="button"][aria-disabled="true"] {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
     .btn-danger {
       background: var(--accent-danger);
       color: white;
