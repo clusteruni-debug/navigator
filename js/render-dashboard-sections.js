@@ -718,9 +718,9 @@ function _renderDashRevenuePanel(ctx) {
       </div>
 
       <div class="dashboard-section dash-export-section">
-        <button class="btn-export-asset" onclick="exportToAssetManager()" title="자산관리로 내보내기">
+        <button class="btn-export-asset" onclick="exportToAssetManager()" title="자산관리 앱에 붙여넣을 데이터를 클립보드/파일로 복사">
           ${_dashIcon('download', 15)}
-          <span>자산관리로 내보내기</span>
+          <span>클립보드 복사 (자산관리용)</span>
         </button>
       </div>
     </div>

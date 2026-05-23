@@ -22,12 +22,6 @@ function _ensureAllTasksState() {
 
 _ensureAllTasksState();
 
-function setAllTasksSubView(view) {
-  appState.allTasksSubView = view;
-  appState.allTasksView = view === 'all' ? 'category' : 'time';
-  renderStatic();
-}
-
 function setAllTasksView(view) {
   appState.allTasksView = view === 'category' ? 'category' : 'time';
   renderStatic();
@@ -293,6 +287,10 @@ function _renderAllCategoryBoard(query) {
 function navigateAllTasksCategory(category) {
   if (category === '본업') return switchTab('work');
   if (category === '부업') return switchTab('events');
+  if (category === '가족') {
+    setAllTasksCategoryFilter('가족');
+    return;
+  }
   switchTab('life');
 }
 window.navigateAllTasksCategory = navigateAllTasksCategory;

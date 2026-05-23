@@ -415,7 +415,10 @@ function renderCommuteHistoryView() {
 
 function goToCommuteDate(dateStr, direction) {
   appState.commuteViewDate = dateStr;
-  appState.commuteSubTab = direction;
+  appState.commuteSubTab = 'today';
+  if (direction === 'morning' || direction === 'evening') {
+    appState.commuteActiveDirection = direction;
+  }
   renderStatic();
 }
 window.goToCommuteDate = goToCommuteDate;

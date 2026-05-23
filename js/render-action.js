@@ -191,9 +191,9 @@ function _renderResolutionsMini() {
     <div class="resolutions-mini">
       <span class="resolutions-mini-label">오늘 결심</span>
       <span class="resolutions-mini-list">${escapeHtml(listText)}</span>
-      <button class="resolutions-mini-btn" type="button" onclick="openResolutionRecordModal()">
+      <button class="resolutions-mini-btn" type="button" onclick="openResolutionRecordModal()" title="일상 탭에서 결심 기록">
         ${_renderActionIcon('plus', 13)}
-        <span>기록</span>
+        <span>일상에서 기록 ▸</span>
       </button>
     </div>
   `;
@@ -436,8 +436,8 @@ function _renderTodayEmptyState(completedToday) {
         ${streak > 1 ? ` · <span class="today-streak inline">${_renderActionIcon('flame', 14)}${streak}일 연속</span>` : ''}
       </div>
       <div class="empty-state-actions">
-        <button class="empty-state-btn" onclick="showToast('${escapeAttr(rest.text)}: ${escapeAttr(rest.desc)}', 'success')">
-          ${escapeHtml(rest.text)}
+        <button class="empty-state-btn" onclick="showToast('${escapeAttr(rest.text)}: ${escapeAttr(rest.desc)}', 'success')" title="${escapeAttr(rest.desc)}">
+          ${escapeHtml(rest.text)} ▸
         </button>
       </div>
     </div>

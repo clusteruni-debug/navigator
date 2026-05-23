@@ -187,7 +187,7 @@ function renderReflectionTab() {
           <h2 id="reflection-tab-title">매일 자문</h2>
         </div>
         <button type="button" class="reflection-modal-trigger" onclick="showReflectionModal('${activeAspect}')">
-          Modal
+          모달로 입력
         </button>
       </header>
 
@@ -312,7 +312,7 @@ function renderReflectionEntryPanel(today, aspect) {
       <div class="reflection-inline-questions">${questionHtml}</div>
       <div class="reflection-entry-actions">
         <button type="button" class="reflection-btn-secondary" onclick="submitReflectionInline('${aspect}', true)">건너뛰기</button>
-        <button type="button" class="reflection-btn-secondary" onclick="showReflectionModal('${aspect}')">Modal</button>
+        <button type="button" class="reflection-btn-secondary" onclick="showReflectionModal('${aspect}')">모달로 입력</button>
         <button type="button" class="reflection-btn-primary" onclick="submitReflectionInline('${aspect}', false)">저장</button>
       </div>
     </section>
