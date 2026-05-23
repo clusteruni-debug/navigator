@@ -37,7 +37,7 @@
     .work-task-checkbox.checked {
       background: var(--accent-success);
       border-color: var(--accent-success);
-      color: white;
+      color: var(--text-primary);
     }
 
     .work-task-title {
@@ -102,7 +102,7 @@
       overflow: hidden;
       pointer-events: none;
       flex-shrink: 0;
-      transition: opacity 0.2s, max-width 0.2s;
+      transition: opacity 0.2s;
     }
 
     .work-task-item:hover .work-task-actions,
@@ -128,7 +128,7 @@
       color: var(--text-secondary);
       font-size: 14px;
       cursor: pointer;
-      transition: background 0.2s, color 0.2s;
+      transition: background 0.2s;
       min-height: 44px;
       min-width: 44px;
       display: inline-flex;
@@ -261,7 +261,7 @@
       background: var(--accent-primary);
       border: none;
       border-radius: 6px;
-      color: white;
+      color: var(--text-primary);
       font-size: 15px;
       cursor: pointer;
     }
@@ -275,7 +275,7 @@
       background: var(--accent-primary);
       border: none;
       border-radius: 8px;
-      color: white;
+      color: var(--text-primary);
       font-size: 16px;
       cursor: pointer;
       margin-top: 16px;
@@ -308,4 +308,360 @@
     .work-empty-desc {
       font-size: 16px;
       margin-bottom: 20px;
+    }
+
+    /* ====================================
+       본업 redesign task/project rows
+       ==================================== */
+    .work-task-list-redesign {
+      display: grid;
+      gap: 6px;
+    }
+
+    .work-redesign-task-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 8px;
+      min-height: 56px;
+      padding: 8px 10px 8px 13px;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      overflow: hidden;
+    }
+
+    .work-redesign-task-row::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--cat-본업);
+    }
+
+    .work-redesign-task-row.urgent {
+      border-color: color-mix(in srgb, var(--accent-danger) 35%, var(--border-color));
+      background: color-mix(in srgb, var(--accent-danger) 6%, var(--bg-secondary));
+    }
+
+    .work-redesign-task-row.warn {
+      border-color: color-mix(in srgb, var(--accent-warning) 35%, var(--border-color));
+      background: color-mix(in srgb, var(--accent-warning) 6%, var(--bg-secondary));
+    }
+
+    .work-redesign-task-row.completed {
+      opacity: 0.72;
+    }
+
+    .work-row-check {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .work-row-check:hover {
+      border-color: var(--cat-본업);
+      background: color-mix(in srgb, var(--cat-본업) 10%, var(--bg-primary));
+    }
+
+    .work-row-main {
+      min-width: 0;
+      display: grid;
+      gap: 2px;
+    }
+
+    .work-row-title {
+      color: var(--text-primary);
+      font-size: var(--font-base);
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+
+    .work-row-meta {
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .work-cat-tag {
+      color: var(--cat-본업);
+      font-weight: 700;
+    }
+
+    .work-dday-chip {
+      min-height: 30px;
+      display: inline-flex;
+      align-items: center;
+      border-radius: 7px;
+      padding: 0 9px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      font-size: var(--font-xs);
+      font-weight: 700;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .work-dday-chip.urgent {
+      border-color: color-mix(in srgb, var(--accent-danger) 45%, var(--border-color));
+      background: color-mix(in srgb, var(--accent-danger) 12%, var(--bg-primary));
+      color: var(--accent-danger);
+    }
+
+    .work-dday-chip.warn {
+      border-color: color-mix(in srgb, var(--accent-warning) 45%, var(--border-color));
+      background: color-mix(in srgb, var(--accent-warning) 12%, var(--bg-primary));
+      color: var(--accent-warning);
+    }
+
+    .work-dday-chip.none {
+      color: var(--text-muted);
+    }
+
+    .work-row-actions {
+      display: inline-flex;
+      gap: 4px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .work-redesign-task-row:hover .work-row-actions,
+    .work-redesign-task-row:focus-within .work-row-actions {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .work-row-action {
+      padding: 0;
+    }
+
+    .work-row-action.danger {
+      color: var(--accent-danger);
+    }
+
+    .work-project-grid-redesign {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .work-project-card-redesign {
+      position: relative;
+      display: grid;
+      gap: 10px;
+      min-height: 146px;
+      padding: 13px;
+      border: 1px solid var(--border-light);
+      border-left: 3px solid var(--cat-본업);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+    }
+
+    .work-project-card-redesign.urgent {
+      border-color: color-mix(in srgb, var(--accent-danger) 35%, var(--border-color));
+      border-left-color: var(--accent-danger);
+    }
+
+    .work-project-card-redesign.warn {
+      border-color: color-mix(in srgb, var(--accent-warning) 35%, var(--border-color));
+      border-left-color: var(--accent-warning);
+    }
+
+    .work-project-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .work-project-card-head h3 {
+      margin: 0;
+      color: var(--text-primary);
+      font-size: var(--font-md);
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .work-stage-progress {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-height: 14px;
+    }
+
+    .work-stage-pill {
+      height: 8px;
+      min-width: 20px;
+      flex: 1;
+      border-radius: 4px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+    }
+
+    .work-stage-pill.completed {
+      background: color-mix(in srgb, var(--cat-본업) 55%, var(--bg-tertiary));
+      border-color: color-mix(in srgb, var(--cat-본업) 50%, var(--border-color));
+    }
+
+    .work-stage-pill.current {
+      background: color-mix(in srgb, var(--accent-warning) 55%, var(--bg-tertiary));
+      border-color: color-mix(in srgb, var(--accent-warning) 50%, var(--border-color));
+    }
+
+    .work-project-meta {
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+      overflow-wrap: anywhere;
+    }
+
+    .work-project-card-action {
+      padding: 0 10px;
+      min-height: 38px;
+    }
+
+    .work-general-quick-add {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+    }
+
+    .work-general-quick-input {
+      min-height: 44px;
+      flex: 1;
+      min-width: 0;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 0 12px;
+      font-size: var(--font-base);
+    }
+
+    .work-general-quick-input:focus {
+      outline: 2px solid var(--cat-본업);
+      outline-offset: 2px;
+    }
+
+    .work-more-row {
+      width: 100%;
+      padding: 0 12px;
+      border-style: dashed;
+      color: var(--text-muted);
+      background: transparent;
+    }
+
+    .work-recent-done {
+      margin-top: 6px;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      background: var(--bg-tertiary);
+      overflow: hidden;
+    }
+
+    .work-recent-done-head {
+      width: 100%;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 12px;
+      border: 0;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .work-recent-done-head span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .work-recent-done-body {
+      display: grid;
+      gap: 4px;
+      padding: 0 10px 10px;
+    }
+
+    .work-recent-done-row {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 8px;
+      border-radius: 7px;
+      background: var(--bg-primary);
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+    }
+
+    .work-recent-done-row span {
+      text-decoration: line-through;
+      overflow-wrap: anywhere;
+    }
+
+    .work-recent-done-row time {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .work-recent-done-empty {
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+      padding: 8px;
+    }
+
+    .work-history-link {
+      justify-self: end;
+      min-height: 38px;
+      padding: 0 10px;
+      color: var(--cat-본업);
+      background: color-mix(in srgb, var(--cat-본업) 10%, var(--bg-primary));
+      border-color: color-mix(in srgb, var(--cat-본업) 35%, var(--border-color));
+      font-weight: 700;
+    }
+
+    .work-empty-state {
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      padding: 28px 16px;
+      border: 1px dashed var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .work-empty-title {
+      color: var(--text-primary);
+      font-size: var(--font-md);
+      font-weight: 700;
+    }
+
+    .work-empty-desc {
+      max-width: 520px;
+      font-size: var(--font-sm);
     }

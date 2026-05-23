@@ -22,6 +22,37 @@ blockers: []
 depends_on: ["NAVIGATOR-LIFEOS-INTEGRATION"]
 git_strategy: retired-mono
 last_verified: 2026-05-09
+ko_translation:
+  status_reason_ko: Phase 0.5~12 구현 완료 (feature/daily-reflection 브랜치 14 commit) + Codex peer review round 2 적용 + 2026-05-09 Session 5에 GitHub origin push. Session 8에 시각 대비 핫픽스 + Node 로직 테스트 (40 assertion / 15 test) 추가.
+  milestones_ko:
+  - id: P0.5
+    label_ko: Codex read-only 리뷰로 pre-flight findings
+  - id: P1
+    label_ko: State 스키마 (사용자 state의 dailyReflection 필드)
+  - id: P2
+    label_ko: Load/save (state.js + firebase-sync 명시 필드)
+  - id: P3
+    label_ko: Core 로직 + streak + compaction + 분기별 markdown export
+  - id: P4
+    label_ko: Bottom-sheet modal UI (.modal과 분리)
+  - id: P5.5
+    label_ko: 멀티 디바이스 listener (초기 load + onSnapshot merge)
+  - id: P6
+    label_ko: 온보딩 + a11y + focus-trap
+  - id: P7
+    label_ko: 설정 UI (toggle + time picker)
+  - id: P8
+    label_ko: Tab 통합 (history view)
+  - id: P9
+    label_ko: 자동 트리거 (22:00 PWA push) + push 알림 권한 흐름
+  - id: P10
+    label_ko: sw.js cache list + html script tag drift 수정
+  - id: P11
+    label_ko: 기존 work-ro-template.js cache drift 수정 (Phase 9 merge gate)
+  - id: P12
+    label_ko: 검증 (npm run verify + npm test) + Codex peer review 라운드 1/2/2.1
+  decisions_pending_ko: []
+  blockers_ko: []
 ---
 
 # PLAN-NAVIGATOR-DAILY-REFLECTION
