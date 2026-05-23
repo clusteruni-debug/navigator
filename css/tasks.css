@@ -27,7 +27,7 @@
     }
 
     .today-mode {
-      font-size: 13px;
+      font-size: var(--font-sm);
       font-weight: 600;
       padding: 2px 8px;
       border-radius: 12px;
@@ -43,7 +43,7 @@
     .today-mode.휴식 { background: color-mix(in srgb, var(--text-muted) 15%, transparent); color: var(--text-secondary); }
 
     .today-remaining {
-      font-size: 13px;
+      font-size: var(--font-sm);
       font-variant-numeric: tabular-nums;
       color: var(--text-muted);
     }
@@ -101,7 +101,7 @@
 
     .section-title .count {
       color: var(--text-muted);
-      font-size: 11px;
+      font-size: var(--font-xs);
       font-weight: 600;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
@@ -149,7 +149,7 @@
     .action-anchors .anchor-label {
       display: block;
       color: var(--text-muted);
-      font-size: 11px;
+      font-size: var(--font-xs);
       font-weight: 600;
       line-height: 1.2;
       white-space: nowrap;
@@ -183,7 +183,7 @@
 
     .resolutions-mini-label {
       color: var(--text-muted);
-      font-size: 11px;
+      font-size: var(--font-xs);
       font-weight: 700;
       letter-spacing: 0;
       text-transform: uppercase;
@@ -194,7 +194,7 @@
       min-width: 0;
       flex: 1;
       color: var(--text-secondary);
-      font-size: 12px;
+      font-size: var(--font-xs);
       line-height: 1.4;
     }
 
@@ -211,7 +211,7 @@
       color: var(--accent-primary);
       cursor: pointer;
       font-family: inherit;
-      font-size: 12px;
+      font-size: var(--font-xs);
       font-weight: 700;
       white-space: nowrap;
       transition: background-color var(--transition-fast), border-color var(--transition-fast);
@@ -243,7 +243,7 @@
       align-items: center;
       gap: 5px;
       color: var(--text-secondary);
-      font-size: 11px;
+      font-size: var(--font-xs);
       font-weight: 700;
       white-space: nowrap;
     }
@@ -287,7 +287,7 @@
       color: var(--text-secondary);
       cursor: pointer;
       font-family: inherit;
-      font-size: 12px;
+      font-size: var(--font-xs);
       transition: background-color var(--transition-fast), border-color var(--transition-fast);
     }
 
@@ -318,7 +318,7 @@
     .med-compact-slot-time {
       color: inherit;
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: var(--font-xs);
       font-variant-numeric: tabular-nums;
       opacity: 0.82;
       white-space: nowrap;
@@ -339,7 +339,7 @@
       color: var(--text-muted);
       cursor: pointer;
       font-family: inherit;
-      font-size: 11px;
+      font-size: var(--font-xs);
       transition: background-color var(--transition-fast), border-color var(--transition-fast);
     }
 
@@ -363,7 +363,7 @@
         height: 18px;
       }
       .med-compact-tag {
-        font-size: 11px;
+        font-size: var(--font-xs);
         padding: 2px 7px;
       }
       .med-compact-slot {
@@ -377,10 +377,10 @@
         height: 16px;
       }
       .med-compact-slot-time {
-        font-size: 13px;
+        font-size: var(--font-sm);
       }
       .med-compact-link {
-        font-size: 13px;
+        font-size: var(--font-sm);
         padding: 6px 12px;
       }
 
@@ -392,7 +392,7 @@
         padding: 13px 16px;
       }
       .action-anchors .anchor-label {
-        font-size: 13px;
+        font-size: var(--font-sm);
       }
       .action-anchors .anchor-value {
         font-size: 26px;
@@ -404,20 +404,20 @@
         margin-bottom: 10px;
       }
       .action-section-title .count {
-        font-size: 13px;
+        font-size: var(--font-sm);
       }
 
       .resolutions-mini {
         padding: 14px 18px;
       }
       .resolutions-mini-label {
-        font-size: 13px;
+        font-size: var(--font-sm);
       }
       .resolutions-mini-list {
         font-size: 14px;
       }
       .resolutions-mini-btn {
-        font-size: 13px;
+        font-size: var(--font-sm);
         padding: 7px 14px;
       }
     }
@@ -503,7 +503,7 @@
       min-width: 0;
       margin: 0;
       color: var(--text-muted);
-      font-size: 11px;
+      font-size: var(--font-xs);
       line-height: 1.2;
     }
 
@@ -541,7 +541,7 @@
       border: 1px solid transparent;
       border-radius: 999px;
       color: var(--text-secondary);
-      font-size: 11px;
+      font-size: var(--font-xs);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
@@ -643,7 +643,7 @@
       background: color-mix(in srgb, var(--accent-danger) 12%, transparent);
       border-radius: 8px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: var(--font-sm);
       color: var(--text-primary);
     }
 
@@ -709,7 +709,7 @@
     }
 
     .task-item-mini-deadline {
-      font-size: 12px;
+      font-size: var(--font-xs);
       font-variant-numeric: tabular-nums;
       color: var(--text-muted);
     }
@@ -718,7 +718,7 @@
     .deadline-chip {
       display: inline-flex;
       align-items: center;
-      font-size: 12px;
+      font-size: var(--font-xs);
       font-weight: 600;
       font-variant-numeric: tabular-nums;
       padding: 2px 8px;
@@ -749,7 +749,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: var(--font-xs);
       color: var(--accent-success);
       border: 1px solid var(--accent-success);
       border-radius: 50%;
@@ -852,7 +852,7 @@
       color: var(--text-secondary);
       cursor: pointer;
       font-family: inherit;
-      font-size: 12px;
+      font-size: var(--font-xs);
       transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
     }
 
@@ -874,7 +874,7 @@
 
     .rhythm-time {
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: var(--font-xs);
       font-variant-numeric: tabular-nums;
       opacity: 0.9;
     }
@@ -893,7 +893,7 @@
       align-items: center;
       gap: 8px;
       margin-bottom: 8px;
-      font-size: 12px;
+      font-size: var(--font-xs);
     }
 
     .today-rhythm-details .medication-group-header-right {
@@ -953,7 +953,7 @@
       color: var(--text-secondary);
       cursor: pointer;
       font-family: inherit;
-      font-size: 13px;
+      font-size: var(--font-sm);
       text-align: left;
       transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
     }
@@ -997,7 +997,7 @@
     .today-rhythm-details .medication-btn-time {
       margin-left: auto;
       font-family: var(--font-mono);
-      font-size: 12px;
+      font-size: var(--font-xs);
       font-variant-numeric: tabular-nums;
       opacity: 0.9;
       white-space: nowrap;
@@ -1435,7 +1435,7 @@
       padding: 4px 10px;
       background: var(--bg-tertiary);
       border-radius: 12px;
-      font-size: 12px;
+      font-size: var(--font-xs);
       color: var(--text-secondary);
       font-variant-numeric: tabular-nums;
     }
@@ -1931,7 +1931,7 @@
       }
 
       .task-item .task-item-meta {
-        font-size: 13px;
+        font-size: var(--font-sm);
         display: flex;
         flex-wrap: wrap;
         gap: 4px 8px;

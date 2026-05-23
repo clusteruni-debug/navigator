@@ -701,11 +701,11 @@
     .commute-date-nav-btn { background: var(--bg-secondary); border: none; border-radius: 8px; padding: 6px 12px; font-size: 15px; font-weight: 600; color: var(--text-secondary); cursor: pointer; min-height: 36px; }
     .commute-date-nav-btn:hover:not(:disabled) { background: var(--bg-hover); color: var(--text-primary); }
     .commute-date-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .commute-date-nav-btn.today-btn { background: var(--accent-primary); color: white; font-size: 13px; padding: 4px 10px; }
+    .commute-date-nav-btn.today-btn { background: var(--accent-primary); color: white; font-size: var(--font-sm); padding: 4px 10px; }
     .commute-date-nav-label { font-size: 16px; font-weight: 700; color: var(--text-primary); min-width: 80px; text-align: center; }
     .commute-date-nav-label.past { color: var(--text-secondary); }
     .commute-history-add-row { display: flex; gap: 8px; margin-top: 6px; }
-    .commute-history-add-btn { background: var(--bg-secondary); border: 1px dashed var(--border-primary); border-radius: 8px; padding: 4px 12px; font-size: 13px; color: var(--text-secondary); cursor: pointer; }
+    .commute-history-add-btn { background: var(--bg-secondary); border: 1px dashed var(--border-primary); border-radius: 8px; padding: 4px 12px; font-size: var(--font-sm); color: var(--text-secondary); cursor: pointer; }
     .commute-history-add-btn:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--accent-primary); }
     .commute-stats-card { background: var(--bg-card); border-radius: 16px; padding: 18px; margin-bottom: 12px; }
     .commute-stats-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }

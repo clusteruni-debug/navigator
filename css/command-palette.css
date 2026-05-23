@@ -67,7 +67,7 @@
 }
 
 .cmd-palette-esc {
-  font-size: 12px;
+  font-size: var(--font-xs);
   padding: 2px 6px;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
@@ -123,7 +123,7 @@
 }
 
 .cmd-palette-item-desc {
-  font-size: 13px;
+  font-size: var(--font-sm);
   color: var(--text-muted);
 }
 

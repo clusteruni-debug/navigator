@@ -685,7 +685,7 @@
       .tab-nav::-webkit-scrollbar { display: none; }
       .tab-btn {
         padding: 10px 8px;
-        font-size: 13px;
+        font-size: var(--font-sm);
         min-height: 42px;
         white-space: nowrap;
         flex-shrink: 0;

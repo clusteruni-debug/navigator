@@ -284,7 +284,7 @@
       display: inline-flex;
       align-items: center;
       gap: 3px;
-      font-size: 12px;
+      font-size: var(--font-xs);
       padding: 2px 8px;
       border-radius: 10px;
       background: var(--bg-tertiary);
@@ -309,11 +309,11 @@
     }
 
     .subtask-chip-check {
-      font-size: 12px;
+      font-size: var(--font-xs);
     }
 
     .subtask-progress-indicator {
-      font-size: 11px;
+      font-size: var(--font-xs);
       font-weight: 600;
       color: var(--text-muted);
       min-width: 22px;

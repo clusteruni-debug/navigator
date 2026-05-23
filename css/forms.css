@@ -359,7 +359,7 @@
     }
 
     .pagination-info {
-      font-size: 13px;
+      font-size: var(--font-sm);
       color: var(--text-muted);
       margin-left: 8px;
     }
@@ -377,7 +377,7 @@
       border: 1px solid var(--border-color);
       border-radius: 6px;
       color: var(--text-secondary);
-      font-size: 13px;
+      font-size: var(--font-sm);
       cursor: pointer;
       font-family: inherit;
     }

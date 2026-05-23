@@ -175,7 +175,7 @@
 
     /* ── Event subtask badge & chips ── */
     .event-subtask-badge {
-      font-size: 11px;
+      font-size: var(--font-xs);
       font-weight: 600;
       background: var(--bg-tertiary);
       border: 1px solid var(--border-color);
@@ -305,7 +305,7 @@
     }
 
     .event-revenue-inline {
-      font-size: 13px;
+      font-size: var(--font-sm);
       font-weight: 500;
       color: var(--accent-success);
       margin-left: 4px;
@@ -337,7 +337,7 @@
 
     .completed-log-source {
       flex-shrink: 0;
-      font-size: 12px;
+      font-size: var(--font-xs);
     }
 
     .completed-log-title {
@@ -351,7 +351,7 @@
 
     .completed-log-date {
       flex-shrink: 0;
-      font-size: 13px;
+      font-size: var(--font-sm);
       color: var(--text-muted);
     }
 
@@ -389,7 +389,7 @@
       justify-content: center;
       gap: 12px;
       padding: 8px 0;
-      font-size: 13px;
+      font-size: var(--font-sm);
       color: var(--text-muted);
     }
 
@@ -422,7 +422,7 @@
 .events-subtitle {
   margin-top: 3px;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 
 .events-title {
@@ -516,7 +516,7 @@
 
 .events-sync-state {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 
 .events-sync-state.error {
@@ -682,7 +682,7 @@
   border-radius: 8px;
   background: var(--bg-tertiary);
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: var(--font-xs);
   line-height: 1.2;
   padding: 3px 7px;
 }
@@ -752,7 +752,7 @@
   display: inline-flex;
   align-items: center;
   padding: 0 9px;
-  font-size: 12px;
+  font-size: var(--font-xs);
 }
 
 .event-trash-card {
