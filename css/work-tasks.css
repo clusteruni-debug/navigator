@@ -743,8 +743,4 @@
       }
     }
 
-/* P0d focus-visible (a11y 2026-05-24) */
-.work-redesign-task-row:focus-visible {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
-}
+/* P0d focus-visible (a11y 2026-05-24) — .work-redesign-task-row removed Round 3 (work.js:181 renders outer div with no tabindex, dead rule same pattern as life-task-row Round 2 removal) */

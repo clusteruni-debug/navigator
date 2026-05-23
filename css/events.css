@@ -258,9 +258,7 @@
       border-radius: 12px;
     }
 
-    .events-summary-item {
-      text-align: center;
-    }
+    /* .events-summary-item old text-align:center removed Round 3 (overridden by global definition at line 470, text-align:left) */
 
     .events-summary-value {
       font-size: 28px;
