@@ -258,6 +258,7 @@
         padding: 30px 40px;
         max-width: calc(1600px - var(--sidebar-width));
         margin-left: var(--sidebar-width);
+        zoom: 1.15;  /* PC visible boost — uniform +15% typography+spacing (2026-05-23 user feedback) */
       }
 
       /* 사이드바 스타일은 nav.css에 정의 */
