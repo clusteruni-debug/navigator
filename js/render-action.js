@@ -344,7 +344,12 @@ function renderActionTab(ctx) {
           </div>
         </div>
 
-        <!-- ▶ 지금 할 것 (메인 히어로) - moved to top per user feedback 2026-05-23 (B1: "지금 뭐 해?" 1초 결정 1순위 위치) -->
+        ${_renderActionAnchors(filteredTasks, completedToday)}
+        ${_renderResolutionsMini()}
+        ${_renderRhythmCompact()}
+        ${medicationCompact}
+
+        <!-- ▶ 지금 할 것 (메인 히어로) - moved back to position 6 (task preview 위까지) per user 2026-05-23 -->
         ${nextAction ? `
           <div class="action-section-label">지금 할 것</div>
           <div class="next-action ${urgencyClass}" style="--task-cat-color: var(--cat-${safeCatId(nextAction.category)})">
@@ -385,11 +390,6 @@ function renderActionTab(ctx) {
             </div>
           </div>
         ` : ''}
-
-        ${_renderActionAnchors(filteredTasks, completedToday)}
-        ${_renderResolutionsMini()}
-        ${_renderRhythmCompact()}
-        ${medicationCompact}
 
         ${_renderTodayTaskPreview(filteredTasks)}
 

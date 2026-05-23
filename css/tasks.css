@@ -84,8 +84,8 @@
     }
 
     .action-section-label {
-      font: var(--text-label);
-      color: var(--text-secondary);
+      font: var(--text-body-emph);
+      color: var(--text-primary);
       margin: 0 0 6px 4px;
     }
 
@@ -182,20 +182,16 @@
     }
 
     .resolutions-mini-label {
-      color: var(--text-muted);
-      font-size: var(--font-xs);
-      font-weight: 700;
-      letter-spacing: 0;
-      text-transform: uppercase;
+      color: var(--text-secondary);
+      font: var(--text-body-emph);
       white-space: nowrap;
     }
 
     .resolutions-mini-list {
       min-width: 0;
       flex: 1;
-      color: var(--text-secondary);
-      font-size: var(--font-xs);
-      line-height: 1.4;
+      color: var(--text-primary);
+      font: var(--text-body);
     }
 
     .resolutions-mini-btn {
@@ -242,9 +238,8 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      color: var(--text-secondary);
-      font-size: var(--font-xs);
-      font-weight: 700;
+      color: var(--text-primary);
+      font: var(--text-body-emph);
       white-space: nowrap;
     }
 

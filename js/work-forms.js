@@ -216,15 +216,15 @@ function exportSlackUpdate(project) {
   const doneTasks = subcats.reduce((s, sub) => s + sub.tasks.filter(t => t.status === 'completed').length, 0);
   const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
-  // 최근 7일 완료한 항목
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  // 최근 30일 완료한 항목 (user 2026-05-23: 7일 → 30일)
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const recentCompleted = [];
   (project.stages || []).forEach(s => {
     (s.subcategories || []).forEach(sub => {
       sub.tasks.forEach(t => {
         if (t.status === 'completed' && t.completedAt) {
-          if (new Date(t.completedAt) >= sevenDaysAgo) {
+          if (new Date(t.completedAt) >= thirtyDaysAgo) {
             recentCompleted.push(t);
           }
         }
