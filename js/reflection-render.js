@@ -186,9 +186,6 @@ function renderReflectionTab() {
           <p class="reflection-tab-kicker">Reflection</p>
           <h2 id="reflection-tab-title">매일 자문</h2>
         </div>
-        <button type="button" class="reflection-modal-trigger" onclick="showReflectionModal('${activeAspect}')">
-          모달로 입력
-        </button>
       </header>
 
       ${renderReflectionOverview()}

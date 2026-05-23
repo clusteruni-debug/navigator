@@ -122,7 +122,7 @@ function renderWorkTimeline() {
         const deadline = p.deadline ? fmtDate(p.deadline) : '-';
         const isComplete = p.stages.length > 0 && p.stages.every(s => s.completed);
 
-        return '<div style="background: var(--bg-secondary); border-radius: 12px; padding: 16px; margin-bottom: 12px; cursor: pointer;" onclick="selectWorkProject(\'' + escapeAttr(p.id) + '\'); setWorkView(\'detail\');">' +
+        return '<div style="background: var(--bg-secondary); border-radius: 12px; padding: 16px; margin-bottom: 12px; cursor: pointer;" onclick="openWorkProjectDetail(\'' + escapeAttr(p.id) + '\');">' +
           '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">' +
             '<span style="font-size: 16px; font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + (isComplete ? '✅ ' : '📁 ') + escapeHtml(p.name) + '</span>' +
             '<span style="font-size: 14px; color: var(--text-muted); white-space: nowrap;">' + created + ' ~ ' + deadline + '</span>' +

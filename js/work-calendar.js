@@ -114,7 +114,7 @@ function renderWorkCalendarView() {
     // 마감일 라벨
     var deadlineLabel = proj.deadline ? proj.deadline.substring(5).replace('-', '/') : '';
 
-    rowsHtml += '<div style="display: flex; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border-color); min-height: 40px; cursor: pointer; transition: background 0.15s;" onmouseenter="this.style.background=&quot;var(--bg-tertiary)&quot;" onmouseleave="this.style.background=&quot;transparent&quot;" onclick="appState.activeWorkProject=&quot;' + proj.id + '&quot;; setWorkView(&quot;detail&quot;);">';
+    rowsHtml += '<div style="display: flex; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border-color); min-height: 40px; cursor: pointer; transition: background 0.15s;" onmouseenter="this.style.background=&quot;var(--bg-tertiary)&quot;" onmouseleave="this.style.background=&quot;transparent&quot;" onclick="openWorkProjectDetail(&quot;' + escapeAttr(proj.id) + '&quot;);">';
     // 프로젝트 이름
     rowsHtml += '<div style="min-width: 130px; max-width: 130px; padding: 0 8px; display: flex; align-items: center; gap: 6px;">';
     rowsHtml += '<div style="width: 8px; height: 8px; border-radius: 50%; background: ' + barColor + '; flex-shrink: 0;"></div>';

@@ -201,7 +201,16 @@ function _renderLifeRhythmSection(rhythmItems) {
   const recordedCount = rhythmItems.filter(item => item.value).length;
   return `
     <section class="life-section-card life-rhythm-primary" aria-labelledby="life-rhythm-title">
-      ${_renderLifeSectionHeading('라이프 리듬', recordedCount + ' / ' + rhythmItems.length, 'clock', 'life-rhythm-title')}
+      <div class="life-section-heading split">
+        <span id="life-rhythm-title" class="life-section-label">${_lifeIcon('clock', 14)}라이프 리듬</span>
+        <div class="life-section-heading-actions">
+          <span class="life-section-count">${recordedCount} / ${rhythmItems.length}</span>
+          <button class="life-soft-action" type="button" onclick="appState.activeLifeSubView='rhythmHistory'; renderStatic();" aria-label="리듬 히스토리 보기">
+            ${_lifeIcon('calendar', 13)}
+            <span>히스토리</span>
+          </button>
+        </div>
+      </div>
       <div class="rhythm-strip life-rhythm-strip" role="group" aria-labelledby="life-rhythm-title">
         ${rhythmItems.map(item => `
           <button class="rhythm-btn life-rhythm-strip-btn ${item.value ? 'recorded' : ''}"
@@ -480,6 +489,22 @@ function _renderResolutionSection() {
  * 일상 탭 HTML을 반환한다.
  */
 function renderLifeTab() {
+  // rhythm history sub-view 분기 — 일상 탭 안 swap
+  if (appState.activeLifeSubView === 'rhythmHistory' && typeof renderLifeRhythmHistory === 'function') {
+    return `
+      <div class="life-shell">
+        <div class="life-topbar">
+          <button type="button" class="life-back-btn" onclick="appState.activeLifeSubView=null; renderStatic();" aria-label="일상 탭으로 돌아가기">
+            ${_lifeIcon('arrow-left', 14)}
+            <span>일상</span>
+          </button>
+          <h2 class="life-title">리듬 히스토리</h2>
+        </div>
+        ${renderLifeRhythmHistory()}
+      </div>
+    `;
+  }
+
   const now = new Date();
   const todayEnd = new Date(now);
   todayEnd.setHours(23, 59, 59, 999);
@@ -522,7 +547,7 @@ function renderLifeTab() {
           <span class="life-anchor-label">${_lifeIcon('pill', 13)}약 복용</span>
           <span class="life-anchor-value">${medicationSummary.taken}/${medicationSummary.total}</span>
         </div>
-        <div class="life-anchor cat-family">
+        <div class="life-anchor cat-family life-anchor-clickable" role="button" tabindex="0" onclick="setLifeTaskFilter('family')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setLifeTaskFilter('family')}" aria-label="가족 task ${familyTasks.length}개 필터 적용">
           <span class="life-anchor-label">${_lifeIcon('home', 13)}가족</span>
           <span class="life-anchor-value">${familyTasks.length}</span>
         </div>

@@ -150,8 +150,8 @@
 
     .anchor-label {
       margin-top: 1px;
-      font-size: 11px;
-      color: var(--text-muted);
+      font-size: 13px;
+      color: var(--text-secondary);
     }
 
     .category-columns {
@@ -167,8 +167,8 @@
       align-items: center;
       gap: 8px;
       margin: 6px 4px 4px;
-      color: var(--text-muted);
-      font-size: 10px;
+      color: var(--text-secondary);
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -224,8 +224,8 @@
     }
 
     .cat-column-count {
-      color: var(--text-muted);
-      font-size: 11px;
+      color: var(--text-secondary);
+      font-size: 12px;
       font-weight: 600;
       font-variant-numeric: tabular-nums;
     }
@@ -320,9 +320,9 @@
 
     .cat-column-task-time {
       flex-shrink: 0;
-      color: var(--text-muted);
+      color: var(--text-secondary);
       font-family: var(--font-mono, monospace);
-      font-size: 11px;
+      font-size: 12px;
       font-variant-numeric: tabular-nums;
     }
 

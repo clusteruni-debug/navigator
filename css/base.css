@@ -21,16 +21,21 @@
       --space-5: 40px;
       --space-6: 48px;
 
+      /* Semantic spacing — section / card / tab-shell 일관 */
+      --space-card: 12px;
+      --space-section: 16px;
+      --space-tab-shell: 14px;
+
       /* Slate palette */
       --bg-primary: #0F172A;
       --bg-secondary: #1E293B;
       --bg-tertiary: #334155;
-      --bg-card: #1E293B;
+      --bg-card: #273349;
       --text-primary: #F1F5F9;
       --text-secondary: #94A3B8;
-      --text-muted: #64748B;
-      --border-color: rgba(148, 163, 184, 0.12);
-      --border-light: rgba(148, 163, 184, 0.06);
+      --text-muted: #7C8FA1;
+      --border-color: rgba(148, 163, 184, 0.18);
+      --border-light: rgba(148, 163, 184, 0.15);
 
       /* 카테고리 색상 */
       --cat-본업: #667eea;
@@ -60,6 +65,11 @@
       --font-md: 17px;    /* 강조 본문 */
       --font-lg: 18px;    /* 소제목 */
       --font-xl: 20px;    /* 제목 */
+      --font-2xl: 24px;   /* 큰 제목 */
+      --font-3xl: 32px;   /* hero */
+      --font-h1: 28px;    /* h1 semantic */
+      --font-h2: 22px;    /* h2 semantic */
+      --font-h3: 18px;    /* h3 semantic */
 
       /* ═══════════════════════════════════════════
          Semantic — purpose aliases
@@ -136,9 +146,9 @@
       --bg-card: #ffffff;
       --text-primary: #1a1a1a;
       --text-secondary: #5f6368;
-      --text-muted: #72787e;
-      --border-color: #e0e0e0;
-      --border-light: #f1f3f4;
+      --text-muted: #636870;
+      --border-color: #d0d4d8;
+      --border-light: #dde0e3;
       --shadow-color: rgba(0, 0, 0, 0.15);
       --overlay-backdrop: rgba(0, 0, 0, 0.5);
       --overlay-heavy: rgba(0, 0, 0, 0.7);
@@ -150,6 +160,7 @@
 
     body {
       font-family: var(--font-body);
+      font-size: 16px;
       background: var(--bg-primary);
       color: var(--text-primary);
       min-height: 100vh;
@@ -281,10 +292,14 @@
       }
     }
 
-    /* 와이드 사이드바 (1440px+): 3패널 레이아웃 */
+    /* 와이드 사이드바 (1440px+): 3패널 레이아웃 + 본문 font scale up */
     @media (min-width: 1440px) {
       :root {
         --sidebar-width: 260px;
+      }
+
+      body {
+        font-size: 18px;
       }
     }
 
@@ -296,7 +311,7 @@
       }
 
       body {
-        font-size: 17px;
+        font-size: 19px;
       }
 
       .header h1 {

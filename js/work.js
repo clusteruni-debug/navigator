@@ -471,8 +471,9 @@ function _renderProjectDetail(project) {
 
 function _renderWorkProjectsTab(activeProjects) {
   const selectedProject = _activeProjectOrFirst(activeProjects);
+  const isFullWidthView = appState.workProjectView === 'calendar' || appState.workProjectView === 'timeline';
   return '<div class="work-subtab-content active" id="work-subtab-panel-projects" role="tabpanel" aria-labelledby="work-subtab-btn-projects" data-work-subtab="projects">' +
-    '<div class="work-master-detail ' + (appState.workMobileDrillIn ? 'detail-open' : '') + '">' + _renderProjectMaster(activeProjects) + _renderProjectDetail(selectedProject) + '</div>' +
+    '<div class="work-master-detail ' + (appState.workMobileDrillIn ? 'detail-open ' : '') + (isFullWidthView ? 'full-width-view' : '') + '">' + _renderProjectMaster(activeProjects) + _renderProjectDetail(selectedProject) + '</div>' +
   '</div>';
 }
 

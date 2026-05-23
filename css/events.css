@@ -5,8 +5,8 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
+      margin-bottom: var(--space-section);
+      padding-bottom: var(--space-card);
       border-bottom: 1px solid var(--border-light);
       flex-wrap: wrap;
     }

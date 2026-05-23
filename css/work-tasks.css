@@ -708,3 +708,21 @@
     .work-detail-footer { min-height: 54px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: var(--font-sm); }
     @media (prefers-reduced-motion: reduce) { .work-redesign * { transition-duration: 0.01ms; animation: none; } }
     @media (max-width: 1023px) { .work-master-detail { grid-template-columns: 1fr; } .work-master-detail.detail-open .work-master-panel, .work-master-detail:not(.detail-open) .work-detail-panel { display: none; } .work-back-btn { display: inline-flex; } }
+
+    /* Calendar/Timeline view — master-panel 320px 락 해제, full-width 사용 */
+    .work-master-detail.full-width-view { grid-template-columns: 1fr; gap: 0; }
+    .work-master-detail.full-width-view:not(.detail-open) .work-detail-panel { display: none; }
+    .work-master-detail.full-width-view:not(.detail-open) .work-master-panel { max-height: none; overflow: visible; padding: var(--space-section); }
+    /* detail drill-in (calendar/timeline view 에서 project click) — master hide, detail show */
+    .work-master-detail.full-width-view.detail-open .work-master-panel { display: none; }
+    .work-master-detail.full-width-view.detail-open .work-detail-panel { display: grid; max-height: none; overflow: visible; }
+
+    /* 큰 화면 breakpoint — master panel + detail width 확장 */
+    @media (min-width: 1280px) {
+      .work-master-detail:not(.full-width-view) { grid-template-columns: 360px minmax(0, 1fr); gap: 16px; }
+    }
+    @media (min-width: 1920px) {
+      .work-master-detail:not(.full-width-view) { grid-template-columns: 420px minmax(0, 1fr); gap: 20px; }
+      .work-master-detail:not(.full-width-view) .work-master-panel,
+      .work-master-detail:not(.full-width-view) .work-detail-panel { max-height: 900px; }
+    }

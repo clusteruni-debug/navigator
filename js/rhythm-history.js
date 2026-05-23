@@ -237,6 +237,7 @@ function renderLifeRhythmHistory() {
 
   return toolbarHtml + statsSection + recentHtml + calendarHtml + detailHtml;
 }
+window.renderLifeRhythmHistory = renderLifeRhythmHistory;
 
 /**
  * 리듬 히스토리 날짜 선택
