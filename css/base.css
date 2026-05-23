@@ -239,15 +239,15 @@
         --font-lg: 20px;
         --font-xl: 24px;
 
-        /* Typography role PC override (modular ~1.25) */
-        --text-display:    700 40px/1.2 -0.02em;
-        --text-title-1:    700 30px/1.3 -0.02em;
-        --text-title-2:    700 20px/1.4 -0.01em;
-        --text-body-emph:  600 18px/1.5 -0.01em;
-        --text-body:       400 17px/1.6 -0.005em;
-        --text-label:      500 15px/1.4 0;
-        --text-caption:    500 14px/1.35 0;
-        --text-micro:      600 13px/1.3 0.02em;
+        /* Typography role PC override (modular ~1.25) + +1-4px font boost per user 2026-05-23 */
+        --text-display:    700 44px/1.2 -0.02em;
+        --text-title-1:    700 32px/1.3 -0.02em;
+        --text-title-2:    700 22px/1.4 -0.01em;
+        --text-body-emph:  600 20px/1.5 -0.01em;
+        --text-body:       400 18px/1.6 -0.005em;
+        --text-label:      500 16px/1.4 0;
+        --text-caption:    500 15px/1.35 0;
+        --text-micro:      600 14px/1.3 0.02em;
       }
 
       body {
@@ -258,7 +258,7 @@
         padding: 30px 40px;
         max-width: calc(1600px - var(--sidebar-width));
         margin-left: var(--sidebar-width);
-        zoom: 1.15;  /* PC visible boost — uniform +15% typography+spacing (2026-05-23 user feedback) */
+        zoom: 1.075;  /* PC visible boost — uniform +7.5% (down-tuned from 1.15 per user 2026-05-23) */
       }
 
       /* 사이드바 스타일은 nav.css에 정의 */
