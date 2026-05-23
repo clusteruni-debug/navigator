@@ -84,7 +84,7 @@
     }
 
     .action-section-label {
-      font: var(--text-body-emph);
+      font: var(--text-title-2);
       color: var(--text-primary);
       margin: 0 0 6px 4px;
     }
@@ -182,8 +182,8 @@
     }
 
     .resolutions-mini-label {
-      color: var(--text-secondary);
-      font: var(--text-body-emph);
+      color: var(--text-primary);
+      font: var(--text-title-2);
       white-space: nowrap;
     }
 
@@ -239,7 +239,7 @@
       align-items: center;
       gap: 5px;
       color: var(--text-primary);
-      font: var(--text-body-emph);
+      font: var(--text-title-2);
       white-space: nowrap;
     }
 
