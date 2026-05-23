@@ -272,7 +272,7 @@ function _renderWorkAnchors(activeProjects) {
   }).length;
   const staleCount = activeProjects.filter(project => getProjectStaleDays(project) >= 7).length;
   return '<div class="work-anchor-row" aria-label="본업 핵심 상태">' +
-    '<button class="work-anchor urgent" onclick="setWorkSubTab(\'all\')"><span>마감 임박</span><strong>' + soonCount + '</strong></button>' +
+    '<button class="work-anchor urgent" onclick="setWorkSubTab(\'all\'); appState.workQuickFilter=\'deadline_soon\'; renderStatic();"><span>마감 임박</span><strong>' + soonCount + '</strong></button>' +
     '<button class="work-anchor warn" onclick="setWorkSubTab(\'projects\'); setWorkProjectView(\'cards\')"><span>정체 7일+</span><strong>' + staleCount + '</strong></button>' +
     '<button class="work-anchor cat-work" onclick="setWorkSubTab(\'projects\'); setWorkProjectView(\'cards\')"><span>활성 프로젝트</span><strong>' + activeProjects.length + '</strong></button>' +
     '<button class="work-anchor success" onclick="setWorkSubTab(\'general\'); toggleWorkRecentDone(true)"><span>이번 주 완료</span><strong>' + _completedThisWeekCount() + '</strong></button>' +

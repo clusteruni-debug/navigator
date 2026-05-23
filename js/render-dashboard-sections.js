@@ -107,15 +107,9 @@ function setDashboardSubView(view) {
   if (typeof renderStatic === 'function') renderStatic();
 }
 
-// Sub-tab badges show static component count per panel (not dynamic item counts).
-// Update when adding/removing analysis widgets in _renderDash{Overview,Revenue,Health,Patterns}Panel.
+// Sub-tab badges removed — static component counts are user-noise (ADHD target reads them as "unfinished items").
 function _getDashboardSubTabCounts(ctx) {
-  return {
-    '전체': 5,
-    '수익': 6,
-    '건강': 5,
-    '패턴': 6
-  };
+  return { '전체': '', '수익': '', '건강': '', '패턴': '' };
 }
 
 function _getModeRanges() {
@@ -424,11 +418,11 @@ function _renderDashOverview(ctx) {
   return `
     <div class="dash-panel active" role="tabpanel">
       ${_renderDashHero(ctx)}
-      ${_renderDayTimeline()}
-      ${_renderDashWeeklySummary()}
-      ${_renderDashCategoryStatus(ctx)}
       ${_renderDashUrgent(urgentTasks)}
-      <!-- Action-tab-owned next action, completed chips, and resolution tracker intentionally routed out of dashboard. -->
+      ${_renderDashCategoryStatus(ctx)}
+      ${_renderDashWeeklySummary()}
+      ${_renderDayTimeline()}
+      <!-- ADHD attention order: 긴급 → 카테고리 → 주간 → 타임라인. Action-tab-owned next action, completed chips, resolution tracker intentionally routed out of dashboard. -->
     </div>
   `;
 }
@@ -452,10 +446,10 @@ function _renderDashHero(ctx) {
             <span>${_safeText(mode.endTime)}까지 ${_safeText(mode.remaining)}</span>
           </div>
         </div>
-        <button type="button" class="dash-hero-alert-pill" onclick="setDashboardSubView('전체')" aria-label="긴급 작업 ${urgentTasks.length}개">
+        ${urgentTasks.length > 0 ? `<button type="button" class="dash-hero-alert-pill" onclick="setDashboardSubView('전체'); setTimeout(() => document.getElementById('dash-urgent-section')?.scrollIntoView({behavior:'smooth', block:'start'}), 100);" aria-label="긴급 작업 ${urgentTasks.length}개로 이동">
           ${_dashIcon('alert', 14)}
           <span>긴급 ${urgentTasks.length}</span>
-        </button>
+        </button>` : ''}
       </div>
       <div class="dash-hero-mode-bar" aria-label="현재 모드 진행률 ${mode.progress}%">
         <div class="dash-hero-mode-bar-fill" style="width: ${_clamp(mode.progress, 0, 100)}%"></div>
@@ -596,7 +590,7 @@ function _renderDashCategoryStatus(ctx) {
 function _renderDashUrgent(urgentTasks) {
   const tasks = (urgentTasks || []).slice(0, 2);
   return `
-    <div class="dashboard-section">
+    <div class="dashboard-section" id="dash-urgent-section">
       ${_sectionLabel('URGENT')}
       <div class="dashboard-title">마감 임박</div>
       ${tasks.length > 0 ? `

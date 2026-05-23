@@ -32,14 +32,18 @@ function renderDashboardTab(ctx) {
             onclick="setDashboardSubView('${view}')"
             role="tab"
             aria-label="${view} 분석 패널"
-            aria-selected="${appState.dashboardSubView === view ? 'true' : 'false'}">
+            aria-controls="dashboard-panel-${view}"
+            aria-selected="${appState.dashboardSubView === view ? 'true' : 'false'}"
+            tabindex="${appState.dashboardSubView === view ? '0' : '-1'}">
             ${_dashIcon(view === '전체' ? 'layout-grid' : view === '수익' ? 'dollar' : view === '건강' ? 'activity' : 'bar-chart', 14)}
             <span>${view}</span>
             <span class="dash-sub-tab-count">${counts[view]}</span>
           </button>
         `).join('')}
       </div>
-      ${panelHtml}
+      <div id="dashboard-panel-${appState.dashboardSubView}" role="tabpanel" aria-labelledby="dashboard-subtab-${appState.dashboardSubView}" tabindex="0">
+        ${panelHtml}
+      </div>
     </div>
   `;
 }

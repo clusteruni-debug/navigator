@@ -28,49 +28,81 @@ function parseTimeInput(input) {
 }
 
 /**
- * completionLog 항목 추가 (과거 날짜에 완료 기록 추가)
+ * completionLog 항목 추가 (과거 날짜에 완료 기록 추가) — DOM modal (iOS PWA에서 prompt() 차단 회피)
  */
 function addCompletionLogEntry(dateStr) {
-  const title = prompt('제목:');
-  if (title === null) return; // 취소
-  if (!title.trim()) { showToast('제목을 입력해주세요', 'error'); return; }
+  const modalId = 'add-log-modal';
+  document.getElementById(modalId)?.remove();
+
+  const modal = document.createElement('div');
+  modal.id = modalId;
+  modal.className = 'modal-overlay';
+  modal.style.cssText = 'display:flex;z-index:10000';
 
   const categories = ['본업', '부업', '일상', '가족'];
-  const catIdx = prompt('카테고리 (1:본업, 2:부업, 3:일상, 4:가족):', '3');
-  if (catIdx === null) return;
-  const cat = categories[parseInt(catIdx) - 1] || '일상';
+  const catOptions = categories.map(c => `<option value="${c}" ${c === '일상' ? 'selected' : ''}>${c}</option>`).join('');
 
-  // 오늘이면 현재 시간, 과거 날짜면 12:00 기본값
   const todayStr = getLocalDateStr(new Date());
   const defaultTime = dateStr === todayStr ? new Date().toTimeString().slice(0, 5) : '12:00';
-  const time = prompt('완료 시간 (예: 1430, 930, 9, 14:30):', defaultTime);
-  if (time === null) return;
-  const parsed = parseTimeInput(time);
-  if (!parsed && time.trim()) {
-    showToast('시간 형식이 올바르지 않아 기본값을 사용합니다', 'warning');
-  }
-  const finalTime = parsed || defaultTime;
 
-  const revenueStr = prompt('수익 (원, 없으면 0):', '0');
-  if (revenueStr === null) return;
-  const revenue = parseInt(revenueStr) || 0;
+  modal.innerHTML = `
+    <div class="modal" style="max-width:340px">
+      <div class="modal-header">
+        <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:6px">${svgIcon('plus', 16)} 기록 추가 (${escapeHtml(dateStr)})</h3>
+        <button class="modal-close" onclick="document.getElementById('${modalId}').remove()" aria-label="닫기">×</button>
+      </div>
+      <div class="modal-body" style="padding:16px">
+        <label style="display:block;margin-bottom:8px;font-size:15px;font-weight:600">제목</label>
+        <input type="text" id="add-log-title" placeholder="완료한 일" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);font-size:17px;margin-bottom:12px">
+        <label style="display:block;margin-bottom:8px;font-size:15px;font-weight:600">카테고리</label>
+        <select id="add-log-category" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);font-size:17px;margin-bottom:12px">${catOptions}</select>
+        <label style="display:block;margin-bottom:8px;font-size:15px;font-weight:600">시간</label>
+        <input type="text" id="add-log-time" value="${escapeHtml(defaultTime)}" placeholder="HH:MM (예: 1430, 9:30)" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);font-size:17px;margin-bottom:12px">
+        <label style="display:block;margin-bottom:8px;font-size:15px;font-weight:600">수익 (원, 선택)</label>
+        <input type="number" id="add-log-revenue" value="0" min="0" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);font-size:17px">
+      </div>
+      <div class="modal-footer" style="padding:12px 16px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-secondary" onclick="document.getElementById('${modalId}').remove()">취소</button>
+        <button class="btn btn-primary" onclick="applyAddCompletionLog('${escapeAttr(dateStr)}')">저장</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+  setTimeout(() => document.getElementById('add-log-title')?.focus(), 50);
+}
+window.addCompletionLogEntry = addCompletionLogEntry;
 
-  // completionLog에 추가
+function applyAddCompletionLog(dateStr) {
+  const title = (document.getElementById('add-log-title')?.value || '').trim();
+  if (!title) { showToast('제목을 입력해주세요', 'error'); return; }
+
+  const category = document.getElementById('add-log-category')?.value || '일상';
+  const rawTime = document.getElementById('add-log-time')?.value || '12:00';
+  const parsedTime = parseTimeInput(rawTime);
+  const todayStr = getLocalDateStr(new Date());
+  const defaultTime = dateStr === todayStr ? new Date().toTimeString().slice(0, 5) : '12:00';
+  const finalTime = parsedTime || defaultTime;
+
+  const revenue = parseInt(document.getElementById('add-log-revenue')?.value || '0', 10) || 0;
+
   if (!appState.completionLog) appState.completionLog = {};
   if (!appState.completionLog[dateStr]) appState.completionLog[dateStr] = [];
   appState.completionLog[dateStr].push({
-    t: title.trim(),
-    c: cat,
+    t: title,
+    c: category,
     at: finalTime,
     rv: revenue
   });
+
+  document.getElementById('add-log-modal')?.remove();
 
   saveState();
   recomputeTodayStats();
   renderStatic();
   showToast('기록이 추가되었습니다', 'success');
 }
-window.addCompletionLogEntry = addCompletionLogEntry;
+window.applyAddCompletionLog = applyAddCompletionLog;
 
 /**
  * completionLog 항목 삭제 (과거 완료 기록 삭제)

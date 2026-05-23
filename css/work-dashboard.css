@@ -226,7 +226,7 @@
     .work-redesign {
       letter-spacing: 0;
       display: grid;
-      gap: 12px;
+      gap: var(--space-section);
     }
 
     .work-redesign button,

@@ -286,7 +286,10 @@ function _renderAllCategoryBoard(query) {
 
 function navigateAllTasksCategory(category) {
   if (category === '본업') return switchTab('work');
-  if (category === '부업') return switchTab('events');
+  if (category === '부업') {
+    if (typeof setEventSourceFilter === 'function') setEventSourceFilter('local');
+    return switchTab('events');
+  }
   if (category === '가족') {
     setAllTasksCategoryFilter('가족');
     return;
@@ -307,7 +310,6 @@ function openAllTasksCategoryAdd(category) {
   appState.showDetailedAdd = true;
   appState.editingTaskId = null;
   appState._detailedShowDeadline = undefined;
-  appState.currentTab = 'action';
   renderStatic();
   setTimeout(() => {
     const form = document.querySelector('.detailed-add');

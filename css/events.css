@@ -715,7 +715,14 @@
 .event-action-btn.danger { color: var(--accent-danger); border-color: var(--accent-danger); }
 
 .events-shell .event-card:hover .event-actions,
+.events-shell .event-card:focus-within .event-actions,
 .events-shell .completed-log-row:hover .completed-log-undo {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Trash card destructive action — always visible (no hover required for destructive UI) */
+.events-shell .event-trash-card .event-actions {
   opacity: 1;
   pointer-events: auto;
 }

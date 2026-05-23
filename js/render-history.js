@@ -262,7 +262,11 @@ function _renderHistorySubTabs(active) {
     <div class="history-subtabs" role="tablist" aria-label="히스토리 보기">
       ${HISTORY_SUB_TABS.map(tab => `
         <button class="history-subtab ${active === tab.id ? 'active' : ''}" type="button" role="tab"
-          aria-selected="${active === tab.id}" onclick="setHistorySubTab('${tab.id}')">
+          id="history-tab-${tab.id}"
+          aria-controls="history-panel-${tab.id}"
+          aria-selected="${active === tab.id}"
+          tabindex="${active === tab.id ? '0' : '-1'}"
+          onclick="setHistorySubTab('${tab.id}')">
           ${_historyIcon(tab.icon, 14)}<span>${escapeHtml(tab.label)}</span>
         </button>`).join('')}
     </div>`;
@@ -295,7 +299,9 @@ function renderHistoryTab() {
         ${_historyMetric('수익', stats.totalRevenue > 0 ? stats.totalRevenue.toLocaleString() + '원' : '0원', 'dollar')}
       </div>
 
-      ${active === 'list' ? _renderHistoryListSubTab() : active === 'stats' ? _renderHistoryStatsSubTab(stats) : _renderHistoryCalendarSubTab(stats)}
+      <div id="history-panel-${active}" role="tabpanel" aria-labelledby="history-tab-${active}" tabindex="0">
+        ${active === 'list' ? _renderHistoryListSubTab() : active === 'stats' ? _renderHistoryStatsSubTab(stats) : _renderHistoryCalendarSubTab(stats)}
+      </div>
     </section>`;
 }
 window.renderHistoryTab = renderHistoryTab;

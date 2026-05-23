@@ -3,8 +3,8 @@
     .life-rhythm-tracker {
       background: var(--bg-secondary);
       border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
+      padding: var(--space-card);
+      margin-bottom: var(--space-section);
       border: 1px solid var(--border-light);
       transition: border-color var(--transition-normal);
     }
