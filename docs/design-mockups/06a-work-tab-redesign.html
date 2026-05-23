@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>본업 탭 v3 — Master-Detail Split + Drill-in</title>
+<style>
+:root {
+  /* Base tokens (mirror workspace base.css) */
+  --bg-primary: #0f1419;
+  --bg-secondary: #1a1f2e;
+  --bg-tertiary: #232938;
+  --bg-card: #1E293B;
+  --text-primary: #e8eaed;
+  --text-secondary: #b3b9c4;
+  --text-muted: #7c8499;
+  --border-color: #2d3548;
+  --border-light: #232938;
+  --accent-primary: #667eea;
+  --accent-danger: #f56565;
+  --accent-warning: #ed8936;
+  --accent-success: #48bb78;
+  --cat-본업: #667eea;
+  --cat-부업: #f093fb;
+  --cat-일상: #48bb78;
+  --cat-가족: #f6ad55;
+  /* Spacing */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px;
+  --font-xs: 11px; --font-sm: 12px; --font-md: 13px; --font-lg: 15px; --font-xl: 18px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--font-md);
+  line-height: 1.5;
+  padding: var(--sp-4);
+}
+.canvas { max-width: 1440px; margin: 0 auto; }
+.mode-note { font-size: var(--font-xs); color: var(--text-muted); margin-bottom: var(--sp-3); }
+.tab-view { background: var(--bg-secondary); border-radius: var(--r-lg); padding: var(--sp-4); margin-bottom: var(--sp-5); border: 1px solid var(--border-color); }
+
+/* === Header === */
+.tab-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-3); }
+.tab-head-title { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--font-xl); font-weight: 700; }
+.title-bar { width: 4px; height: 22px; border-radius: 2px; background: var(--cat-본업); }
+.tab-head-actions { display: inline-flex; gap: var(--sp-2); align-items: center; }
+.add-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--cat-본업); color: white; border: none; border-radius: var(--r-sm); font-weight: 600; cursor: pointer; transition: background 0.15s; font-size: var(--font-sm); }
+.add-btn:hover { background: color-mix(in srgb, var(--cat-본업) 85%, white); }
+.more-btn { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; background: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: var(--r-sm); cursor: pointer; transition: background 0.15s; }
+.more-btn:hover { background: var(--border-color); }
+.meta-pill { font-size: var(--font-xs); color: var(--text-muted); font-weight: 500; margin-left: var(--sp-1); }
+.icon-sm { width: 15px; height: 15px; }
+
+/* === Anchor row (filter-active chips) === */
+.anchors { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.anchor { display: flex; flex-direction: column; gap: 2px; padding: var(--sp-2) var(--sp-3); background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--r-md); cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.anchor:hover { background: var(--bg-tertiary); border-color: var(--accent-primary); }
+.anchor.urgent { border-left: 3px solid var(--accent-danger); }
+.anchor.warn { border-left: 3px solid var(--accent-warning); }
+.anchor.cat-본업 { border-left: 3px solid var(--cat-본업); }
+.anchor.success { border-left: 3px solid var(--accent-success); }
+.anchor-label { font-size: var(--font-xs); color: var(--text-muted); }
+.anchor-value { font-size: var(--font-lg); font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+/* === Sub-tab nav === */
+.subtabs { display: flex; gap: var(--sp-1); margin-bottom: var(--sp-3); border-bottom: 1px solid var(--border-color); }
+.subtab-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; background: transparent; color: var(--text-secondary); border: none; border-bottom: 2px solid transparent; cursor: pointer; font-size: var(--font-md); font-weight: 500; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+.subtab-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.subtab-btn.active { color: var(--cat-본업); border-bottom-color: var(--cat-본업); font-weight: 600; }
+
+/* === Sub-tab content (one visible at a time) === */
+.subtab-content { display: none; }
+.subtab-content.active { display: block; }
+
+/* === Focus card (지금 집중) === */
+.focus-card { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); background: color-mix(in srgb, var(--cat-본업) 8%, var(--bg-card)); border: 1px solid color-mix(in srgb, var(--cat-본업) 30%, var(--border-color)); border-radius: var(--r-md); margin-bottom: var(--sp-3); }
+.focus-label { font-size: var(--font-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--cat-본업); }
+.focus-main { flex: 1; }
+.focus-title { font-size: var(--font-lg); font-weight: 600; margin-bottom: 2px; }
+.focus-meta { font-size: var(--font-xs); color: var(--text-muted); }
+.focus-cta { padding: 8px 16px; background: var(--cat-본업); color: white; border: none; border-radius: var(--r-sm); cursor: pointer; font-weight: 600; transition: background 0.15s; font-size: var(--font-sm); }
+.focus-cta:hover { background: color-mix(in srgb, var(--cat-본업) 85%, white); }
+
+/* === D-day chip === */
+.dday-chip { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 10px; font-size: var(--font-xs); font-weight: 600; font-variant-numeric: tabular-nums; background: var(--bg-tertiary); color: var(--text-secondary); }
+.dday-chip.urgent { background: color-mix(in srgb, var(--accent-danger) 18%, transparent); color: var(--accent-danger); }
+.dday-chip.warn { background: color-mix(in srgb, var(--accent-warning) 18%, transparent); color: var(--accent-warning); }
+
+/* === Common helpers === */
+.cat-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; vertical-align: middle; }
+.empty-hint { font-size: var(--font-xs); color: var(--text-muted); padding: var(--sp-3); text-align: center; margin-top: var(--sp-3); background: var(--bg-card); border-radius: var(--r-sm); border: 1px dashed var(--border-color); }
+
+/* === Toolbar (chip filter + search) === */
+.toolbar { display: flex; gap: var(--sp-3); align-items: center; margin-bottom: var(--sp-3); flex-wrap: wrap; }
+.chips { display: flex; gap: var(--sp-1); }
+.chip { padding: 6px 12px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; color: var(--text-secondary); font-size: var(--font-sm); cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.chip:hover { background: var(--bg-tertiary); }
+.chip.active { background: color-mix(in srgb, var(--cat-본업) 18%, var(--bg-card)); border-color: var(--cat-본업); color: var(--cat-본업); font-weight: 600; }
+.search { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--r-sm); flex: 1; min-width: 180px; }
+.search input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-primary); font-size: var(--font-sm); }
+.search input::placeholder { color: var(--text-muted); }
+
+/* === Project-grouped dashboard (전체 sub-tab default view) === */
+.proj-section { background: var(--bg-card); border: 1px solid var(--border-color); border-left: 3px solid var(--cat-본업); border-radius: var(--r-md); padding: var(--sp-3); margin-bottom: var(--sp-3); }
+.proj-section.urgent { border-left-color: var(--accent-danger); }
+.proj-section.warn { border-left-color: var(--accent-warning); }
+.proj-section.general { border-left-color: var(--text-muted); background: color-mix(in srgb, var(--text-muted) 4%, var(--bg-card)); }
+.proj-section-head { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-3); padding-bottom: var(--sp-2); border-bottom: 1px solid var(--border-color); margin-bottom: var(--sp-2); cursor: pointer; transition: background 0.15s; padding: 6px 4px; border-radius: 4px; }
+.proj-section-head:hover { background: var(--bg-tertiary); }
+.proj-section-title-block { display: flex; align-items: center; gap: var(--sp-3); flex: 1; min-width: 0; }
+.proj-section-name { font-size: var(--font-lg); font-weight: 700; color: var(--text-primary); display: inline-flex; align-items: center; gap: 6px; }
+.proj-section-name .nav-arrow { color: var(--text-muted); opacity: 0; transition: opacity 0.15s; }
+.proj-section-head:hover .proj-section-name .nav-arrow { opacity: 1; }
+.proj-section-progress { display: inline-flex; align-items: center; gap: var(--sp-2); font-size: var(--font-xs); color: var(--text-muted); font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+.proj-section-progress .sep { color: var(--border-color); }
+.proj-section-progress .stale-pill { padding: 2px 8px; background: color-mix(in srgb, var(--accent-warning) 18%, transparent); color: var(--accent-warning); border-radius: 10px; font-weight: 600; }
+.proj-section-actions { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.proj-mini-bar { display: flex; gap: 2px; width: 90px; }
+.proj-mini-bar-pill { flex: 1; height: 4px; background: var(--bg-tertiary); border-radius: 2px; }
+.proj-mini-bar-pill.completed { background: var(--cat-본업); }
+.proj-mini-bar-pill.current { background: color-mix(in srgb, var(--cat-본업) 50%, transparent); }
+.proj-section.urgent .proj-mini-bar-pill.completed { background: var(--accent-danger); }
+.proj-section.warn .proj-mini-bar-pill.completed { background: var(--accent-warning); }
+
+.proj-task-list { display: flex; flex-direction: column; gap: 4px; }
+.proj-task-row { display: grid; grid-template-columns: 16px 1fr auto auto; gap: var(--sp-2); align-items: center; padding: 6px 8px; border-radius: 4px; cursor: pointer; transition: background 0.15s; }
+.proj-task-row:hover { background: var(--bg-tertiary); }
+.proj-task-row.focus-pick { background: color-mix(in srgb, var(--cat-본업) 10%, transparent); }
+.proj-task-row.completed .proj-task-title { text-decoration: line-through; color: var(--text-muted); }
+.proj-task-title { font-size: var(--font-sm); color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.proj-task-title .focus-star { color: var(--cat-본업); margin-right: 2px; }
+.proj-task-meta { font-size: var(--font-xs); color: var(--text-muted); white-space: nowrap; }
+
+.proj-section-more { padding: 6px 8px; font-size: var(--font-xs); color: var(--text-muted); cursor: pointer; border-radius: 4px; transition: background 0.15s, color 0.15s; margin-top: 4px; }
+.proj-section-more:hover { background: var(--bg-tertiary); color: var(--cat-본업); }
+.proj-section-quickadd { display: flex; gap: var(--sp-2); margin-top: var(--sp-2); padding-top: var(--sp-2); border-top: 1px dashed var(--border-color); }
+.proj-section-quickadd input { flex: 1; padding: 6px 10px; background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 4px; color: var(--text-primary); font-size: var(--font-xs); }
+.proj-section-quickadd input:focus { outline: none; border-color: var(--cat-본업); }
+.proj-section-quickadd input::placeholder { color: var(--text-muted); }
+
+.sort-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--r-sm); color: var(--text-secondary); cursor: pointer; font-size: var(--font-xs); transition: background 0.15s; }
+.sort-toggle:hover { background: var(--bg-tertiary); }
+
+/* === Task card (compact, Linear-inspired) === */
+.task-card { display: grid; grid-template-columns: 16px 1fr auto; gap: var(--sp-2); align-items: start; padding: 8px 10px; background: var(--bg-secondary); border: 1px solid var(--border-light); border-left: 3px solid var(--cat-본업); border-radius: var(--r-sm); cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.task-card:hover { background: var(--bg-tertiary); border-color: var(--accent-primary); }
+.task-card.urgent { border-left-color: var(--accent-danger); }
+.task-card.warn { border-left-color: var(--accent-warning); }
+.task-card.focus-pick { background: color-mix(in srgb, var(--cat-본업) 10%, var(--bg-secondary)); }
+.task-check { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--text-muted); background: transparent; cursor: pointer; padding: 0; transition: background 0.15s, border-color 0.15s; }
+.task-check:hover { border-color: var(--cat-본업); }
+.task-body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.task-title { font-size: var(--font-sm); font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.task-title .focus-star { color: var(--cat-본업); margin-right: 2px; }
+.task-meta { font-size: var(--font-xs); color: var(--text-muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.task-meta .project-tag { padding: 1px 6px; background: var(--bg-tertiary); border-radius: 4px; color: var(--text-secondary); font-weight: 500; }
+.task-meta .general-tag { padding: 1px 6px; background: color-mix(in srgb, var(--text-muted) 15%, transparent); border-radius: 4px; color: var(--text-secondary); }
+
+/* Time secondary group (다음 주 inside 이번 주 col) */
+.col-subgroup { margin-top: var(--sp-3); padding-top: var(--sp-2); border-top: 1px dashed var(--border-color); }
+.col-subgroup-head { font-size: var(--font-xs); color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+
+/* === Master-Detail Split (desktop ≥1024px) — 프로젝트 sub-tab === */
+.master-detail { display: grid; grid-template-columns: 320px 1fr; gap: var(--sp-3); min-height: 560px; }
+@media (max-width: 1023px) { .master-detail { grid-template-columns: 1fr; } .master-detail .detail-panel.mobile-hidden { display: none; } }
+
+/* Master panel (좌) */
+.master-panel { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--r-md); padding: var(--sp-3); display: flex; flex-direction: column; gap: var(--sp-3); max-height: 720px; }
+.view-toggle { display: inline-flex; gap: 2px; padding: 3px; background: var(--bg-secondary); border-radius: var(--r-sm); border: 1px solid var(--border-color); }
+.view-toggle-btn { padding: 5px 10px; background: transparent; border: none; border-radius: 4px; color: var(--text-secondary); cursor: pointer; font-size: var(--font-xs); font-weight: 500; transition: background 0.15s, color 0.15s; }
+.view-toggle-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.view-toggle-btn.active { background: var(--cat-본업); color: white; font-weight: 600; }
+.master-section-title { font-size: var(--font-xs); font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: var(--sp-2); margin-bottom: 4px; display: flex; justify-content: space-between; }
+.master-section-title .count { font-variant-numeric: tabular-nums; color: var(--text-muted); }
+.project-grid-compact { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; }
+
+/* Project card (master) — compact, click → detail */
+.project-card-mini { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; background: var(--bg-secondary); border: 1px solid var(--border-light); border-left: 3px solid var(--cat-본업); border-radius: var(--r-sm); cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.project-card-mini:hover { background: var(--bg-tertiary); border-color: var(--accent-primary); }
+.project-card-mini.active { background: color-mix(in srgb, var(--cat-본업) 12%, var(--bg-secondary)); border-color: var(--cat-본업); }
+.project-card-mini.urgent { border-left-color: var(--accent-danger); }
+.project-card-mini.warn { border-left-color: var(--accent-warning); }
+.pcm-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.pcm-name { font-size: var(--font-sm); font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pcm-meta { font-size: var(--font-xs); color: var(--text-muted); display: flex; gap: 6px; align-items: center; }
+.pcm-progress { display: flex; gap: 2px; margin-top: 2px; }
+.pcm-stage-pill { flex: 1; height: 3px; background: var(--bg-tertiary); border-radius: 2px; }
+.pcm-stage-pill.completed { background: var(--cat-본업); }
+.pcm-stage-pill.current { background: color-mix(in srgb, var(--cat-본업) 50%, transparent); }
+
+/* === Detail panel (우) — Project drill-in 4-level === */
+.detail-panel { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--r-md); padding: var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-3); max-height: 720px; overflow-y: auto; }
+.detail-header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--sp-3); padding-bottom: var(--sp-3); border-bottom: 1px solid var(--border-color); }
+.detail-title-block { flex: 1; }
+.detail-back-btn { display: none; padding: 4px 8px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-secondary); cursor: pointer; font-size: var(--font-xs); margin-bottom: 6px; transition: background 0.15s; }
+.detail-back-btn:hover { background: var(--border-color); }
+@media (max-width: 1023px) { .detail-back-btn { display: inline-flex; } }
+.detail-title { font-size: var(--font-xl); font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+.detail-meta { font-size: var(--font-xs); color: var(--text-muted); margin-top: 4px; display: flex; gap: var(--sp-2); align-items: center; flex-wrap: wrap; }
+.detail-meta .sep { color: var(--border-color); }
+.detail-actions { display: inline-flex; gap: 6px; }
+.detail-icon-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--r-sm); cursor: pointer; color: var(--text-secondary); transition: background 0.15s, color 0.15s; }
+.detail-icon-btn:hover { background: var(--border-color); color: var(--text-primary); }
+
+/* Stage tabs (가로 progress + tab) */
+.stage-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; }
+.stage-tab { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 14px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--r-sm); cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s; min-width: 110px; flex-shrink: 0; }
+.stage-tab:hover { background: var(--bg-tertiary); }
+.stage-tab.completed { color: var(--text-muted); }
+.stage-tab.completed::before { content: '✓ '; color: var(--accent-success); }
+.stage-tab.current { background: var(--cat-본업); color: white; border-color: var(--cat-본업); font-weight: 600; }
+.stage-tab.current::before { content: '● '; color: white; }
+.stage-tab-label { font-size: var(--font-sm); font-weight: 500; }
+.stage-tab-meta { font-size: var(--font-xs); opacity: 0.75; }
+
+/* Subcategory accordion (Things 3 heading pattern) */
+.subcat-list { display: flex; flex-direction: column; gap: var(--sp-2); }
+.subcat { background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: var(--r-sm); overflow: hidden; }
+.subcat-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; cursor: pointer; transition: background 0.15s; background: var(--bg-secondary); border: none; width: 100%; text-align: left; }
+.subcat-head:hover { background: var(--bg-tertiary); }
+.subcat-head-title { font-size: var(--font-md); font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+.subcat-chev { color: var(--text-muted); transition: transform 0.2s; }
+.subcat[aria-expanded="true"] .subcat-chev { transform: rotate(90deg); }
+.subcat[aria-expanded="false"] .subcat-body { display: none; }
+.subcat-progress { font-size: var(--font-xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.subcat-body { padding: 4px 8px 8px; display: flex; flex-direction: column; gap: 4px; }
+.subcat-task { display: grid; grid-template-columns: 16px 1fr auto auto; gap: var(--sp-2); align-items: center; padding: 6px 8px; border-radius: 4px; transition: background 0.15s; cursor: pointer; }
+.subcat-task:hover { background: var(--bg-tertiary); }
+.subcat-task.completed .subcat-task-title { text-decoration: line-through; color: var(--text-muted); }
+.subcat-task.focus-pick { background: color-mix(in srgb, var(--cat-본업) 12%, transparent); }
+.subcat-task-title { font-size: var(--font-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.subcat-task-title .focus-star { color: var(--cat-본업); margin-right: 2px; }
+.subcat-task-meta { font-size: var(--font-xs); color: var(--text-muted); }
+.subcat-add-row { padding: 6px 8px; font-size: var(--font-xs); color: var(--text-muted); cursor: pointer; border-radius: 4px; transition: background 0.15s, color 0.15s; }
+.subcat-add-row:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
+/* Detail footer (next stage / 정체 경고 / 회고) */
+.detail-footer { margin-top: var(--sp-3); padding-top: var(--sp-3); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+.stale-warn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; background: color-mix(in srgb, var(--accent-warning) 12%, transparent); color: var(--accent-warning); border: 1px solid color-mix(in srgb, var(--accent-warning) 30%, transparent); border-radius: var(--r-sm); font-size: var(--font-xs); font-weight: 500; }
+.next-stage-btn { padding: 8px 16px; background: var(--cat-본업); color: white; border: none; border-radius: var(--r-sm); cursor: pointer; font-weight: 600; font-size: var(--font-sm); transition: background 0.15s; }
+.next-stage-btn:hover { background: color-mix(in srgb, var(--cat-본업) 85%, white); }
+
+/* === 일반업무 sub-tab === */
+.quick-add { display: flex; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.quick-add input { flex: 1; padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--r-sm); color: var(--text-primary); font-size: var(--font-md); }
+.quick-add input:focus { outline: none; border-color: var(--cat-본업); }
+.quick-add input::placeholder { color: var(--text-muted); }
+.quick-add button { padding: 10px 18px; background: var(--cat-본업); color: white; border: none; border-radius: var(--r-sm); cursor: pointer; font-weight: 600; transition: background 0.15s; font-size: var(--font-sm); }
+.quick-add button:hover { background: color-mix(in srgb, var(--cat-본업) 85%, white); }
+
+.sort-bar { display: flex; gap: var(--sp-2); align-items: center; margin-bottom: var(--sp-3); }
+.sort-label { font-size: var(--font-xs); color: var(--text-muted); }
+.sort-pill { padding: 4px 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-secondary); cursor: pointer; font-size: var(--font-xs); transition: background 0.15s, color 0.15s; }
+.sort-pill:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.sort-pill.active { background: color-mix(in srgb, var(--cat-본업) 18%, transparent); color: var(--cat-본업); border-color: var(--cat-본업); font-weight: 600; }
+
+.general-list { display: flex; flex-direction: column; gap: 4px; }
+.recent-done-expander { margin-top: var(--sp-4); padding: 10px 14px; background: var(--bg-card); border: 1px dashed var(--border-color); border-radius: var(--r-sm); color: var(--text-muted); cursor: pointer; font-size: var(--font-sm); text-align: center; transition: background 0.15s, color 0.15s; }
+.recent-done-expander:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="mode-note">📐 본업 탭 v3 — Master-Detail Split + Kanban 시간축 + 4-level Drill-in (Linear / Things 3 / Asana / Sunsama 패턴 통합)</div>
+
+  <!-- ============================================================ -->
+  <!-- 본업 탭 (work) — v3 redesign                                  -->
+  <!-- ============================================================ -->
+  <section class="tab-view" id="tab-work">
+
+    <!-- Header -->
+    <div class="tab-head">
+      <div class="tab-head-title">
+        <span class="title-bar"></span>
+        본업
+        <span class="meta-pill">프로젝트 4 활성</span>
+      </div>
+      <div class="tab-head-actions">
+        <button class="add-btn" aria-label="새 프로젝트 추가">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          새 프로젝트
+        </button>
+        <button class="more-btn" title="더보기 — RO v3 / 템플릿 / 리포트" aria-label="더보기">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Anchor row (filter-active chips — click → sub-tab + filter) -->
+    <div class="anchors" role="group" aria-label="본업 핵심 상태 필터">
+      <button class="anchor urgent" aria-label="마감 임박 본업 보기">
+        <span class="anchor-label">마감 임박</span>
+        <span class="anchor-value">2</span>
+      </button>
+      <button class="anchor warn" aria-label="정체 7일 이상 프로젝트 보기">
+        <span class="anchor-label">정체 7일+</span>
+        <span class="anchor-value">1</span>
+      </button>
+      <button class="anchor cat-본업" aria-label="활성 프로젝트 카드 보기">
+        <span class="anchor-label">활성 프로젝트</span>
+        <span class="anchor-value">4</span>
+      </button>
+      <button class="anchor success" aria-label="이번 주 완료한 본업 보기">
+        <span class="anchor-label">이번 주 완료</span>
+        <span class="anchor-value">7</span>
+      </button>
+    </div>
+
+    <!-- Sub-tab nav -->
+    <div class="subtabs" role="tablist" aria-label="본업 하위 탭">
+      <button class="subtab-btn active" role="tab" aria-selected="true" aria-controls="work-panel-all" id="work-tab-btn-all" data-sub="all">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        전체
+      </button>
+      <button class="subtab-btn" role="tab" aria-selected="false" aria-controls="work-panel-projects" id="work-tab-btn-projects" data-sub="projects">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        프로젝트
+      </button>
+      <button class="subtab-btn" role="tab" aria-selected="false" aria-controls="work-panel-general" id="work-tab-btn-general" data-sub="general">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        일반업무
+      </button>
+    </div>
+
+    <!-- ============ 전체 sub-tab (cross-cutting kanban 시간축) ============ -->
+    <div class="subtab-content active" id="work-panel-all" role="tabpanel" aria-labelledby="work-tab-btn-all" data-sub="all">
+
+      <!-- Toolbar: chip filter + sort toggle + 검색 -->
+      <div class="toolbar">
+        <div class="chips" role="group" aria-label="본업 task 필터">
+          <button class="chip active">전체</button>
+          <button class="chip">프로젝트 task</button>
+          <button class="chip">일반 업무</button>
+        </div>
+        <button class="sort-toggle" aria-label="정렬 변경">
+          정렬: 프로젝트별
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <label class="search">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--text-muted)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="search" placeholder="본업 검색…" aria-label="본업 task 검색">
+        </label>
+      </div>
+
+      <!-- Focus card (지금 집중) -->
+      <div class="focus-card">
+        <span class="focus-label">지금 집중</span>
+        <div class="focus-main">
+          <div class="focus-title">Q2 RO 리포트 초안 작성</div>
+          <div class="focus-meta">RO 프로젝트 #14 · 2단계 본조사 · ~45분 · D-2</div>
+        </div>
+        <button class="focus-cta">완료</button>
+      </div>
+
+      <!-- Project-grouped sections (project-axis dashboard, breadth view) -->
+      <div class="proj-sections">
+
+        <!-- Section 1: RO #14 (urgent) -->
+        <article class="proj-section urgent">
+          <div class="proj-section-head" tabindex="0" aria-label="RO #14 detail로 이동">
+            <div class="proj-section-title-block">
+              <span class="proj-section-name">
+                RO 프로젝트 #14
+                <svg class="nav-arrow icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </span>
+              <span class="proj-section-progress">
+                <span>12/28 항목</span><span class="sep">·</span>
+                <span>1/6 단계</span><span class="sep">·</span>
+                <div class="proj-mini-bar">
+                  <span class="proj-mini-bar-pill completed"></span>
+                  <span class="proj-mini-bar-pill current"></span>
+                  <span class="proj-mini-bar-pill"></span>
+                  <span class="proj-mini-bar-pill"></span>
+                  <span class="proj-mini-bar-pill"></span>
+                  <span class="proj-mini-bar-pill"></span>
+                </div>
+              </span>
+            </div>
+            <div class="proj-section-actions">
+              <span class="dday-chip urgent">D-2</span>
+            </div>
+          </div>
+          <div class="proj-task-list">
+            <div class="proj-task-row focus-pick">
+              <button class="task-check" aria-label="완료"></button>
+              <span class="proj-task-title"><span class="focus-star">★</span>본조사 launch (200명)</span>
+              <span class="proj-task-meta">2단계 · 45분</span>
+              <span class="dday-chip urgent">D-Day</span>
+            </div>
+            <div class="proj-task-row">
+              <button class="task-check" aria-label="완료"></button>
+              <span class="proj-task-title">응답 모니터링 + 독려</span>
+              <span class="proj-task-meta">2단계 · 30분</span>
+              <span class="dday-chip urgent">D-1</span>
+            </div>
+            <div class="proj-task-row">
+              <button class="task-check" aria-label="완료"></button>
+              <span class="proj-task-title">인터뷰 가이드 작성</span>
+              <span class="proj-task-meta">2단계 · 60분</span>
+              <span class="dday-chip">D-1</span>
+            </div>
+            <div class="proj-section-more">+ 9개 더 보기 (3단계~6단계 예정 포함)</div>
+          </div>
+          <div class="proj-section-quickadd">
+            <input type="text" placeholder="RO #14에 task 추가 (Enter)">
+          </div>
+        </article>
+
+        <!-- Section 2: 회의록 (warn, 정체 9일) -->
+        <article class="proj-section warn">
+          <div class="proj-section-head" tabindex="0" aria-label="회의록 detail로 이동">
+            <div class="proj-section-title-block">
+              <span class="proj-section-name">
+                상반기 회의록 정리
+                <svg class="nav-arrow icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </span>
+              <span class="proj-section-progress">
+                <span>8/15 항목</span><span class="sep">·</span>
+                <span>2/4 단계</span><span class="sep">·</span>
+                <div class="proj-mini-bar">
+                  <span class="proj-mini-bar-pill completed"></span>
+                  <span class="proj-mini-bar-pill completed"></span>
+                  <span class="proj-mini-bar-pill current"></span>
+                  <span class="proj-mini-bar-pill"></span>
+                </div>
+                <span class="stale-pill">⚠ 9일 정체</span>
+              </span>
+            </div>
+            <div class="proj-section-actions">
+              <span class="dday-chip warn">D-7</span>
+            </div>
+          </div>
+          <div class="proj-task-list">
+            <div class="proj-task-row">
+              <button class="task-check" aria-label="완료"></button>
+              <span class="proj-task-title">상반기 회의록 정리</span>
+              <span class="proj-task-meta">3단계 · 정체 9일</span>
+              <span class="dday-chip warn">D-3</span>
+            </div>
+            <div class="proj-task-row">
+              <button class="task-check" aria-label="완료"></button>
+              <span class="proj-task-title">참석자 액션 아이템 추출</span>
+              <span class="proj-task-meta">3단계 · 30분</span>
+              <span class="dday-chip">D-5</span>
+            </div>
+            <div class="proj-section-more">+ 4개 더 보기</div>
+          </div>
+          <div class="proj-section-quickadd">
+            <input type="text" placeholder="회의록에 task 추가 (Enter)">
+          </div>
+        </article>
+
+        <!-- Section 3: RFP -->
+        <article class="proj-section">
+          <div class="proj-section-head" tabindex="0" aria-label="RFP detail로 이동">
+            <div class="proj-section-title-block">
+              <span class="proj-section-name">
+                신규 클라이언트 RFP
+                <svg class="nav-arrow icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </span>
+              <span class="proj-section-progress">
+                <span>3/9 항목</span><span class="sep">·</span>
+                <span>0/3 단계</span><span class="sep">·</span>
+                <div class="proj-mini-bar">
+                  <span class="proj-mini-bar-pill current"></span>
+                  <span class="proj-mini-bar-pill"></span>
+                  <span class="proj-mini-bar-pill"></span>
+                </div>
+              </span>
+            </div>
+            <div class="proj-section-actions">
+              <span class="dday-chip">D-12</span>
+            </div>
+          </div>
+          <div class="proj-task-list">
+            <div class="proj-task-row">
+              <button class="task-check" aria-label="완료"></button>
+              <span class="proj-task-title">신규 RFP 시장 분석</span>
+              <span class="proj-task-meta">1단계 · 60분</span>
+              <span class="dday-chip">D-5</span>
+            </div>
+            <div class="proj-task-row">
+              <button class="task-check" aria-label="완료"></button>
+              <span class="proj-task-title">경쟁사 5팀 자료 수집</span>
+              <span class="proj-task-meta">1단계 · 45분</span>
+              <span class="dday-chip">D-7</span>
+            </div>
+            <div class="proj-section-more">+ 2개 더 보기</div>
+          </div>
+          <div class="proj-section-quickadd">
+            <input type="text" placeholder="RFP에 task 추가 (Enter)">
+          </div>
+        </article>
+
+        <!-- Section: 일반 업무 (project-unlinked) -->
+        <article class="proj-section general">
+          <div class="proj-section-head" tabindex="0" aria-label="일반업무 sub-tab으로 이동">
+            <div class="proj-section-title-block">
+              <span class="proj-section-name">
+                일반 업무
+                <svg class="nav-arrow icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </span>
+              <span class="proj-section-progress">
+                <span>5개 active</span><span class="sep">·</span>
+                <span>이번 주 완료 3</span>
+              </span>
+            </div>
+          </div>
+          <div class="proj-task-list">
+            <div class="proj-task-row">
+              <button class="task-check" aria-label="완료"></button>
+              <span class="proj-task-title">Q2 보고서 외부 검토 요청</span>
+              <span class="proj-task-meta">30분</span>
+              <span class="dday-chip urgent">D-1</span>
+            </div>
+            <div class="proj-task-row">
+              <button class="task-check" aria-label="완료"></button>
+              <span class="proj-task-title">팀 OKR 안건 정리</span>
+              <span class="proj-task-meta">30분</span>
+              <span class="dday-chip">D-1</span>
+            </div>
+            <div class="proj-task-row">
+              <button class="task-check" aria-label="완료"></button>
+              <span class="proj-task-title">팀 1:1 일정 조율</span>
+              <span class="proj-task-meta">15분</span>
+              <span class="dday-chip">D-4</span>
+            </div>
+            <div class="proj-section-more">+ 2개 더 보기</div>
+          </div>
+          <div class="proj-section-quickadd">
+            <input type="text" placeholder="일반업무 추가 (Enter)">
+          </div>
+        </article>
+
+      </div>
+
+      <div style="display:none;">
+      <!-- Kept hidden for clean replacement: legacy kanban block below kept as scaffold; ignored -->
+      <div class="kanban-grid">
+
+        <!-- Col 1: 오늘 -->
+        <div class="kanban-col">
+          <div class="kanban-col-head">
+            <span class="kanban-col-title today">오늘</span>
+            <span class="kanban-col-count">3</span>
+          </div>
+          <div class="kanban-col-body">
+            <article class="task-card urgent focus-pick">
+              <button class="task-check" aria-label="완료"></button>
+              <div class="task-body">
+                <div class="task-title"><span class="focus-star">★</span>Q2 RO 리포트 초안 작성</div>
+                <div class="task-meta"><span class="project-tag">RO #14</span><span>2단계</span><span>45분</span></div>
+              </div>
+              <span class="dday-chip urgent">D-Day</span>
+            </article>
+            <article class="task-card urgent">
+              <button class="task-check" aria-label="완료"></button>
+              <div class="task-body">
+                <div class="task-title">Q2 보고서 외부 검토 요청</div>
+                <div class="task-meta"><span class="general-tag">일반</span><span>30분</span></div>
+              </div>
+              <span class="dday-chip urgent">D-1</span>
+            </article>
+            <article class="task-card">
+              <button class="task-check" aria-label="완료"></button>
+              <div class="task-body">
+                <div class="task-title">팀 OKR 안건 정리</div>
+                <div class="task-meta"><span class="general-tag">일반</span><span>30분</span></div>
+              </div>
+              <span class="dday-chip">D-1</span>
+            </article>
+          </div>
+        </div>
+
+        <!-- Col 2: 이번 주 -->
+        <div class="kanban-col">
+          <div class="kanban-col-head">
+            <span class="kanban-col-title thisweek">이번 주</span>
+            <span class="kanban-col-count">5</span>
+          </div>
+          <div class="kanban-col-body">
+            <article class="task-card warn">
+              <button class="task-check" aria-label="완료"></button>
+              <div class="task-body">
+                <div class="task-title">상반기 회의록 정리</div>
+                <div class="task-meta"><span class="project-tag">회의록</span><span>3단계</span><span style="color:var(--accent-warning)">9일 정체</span></div>
+              </div>
+              <span class="dday-chip warn">D-3</span>
+            </article>
+            <article class="task-card">
+              <button class="task-check" aria-label="완료"></button>
+              <div class="task-body">
+                <div class="task-title">신규 RFP 시장 분석</div>
+                <div class="task-meta"><span class="project-tag">RFP</span><span>1단계</span><span>60분</span></div>
+              </div>
+              <span class="dday-chip">D-5</span>
+            </article>
+            <article class="task-card">
+              <button class="task-check" aria-label="완료"></button>
+              <div class="task-body">
+                <div class="task-title">팀 1:1 일정 조율</div>
+                <div class="task-meta"><span class="general-tag">일반</span><span>15분</span></div>
+              </div>
+              <span class="dday-chip">D-4</span>
+            </article>
+          </div>
+          <!-- 다음 주는 이번 주 col 안 secondary group -->
+          <div class="col-subgroup">
+            <div class="col-subgroup-head">다음 주 (D+8 ~ D+14) · 4</div>
+            <article class="task-card">
+              <button class="task-check" aria-label="완료"></button>
+              <div class="task-body">
+                <div class="task-title">RO #14 본조사 마무리</div>
+                <div class="task-meta"><span class="project-tag">RO #14</span><span>2단계</span></div>
+              </div>
+              <span class="dday-chip">D+9</span>
+            </article>
+            <article class="task-card">
+              <button class="task-check" aria-label="완료"></button>
+              <div class="task-body">
+                <div class="task-title">월간 리포트 초안</div>
+                <div class="task-meta"><span class="general-tag">일반</span></div>
+              </div>
+              <span class="dday-chip">D+12</span>
+            </article>
+          </div>
+        </div>
+
+        <!-- Col 3: 나중 -->
+        <div class="kanban-col">
+          <div class="kanban-col-head">
+            <span class="kanban-col-title later">나중</span>
+            <span class="kanban-col-count">8</span>
+          </div>
+          <div class="kanban-col-body">
+            <article class="task-card">
+              <button class="task-check" aria-label="완료"></button>
+              <div class="task-body">
+                <div class="task-title">Q3 OKR 안 작성</div>
+                <div class="task-meta"><span class="general-tag">일반</span><span>120분</span></div>
+              </div>
+              <span class="dday-chip">D+18</span>
+            </article>
+            <article class="task-card">
+              <button class="task-check" aria-label="완료"></button>
+              <div class="task-body">
+                <div class="task-title">RFP 3단계 (입찰 작성)</div>
+                <div class="task-meta"><span class="project-tag">RFP</span><span>3단계</span></div>
+              </div>
+              <span class="dday-chip">D+22</span>
+            </article>
+            <article class="task-card">
+              <button class="task-check" aria-label="완료"></button>
+              <div class="task-body">
+                <div class="task-title">회의록 4단계 (회고)</div>
+                <div class="task-meta"><span class="project-tag">회의록</span><span>4단계</span></div>
+              </div>
+              <span class="dday-chip">마감 없음</span>
+            </article>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="empty-hint">전체 = 프로젝트-axis dashboard (breadth view). 각 프로젝트 section header click → 프로젝트 sub-tab의 해당 detail로 navigate. 마감 임박 순 정렬 default + sort toggle (프로젝트별 / 시간순 / 우선순위). Quick-add inline 각 section. "+ N개 더" 펼치기로 정보 밀도 사용자 control.</div>
+    </div>
+
+    <!-- ============ 프로젝트 sub-tab (master-detail split + 4-level drill-in) ============ -->
+    <div class="subtab-content" id="work-panel-projects" role="tabpanel" aria-labelledby="work-tab-btn-projects" data-sub="projects" style="display: block;">
+      <div class="master-detail">
+
+        <!-- Master panel (좌, ≥1024px: 320px / mobile: full width) -->
+        <aside class="master-panel" aria-label="프로젝트 목록">
+          <div class="view-toggle" role="group" aria-label="프로젝트 보기 모드">
+            <button class="view-toggle-btn active" role="button" aria-pressed="true">카드</button>
+            <button class="view-toggle-btn" role="button" aria-pressed="false">캘린더</button>
+            <button class="view-toggle-btn" role="button" aria-pressed="false">타임라인</button>
+          </div>
+
+          <div class="master-section-title">진행 중<span class="count">3</span></div>
+          <div class="project-grid-compact">
+            <article class="project-card-mini urgent active" tabindex="0">
+              <div class="pcm-head">
+                <span class="pcm-name">RO 프로젝트 #14</span>
+                <span class="dday-chip urgent">D-2</span>
+              </div>
+              <div class="pcm-progress">
+                <span class="pcm-stage-pill completed"></span>
+                <span class="pcm-stage-pill current"></span>
+                <span class="pcm-stage-pill"></span>
+                <span class="pcm-stage-pill"></span>
+                <span class="pcm-stage-pill"></span>
+                <span class="pcm-stage-pill"></span>
+              </div>
+              <div class="pcm-meta"><span>12/28 항목</span><span>·</span><span>1/6 단계</span></div>
+            </article>
+            <article class="project-card-mini warn" tabindex="0">
+              <div class="pcm-head">
+                <span class="pcm-name">상반기 회의록 정리</span>
+                <span class="dday-chip warn">D-7</span>
+              </div>
+              <div class="pcm-progress">
+                <span class="pcm-stage-pill completed"></span>
+                <span class="pcm-stage-pill completed"></span>
+                <span class="pcm-stage-pill current"></span>
+                <span class="pcm-stage-pill"></span>
+              </div>
+              <div class="pcm-meta"><span>8/15 항목</span><span>·</span><span style="color:var(--accent-warning)">9일 정체</span></div>
+            </article>
+            <article class="project-card-mini" tabindex="0">
+              <div class="pcm-head">
+                <span class="pcm-name">신규 클라이언트 RFP</span>
+                <span class="dday-chip">D-12</span>
+              </div>
+              <div class="pcm-progress">
+                <span class="pcm-stage-pill current"></span>
+                <span class="pcm-stage-pill"></span>
+                <span class="pcm-stage-pill"></span>
+              </div>
+              <div class="pcm-meta"><span>3/9 항목</span><span>·</span><span>0/3 단계</span></div>
+            </article>
+          </div>
+
+          <div class="master-section-title">보류<span class="count">1</span></div>
+          <div class="project-grid-compact">
+            <article class="project-card-mini" tabindex="0" style="opacity:0.7;">
+              <div class="pcm-head">
+                <span class="pcm-name">2026 비전 워크숍 자료</span>
+                <span class="dday-chip">보류</span>
+              </div>
+              <div class="pcm-meta"><span>2/12 항목</span></div>
+            </article>
+          </div>
+        </aside>
+
+        <!-- Detail panel (우, ≥1024px: flex / mobile: stacked OR overlay) -->
+        <section class="detail-panel" aria-label="RO 프로젝트 #14 상세">
+          <div class="detail-header">
+            <div class="detail-title-block">
+              <button class="detail-back-btn">← 프로젝트 목록</button>
+              <h2 class="detail-title">
+                RO 프로젝트 #14
+                <span class="dday-chip urgent">D-2</span>
+              </h2>
+              <div class="detail-meta">
+                <span>12/28 항목 완료</span><span class="sep">·</span>
+                <span>1/6 단계 완료</span><span class="sep">·</span>
+                <span>최종 업데이트 2시간 전</span>
+              </div>
+            </div>
+            <div class="detail-actions">
+              <button class="detail-icon-btn" title="편집" aria-label="프로젝트 편집">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              </button>
+              <button class="detail-icon-btn" title="더보기" aria-label="더보기">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Stage tabs (가로) — 1단계 ✓ / 2단계 current / 3-6단계 upcoming -->
+          <div class="stage-tabs" role="tablist" aria-label="프로젝트 단계">
+            <button class="stage-tab completed" role="tab" aria-selected="false">
+              <span class="stage-tab-label">1단계 사전조사</span>
+              <span class="stage-tab-meta">5/5</span>
+            </button>
+            <button class="stage-tab current" role="tab" aria-selected="true">
+              <span class="stage-tab-label">2단계 본조사</span>
+              <span class="stage-tab-meta">4/12</span>
+            </button>
+            <button class="stage-tab" role="tab" aria-selected="false">
+              <span class="stage-tab-label">3단계 분석</span>
+              <span class="stage-tab-meta">0/6</span>
+            </button>
+            <button class="stage-tab" role="tab" aria-selected="false">
+              <span class="stage-tab-label">4단계 리포트</span>
+              <span class="stage-tab-meta">0/3</span>
+            </button>
+            <button class="stage-tab" role="tab" aria-selected="false">
+              <span class="stage-tab-label">5단계 발표</span>
+              <span class="stage-tab-meta">0/1</span>
+            </button>
+            <button class="stage-tab" role="tab" aria-selected="false">
+              <span class="stage-tab-label">6단계 마감</span>
+              <span class="stage-tab-meta">0/1</span>
+            </button>
+          </div>
+
+          <!-- 선택된 단계 (2단계 본조사): subcategory accordion -->
+          <div class="subcat-list">
+
+            <div class="subcat" aria-expanded="true">
+              <button class="subcat-head" aria-expanded="true">
+                <span class="subcat-head-title">
+                  <svg class="subcat-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                  설문 수집
+                </span>
+                <span class="subcat-progress">3/5</span>
+              </button>
+              <div class="subcat-body">
+                <div class="subcat-task completed">
+                  <button class="task-check" aria-label="완료 취소" style="background:var(--accent-success);border-color:var(--accent-success);"></button>
+                  <span class="subcat-task-title">설문 문항 초안</span>
+                  <span class="subcat-task-meta">완료 5/20</span>
+                  <span class="dday-chip" style="opacity:0.6;">D-7</span>
+                </div>
+                <div class="subcat-task completed">
+                  <button class="task-check" aria-label="완료 취소" style="background:var(--accent-success);border-color:var(--accent-success);"></button>
+                  <span class="subcat-task-title">파일럿 진행 (10명)</span>
+                  <span class="subcat-task-meta">완료 5/21</span>
+                  <span class="dday-chip" style="opacity:0.6;">D-5</span>
+                </div>
+                <div class="subcat-task completed">
+                  <button class="task-check" aria-label="완료 취소" style="background:var(--accent-success);border-color:var(--accent-success);"></button>
+                  <span class="subcat-task-title">파일럿 피드백 반영</span>
+                  <span class="subcat-task-meta">완료 어제</span>
+                  <span class="dday-chip" style="opacity:0.6;">D-3</span>
+                </div>
+                <div class="subcat-task focus-pick">
+                  <button class="task-check" aria-label="완료"></button>
+                  <span class="subcat-task-title"><span class="focus-star">★</span>본 조사 launch (200명)</span>
+                  <span class="subcat-task-meta">45분 · 지금 집중</span>
+                  <span class="dday-chip urgent">D-Day</span>
+                </div>
+                <div class="subcat-task">
+                  <button class="task-check" aria-label="완료"></button>
+                  <span class="subcat-task-title">응답 모니터링 + 독려</span>
+                  <span class="subcat-task-meta">30분</span>
+                  <span class="dday-chip">D-1</span>
+                </div>
+                <div class="subcat-add-row">+ task 추가</div>
+              </div>
+            </div>
+
+            <div class="subcat" aria-expanded="true">
+              <button class="subcat-head" aria-expanded="true">
+                <span class="subcat-head-title">
+                  <svg class="subcat-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                  심층 인터뷰
+                </span>
+                <span class="subcat-progress">1/4</span>
+              </button>
+              <div class="subcat-body">
+                <div class="subcat-task completed">
+                  <button class="task-check" aria-label="완료 취소" style="background:var(--accent-success);border-color:var(--accent-success);"></button>
+                  <span class="subcat-task-title">대상자 5명 컨택</span>
+                  <span class="subcat-task-meta">완료 5/19</span>
+                  <span class="dday-chip" style="opacity:0.6;">D-9</span>
+                </div>
+                <div class="subcat-task">
+                  <button class="task-check" aria-label="완료"></button>
+                  <span class="subcat-task-title">인터뷰 가이드 작성</span>
+                  <span class="subcat-task-meta">60분</span>
+                  <span class="dday-chip">D-1</span>
+                </div>
+                <div class="subcat-task">
+                  <button class="task-check" aria-label="완료"></button>
+                  <span class="subcat-task-title">인터뷰 진행 (5세션)</span>
+                  <span class="subcat-task-meta">총 5h</span>
+                  <span class="dday-chip">D+2</span>
+                </div>
+                <div class="subcat-task">
+                  <button class="task-check" aria-label="완료"></button>
+                  <span class="subcat-task-title">녹취 정리</span>
+                  <span class="subcat-task-meta">90분</span>
+                  <span class="dday-chip">D+4</span>
+                </div>
+                <div class="subcat-add-row">+ task 추가</div>
+              </div>
+            </div>
+
+            <div class="subcat" aria-expanded="false">
+              <button class="subcat-head" aria-expanded="false">
+                <span class="subcat-head-title">
+                  <svg class="subcat-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                  품질 검수
+                </span>
+                <span class="subcat-progress">0/3</span>
+              </button>
+              <div class="subcat-body">
+                <!-- collapsed -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Detail footer -->
+          <div class="detail-footer">
+            <div class="stale-warn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              "심층 인터뷰" 3일째 진행 멈춤 — 가이드 작성부터 확인
+            </div>
+            <button class="next-stage-btn">2단계 완료 → 3단계 분석으로</button>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="empty-hint">프로젝트 sub-tab = master-detail split (≥1024px). 좌: project 카드/캘린더/타임라인 view toggle. 우: 4-level drill-in (project → stage tab → subcategory accordion → task). Mobile: drill-in stack. ESC 또는 ← 버튼으로 master 복귀. ↑↓ project nav / ←→ stage nav / Enter drill / j/k task list 키보드.</div>
+    </div>
+
+    <!-- ============ 일반업무 sub-tab (project-unlinked tasks) ============ -->
+    <div class="subtab-content" id="work-panel-general" role="tabpanel" aria-labelledby="work-tab-btn-general" data-sub="general" style="display: block;">
+
+      <div class="quick-add">
+        <input type="text" placeholder="새 일반 업무 추가 (Enter)" aria-label="일반 업무 추가">
+        <button>+ 추가</button>
+      </div>
+
+      <div class="sort-bar">
+        <span class="sort-label">정렬</span>
+        <button class="sort-pill active">마감순</button>
+        <button class="sort-pill">생성순</button>
+        <button class="sort-pill">우선순위</button>
+        <span style="flex:1"></span>
+        <span class="sort-label">총 5개</span>
+      </div>
+
+      <div class="general-list">
+        <article class="task-card urgent">
+          <button class="task-check" aria-label="완료"></button>
+          <div class="task-body">
+            <div class="task-title">Q2 보고서 외부 검토 요청</div>
+            <div class="task-meta"><span>30분</span><span>·</span><span>2시간 전 추가</span></div>
+          </div>
+          <span class="dday-chip urgent">D-1</span>
+        </article>
+        <article class="task-card">
+          <button class="task-check" aria-label="완료"></button>
+          <div class="task-body">
+            <div class="task-title">팀 OKR 안건 정리</div>
+            <div class="task-meta"><span>30분</span><span>·</span><span>오늘 오전</span></div>
+          </div>
+          <span class="dday-chip">D-1</span>
+        </article>
+        <article class="task-card">
+          <button class="task-check" aria-label="완료"></button>
+          <div class="task-body">
+            <div class="task-title">팀 1:1 일정 조율</div>
+            <div class="task-meta"><span>15분</span><span>·</span><span>어제</span></div>
+          </div>
+          <span class="dday-chip">D-4</span>
+        </article>
+        <article class="task-card">
+          <button class="task-check" aria-label="완료"></button>
+          <div class="task-body">
+            <div class="task-title">월간 리포트 초안</div>
+            <div class="task-meta"><span>60분</span><span>·</span><span>3일 전</span></div>
+          </div>
+          <span class="dday-chip">D+12</span>
+        </article>
+        <article class="task-card">
+          <button class="task-check" aria-label="완료"></button>
+          <div class="task-body">
+            <div class="task-title">Q3 OKR 안 작성</div>
+            <div class="task-meta"><span>120분</span><span>·</span><span>1주 전</span></div>
+          </div>
+          <span class="dday-chip">D+18</span>
+        </article>
+      </div>
+
+      <div class="recent-done-expander">▾ 최근 7일 완료 (4) 보기</div>
+
+      <div class="empty-hint">일반업무 = 프로젝트 미연결 본업 (one-off). Quick-add (Enter) + sort + 7일 완료 mini expander. 큰 누적 history는 히스토리 탭으로 routing.</div>
+    </div>
+
+    <!-- ============ /본업 탭 v3 끝 ============ -->
+
+  </section>
+</div>
+</body>
+</html>

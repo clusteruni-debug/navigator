@@ -665,3 +665,46 @@
       max-width: 520px;
       font-size: var(--font-sm);
     }
+
+    .work-project-dashboard { display: grid; gap: 10px; }
+    .work-project-section { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--border-light); border-left: 3px solid var(--cat-본업); border-radius: 8px; background: var(--bg-secondary); }
+    .work-project-section.urgent, .work-master-project.urgent { border-left-color: var(--accent-danger); }
+    .work-project-section.warn, .work-master-project.warn { border-left-color: var(--accent-warning); }
+    .work-project-section.general { border-left-color: var(--text-muted); }
+    .work-project-section-head, .work-master-project, .work-v3-subcat-head { width: 100%; border: 1px solid transparent; background: transparent; color: var(--text-primary); cursor: pointer; transition: background-color 0.2s, border-color 0.2s; }
+    .work-project-section-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 220px) auto; align-items: center; gap: 10px; padding: 6px; border-radius: 7px; text-align: left; }
+    .work-project-section-head:hover, .work-master-project:hover, .work-v3-subcat-head:hover, .work-section-more:hover, .work-back-btn:hover { background: var(--bg-tertiary); border-color: var(--border-color); }
+    .work-project-section-title, .work-master-project-head { min-width: 0; display: grid; gap: 2px; }
+    .work-project-section-title strong, .work-master-project-head strong { overflow-wrap: anywhere; }
+    .work-project-section-title small, .work-master-project small, .work-stage-tab small { color: var(--text-muted); font-size: var(--font-xs); overflow-wrap: anywhere; }
+    .work-project-section-tail, .work-detail-actions { display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px; }
+    .work-section-more { min-height: 36px; border: 1px dashed var(--border-color); border-radius: 7px; background: transparent; color: var(--text-muted); cursor: pointer; transition: background-color 0.2s, border-color 0.2s; }
+    .work-section-quickadd { display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: 8px; padding-top: 8px; border-top: 1px dashed var(--border-color); }
+    .work-section-quickadd input { min-height: 44px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary); padding: 0 12px; }
+    .work-section-quickadd input:focus { outline: 2px solid var(--cat-본업); outline-offset: 2px; }
+    .work-empty-inline { min-height: 42px; display: flex; align-items: center; color: var(--text-muted); font-size: var(--font-sm); padding: 0 10px; }
+    .work-master-detail { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 12px; align-items: start; }
+    .work-master-panel, .work-detail-panel { border: 1px solid var(--border-light); border-radius: 8px; background: var(--bg-secondary); }
+    .work-master-panel { display: grid; gap: 10px; padding: 12px; max-height: 720px; overflow: auto; }
+    .work-master-list, .work-stage-panel, .work-v3-subcat-body { display: grid; gap: 8px; }
+    .work-master-project { display: grid; gap: 7px; padding: 10px; border-color: var(--border-light); border-left: 3px solid var(--cat-본업); border-radius: 8px; text-align: left; }
+    .work-master-project.active { background: color-mix(in srgb, var(--cat-본업) 12%, var(--bg-primary)); border-color: color-mix(in srgb, var(--cat-본업) 45%, var(--border-color)); }
+    .work-master-project-head { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+    .work-detail-panel { display: grid; gap: 12px; padding: 14px; max-height: 720px; overflow: auto; }
+    .work-detail-header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+    .work-detail-header h2 { margin: 0; font-size: var(--font-xl); overflow-wrap: anywhere; }
+    .work-detail-header p { margin: 3px 0 0; color: var(--text-muted); font-size: var(--font-xs); }
+    .work-back-btn { display: none; min-height: 38px; align-items: center; gap: 6px; border: 1px solid var(--border-color); border-radius: 7px; background: var(--bg-tertiary); color: var(--text-secondary); cursor: pointer; transition: background-color 0.2s, border-color 0.2s; }
+    .work-stage-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 3px; }
+    .work-stage-tab { min-width: 112px; display: grid; gap: 2px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-secondary); text-align: left; cursor: pointer; transition: background-color 0.2s, border-color 0.2s; }
+    .work-stage-tab:hover { background: var(--bg-tertiary); border-color: var(--border-color); }
+    .work-stage-tab.active { background: color-mix(in srgb, var(--cat-본업) 16%, var(--bg-primary)); border-color: color-mix(in srgb, var(--cat-본업) 50%, var(--border-color)); color: var(--cat-본업); }
+    .work-stage-tab.completed { color: var(--accent-success); }
+    .work-v3-subcat { border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; background: var(--bg-primary); }
+    .work-v3-subcat-head { min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 12px; }
+    .work-v3-subcat-head span { display: inline-flex; align-items: center; gap: 7px; min-width: 0; overflow-wrap: anywhere; }
+    .work-v3-subcat-head strong { color: var(--text-muted); font-size: var(--font-xs); font-variant-numeric: tabular-nums; }
+    .work-v3-subcat-body { padding: 0 10px 10px; }
+    .work-detail-footer { min-height: 54px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: var(--font-sm); }
+    @media (prefers-reduced-motion: reduce) { .work-redesign * { transition-duration: 0.01ms; animation: none; } }
+    @media (max-width: 1023px) { .work-master-detail { grid-template-columns: 1fr; } .work-master-detail.detail-open .work-master-panel, .work-master-detail:not(.detail-open) .work-detail-panel { display: none; } .work-back-btn { display: inline-flex; } }

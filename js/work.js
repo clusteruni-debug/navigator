@@ -1,6 +1,5 @@
 const WORK_REDESIGN_SUBTABS = ['all', 'projects', 'general'];
 const WORK_REDESIGN_PROJECT_VIEWS = ['cards', 'calendar', 'timeline'];
-const WORK_REDESIGN_ALL_FILTERS = ['all', 'project', 'general'];
 const WORK_REDESIGN_GENERAL_SORTS = ['deadline', 'recent', 'time'];
 
 function _workIcon(name, size) {
@@ -13,13 +12,11 @@ function _workIcon(name, size) {
 }
 
 function _ensureWorkRedesignState() {
-  if (!WORK_REDESIGN_SUBTABS.includes(appState.workSubTab)) appState.workSubTab = 'projects';
+  if (!WORK_REDESIGN_SUBTABS.includes(appState.workSubTab)) appState.workSubTab = 'all';
   if (!WORK_REDESIGN_PROJECT_VIEWS.includes(appState.workProjectView)) {
     appState.workProjectView = WORK_REDESIGN_PROJECT_VIEWS.includes(appState.workView) ? appState.workView : 'cards';
   }
-  if (!WORK_REDESIGN_ALL_FILTERS.includes(appState.workAllFilter)) appState.workAllFilter = 'all';
   if (!WORK_REDESIGN_GENERAL_SORTS.includes(appState.workGeneralSort)) appState.workGeneralSort = 'deadline';
-  if (typeof appState.workSearchQuery !== 'string') appState.workSearchQuery = '';
 }
 
 function _isActiveWorkProject(project) {
@@ -136,18 +133,6 @@ function _collectGeneralWorkItems(includeCompleted) {
 
 function _collectOpenWorkItems() {
   return _collectProjectWorkItems().concat(_collectGeneralWorkItems(false));
-}
-
-function _matchesWorkSearch(item) {
-  const query = String(appState.workSearchQuery || '').trim().toLowerCase();
-  if (!query) return true;
-  const haystack = [
-    item.title,
-    item.projectName,
-    item.stageName,
-    item.source === 'project' ? '프로젝트 task' : '일반 업무'
-  ].filter(Boolean).join(' ').toLowerCase();
-  return haystack.includes(query);
 }
 
 function _sortByDeadlineThenRecent(a, b) {
@@ -287,7 +272,7 @@ function _renderWorkAnchors(activeProjects) {
   }).length;
   const staleCount = activeProjects.filter(project => getProjectStaleDays(project) >= 7).length;
   return '<div class="work-anchor-row" aria-label="본업 핵심 상태">' +
-    '<button class="work-anchor urgent" onclick="setWorkSubTab(\'all\'); setWorkAllFilter(\'all\')"><span>마감 임박</span><strong>' + soonCount + '</strong></button>' +
+    '<button class="work-anchor urgent" onclick="setWorkSubTab(\'all\')"><span>마감 임박</span><strong>' + soonCount + '</strong></button>' +
     '<button class="work-anchor warn" onclick="setWorkSubTab(\'projects\'); setWorkProjectView(\'cards\')"><span>정체 7일+</span><strong>' + staleCount + '</strong></button>' +
     '<button class="work-anchor cat-work" onclick="setWorkSubTab(\'projects\'); setWorkProjectView(\'cards\')"><span>활성 프로젝트</span><strong>' + activeProjects.length + '</strong></button>' +
     '<button class="work-anchor success" onclick="setWorkSubTab(\'general\'); toggleWorkRecentDone(true)"><span>이번 주 완료</span><strong>' + _completedThisWeekCount() + '</strong></button>' +
@@ -324,159 +309,62 @@ function _renderWorkFocusCard() {
   '</div>';
 }
 
-function _renderFilterChip(kind, label) {
-  const active = appState.workAllFilter === kind;
-  return '<button class="work-chip ' + (active ? 'active cat-work' : '') + '" onclick="setWorkAllFilter(\'' + kind + '\')">' +
-    (kind === 'all' ? '' : '<span class="work-chip-swatch"></span>') +
-    '<span>' + escapeHtml(label) + '</span>' +
-  '</button>';
+function _projectOpenItems(project) {
+  return _collectProjectWorkItems()
+    .filter(item => item.projectId === project.id)
+    .sort(_sortByDeadlineThenRecent);
 }
 
-function _renderWorkAllTab() {
-  let items = _collectOpenWorkItems().filter(_matchesWorkSearch);
-  if (appState.workAllFilter === 'project') items = items.filter(item => item.source === 'project');
-  if (appState.workAllFilter === 'general') items = items.filter(item => item.source === 'general');
-  items.sort(_sortByDeadlineThenRecent);
-
-  const groups = [
-    { key: 'today', label: '오늘', predicate: item => { const d = _daysUntil(item.deadline); return d !== null && d <= 0; } },
-    { key: 'this-week', label: '이번 주', predicate: item => { const d = _daysUntil(item.deadline); return d !== null && d > 0 && d <= 7; } },
-    { key: 'next-week', label: '다음 주', predicate: item => { const d = _daysUntil(item.deadline); return d !== null && d > 7 && d <= 14; } },
-    { key: 'later', label: '나중', predicate: item => _daysUntil(item.deadline) === null || _daysUntil(item.deadline) > 14 }
-  ];
-
-  const groupedHtml = groups.map(group => {
-    const groupItems = items.filter(group.predicate);
-    if (groupItems.length === 0) return '';
-    return '<section class="work-time-group" data-group="' + group.key + '">' +
-      '<div class="work-section-heading"><span>' + group.label + '</span><span class="count">' + groupItems.length + '</span></div>' +
-      '<div class="work-task-list-redesign">' + groupItems.map(item => _renderWorkTaskRow(item)).join('') + '</div>' +
-    '</section>';
-  }).join('');
-
-  return '<div class="work-subtab-content active" id="work-subtab-panel-all" role="tabpanel" aria-labelledby="work-subtab-btn-all" data-work-subtab="all">' +
-    '<div class="work-toolbar">' +
-      '<div class="work-chip-row">' +
-        _renderFilterChip('all', '전체') +
-        _renderFilterChip('project', '프로젝트 task') +
-        _renderFilterChip('general', '일반 업무') +
-      '</div>' +
-      '<label class="work-search">' + _workIcon('search', 15) +
-        '<input type="search" value="' + escapeAttr(appState.workSearchQuery || '') + '" placeholder="본업 검색" oninput="setWorkSearch(this.value)">' +
-      '</label>' +
-    '</div>' +
-    _renderWorkFocusCard() +
-    (groupedHtml || '<div class="work-empty-state"><div class="work-empty-title">표시할 본업 task가 없습니다</div><div class="work-empty-desc">필터나 검색어를 조정하거나 새 업무를 추가하세요</div></div>') +
-  '</div>';
-}
-
-function _renderProjectCard(project) {
-  const stats = _projectStats(project);
-  const staleDays = getProjectStaleDays(project);
-  const stagePills = (project.stages || []).map((stage, idx) => {
+function _renderStageProgress(project, stats) {
+  const pills = (project.stages || []).map((stage, idx) => {
     const cls = stage.completed ? 'completed' : (idx === stats.currentStage ? 'current' : 'upcoming');
     return '<span class="work-stage-pill ' + cls + '"></span>';
   }).join('');
-  const meta = [
-    stats.completedTasks + '/' + stats.totalTasks + ' 항목',
-    stats.completedStages + '/' + stats.totalStages + ' 단계',
-    staleDays >= 7 ? staleDays + '일 정체' : ''
-  ].filter(Boolean).join(' · ');
-
-  return '<article class="work-project-card-redesign ' + _deadlineClass(project.deadline) + '">' +
-    '<div class="work-project-card-head">' +
-      '<h3>' + escapeHtml(project.name || '제목 없음') + '</h3>' +
-      _renderDdayChip(project.deadline) +
-    '</div>' +
-    '<div class="work-stage-progress" aria-label="단계 진행률">' + (stagePills || '<span class="work-stage-pill upcoming"></span>') + '</div>' +
-    '<div class="work-project-meta">' + escapeHtml(meta || '항목 없음') + '</div>' +
-    '<div class="work-project-card-actions">' +
-      '<button class="work-project-card-action" onclick="selectWorkProject(\'' + escapeAttr(project.id) + '\')">' + _workIcon('target', 13) + '<span>선택</span></button>' +
-    '</div>' +
-  '</article>';
+  return '<div class="work-stage-progress" aria-label="단계 진행률">' + (pills || '<span class="work-stage-pill upcoming"></span>') + '</div>';
 }
 
-function _renderProjectCardsView(activeProjects) {
-  if (activeProjects.length === 0) {
-    return '<div class="work-empty-state"><div class="work-empty-title">활성 프로젝트가 없습니다</div><div class="work-empty-desc">새 프로젝트를 만들면 카드, 캘린더, 타임라인에 표시됩니다</div><button class="work-primary-action" onclick="showWorkModal(\'project\')">' + _workIcon('plus', 14) + '<span>프로젝트 만들기</span></button></div>';
-  }
-  const visible = appState.workShowAllProjectCards ? activeProjects : activeProjects.slice(0, 3);
-  return '<div class="work-project-cards-view">' +
+function _renderAllProjectSection(project) {
+  const stats = _projectStats(project);
+  const items = _projectOpenItems(project);
+  const expanded = !!(appState.workExpandedProjectSections && appState.workExpandedProjectSections[project.id]);
+  const visible = expanded ? items : items.slice(0, 3);
+  const more = Math.max(0, items.length - visible.length);
+  const staleDays = getProjectStaleDays(project);
+  const meta = stats.completedTasks + '/' + stats.totalTasks + ' 항목 · ' + stats.completedStages + '/' + stats.totalStages + ' 단계' + (staleDays >= 7 ? ' · ' + staleDays + '일 정체' : '');
+
+  return '<section class="work-project-section ' + _deadlineClass(project.deadline) + '" data-work-project-section="' + escapeAttr(project.id) + '">' +
+    '<button class="work-project-section-head" onclick="openWorkProjectDetail(\'' + escapeAttr(project.id) + '\')">' +
+      '<span class="work-project-section-title"><strong>' + escapeHtml(project.name || '제목 없음') + '</strong><small>' + escapeHtml(meta) + '</small></span>' +
+      _renderStageProgress(project, stats) +
+      '<span class="work-project-section-tail">' + _renderDdayChip(project.deadline) + _workIcon('target', 14) + '</span>' +
+    '</button>' +
+    '<div class="work-task-list-redesign">' + (visible.map(item => _renderWorkTaskRow(item)).join('') || '<div class="work-empty-inline">활성 task 없음</div>') + '</div>' +
+    (more > 0 ? '<button class="work-section-more" aria-expanded="' + expanded + '" onclick="toggleWorkProjectSection(\'' + escapeAttr(project.id) + '\')">' + (expanded ? '접기' : '+' + more + '개 더') + '</button>' : '') +
+    '<div class="work-section-quickadd"><input id="work-project-quick-' + escapeAttr(project.id) + '" type="text" placeholder="이 프로젝트에 task 추가" onkeydown="if(event.key===\'Enter\') quickAddWorkProjectTask(\'' + escapeAttr(project.id) + '\')"><button class="work-icon-action" onclick="quickAddWorkProjectTask(\'' + escapeAttr(project.id) + '\')" aria-label="프로젝트 task 추가">' + _workIcon('plus', 14) + '</button></div>' +
+  '</section>';
+}
+
+function _renderAllGeneralSection() {
+  const items = _sortByDeadlineThenRecent ? _collectGeneralWorkItems(false).sort(_sortByDeadlineThenRecent) : _collectGeneralWorkItems(false);
+  const expanded = !!appState.workExpandedGeneralSection;
+  const visible = expanded ? items : items.slice(0, 3);
+  const more = Math.max(0, items.length - visible.length);
+  return '<section class="work-project-section general" data-work-project-section="general">' +
+    '<button class="work-project-section-head" onclick="setWorkSubTab(\'general\')">' +
+      '<span class="work-project-section-title"><strong>일반 업무</strong><small>프로젝트 미연결 본업 · ' + items.length + '개</small></span>' +
+      '<span class="work-project-section-tail">' + _workIcon('list', 14) + '</span>' +
+    '</button>' +
+    '<div class="work-task-list-redesign">' + (visible.map(item => _renderWorkTaskRow(item)).join('') || '<div class="work-empty-inline">일반 업무 없음</div>') + '</div>' +
+    (more > 0 ? '<button class="work-section-more" aria-expanded="' + expanded + '" onclick="toggleWorkGeneralSection()">' + (expanded ? '접기' : '+' + more + '개 더') + '</button>' : '') +
+    '<div class="work-section-quickadd"><input id="work-quick-input" type="text" placeholder="새 일반 업무 추가" onkeydown="if(event.key===\'Enter\') quickAddWorkTask()"><button class="work-icon-action" onclick="quickAddWorkTask()" aria-label="일반 업무 추가">' + _workIcon('plus', 14) + '</button></div>' +
+  '</section>';
+}
+
+function _renderWorkAllTab(activeProjects) {
+  const sections = activeProjects.map(_renderAllProjectSection).join('') + _renderAllGeneralSection();
+  return '<div class="work-subtab-content active" id="work-subtab-panel-all" role="tabpanel" aria-labelledby="work-subtab-btn-all" data-work-subtab="all">' +
     _renderWorkFocusCard() +
-    '<div class="work-project-grid-redesign">' + visible.map(_renderProjectCard).join('') + '</div>' +
-    (activeProjects.length > 3 ? '<button class="work-more-row" onclick="appState.workShowAllProjectCards=!appState.workShowAllProjectCards; renderStatic();">' + (appState.workShowAllProjectCards ? '접기' : '+' + (activeProjects.length - 3) + '개 더 보기') + '</button>' : '') +
-  '</div>';
-}
-
-function _projectDeadlineMap(projects) {
-  const map = {};
-  projects.forEach(project => {
-    if (!project.deadline) return;
-    const key = project.deadline.substring(0, 10);
-    if (!map[key]) map[key] = [];
-    map[key].push(project);
-  });
-  return map;
-}
-
-function _renderProjectCalendarView(activeProjects) {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const todayStr = getLocalDateStr(now);
-  const first = new Date(year, month, 1);
-  const mondayStartOffset = (first.getDay() + 6) % 7;
-  const start = new Date(year, month, 1 - mondayStartOffset);
-  const deadlineMap = _projectDeadlineMap(activeProjects);
-  const weekdayLabels = ['월', '화', '수', '목', '금', '토', '일'];
-  const cells = [];
-
-  for (let i = 0; i < 42; i++) {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    const key = getLocalDateStr(d);
-    const projects = deadlineMap[key] || [];
-    const muted = d.getMonth() !== month ? ' muted' : '';
-    const today = key === todayStr ? ' today' : '';
-    const deadline = projects.length > 0 ? ' deadline ' + _deadlineClass(key) : '';
-    const firstProject = projects[0];
-    cells.push('<div class="work-calendar-cell' + muted + today + deadline + '">' +
-      '<span class="work-calendar-day">' + d.getDate() + '</span>' +
-      (firstProject ? '<span class="work-calendar-deadline">' + escapeHtml(firstProject.name) + '</span>' : '') +
-      (projects.length > 1 ? '<span class="work-calendar-more">+' + (projects.length - 1) + '</span>' : '') +
-    '</div>');
-  }
-
-  return '<div class="work-project-calendar-view">' +
-    '<div class="work-section-heading"><span>' + year + '년 ' + (month + 1) + '월 프로젝트 마감</span><span class="count">' + activeProjects.filter(p => p.deadline).length + '</span></div>' +
-    '<div class="work-calendar-weekdays">' + weekdayLabels.map(label => '<div>' + label + '</div>').join('') + '</div>' +
-    '<div class="work-calendar-grid">' + cells.join('') + '</div>' +
-  '</div>';
-}
-
-function _renderProjectTimelineView(activeProjects) {
-  if (activeProjects.length === 0) {
-    return '<div class="work-empty-state"><div class="work-empty-title">타임라인에 표시할 프로젝트가 없습니다</div><div class="work-empty-desc">마감일이 있는 활성 프로젝트를 추가하세요</div></div>';
-  }
-  const rows = activeProjects.slice(0, 5).map(project => {
-    const stats = _projectStats(project);
-    const stages = project.stages && project.stages.length > 0 ? project.stages : [{ name: '단계 1', completed: false }];
-    const bars = stages.map((stage, idx) => {
-      const cls = stage.completed ? 'completed' : (idx === stats.currentStage ? 'current' : 'upcoming');
-      const width = Math.max(12, Math.round(100 / stages.length));
-      return '<span class="work-phase-bar ' + cls + '" style="width:' + width + '%"><span>' + escapeHtml(stage.name || ('단계 ' + (idx + 1))) + '</span></span>';
-    }).join('');
-    return '<div class="work-timeline-row">' +
-      '<div class="work-timeline-row-head"><strong>' + escapeHtml(project.name || '제목 없음') + '</strong><span>' + escapeHtml(project.deadline ? _formatShortDate(project.deadline) + ' · ' + _deadlineLabel(project.deadline) : '마감 없음') + '</span></div>' +
-      '<div class="work-phase-track">' + bars + '</div>' +
-      '<div class="work-timeline-meta">' + stats.completedTasks + '/' + stats.totalTasks + ' 항목 · ' + stats.completedStages + '/' + stats.totalStages + ' 단계</div>' +
-    '</div>';
-  }).join('');
-
-  return '<div class="work-project-timeline-view">' +
-    '<div class="work-section-heading"><span>프로젝트 타임라인</span><span class="count">진행 구간</span></div>' +
-    rows +
-    '<div class="work-timeline-legend"><span><i class="completed"></i>완료</span><span><i class="current"></i>진행</span><span><i class="upcoming"></i>예정</span></div>' +
+    '<div class="work-project-dashboard">' + sections + '</div>' +
   '</div>';
 }
 
@@ -484,9 +372,9 @@ function _renderProjectViewToggle() {
   const views = [
     { key: 'cards', label: '카드', icon: 'briefcase' },
     { key: 'calendar', label: '캘린더', icon: 'calendar' },
-    { key: 'timeline', label: '타임라인', icon: 'bar-chart-3' }
+    { key: 'timeline', label: '타임라인', icon: 'bar-chart' }
   ];
-  return '<div class="work-project-view-toggle" role="group" aria-label="프로젝트 보기">' +
+  return '<div class="work-project-view-toggle" aria-label="프로젝트 보기 모드">' +
     views.map(view => {
       const active = appState.workProjectView === view.key;
       return '<button class="work-view-toggle-btn ' + (active ? 'active cat-work' : '') + '" role="button" aria-pressed="' + active + '" onclick="setWorkProjectView(\'' + view.key + '\')">' +
@@ -496,18 +384,104 @@ function _renderProjectViewToggle() {
   '</div>';
 }
 
-function _renderWorkProjectsTab(activeProjects) {
-  let viewHtml = '';
-  if (appState.workProjectView === 'calendar') viewHtml = _renderProjectCalendarView(activeProjects);
-  else if (appState.workProjectView === 'timeline') viewHtml = _renderProjectTimelineView(activeProjects);
-  else viewHtml = _renderProjectCardsView(activeProjects);
+function _activeProjectOrFirst(activeProjects) {
+  const selected = activeProjects.find(project => project.id === appState.activeWorkProject);
+  if (selected) return selected;
+  if (activeProjects[0]) appState.activeWorkProject = activeProjects[0].id;
+  return activeProjects[0] || null;
+}
 
+function _stageIndexFor(project) {
+  if (!appState.workStageByProject) appState.workStageByProject = {};
+  const saved = Number(appState.workStageByProject[project.id]);
+  if (Number.isInteger(saved) && saved >= 0 && saved < (project.stages || []).length) return saved;
+  const current = (project.stages || []).findIndex(stage => !stage.completed);
+  return current >= 0 ? current : 0;
+}
+
+function _renderProjectMaster(activeProjects) {
+  const selected = appState.activeWorkProject;
+  const list = activeProjects.map(project => {
+    const stats = _projectStats(project);
+    const active = project.id === selected;
+    const stale = getProjectStaleDays(project);
+    return '<button class="work-master-project ' + (active ? 'active ' : '') + _deadlineClass(project.deadline) + '" onclick="openWorkProjectDetail(\'' + escapeAttr(project.id) + '\')" aria-current="' + active + '">' +
+      '<span class="work-master-project-head"><strong>' + escapeHtml(project.name || '제목 없음') + '</strong>' + _renderDdayChip(project.deadline) + '</span>' +
+      _renderStageProgress(project, stats) +
+      '<small>' + stats.completedTasks + '/' + stats.totalTasks + ' 항목 · ' + stats.completedStages + '/' + stats.totalStages + ' 단계' + (stale >= 7 ? ' · ' + stale + '일 정체' : '') + '</small>' +
+    '</button>';
+  }).join('');
+  return '<aside class="work-master-panel">' + _renderProjectViewToggle() + '<div class="work-master-list" data-view="' + escapeAttr(appState.workProjectView) + '">' + (list || '<div class="work-empty-inline">활성 프로젝트 없음</div>') + '</div></aside>';
+}
+
+function _stageStats(stage) {
+  const tasks = (stage.subcategories || []).flatMap(subcat => subcat.tasks || []);
+  return { total: tasks.length, done: tasks.filter(task => task.status === 'completed').length };
+}
+
+function _renderStageTabs(project, activeIdx) {
+  return '<div class="work-stage-tabs" role="tablist" aria-label="프로젝트 단계">' + (project.stages || []).map((stage, idx) => {
+    const active = idx === activeIdx;
+    const stats = _stageStats(stage);
+    const btnId = 'work-stage-tab-' + escapeAttr(project.id) + '-' + idx;
+    const panelId = 'work-stage-panel-' + escapeAttr(project.id) + '-' + idx;
+    return '<button id="' + btnId + '" class="work-stage-tab ' + (stage.completed ? 'completed ' : '') + (active ? 'active' : '') + '" role="tab" aria-selected="' + active + '" aria-controls="' + panelId + '" onclick="setWorkStage(\'' + escapeAttr(project.id) + '\',' + idx + ')"><span>' + escapeHtml(getStageName(project, idx)) + '</span><small>' + stats.done + '/' + stats.total + '</small></button>';
+  }).join('') + '</div>';
+}
+
+function _renderV3Task(project, stageIdx, subcatIdx, task, taskIdx) {
+  return _renderWorkTaskRow({
+    source: 'project',
+    id: task.id || project.id + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx,
+    title: task.title || '',
+    deadline: task.deadline || null,
+    estimatedTime: task.estimatedTime || null,
+    updatedAt: task.updatedAt || project.updatedAt || project.createdAt || '',
+    projectId: project.id,
+    projectName: project.name || '',
+    stageName: getStageName(project, stageIdx),
+    stageIdx,
+    subcatIdx,
+    taskIdx
+  });
+}
+
+function _renderSubcategory(project, stageIdx, subcat, subcatIdx) {
+  const key = project.id + '-' + stageIdx + '-' + subcatIdx;
+  const val = appState.collapsedSubcategories && appState.collapsedSubcategories[key];
+  const done = (subcat.tasks || []).filter(task => task.status === 'completed').length;
+  const total = (subcat.tasks || []).length;
+  const expanded = val === 'explicit-expanded' || (val !== 'explicit-collapsed' && done < total);
+  const bodyId = 'work-subcat-panel-' + escapeAttr(key);
+  return '<section class="work-v3-subcat" aria-expanded="' + expanded + '">' +
+    '<button class="work-v3-subcat-head" aria-expanded="' + expanded + '" aria-controls="' + bodyId + '" onclick="toggleSubcategoryCollapse(\'' + escapeAttr(project.id) + '\',' + stageIdx + ',' + subcatIdx + ')">' +
+      '<span>' + _workIcon(expanded ? 'chevron-down' : 'menu', 13) + escapeHtml(subcat.name || '중분류') + '</span><strong>' + done + '/' + total + '</strong>' +
+    '</button>' +
+    (expanded ? '<div id="' + bodyId + '" class="work-v3-subcat-body">' + ((subcat.tasks || []).map((task, taskIdx) => _renderV3Task(project, stageIdx, subcatIdx, task, taskIdx)).join('') || '<div class="work-empty-inline">항목 없음</div>') + '</div>' : '') +
+  '</section>';
+}
+
+function _renderProjectDetail(project) {
+  if (!project) return '<section class="work-detail-panel"><div class="work-empty-state"><div class="work-empty-title">프로젝트를 선택하세요</div></div></section>';
+  const stats = _projectStats(project);
+  const stageIdx = _stageIndexFor(project);
+  const stage = (project.stages || [])[stageIdx] || { subcategories: [] };
+  const stagePanelId = 'work-stage-panel-' + escapeAttr(project.id) + '-' + stageIdx;
+  const stageTabId = 'work-stage-tab-' + escapeAttr(project.id) + '-' + stageIdx;
+  const footerType = (stage.subcategories || []).length > 0 ? 'task' : 'subcategory';
+  const footerSuffix = footerType === 'task' ? ',0' : '';
+  return '<section class="work-detail-panel" aria-label="프로젝트 상세">' +
+    '<div class="work-detail-header"><button class="work-back-btn" onclick="showWorkProjectMaster()">' + _workIcon('chevron-down', 14) + '<span>프로젝트 목록</span></button><div><h2>' + escapeHtml(project.name || '제목 없음') + '</h2><p>' + stats.completedTasks + '/' + stats.totalTasks + ' 항목 · ' + stats.completedStages + '/' + stats.totalStages + ' 단계</p></div><div class="work-detail-actions"><button class="work-icon-action" onclick="renameWorkProject(\'' + escapeAttr(project.id) + '\')" aria-label="프로젝트 이름 변경">' + _workIcon('edit', 14) + '</button><button class="work-icon-action" onclick="showProjectMoreMenu(event, \'' + escapeAttr(project.id) + '\')" aria-label="프로젝트 더보기">' + _workIcon('menu', 14) + '</button></div></div>' +
+    _renderStageTabs(project, stageIdx) +
+    '<div id="' + stagePanelId + '" class="work-stage-panel" role="tabpanel" aria-labelledby="' + stageTabId + '">' + ((stage.subcategories || []).map((subcat, subcatIdx) => _renderSubcategory(project, stageIdx, subcat, subcatIdx)).join('') || '<div class="work-empty-state"><div class="work-empty-title">중분류가 없습니다</div><button class="work-primary-action" onclick="showWorkModal(\'subcategory\', \'' + escapeAttr(project.id) + '\',' + stageIdx + ')">' + _workIcon('plus', 14) + '<span>중분류 추가</span></button></div>') + '</div>' +
+    '<footer class="work-detail-footer"><span>' + escapeHtml(getStageName(project, stageIdx)) + ' · ' + _stageStats(stage).done + '/' + _stageStats(stage).total + '</span><button class="work-primary-action" onclick="showWorkModal(\'' + footerType + '\', \'' + escapeAttr(project.id) + '\',' + stageIdx + footerSuffix + ')">' + _workIcon('plus', 14) + '<span>항목 추가</span></button></footer>' +
+  '</section>';
+}
+
+function _renderWorkProjectsTab(activeProjects) {
+  const selectedProject = _activeProjectOrFirst(activeProjects);
   return '<div class="work-subtab-content active" id="work-subtab-panel-projects" role="tabpanel" aria-labelledby="work-subtab-btn-projects" data-work-subtab="projects">' +
-    '<div class="work-project-toolbar">' +
-      '<div class="work-section-heading"><span>진행 중 프로젝트</span><span class="count">' + activeProjects.length + '</span></div>' +
-      _renderProjectViewToggle() +
-    '</div>' +
-    viewHtml +
+    '<div class="work-master-detail ' + (appState.workMobileDrillIn ? 'detail-open' : '') + '">' + _renderProjectMaster(activeProjects) + _renderProjectDetail(selectedProject) + '</div>' +
   '</div>';
 }
 
@@ -529,9 +503,8 @@ function _sortGeneralItems(items) {
 }
 
 function _renderGeneralQuickAdd() {
-  if (!appState.workGeneralQuickAddOpen) return '';
   return '<div class="work-general-quick-add">' +
-    '<input type="text" id="work-quick-input" class="work-general-quick-input" placeholder="일반 업무 제목" onkeypress="if(event.key===\'Enter\') quickAddWorkTask()">' +
+    '<input type="text" id="work-quick-input" class="work-general-quick-input" placeholder="새 일반 업무 추가" onkeypress="if(event.key===\'Enter\') quickAddWorkTask()">' +
     '<button class="work-primary-action" onclick="quickAddWorkTask()">' + _workIcon('plus', 14) + '<span>추가</span></button>' +
   '</div>';
 }
@@ -558,15 +531,15 @@ function _renderWorkGeneralTab() {
   const recentItems = _recentCompletedGeneralItems();
 
   return '<div class="work-subtab-content active" id="work-subtab-panel-general" role="tabpanel" aria-labelledby="work-subtab-btn-general" data-work-subtab="general">' +
+    _renderGeneralQuickAdd() +
     '<div class="work-toolbar">' +
       '<div class="work-chip-row"><span class="work-chip-label">정렬</span>' +
         _renderGeneralSortChip('deadline', '마감') +
         _renderGeneralSortChip('recent', '최근') +
         _renderGeneralSortChip('time', '시간') +
       '</div>' +
-      '<button class="work-primary-action" onclick="startWorkGeneralQuickAdd()">' + _workIcon('plus', 14) + '<span>빠른 추가</span></button>' +
+      '<span class="work-chip-label">총 ' + items.length + '개</span>' +
     '</div>' +
-    _renderGeneralQuickAdd() +
     '<div class="work-task-list-redesign">' +
       (visibleItems.map(item => _renderWorkTaskRow(item)).join('') || '<div class="work-empty-state"><div class="work-empty-title">일반 업무가 없습니다</div><div class="work-empty-desc">프로젝트와 연결되지 않은 본업 task가 여기에 모입니다</div></div>') +
     '</div>' +
@@ -583,7 +556,7 @@ function renderWorkProjects() {
     .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
 
   let content = '';
-  if (appState.workSubTab === 'all') content = _renderWorkAllTab();
+  if (appState.workSubTab === 'all') content = _renderWorkAllTab(activeProjects);
   else if (appState.workSubTab === 'general') content = _renderWorkGeneralTab();
   else content = _renderWorkProjectsTab(activeProjects);
 
@@ -598,9 +571,7 @@ function renderWorkProjects() {
 function setWorkSubTab(tab) {
   if (!WORK_REDESIGN_SUBTABS.includes(tab)) return;
   appState.workSubTab = tab;
-  if (tab === 'projects' && !WORK_REDESIGN_PROJECT_VIEWS.includes(appState.workProjectView)) {
-    appState.workProjectView = 'cards';
-  }
+  if (tab === 'projects' && !WORK_REDESIGN_PROJECT_VIEWS.includes(appState.workProjectView)) appState.workProjectView = 'cards';
   renderStatic();
 }
 window.setWorkSubTab = setWorkSubTab;
@@ -609,23 +580,67 @@ function setWorkProjectView(view) {
   if (!WORK_REDESIGN_PROJECT_VIEWS.includes(view)) return;
   appState.workSubTab = 'projects';
   appState.workProjectView = view;
-  appState.workView = view;
+  appState.workView = 'detail';
+  appState.workMobileDrillIn = false;
   renderStatic();
 }
 window.setWorkProjectView = setWorkProjectView;
 
-function setWorkAllFilter(filter) {
-  if (!WORK_REDESIGN_ALL_FILTERS.includes(filter)) return;
-  appState.workAllFilter = filter;
-  renderStatic();
+function openWorkProjectDetail(projectId) {
+  appState.workSubTab = 'projects';
+  appState.workView = 'detail';
+  appState.workMobileDrillIn = true;
+  if (typeof selectWorkProject === 'function') selectWorkProject(projectId);
+  else { appState.activeWorkProject = projectId; renderStatic(); }
 }
-window.setWorkAllFilter = setWorkAllFilter;
+window.openWorkProjectDetail = openWorkProjectDetail;
 
-function setWorkSearch(value) {
-  appState.workSearchQuery = String(value || '');
+function showWorkProjectMaster() { appState.workMobileDrillIn = false; renderStatic(); }
+window.showWorkProjectMaster = showWorkProjectMaster;
+
+function setWorkStage(projectId, stageIdx) {
+  if (!appState.workStageByProject) appState.workStageByProject = {};
+  appState.workStageByProject[projectId] = stageIdx; renderStatic();
+}
+window.setWorkStage = setWorkStage;
+
+function toggleWorkProjectSection(projectId) {
+  if (!appState.workExpandedProjectSections) appState.workExpandedProjectSections = {};
+  appState.workExpandedProjectSections[projectId] = !appState.workExpandedProjectSections[projectId];
   renderStatic();
 }
-window.setWorkSearch = setWorkSearch;
+window.toggleWorkProjectSection = toggleWorkProjectSection;
+
+function toggleWorkGeneralSection() { appState.workExpandedGeneralSection = !appState.workExpandedGeneralSection; renderStatic(); }
+window.toggleWorkGeneralSection = toggleWorkGeneralSection;
+
+function quickAddWorkProjectTask(projectId) {
+  const input = document.getElementById('work-project-quick-' + projectId);
+  if (!input || !input.value.trim()) return;
+  const project = (appState.workProjects || []).find(p => p.id === projectId);
+  if (!project) return;
+  if (!project.stages || project.stages.length === 0) project.stages = [{ id: generateId(), name: '1단계', completed: false, subcategories: [] }];
+  const stageIdx = _stageIndexFor(project);
+  const stage = project.stages[stageIdx];
+  if (!stage.subcategories || stage.subcategories.length === 0) stage.subcategories = [{ id: generateId(), name: '일반', tasks: [] }];
+  const title = input.value.trim();
+  stage.subcategories[0].tasks.push({
+    id: generateId(),
+    title,
+    status: 'not-started',
+    owner: 'me',
+    estimatedTime: 30,
+    actualTime: null,
+    completedAt: null,
+    logs: []
+  });
+  project.updatedAt = new Date().toISOString();
+  saveWorkProjects();
+  input.value = '';
+  renderStatic();
+  if (typeof showToast === 'function') showToast(title + ' 추가됨', 'success');
+}
+window.quickAddWorkProjectTask = quickAddWorkProjectTask;
 
 function setWorkGeneralSort(sort) {
   if (!WORK_REDESIGN_GENERAL_SORTS.includes(sort)) return;
@@ -634,26 +649,8 @@ function setWorkGeneralSort(sort) {
 }
 window.setWorkGeneralSort = setWorkGeneralSort;
 
-function startWorkGeneralQuickAdd() {
-  appState.workSubTab = 'general';
-  appState.workGeneralQuickAddOpen = true;
-  appState.workView = 'dashboard';
-  renderStatic();
-  setTimeout(() => {
-    const input = document.getElementById('work-quick-input');
-    if (input) input.focus();
-  }, 0);
-}
-window.startWorkGeneralQuickAdd = startWorkGeneralQuickAdd;
-
 function toggleWorkRecentDone(forceOpen) {
   appState.workRecentDoneExpanded = forceOpen === true ? true : !appState.workRecentDoneExpanded;
   renderStatic();
 }
 window.toggleWorkRecentDone = toggleWorkRecentDone;
-
-function setWorkGeneralCompletedPage(page) {
-  appState.workGeneralCompletedPage = Math.max(0, page);
-  renderStatic();
-}
-window.setWorkGeneralCompletedPage = setWorkGeneralCompletedPage;
