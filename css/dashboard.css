@@ -109,6 +109,14 @@
       transition: border-color 0.2s;
     }
 
+    /* Phase B3: 통계 탭 weight tier — primary (Hero / Urgent) stronger visual emphasis */
+    .dashboard-section.primary-tier {
+      border-left-width: 4px;
+      border-left-color: var(--accent-primary);
+      background: var(--bg-secondary);
+      padding: var(--space-comfortable);
+    }
+
     .dashboard-redesign .dashboard-section.revenue-dashboard {
       border-left-color: var(--cat-부업);
       background: var(--bg-secondary);

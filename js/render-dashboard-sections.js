@@ -437,7 +437,7 @@ function _renderDashHero(ctx) {
   const streak = appState.streak || { current: 0, best: 0 };
 
   return `
-    <div class="dashboard-section dash-hero dash-hero-clean">
+    <div class="dashboard-section dash-hero dash-hero-clean primary-tier">
       <div class="dash-hero-row-top">
         <div>
           <div class="dash-hero-clock">${now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</div>
@@ -590,7 +590,7 @@ function _renderDashCategoryStatus(ctx) {
 function _renderDashUrgent(urgentTasks) {
   const tasks = (urgentTasks || []).slice(0, 2);
   return `
-    <div class="dashboard-section" id="dash-urgent-section">
+    <div class="dashboard-section primary-tier" id="dash-urgent-section">
       ${_sectionLabel('URGENT')}
       <div class="dashboard-title">마감 임박</div>
       ${tasks.length > 0 ? `
