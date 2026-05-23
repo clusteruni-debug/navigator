@@ -416,7 +416,7 @@ function getDeferredTasks(limit) {
 function _renderDashOverview(ctx) {
   const urgentTasks = ctx.urgentTasks || [];
   return `
-    <div class="dash-panel active" role="tabpanel">
+    <div class="dash-panel active">
       ${_renderDashHero(ctx)}
       ${_renderDashUrgent(urgentTasks)}
       ${_renderDashCategoryStatus(ctx)}
@@ -614,7 +614,7 @@ function _renderDashRevenuePanel(ctx) {
   const maxRoi = Math.max(...roi.map(item => item.roi), 1);
 
   return `
-    <div class="dash-panel active" role="tabpanel">
+    <div class="dash-panel active">
       <div class="dashboard-section revenue-dashboard">
         ${_sectionLabel('REVENUE')}
         <div class="dashboard-title">수익 대시보드</div>
@@ -760,7 +760,7 @@ function _renderDashHealthPanel(ctx) {
   const debt = getSleepDebt(7);
 
   return `
-    <div class="dash-panel active" role="tabpanel">
+    <div class="dash-panel active">
       <div class="dashboard-section life-rhythm-stats">
         ${_sectionLabel('SLEEP')}
         <div class="dashboard-title">수면 패턴 7일</div>
@@ -843,7 +843,7 @@ function _renderDashPatternsPanel(ctx) {
   const deferred = getDeferredTasks(3);
 
   return `
-    <div class="dash-panel active" role="tabpanel">
+    <div class="dash-panel active">
       <div class="dashboard-section insights-section">
         ${_sectionLabel('TIME')}
         <div class="dashboard-title">생산적 시간대</div>

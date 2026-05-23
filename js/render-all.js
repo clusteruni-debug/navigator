@@ -310,6 +310,7 @@ function openAllTasksCategoryAdd(category) {
   appState.showDetailedAdd = true;
   appState.editingTaskId = null;
   appState._detailedShowDeadline = undefined;
+  appState.currentTab = 'action';
   renderStatic();
   setTimeout(() => {
     const form = document.querySelector('.detailed-add');
