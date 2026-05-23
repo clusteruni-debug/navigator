@@ -177,6 +177,8 @@
 
 .life-rhythm-primary {
   border-color: color-mix(in srgb, var(--cat-일상) 32%, var(--border-light));
+  border-left: 4px solid var(--cat-일상);
+  background: color-mix(in srgb, var(--cat-일상) 5%, var(--bg-secondary));
 }
 
 .life-section-heading {
