@@ -367,13 +367,7 @@
       color: var(--accent-primary);
     }
 
-    /* 모바일(hover 없는 포인터 장치): 액션 버튼 항상 표시 */
-    @media (hover: none) and (pointer: coarse) {
-      .work-general-edit-btn,
-      .work-general-delete-btn {
-        opacity: 1;
-      }
-    }
+    /* 모바일 touch override — Round 1 per-button @media blocks (line 333-335 + 361-363) cover this already; redundant combined block removed Round 2 */
 
     .work-general-deadline {
       font-size: var(--font-sm);
@@ -721,8 +715,4 @@
       color: var(--accent-danger);
     }
 
-/* P0d focus-visible (a11y 2026-05-24) */
-.work-priority-item:focus-visible {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
-}
+/* P0d focus-visible (a11y 2026-05-24) — .work-priority-item removed Round 2 (no matching JS markup) */

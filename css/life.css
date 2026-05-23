@@ -805,14 +805,4 @@ body[data-theme="light"] .life-rhythm-primary {
   }
 }
 
-/* P0d focus-visible (a11y 2026-05-24) */
-.life-task-row:focus-visible {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
-}
-
-/* P0d focus-visible (a11y 2026-05-24) */
-.life-habit-row:focus-visible {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
-}
+/* P0d focus-visible (a11y 2026-05-24) — .life-task-row + .life-habit-row removed Round 2 (no tabindex on outer div, focusable element is inner .life-task-main per render-life.js:349; ring fires on wrong element) */
