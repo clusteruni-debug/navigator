@@ -19,9 +19,7 @@
     }
 
     .events-title {
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: 0;
+      font: var(--text-title-2);
       white-space: nowrap;
     }
 

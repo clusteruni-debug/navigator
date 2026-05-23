@@ -177,13 +177,11 @@
     }
 
     .dashboard-title {
-      font-size: 16px;
-      font-weight: 600;
+      font: var(--text-title-2);
       margin-bottom: 15px;
       display: flex;
       align-items: center;
       gap: 10px;
-      letter-spacing: -0.01em;
     }
 
     .category-stats {

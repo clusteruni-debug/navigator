@@ -84,11 +84,8 @@
     }
 
     .action-section-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+      font: var(--text-label);
+      color: var(--text-secondary);
       margin: 0 0 6px 4px;
     }
 
@@ -98,9 +95,8 @@
       align-items: center;
       gap: 10px;
       margin: 0 0 8px;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-secondary);
+      font: var(--text-title-2);
+      color: var(--text-primary);
     }
 
     .section-title .count {
@@ -168,7 +164,7 @@
       margin-top: 3px;
       color: var(--text-primary);
       font-size: 18px;
-      font-weight: 800;
+      font-weight: 700;
       font-variant-numeric: tabular-nums;
       line-height: 1;
     }
@@ -1257,7 +1253,7 @@
     }
 
     .task-item-mini-title {
-      font-size: 16px;
+      font: var(--text-body-emph);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1393,12 +1389,9 @@
       justify-content: space-between;
       align-items: center;
       gap: 8px;
-      font-size: 12px;
-      font-weight: 700;
+      font: var(--text-label);
       color: var(--text-secondary);
       margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
     }
 
     .next-action-label-main,
@@ -1423,11 +1416,8 @@
     }
 
     .next-action-title {
-      font-size: 24px;
+      font: var(--text-display);
       margin: 4px 0 14px;
-      line-height: 1.35;
-      font-weight: 700;
-      letter-spacing: 0;
       word-break: keep-all;
     }
 
@@ -1463,11 +1453,8 @@
     }
 
     .task-title {
-      font-size: 24px;
+      font: var(--text-title-1);
       margin-bottom: 18px;
-      line-height: 1.4;
-      font-weight: 600;
-      letter-spacing: -0.02em;
       word-break: keep-all;
     }
 

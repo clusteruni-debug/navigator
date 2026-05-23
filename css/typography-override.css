@@ -1,35 +1,23 @@
-/* typography-override.css - 타이포그래피 정규화 override 블록 */
-    /* ============================================
-       타이포그래피 정규화 — 최소 가독 크기 보장
-       9px→12px, 10px→12px, 11px→13px, 일부 12px→13px
-       원본 CSS 미변경, 이 블록으로 override
-       ============================================ */
+/* typography-override.css — Component overrides mapped to typography role tokens
+   Most font-size setting now handled by --text-* role tokens (base.css).
+   This file maps legacy component classes to appropriate roles.
+   Role tokens (base.css): --text-display / --text-title-1 / --text-title-2 /
+   --text-body-emph / --text-body / --text-label / --text-caption / --text-micro */
 
-    /* --- 통계/차트 라벨 (기존 10-11px → 12-13px) --- */
+    /* === Microscale: counter chips, bar values, indicator badges === */
     .stat-label,
     .insight-bar-label,
     .revenue-bar-value,
-    .revenue-bar-label,
     .rhythm-bar-value,
     .pie-legend-value,
-    .commute-weekday-count {
-      font-size: var(--font-xs) !important; /* 12px */
+    .commute-weekday-count,
+    .task-tag,
+    .calendar-day-task,
+    .work-section-toggle {
+      font: var(--text-caption);
     }
 
-    .rhythm-bar-label,
-    .rhythm-work-label,
-    .rhythm-summary-row,
-    .rhythm-insight-item,
-    .revenue-card-label,
-    .revenue-category-percent,
-    .revenue-card-sub,
-    .commute-stat-label,
-    .commute-weekday-label,
-    .commute-recommend-confidence {
-      font-size: var(--font-sm) !important; /* 13px */
-    }
-
-    /* --- 메타 정보/보조 텍스트 (기존 11-12px → 13px) --- */
+    /* === Caption: meta, indicators, tags, system status === */
     .user-email,
     .sync-status,
     .sync-indicator,
@@ -44,16 +32,23 @@
     .current-time-mode-label,
     .start-now-btn,
     .logout-btn,
-    .calendar-weekday {
-      font-size: var(--font-sm) !important; /* 13px */
+    .calendar-weekday,
+    .calendar-day-more,
+    .work-task-action {
+      font: var(--text-caption);
     }
 
-    /* --- 태그/뱃지 (기존 10px → 12px) --- */
-    .task-tag {
-      font-size: var(--font-xs) !important; /* 12px */
-    }
-
-    /* --- 본문/설명/라벨 (기존 13px → 14px) --- */
+    /* === Label: form fields, button labels, chart titles === */
+    .rhythm-bar-label,
+    .rhythm-work-label,
+    .rhythm-summary-row,
+    .rhythm-insight-item,
+    .revenue-card-label,
+    .revenue-category-percent,
+    .revenue-card-sub,
+    .commute-stat-label,
+    .commute-weekday-label,
+    .commute-recommend-confidence,
     .meta-item,
     .header p,
     .shuttle-desc,
@@ -65,70 +60,13 @@
     .quick-timer-btn,
     .shuttle-toggle,
     .motivation-toast {
-      font-size: var(--font-base) !important; /* 14px */
+      font: var(--text-label);
     }
 
-    /* --- 작업 섹션 소형 텍스트 보정 --- */
-    .work-section-toggle {
-      font-size: var(--font-xs) !important; /* 12px, 기존 10px */
-    }
-
-    .work-task-action {
-      font-size: var(--font-sm) !important; /* 13px */
-    }
-
-    /* --- 달력 셀 내 작업 (기존 10px → 12px, 모바일은 11px) --- */
-    .calendar-day-task {
-      font-size: var(--font-xs) !important; /* 12px */
-    }
-
-    .calendar-day-more {
-      font-size: 14px !important; /* 기존 9px → 11px */
-    }
-
-    /* --- 스케줄 타임라인 내 인라인 텍스트 최소 크기 --- */
-    .work-view-tab {
-      font-size: var(--font-base) !important; /* 14px, 기존 13px */
-    }
-
-    /* --- 반응형: 모바일에서도 최소 크기 유지 --- */
+    /* Mobile: calendar cells stay readable on small screens */
     @media (max-width: 480px) {
-      .calendar-day-task {
-        font-size: 14px !important;
-      }
+      .calendar-day-task,
       .calendar-day-more {
-        font-size: 14px !important;
-      }
-      .work-view-tab {
-        font-size: var(--font-sm) !important; /* 13px */
-      }
-    }
-
-    /* --- 데스크톱: 전체적으로 한 단계 더 --- */
-    @media (min-width: 1024px) {
-      .stat-label,
-      .rhythm-bar-value,
-      .revenue-bar-value,
-      .insight-bar-label {
-        font-size: var(--font-sm) !important; /* 13px */
-      }
-
-      .meta-item,
-      .rhythm-insight-item,
-      .rhythm-summary-row,
-      .form-label {
-        font-size: var(--font-md) !important; /* 15px */
-      }
-
-      .category,
-      .tag,
-      .sync-indicator,
-      .task-item-meta,
-      .calendar-weekday {
-        font-size: var(--font-base) !important; /* 14px */
-      }
-
-      .calendar-day-task {
-        font-size: var(--font-sm) !important; /* 13px */
+        font: var(--text-label);
       }
     }

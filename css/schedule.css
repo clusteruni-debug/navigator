@@ -442,7 +442,7 @@
 }
 .commute-anchor span, .commute-shuttle-card span, .commute-mode-card span, .commute-log-stats span { display: block; color: var(--text-muted); font-size: var(--font-xs); font-weight: 700; letter-spacing: 0;
 }
-.commute-anchor strong, .commute-shuttle-card strong, .commute-mode-card strong, .commute-log-stats strong { display: block; margin-top: 4px; color: var(--text-primary); font-size: var(--font-md); font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+.commute-anchor strong, .commute-shuttle-card strong, .commute-mode-card strong, .commute-log-stats strong { display: block; margin-top: 4px; color: var(--text-primary); font-size: var(--font-md); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .commute-anchor.success, .commute-shuttle-card.on { background: color-mix(in srgb, var(--accent-success) 12%, transparent); border-color: var(--accent-success);
 }

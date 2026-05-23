@@ -165,8 +165,7 @@
     }
 
     .weekly-report-title {
-      font-size: 16px;
-      font-weight: 600;
+      font: var(--text-title-2);
     }
 
     .weekly-report-period {
