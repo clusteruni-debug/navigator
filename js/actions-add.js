@@ -351,10 +351,10 @@ function showBrainDumpModal() {
       </div>
       <div class="modal-body">
         <textarea id="brain-dump-input" class="brain-dump-textarea"
-          placeholder="한 줄에 하나씩 작업을 입력하세요&#10;&#10;예시:&#10;보고서 작성&#10;#부업 NFT 이벤트 확인&#10;#일상 장보기&#10;#가족 병원 예약"
+          placeholder="한 줄에 하나씩 작업을 입력하세요&#10;&#10;예시:&#10;보고서 작성&#10;#부업 NFT 이벤트 확인&#10;#일상 장보기&#10;#가족 병원 예약&#10;#이벤트 민방위 교육"
         ></textarea>
         <div class="brain-dump-hint">
-          💡 <strong>#부업</strong>, <strong>#본업</strong>, <strong>#일상</strong>, <strong>#가족</strong>으로 카테고리 지정 (기본: 부업)
+          💡 <strong>#부업</strong>, <strong>#본업</strong>, <strong>#일상</strong>, <strong>#가족</strong>, <strong>#이벤트</strong>, <strong>#미분류</strong>로 카테고리 지정 (기본: 부업)
         </div>
         <div class="brain-dump-count" id="brain-dump-count">0줄</div>
       </div>
