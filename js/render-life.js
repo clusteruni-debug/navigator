@@ -137,7 +137,7 @@ function toggleLifeHabit(title) {
 window.toggleLifeHabit = toggleLifeHabit;
 
 function setLifeTaskFilter(filter) {
-  appState.lifeTaskFilter = ['all', 'life', 'family'].includes(filter) ? filter : 'all';
+  appState.lifeTaskFilter = ['all', 'life', 'family', 'event'].includes(filter) ? filter : 'all';
   renderStatic();
 }
 window.setLifeTaskFilter = setLifeTaskFilter;
@@ -388,7 +388,8 @@ function _renderLifeTaskFilter(activeFilter) {
   const filters = [
     { key: 'all', label: '전체', cat: '' },
     { key: 'life', label: '일상', cat: '일상' },
-    { key: 'family', label: '가족', cat: '가족' }
+    { key: 'family', label: '가족', cat: '가족' },
+    { key: 'event', label: '이벤트', cat: '이벤트' }
   ];
   return `
     <div class="life-filter-chips" role="group" aria-label="일상 task 필터">
@@ -410,10 +411,29 @@ function _renderLifeTaskSection(pendingTasks, completedTasks) {
   const filtered = pendingTasks.filter(task => {
     if (activeFilter === 'life') return task.category === '일상';
     if (activeFilter === 'family') return task.category === '가족';
+    if (activeFilter === 'event') return task.category === '이벤트';
     return true;
   });
-  const familyCount = pendingTasks.filter(task => task.category === '가족').length;
   const lifeCount = pendingTasks.filter(task => task.category === '일상').length;
+  const familyCount = pendingTasks.filter(task => task.category === '가족').length;
+  const eventCount = pendingTasks.filter(task => task.category === '이벤트').length;
+
+  const lifeGroup = filtered.filter(t => t.category === '일상');
+  const familyGroup = filtered.filter(t => t.category === '가족');
+  const eventGroup = filtered.filter(t => t.category === '이벤트');
+
+  const renderSubGroup = (groupTasks, label, catClass) => `
+    <div class="life-section-header cat-${catClass}" role="group" aria-label="${escapeAttr(label)} 그룹">
+      <span class="life-section-header-label">${escapeHtml(label)}</span>
+      <span class="life-section-header-count">${groupTasks.length}</span>
+    </div>
+    ${groupTasks.length > 0 ? `
+      <div class="life-task-list life-sub-list">
+        ${groupTasks.map(task => _renderLifeTaskItem(task)).join('')}
+      </div>
+    ` : '<div class="life-empty-inline life-sub-empty">표시할 task 없음</div>'}
+  `;
+
   return `
     <section class="life-section-card life-task-section" aria-labelledby="life-task-title">
       <div class="life-section-heading split">
@@ -421,15 +441,21 @@ function _renderLifeTaskSection(pendingTasks, completedTasks) {
         ${_renderLifeTaskFilter(activeFilter)}
       </div>
       <div class="life-task-count-row">
-        <span class="life-task-hierarchy">일상 ⊃ 가족</span>
         <span>일상 ${lifeCount}</span>
         <span>가족 ${familyCount}</span>
+        <span>이벤트 ${eventCount}</span>
       </div>
-      ${filtered.length > 0 ? `
-        <div class="life-task-list">
-          ${filtered.map(task => _renderLifeTaskItem(task)).join('')}
-        </div>
-      ` : '<div class="life-empty-inline">표시할 일상/가족 task가 없습니다</div>'}
+      ${filtered.length > 0 ? (
+        activeFilter === 'all'
+          ? `<div class="life-task-groups">
+              ${renderSubGroup(lifeGroup, '일상', '일상')}
+              ${renderSubGroup(familyGroup, '가족', '가족')}
+              ${renderSubGroup(eventGroup, '이벤트', '이벤트')}
+            </div>`
+          : `<div class="life-task-list">
+              ${filtered.map(task => _renderLifeTaskItem(task)).join('')}
+            </div>`
+      ) : '<div class="life-empty-inline">표시할 일상/가족/이벤트 task가 없습니다</div>'}
       ${completedTasks.length > 0 ? `
         <details class="life-completed-details">
           <summary>오늘 완료 ${completedTasks.length}</summary>
@@ -509,7 +535,7 @@ function renderLifeTab() {
   const todayEnd = new Date(now);
   todayEnd.setHours(23, 59, 59, 999);
 
-  const lifeTasks = (appState.tasks || []).filter(task => task.category === '일상' || task.category === '가족');
+  const lifeTasks = (appState.tasks || []).filter(task => task.category === '일상' || task.category === '가족' || task.category === '이벤트');
   const pendingTasks = lifeTasks
     .filter(task => _isLifeTaskDueToday(task, todayEnd))
     .sort(_sortLifeTasks);
