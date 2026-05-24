@@ -36,7 +36,7 @@ const SUPABASE_CACHE_TTL = 3 * 60 * 1000; // 3분
  * @typedef {Object} Task
  * @property {string} id - 고유 ID (crypto.randomUUID, 레거시: 숫자→문자열 마이그레이션)
  * @property {string} title - 작업 제목
- * @property {'본업'|'부업'|'일상'|'가족'} category - 카테고리
+ * @property {'본업'|'부업'|'일상'|'가족'|'이벤트'|'미분류'} category - 카테고리 ('이벤트' = 일회성, '미분류' = 사용자 선택 대기)
  * @property {boolean} completed - 완료 여부
  * @property {string} [startDate] - 시작일 (YYYY-MM-DD)
  * @property {string} [deadline] - 마감일 (YYYY-MM-DD)
@@ -227,7 +227,7 @@ const SUPABASE_CACHE_TTL = 3 * 60 * 1000; // 3분
  *
  * @property {Object} detailedTask - 상세 추가/수정용 임시 데이터
  * @property {string} detailedTask.title
- * @property {'본업'|'부업'|'일상'|'가족'} detailedTask.category
+ * @property {'본업'|'부업'|'일상'|'가족'|'이벤트'|'미분류'} detailedTask.category
  * @property {string} detailedTask.startDate
  * @property {string} detailedTask.deadline
  * @property {number} detailedTask.estimatedTime
@@ -254,7 +254,7 @@ const SUPABASE_CACHE_TTL = 3 * 60 * 1000; // 3분
  * @property {'default'|'granted'|'denied'} notificationPermission - 알림 권한 상태
  * @property {'all'|'weekday'|'weekend'|'today'} scheduleFilter - 일정 필터
  * @property {string} searchQuery - 검색어
- * @property {'all'|'본업'|'부업'|'일상'|'가족'} categoryFilter - 카테고리 필터
+ * @property {'all'|'본업'|'부업'|'일상'|'가족'|'이벤트'|'미분류'} categoryFilter - 카테고리 필터
  * @property {string|null} tagFilter - 태그 필터
  * @property {Object<string, boolean>} showCompletedByCategory - 카테고리별 완료 작업 표시 여부
  * @property {'dark'|'light'} theme - 테마

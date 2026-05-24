@@ -1,6 +1,6 @@
-// Navigator Service Worker v6.45
+// Navigator Service Worker v6.46
 // ⚠️ JS/CSS 파일 추가·삭제 시 이 목록과 navigator-v5.html 모두 업데이트 필요
-const CACHE_NAME = 'navigator-v6-45';
+const CACHE_NAME = 'navigator-v6-46';
 const urlsToCache = [
   './navigator-v5.html',
   './manifest.json',

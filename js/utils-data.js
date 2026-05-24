@@ -99,7 +99,7 @@ function validateTask(task) {
   const validated = {
     id: typeof task.id === 'number' ? String(task.id) : task.id,
     title: String(task.title).trim().substring(0, 500),
-    category: ['본업', '부업', '일상', '가족', '공부', '크립토'].includes(task.category) ? task.category : '일상',
+    category: ['본업', '부업', '일상', '가족', '공부', '크립토', '이벤트', '미분류'].includes(task.category) ? task.category : '미분류',
     completed: Boolean(task.completed),
     completedAt: task.completedAt || null,
     deadline: typeof task.deadline === 'string' ? task.deadline : '',
