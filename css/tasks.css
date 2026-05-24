@@ -523,6 +523,8 @@
     .cat-tag.cat-부업 { background: color-mix(in srgb, var(--cat-부업) 16%, transparent); color: var(--cat-부업); }
     .cat-tag.cat-일상 { background: color-mix(in srgb, var(--cat-일상) 16%, transparent); color: var(--cat-일상); }
     .cat-tag.cat-가족 { background: color-mix(in srgb, var(--cat-가족) 16%, transparent); color: var(--cat-가족); }
+    .cat-tag.cat-이벤트 { background: color-mix(in srgb, var(--cat-이벤트) 16%, transparent); color: var(--cat-이벤트); }
+    .cat-tag.cat-미분류 { background: color-mix(in srgb, var(--cat-미분류) 16%, transparent); color: var(--cat-미분류); }
 
     .repeat-mark {
       color: var(--text-muted);

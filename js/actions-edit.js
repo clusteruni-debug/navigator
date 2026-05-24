@@ -62,6 +62,9 @@ function getQuickEditCategoryFields(category, task) {
           <input type="number" class="work-modal-input" id="quick-edit-time" value="${task.estimatedTime || ''}" min="1">
         </div>
       `;
+    case '이벤트':
+      // 일회성 task — deadline은 modal 상단 고정 field로 노출, 추가 helper field 불필요
+      return '';
     default:
       return '';
   }
@@ -366,7 +369,7 @@ window.openArticleEditor = openArticleEditor;
 function cancelEdit() {
   appState.detailedTask = {
     title: '',
-    category: '부업',
+    category: (typeof _safeReadLastCategory === 'function') ? _safeReadLastCategory() : '미분류',
     startDate: '',
     deadline: '',
     estimatedTime: 10,

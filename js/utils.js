@@ -14,9 +14,13 @@ function generateId() {
  * 카테고리 ID 안전 토큰 — CSS custom property 컨텍스트 (`var(--cat-${name})`)에
  * 사용자 입력을 직접 삽입할 때 사용. allowlist 외엔 '미분류' 폴백.
  * escapeAttr만으론 CSS-context의 `)`, `(`, `;` 등을 못 막으므로 enum 검증이 정공.
- * '이벤트' = 일회성 task (deadline 있지만 반복 없음), '미분류' = silent fallback 차단 sentinel
+ *
+ * Role separation (utils-data.js validateTask whitelist와 의도된 drift):
+ * - _NAV_VALID_CATEGORIES = UI-safe enum (form select 노출 + CSS color 정의 있음)
+ * - utils-data.js whitelist = storage-valid enum (legacy '공부'/'크립토' preserve, render는 fallback '미분류')
+ * '이벤트' = 일회성 task (deadline 있지만 반복 없음) / '미분류' = silent fallback 차단 sentinel + cleanup UI surface
  */
-const _NAV_VALID_CATEGORIES = ['본업', '부업', '일상', '가족', '이벤트', '미분류', '공부', '크립토'];
+const _NAV_VALID_CATEGORIES = ['본업', '부업', '일상', '가족', '이벤트', '미분류'];
 function safeCatId(category) {
   return _NAV_VALID_CATEGORIES.includes(category) ? category : '미분류';
 }

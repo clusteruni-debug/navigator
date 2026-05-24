@@ -667,6 +667,6 @@ function reclassifyTaskCategory(taskId, newCategory) {
   task.updatedAt = new Date().toISOString();
   if (typeof saveState === 'function') saveState();
   if (typeof renderStatic === 'function') renderStatic();
-  if (typeof showToast === 'function') showToast(`'${task.title}' → ${newCategory}`, 'success');
+  if (typeof showToast === 'function') showToast(`'${escapeHtml(task.title)}' → ${escapeHtml(newCategory)}`, 'success');
 }
 window.reclassifyTaskCategory = reclassifyTaskCategory;
