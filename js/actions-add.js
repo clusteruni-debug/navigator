@@ -250,6 +250,7 @@ function addNewEvent() {
  * 카테고리 프리픽스 파싱 (#부업 제목 → 카테고리: 부업, 제목: 제목)
  */
 function parseCategoryPrefix(input) {
+  // alias 매핑: 사용자가 자주 쓰는 input 단축어 → category enum. '#크립토'/'#에어드랍' = '부업' input convenience (dead enum 아님, M8 cleanup과 별개 path).
   const categoryMap = {
     '#부업': '부업',
     '#본업': '본업',
@@ -257,7 +258,8 @@ function parseCategoryPrefix(input) {
     '#가족': '가족',
     '#크립토': '부업',
     '#에어드랍': '부업',
-    '#이벤트': '부업'
+    '#이벤트': '이벤트',
+    '#미분류': '미분류'
   };
 
   let category = '부업';  // 기본값
