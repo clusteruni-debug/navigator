@@ -99,8 +99,8 @@ function validateTask(task) {
   const validated = {
     id: typeof task.id === 'number' ? String(task.id) : task.id,
     title: String(task.title).trim().substring(0, 500),
-    // storage-valid enum (8개) — UI-safe enum (6개)은 utils.js _NAV_VALID_CATEGORIES. 의도된 drift: '공부'/'크립토'는 legacy storage 보존, render는 safeCatId fallback '미분류'
-    category: ['본업', '부업', '일상', '가족', '공부', '크립토', '이벤트', '미분류'].includes(task.category) ? task.category : '미분류',
+    // category enum = utils.js _NAV_VALID_CATEGORIES (6개) align. legacy '공부'/'크립토' dead enum 제거됨 (2026-05-24 M8) — 데이터 0 확인 후 cleanup
+    category: ['본업', '부업', '일상', '가족', '이벤트', '미분류'].includes(task.category) ? task.category : '미분류',
     completed: Boolean(task.completed),
     completedAt: task.completedAt || null,
     deadline: typeof task.deadline === 'string' ? task.deadline : '',
