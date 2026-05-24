@@ -609,7 +609,7 @@ function _renderCategoryCleanupSection() {
           <div style="display: flex; align-items: center; gap: 8px; padding: 6px; background: var(--bg-tertiary); border-radius: var(--radius-sm);">
             <span style="flex: 1; font-size: var(--font-sm);">${escapeHtml(t.title)}</span>
             <select onchange="reclassifyTaskCategory('${escapeAttr(t.id)}', this.value)" style="padding: 4px 8px; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: var(--font-xs);">
-              <option value="">선택...</option>
+              <option value="" selected disabled>선택... (현재: ${escapeHtml(t.category || '미분류')})</option>
               ${ucOptions}
             </select>
           </div>

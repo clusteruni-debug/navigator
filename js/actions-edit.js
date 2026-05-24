@@ -63,8 +63,12 @@ function getQuickEditCategoryFields(category, task) {
         </div>
       `;
     case '이벤트':
-      // 일회성 task — deadline은 modal 상단 고정 field로 노출, 추가 helper field 불필요
-      return '';
+      // 일회성 task — deadline은 modal 상단 고정 field 필수 (utils.js:17 design intent)
+      return `
+        <div class="work-modal-field" style="background: rgba(6, 182, 212, 0.08); padding: 8px; border-radius: 6px; border-left: 2px solid var(--cat-이벤트);">
+          <span style="color: var(--cat-이벤트); font-size: 13px;">💡 일회성 이벤트 — 위 마감일 입력 권장 (cleanup 추천 hit 위해)</span>
+        </div>
+      `;
     default:
       return '';
   }
