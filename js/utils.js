@@ -16,7 +16,7 @@ function generateId() {
  * escapeAttr만으론 CSS-context의 `)`, `(`, `;` 등을 못 막으므로 enum 검증이 정공.
  * '이벤트' = 일회성 task (deadline 있지만 반복 없음), '미분류' = silent fallback 차단 sentinel
  */
-const _NAV_VALID_CATEGORIES = ['본업', '부업', '일상', '가족', '이벤트', '미분류'];
+const _NAV_VALID_CATEGORIES = ['본업', '부업', '일상', '가족', '이벤트', '미분류', '공부', '크립토'];
 function safeCatId(category) {
   return _NAV_VALID_CATEGORIES.includes(category) ? category : '미분류';
 }
@@ -68,6 +68,7 @@ const SVG_ICONS = {
   play: '<polygon points="6 3 20 12 6 21"/>',
   pause: '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>',
   search: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  'arrow-left': '<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
 };
 
 /** SVG 아이콘 렌더링 — stroke 기반, currentColor 상속 */

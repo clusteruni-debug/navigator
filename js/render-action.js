@@ -607,6 +607,7 @@ function _renderDetailedAddForm(categoryFields) {
           <option value="부업" ${appState.detailedTask.category === '부업' ? 'selected' : ''}>부업</option>
           <option value="일상" ${appState.detailedTask.category === '일상' ? 'selected' : ''}>일상</option>
           <option value="가족" ${appState.detailedTask.category === '가족' ? 'selected' : ''}>가족</option>
+          <option value="이벤트" ${appState.detailedTask.category === '이벤트' ? 'selected' : ''}>이벤트</option>
         </select>
       </div>
 

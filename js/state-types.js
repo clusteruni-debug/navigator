@@ -528,6 +528,7 @@ const appState = {
     lastReminderDate: null,           // 마지막 월요일 리마인더 날짜
     dismissed: false                  // 이번 주 리마인더 닫음 여부
   },
+  lifeTaskFilter: 'all',               // 일상 탭 task filter: all/life/family/event
   allTasksSubView: 'all',              // 할일 서브뷰: all/today/upcoming/inbox (legacy — 2x2 grid 재설계 후 미사용)
   allTasksSearch: '',                  // 할일 탭 검색어 (case-insensitive contains)
   dashboardSubView: '전체',             // 대시보드 서브뷰: 전체/수익/건강/패턴

@@ -3,6 +3,15 @@
 // (actions.js에서 분리)
 // ============================================
 
+// sessionStorage 안전 read — Firefox private/iOS old Safari 등에서 SecurityError 가능, swallow
+function _safeReadLastCategory() {
+  try {
+    return sessionStorage.getItem('navigator-last-category') || '미분류';
+  } catch (_) {
+    return '미분류';
+  }
+}
+
 /**
  * 일상/가족 빠른 추가
  */
@@ -452,7 +461,7 @@ function detailedAdd() {
         // 폼 초기화 후 종료
         appState.detailedTask = {
           title: '',
-          category: sessionStorage.getItem('navigator-last-category') || '미분류',
+          category: _safeReadLastCategory(),
           startDate: '',
           deadline: '',
           estimatedTime: 10,
@@ -514,7 +523,7 @@ function detailedAdd() {
   // 폼 초기화
   appState.detailedTask = {
     title: '',
-    category: sessionStorage.getItem('navigator-last-category') || '미분류',
+    category: _safeReadLastCategory(),
     startDate: '',
     deadline: '',
     estimatedTime: 10,

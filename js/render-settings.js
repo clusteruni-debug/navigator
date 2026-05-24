@@ -567,7 +567,7 @@ function resetReflectionSettings() {
  */
 function _getCategoryCleanupCandidates() {
   const tasks = appState.tasks || [];
-  const validCats = (typeof _NAV_VALID_CATEGORIES !== 'undefined') ? _NAV_VALID_CATEGORIES : ['본업', '부업', '일상', '가족', '이벤트', '미분류'];
+  // utils.js loaded before render-settings.js (navigator-v5.html script order) — _NAV_VALID_CATEGORIES is global
   const eventCandidates = tasks.filter(t =>
     !t.completed &&
     t.category === '일상' &&
@@ -576,7 +576,7 @@ function _getCategoryCleanupCandidates() {
   );
   const unclassified = tasks.filter(t =>
     !t.completed &&
-    (t.category === '미분류' || !validCats.includes(t.category))
+    (t.category === '미분류' || !_NAV_VALID_CATEGORIES.includes(t.category))
   );
   return { eventCandidates, unclassified };
 }
@@ -654,10 +654,15 @@ function applyEventReclassifyRecommendation() {
 window.applyEventReclassifyRecommendation = applyEventReclassifyRecommendation;
 
 function reclassifyTaskCategory(taskId, newCategory) {
-  const validCats = (typeof _NAV_VALID_CATEGORIES !== 'undefined') ? _NAV_VALID_CATEGORIES : ['본업', '부업', '일상', '가족', '이벤트', '미분류'];
-  if (!newCategory || !validCats.includes(newCategory)) return;
+  if (!newCategory || !_NAV_VALID_CATEGORIES.includes(newCategory)) {
+    if (typeof showToast === 'function') showToast('유효하지 않은 카테고리', 'error');
+    return;
+  }
   const task = (appState.tasks || []).find(t => t.id === taskId);
-  if (!task) return;
+  if (!task) {
+    if (typeof showToast === 'function') showToast('task를 찾을 수 없어 — 새로고침 필요', 'error');
+    return;
+  }
   task.category = newCategory;
   task.updatedAt = new Date().toISOString();
   if (typeof saveState === 'function') saveState();

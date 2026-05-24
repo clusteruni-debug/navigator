@@ -2,7 +2,7 @@
 // 렌더링 - 전체 목록 탭
 // ============================================
 
-const ALL_TASK_CATEGORIES = ['본업', '부업', '일상', '가족'];
+const ALL_TASK_CATEGORIES = ['본업', '부업', '일상', '가족', '이벤트'];
 const ALL_TASK_TIME_GROUPS = [
   { id: 'today', label: '오늘', empty: '오늘 마감인 진행 중 할일이 없습니다.' },
   { id: 'week', label: '이번 주', empty: '이번 주 마감 할일이 없습니다.' },

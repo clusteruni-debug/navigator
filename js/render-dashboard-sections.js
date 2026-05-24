@@ -3,7 +3,7 @@
 // ============================================
 
 const DASHBOARD_VIEWS = ['전체', '수익', '건강', '패턴'];
-const DASHBOARD_CATEGORIES = ['본업', '부업', '일상', '가족'];
+const DASHBOARD_CATEGORIES = ['본업', '부업', '일상', '가족', '이벤트'];
 const DASHBOARD_PERIODS = [
   { key: 'morning', label: '아침' },
   { key: 'lunch', label: '점심' },
