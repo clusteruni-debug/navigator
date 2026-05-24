@@ -476,6 +476,8 @@ function renderSettingsModal() {
                 </div>
                 <button onclick="resetReflectionSettings()" class="backup-btn" style="width: 100%; margin-top: 8px;">🔄 자문 설정 기본값 복원</button>
               </div>
+
+              ${_renderCategoryCleanupSection()}
             </div>
             <div class="modal-footer" style="display: flex; gap: 10px; justify-content: center;">
               <button class="btn btn-secondary" onclick="closeSettings(); startFeatureTour();">
@@ -554,3 +556,112 @@ function resetReflectionSettings() {
     setTimeout(() => openSettings(), 100);
   }
 }
+
+// ============================================
+// M4 — 카테고리 정리 (bulk reclassify + 시스템 추천)
+// ============================================
+
+/**
+ * 시스템 추천 후보: 일상 category + repeatType none + deadline 있음 = 일회성 패턴
+ * 분류 미정: '미분류' 또는 invalid enum
+ */
+function _getCategoryCleanupCandidates() {
+  const tasks = appState.tasks || [];
+  const validCats = (typeof _NAV_VALID_CATEGORIES !== 'undefined') ? _NAV_VALID_CATEGORIES : ['본업', '부업', '일상', '가족', '이벤트', '미분류'];
+  const eventCandidates = tasks.filter(t =>
+    !t.completed &&
+    t.category === '일상' &&
+    (!t.repeatType || t.repeatType === 'none') &&
+    t.deadline
+  );
+  const unclassified = tasks.filter(t =>
+    !t.completed &&
+    (t.category === '미분류' || !validCats.includes(t.category))
+  );
+  return { eventCandidates, unclassified };
+}
+
+function _renderCategoryCleanupSection() {
+  const { eventCandidates, unclassified } = _getCategoryCleanupCandidates();
+
+  const recHtml = eventCandidates.length > 0 ? `
+    <div style="background: rgba(6, 182, 212, 0.08); border-left: 3px solid var(--cat-이벤트); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 10px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px;">
+        <span style="font-weight: 600; color: var(--cat-이벤트);">💡 시스템 추천: 일회성 task ${eventCandidates.length}개 → '이벤트'</span>
+        <button onclick="applyEventReclassifyRecommendation()" style="background: var(--cat-이벤트); color: var(--bg-primary); border: 0; border-radius: var(--radius-sm); padding: 6px 12px; font-weight: 600; cursor: pointer; font-size: var(--font-xs);">일괄 적용</button>
+      </div>
+      <div style="font-size: var(--font-xs); color: var(--text-secondary);">
+        ${eventCandidates.slice(0, 5).map(t => `<div>• ${escapeHtml(t.title)} <span style="color: var(--text-muted);">(${escapeHtml(t.deadline)})</span></div>`).join('')}
+        ${eventCandidates.length > 5 ? `<div style="color: var(--text-muted); margin-top: 4px;">외 ${eventCandidates.length - 5}개</div>` : ''}
+      </div>
+    </div>
+  ` : '';
+
+  const ucOptions = ['본업', '부업', '일상', '가족', '이벤트'].map(c =>
+    `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`
+  ).join('');
+
+  const ucHtml = unclassified.length > 0 ? `
+    <div style="background: rgba(251, 113, 133, 0.08); border-left: 3px solid var(--cat-미분류); border-radius: var(--radius-sm); padding: 10px;">
+      <div style="font-weight: 600; color: var(--cat-미분류); margin-bottom: 8px;">⚠️ 분류 안 된 task ${unclassified.length}개</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        ${unclassified.slice(0, 10).map(t => `
+          <div style="display: flex; align-items: center; gap: 8px; padding: 6px; background: var(--bg-tertiary); border-radius: var(--radius-sm);">
+            <span style="flex: 1; font-size: var(--font-sm);">${escapeHtml(t.title)}</span>
+            <select onchange="reclassifyTaskCategory('${escapeAttr(t.id)}', this.value)" style="padding: 4px 8px; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: var(--font-xs);">
+              <option value="">선택...</option>
+              ${ucOptions}
+            </select>
+          </div>
+        `).join('')}
+        ${unclassified.length > 10 ? `<div style="color: var(--text-muted); font-size: var(--font-xs); margin-top: 4px;">외 ${unclassified.length - 10}개 — 위 task 처리 후 새로고침</div>` : ''}
+      </div>
+    </div>
+  ` : '';
+
+  const emptyHtml = (eventCandidates.length === 0 && unclassified.length === 0) ? `
+    <div style="text-align: center; padding: 16px; color: var(--text-secondary); font-size: var(--font-sm);">✅ 모든 task가 분류됐어. 추천 작업 없음.</div>
+  ` : '';
+
+  return `
+    <div class="settings-section">
+      <div class="settings-section-title">🏷️ 카테고리 정리</div>
+      ${recHtml}
+      ${ucHtml}
+      ${emptyHtml}
+    </div>
+  `;
+}
+
+function applyEventReclassifyRecommendation() {
+  const { eventCandidates } = _getCategoryCleanupCandidates();
+  if (eventCandidates.length === 0) return;
+  if (!confirm(`${eventCandidates.length}개 task를 '이벤트'로 변경할까요?\n(repeatType=none + deadline 있는 일상 task)`)) return;
+  const now = new Date().toISOString();
+  const idSet = new Set(eventCandidates.map(c => c.id));
+  appState.tasks = appState.tasks.map(t =>
+    idSet.has(t.id) ? { ...t, category: '이벤트', updatedAt: now } : t
+  );
+  if (typeof saveState === 'function') saveState();
+  if (typeof renderStatic === 'function') renderStatic();
+  if (typeof showToast === 'function') showToast(`${eventCandidates.length}개 task → '이벤트' 변경됨`, 'success');
+  // settings modal 재 render — 추천 list 갱신
+  if (typeof closeSettings === 'function' && typeof openSettings === 'function') {
+    closeSettings();
+    setTimeout(() => openSettings(), 100);
+  }
+}
+window.applyEventReclassifyRecommendation = applyEventReclassifyRecommendation;
+
+function reclassifyTaskCategory(taskId, newCategory) {
+  const validCats = (typeof _NAV_VALID_CATEGORIES !== 'undefined') ? _NAV_VALID_CATEGORIES : ['본업', '부업', '일상', '가족', '이벤트', '미분류'];
+  if (!newCategory || !validCats.includes(newCategory)) return;
+  const task = (appState.tasks || []).find(t => t.id === taskId);
+  if (!task) return;
+  task.category = newCategory;
+  task.updatedAt = new Date().toISOString();
+  if (typeof saveState === 'function') saveState();
+  if (typeof renderStatic === 'function') renderStatic();
+  if (typeof showToast === 'function') showToast(`'${task.title}' → ${newCategory}`, 'success');
+}
+window.reclassifyTaskCategory = reclassifyTaskCategory;
