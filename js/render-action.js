@@ -234,7 +234,7 @@ function _renderTodayPreviewTask(task) {
       <div class="task-main">
         <span class="task-title">${escapeHtml(task.title)}</span>
         <span class="task-meta">
-          <span class="cat-tag cat-${category}">${escapeHtml(task.category || '일상')}</span>
+          <span class="cat-tag cat-${category}">${escapeHtml(category)}</span>
           ${task.repeatType && task.repeatType !== 'none' ? `<span class="repeat-mark">${_renderActionIcon('repeat', 12)}${escapeHtml(getRepeatLabel(task.repeatType, task))}</span>` : ''}
           ${task.estimatedTime ? `<span>${_renderActionIcon('clock', 12)}${Number(task.estimatedTime)}분</span>` : ''}
         </span>

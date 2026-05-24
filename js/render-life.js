@@ -353,7 +353,7 @@ function _renderLifeTaskItem(task) {
            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();editTask('${escapeAttr(task.id)}')}">
         <span class="life-task-title">${escapeHtml(task.title)}</span>
         <span class="life-task-meta">
-          <span class="cat-tag cat-${category}">${escapeHtml(task.category || '일상')}</span>
+          <span class="cat-tag cat-${category}">${escapeHtml(category)}</span>
           ${repeatLabel ? `<span class="life-meta-chip">${_lifeIcon('repeat', 12)}${escapeHtml(repeatLabel)}</span>` : ''}
           ${Number.isFinite(estimatedMinutes) && estimatedMinutes > 0 ? `<span class="life-meta-chip">${_lifeIcon('clock', 12)}${estimatedMinutes}분</span>` : ''}
           ${hasSubtasks ? `<span class="life-meta-chip">${doneCount}/${totalCount}</span>` : ''}

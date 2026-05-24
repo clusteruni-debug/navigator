@@ -446,12 +446,13 @@ function detailedAdd() {
         });
         project.updatedAt = new Date().toISOString();
         saveWorkProjects();
+        try { sessionStorage.setItem('navigator-last-category', task.category); } catch (_) {}
         showToast(`"${project.name}" 프로젝트에 추가됨`, 'success');
 
         // 폼 초기화 후 종료
         appState.detailedTask = {
           title: '',
-          category: '부업',
+          category: sessionStorage.getItem('navigator-last-category') || '미분류',
           startDate: '',
           deadline: '',
           estimatedTime: 10,
@@ -506,13 +507,14 @@ function detailedAdd() {
       createdAt: now,
       updatedAt: now
     });
+    try { sessionStorage.setItem('navigator-last-category', task.category); } catch (_) {}
     showToast('작업이 추가되었습니다', 'success');
   }
 
   // 폼 초기화
   appState.detailedTask = {
     title: '',
-    category: '부업',
+    category: sessionStorage.getItem('navigator-last-category') || '미분류',
     startDate: '',
     deadline: '',
     estimatedTime: 10,

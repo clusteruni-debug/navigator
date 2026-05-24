@@ -379,7 +379,7 @@ const appState = {
   quickAddValue: '',              // 빠른 추가 입력값
   detailedTask: {                 // 상세 추가/수정용 임시 데이터
     title: '',
-    category: '부업',
+    category: (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('navigator-last-category')) || '미분류',
     startDate: '',                // 시작일 (일정 범위 표시용)
     deadline: '',
     estimatedTime: 10,
