@@ -531,6 +531,7 @@ const appState = {
   lifeTaskFilter: 'all',               // 일상 탭 task filter: all/life/family/event
   lifeMainSubTab: 'habits',            // 일상 탭 sub-tab: habits (리듬+약+습관+결심) / tasks (카테고리별 task) — PLAN-2TIER-GRID Phase C
   confirmedLifeHabits: [],             // cleanup UI에서 "유지" 누른 title list — 다음 cleanup 진입 시 surface 차단 (옛 분류 의심 list)
+  deletedConfirmedLifeHabits: [],      // 유지 취소된 title list (tombstone) — cross-device union 후 filter 용. confirm 다시 누르면 tombstone에서 제거
   allTasksSubView: 'all',              // 할일 서브뷰: all/today/upcoming/inbox (legacy — 2x2 grid 재설계 후 미사용)
   allTasksSearch: '',                  // 할일 탭 검색어 (case-insensitive contains)
   dashboardSubView: '전체',             // 대시보드 서브뷰: 전체/수익/건강/패턴

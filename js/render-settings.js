@@ -649,7 +649,23 @@ function _renderCategoryCleanupSection() {
     </div>
   ` : '';
 
-  const emptyHtml = (eventCandidates.length === 0 && unclassified.length === 0 && habitSuspects.length === 0) ? `
+  const confirmed = Array.isArray(appState.confirmedLifeHabits) ? appState.confirmedLifeHabits : [];
+  const confirmedHtml = confirmed.length > 0 ? `
+    <div style="background: rgba(72, 187, 120, 0.06); border-left: 3px solid var(--cat-일상); border-radius: var(--radius-sm); padding: 10px; margin-top: 10px;">
+      <div style="font-weight: 600; color: var(--cat-일상); margin-bottom: 4px;">✓ 유지 중인 일상 습관 ${confirmed.length}개</div>
+      <div style="font-size: var(--font-xs); color: var(--text-secondary); margin-bottom: 8px;">"유지" 누른 title list. 실수로 누른 거 있으면 × 로 제거 → 다시 cleanup section에 surface</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+        ${confirmed.map(title => `
+          <span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 4px 4px 10px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: 999px; font-size: var(--font-xs);">
+            <span>${escapeHtml(title)}</span>
+            <button onclick="unconfirmLifeHabit('${escapeAttr(title)}')" style="display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; background: transparent; border: 0; color: var(--text-muted); cursor: pointer; padding: 0; font-size: 14px; line-height: 1; border-radius: 999px;" aria-label="${escapeAttr(title)} 유지 취소" title="유지 취소">×</button>
+          </span>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  const emptyHtml = (eventCandidates.length === 0 && unclassified.length === 0 && habitSuspects.length === 0 && confirmed.length === 0) ? `
     <div style="text-align: center; padding: 16px; color: var(--text-secondary); font-size: var(--font-sm);">✅ 모든 task가 분류됐어. 추천 작업 없음.</div>
   ` : '';
 
@@ -659,6 +675,7 @@ function _renderCategoryCleanupSection() {
       ${recHtml}
       ${ucHtml}
       ${suspectHtml}
+      ${confirmedHtml}
       ${emptyHtml}
     </div>
   `;
@@ -667,9 +684,12 @@ function _renderCategoryCleanupSection() {
 function confirmLifeHabit(title) {
   if (!title) return;
   if (!Array.isArray(appState.confirmedLifeHabits)) appState.confirmedLifeHabits = [];
+  if (!Array.isArray(appState.deletedConfirmedLifeHabits)) appState.deletedConfirmedLifeHabits = [];
   if (!appState.confirmedLifeHabits.includes(title)) {
     appState.confirmedLifeHabits.push(title);
   }
+  // tombstone 에서 제거 (재 confirm — un-confirm 했다가 다시 유지)
+  appState.deletedConfirmedLifeHabits = appState.deletedConfirmedLifeHabits.filter(t => t !== title);
   if (typeof saveState === 'function') saveState();
   if (typeof showToast === 'function') showToast(`'${escapeHtml(title)}' — 일상 습관으로 유지`, 'success');
   // settings modal 재 render — list 갱신
@@ -679,6 +699,25 @@ function confirmLifeHabit(title) {
   }
 }
 window.confirmLifeHabit = confirmLifeHabit;
+
+function unconfirmLifeHabit(title) {
+  if (!title) return;
+  if (!Array.isArray(appState.confirmedLifeHabits)) appState.confirmedLifeHabits = [];
+  if (!Array.isArray(appState.deletedConfirmedLifeHabits)) appState.deletedConfirmedLifeHabits = [];
+  // confirmedLifeHabits 에서 제거
+  appState.confirmedLifeHabits = appState.confirmedLifeHabits.filter(t => t !== title);
+  // tombstone 에 추가 (cross-device union 후 다시 살아나는 거 차단)
+  if (!appState.deletedConfirmedLifeHabits.includes(title)) {
+    appState.deletedConfirmedLifeHabits.push(title);
+  }
+  if (typeof saveState === 'function') saveState();
+  if (typeof showToast === 'function') showToast(`'${escapeHtml(title)}' — 유지 취소 (다시 cleanup에 surface)`, 'info');
+  if (typeof closeSettings === 'function' && typeof openSettings === 'function') {
+    closeSettings();
+    setTimeout(() => openSettings(), 100);
+  }
+}
+window.unconfirmLifeHabit = unconfirmLifeHabit;
 
 function applyEventReclassifyRecommendation() {
   const { eventCandidates } = _getCategoryCleanupCandidates();

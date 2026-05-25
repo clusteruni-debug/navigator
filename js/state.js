@@ -51,6 +51,10 @@ function loadState() {
     const parsedConfirmedLifeHabits = safeParseJSON('navigator-confirmedLifeHabits', null);
     if (Array.isArray(parsedConfirmedLifeHabits)) appState.confirmedLifeHabits = parsedConfirmedLifeHabits;
 
+    // 유지 취소 tombstone (cross-device union 후 filter — 한 device에서 unconfirm 했으면 다른 device 에서 살아나지 않음)
+    const parsedDeletedConfirmedLifeHabits = safeParseJSON('navigator-deletedConfirmedLifeHabits', null);
+    if (Array.isArray(parsedDeletedConfirmedLifeHabits)) appState.deletedConfirmedLifeHabits = parsedDeletedConfirmedLifeHabits;
+
     // 결심 트래커 로드
     const parsedResolutions = safeParseJSON('navigator-resolutions', null);
     if (parsedResolutions) appState.resolutions = parsedResolutions;
@@ -175,6 +179,7 @@ function _doSaveState(immediate = false) {
       localStorage.setItem('navigator-streak', JSON.stringify(appState.streak));
       localStorage.setItem('navigator-habitStreaks', JSON.stringify(appState.habitStreaks || {}));
       localStorage.setItem('navigator-confirmedLifeHabits', JSON.stringify(appState.confirmedLifeHabits || []));
+      localStorage.setItem('navigator-deletedConfirmedLifeHabits', JSON.stringify(appState.deletedConfirmedLifeHabits || []));
       localStorage.setItem('navigator-templates', JSON.stringify(appState.templates));
       localStorage.setItem('navigator-weekly-plan', JSON.stringify(appState.weeklyPlan));
       localStorage.setItem('navigator-work-projects', JSON.stringify(appState.workProjects));
@@ -237,6 +242,7 @@ function _doSaveStateLocalOnly() {
     localStorage.setItem('navigator-streak', JSON.stringify(appState.streak));
     localStorage.setItem('navigator-habitStreaks', JSON.stringify(appState.habitStreaks || {}));
     localStorage.setItem('navigator-confirmedLifeHabits', JSON.stringify(appState.confirmedLifeHabits || []));
+    localStorage.setItem('navigator-deletedConfirmedLifeHabits', JSON.stringify(appState.deletedConfirmedLifeHabits || []));
     localStorage.setItem('navigator-templates', JSON.stringify(appState.templates));
     localStorage.setItem('navigator-weekly-plan', JSON.stringify(appState.weeklyPlan));
     localStorage.setItem('navigator-work-projects', JSON.stringify(appState.workProjects));

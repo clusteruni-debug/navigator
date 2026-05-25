@@ -229,6 +229,7 @@ async function _doSyncToFirebase() {
       streak: appState.streak,
       habitStreaks: appState.habitStreaks || {},
       confirmedLifeHabits: appState.confirmedLifeHabits || [],
+      deletedConfirmedLifeHabits: appState.deletedConfirmedLifeHabits || [],
       templates: appState.templates,
       availableTags: appState.availableTags,
       workProjects: appState.workProjects,
@@ -422,9 +423,14 @@ async function loadFromFirebase() {
         const mergedTags = [...new Set([...(appState.availableTags || []), ...data.availableTags])];
         appState.availableTags = mergedTags;
       }
-      if (Array.isArray(data.confirmedLifeHabits)) {
-        // 일상 습관 confirm list 병합 (양쪽 합집합 — additive only)
-        appState.confirmedLifeHabits = [...new Set([...(appState.confirmedLifeHabits || []), ...data.confirmedLifeHabits])];
+      if (Array.isArray(data.confirmedLifeHabits) || Array.isArray(data.deletedConfirmedLifeHabits)) {
+        // tombstone 우선 — 합집합 union 후 deletedConfirmedLifeHabits filter (한 device 에서 unconfirm 했으면 다른 device 에서 살아나지 않음)
+        const cloudConfirmed = Array.isArray(data.confirmedLifeHabits) ? data.confirmedLifeHabits : [];
+        const cloudDeleted = Array.isArray(data.deletedConfirmedLifeHabits) ? data.deletedConfirmedLifeHabits : [];
+        const allDeleted = new Set([...(appState.deletedConfirmedLifeHabits || []), ...cloudDeleted]);
+        appState.deletedConfirmedLifeHabits = [...allDeleted];
+        const unionConfirmed = [...new Set([...(appState.confirmedLifeHabits || []), ...cloudConfirmed])];
+        appState.confirmedLifeHabits = unionConfirmed.filter(t => !allDeleted.has(t));
       }
       // 본업 프로젝트: ID 기반 병합 (deletedIds 전달)
       appState.workProjects = mergeById(appState.workProjects, data.workProjects, appState.deletedIds.workProjects);
@@ -693,8 +699,14 @@ function startRealtimeSync() {
         }
         // 템플릿: ID 기반 병합 (deletedIds 전달)
         appState.templates = mergeById(appState.templates, data.templates, appState.deletedIds.templates);
-        if (Array.isArray(data.confirmedLifeHabits)) {
-          appState.confirmedLifeHabits = [...new Set([...(appState.confirmedLifeHabits || []), ...data.confirmedLifeHabits])];
+        if (Array.isArray(data.confirmedLifeHabits) || Array.isArray(data.deletedConfirmedLifeHabits)) {
+          // tombstone 우선 (initial load 와 동일 logic)
+          const cloudConfirmed = Array.isArray(data.confirmedLifeHabits) ? data.confirmedLifeHabits : [];
+          const cloudDeleted = Array.isArray(data.deletedConfirmedLifeHabits) ? data.deletedConfirmedLifeHabits : [];
+          const allDeleted = new Set([...(appState.deletedConfirmedLifeHabits || []), ...cloudDeleted]);
+          appState.deletedConfirmedLifeHabits = [...allDeleted];
+          const unionConfirmed = [...new Set([...(appState.confirmedLifeHabits || []), ...cloudConfirmed])];
+          appState.confirmedLifeHabits = unionConfirmed.filter(t => !allDeleted.has(t));
         }
         if (data.availableTags) {
           appState.availableTags = [...new Set([...(appState.availableTags || []), ...data.availableTags])];
