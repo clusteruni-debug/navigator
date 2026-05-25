@@ -80,7 +80,8 @@ function _getLifeHabitTitles() {
   Object.keys(appState.habitStreaks || {}).forEach(title => {
     if (!title) return;
     const linkedTask = tasks.find(task => task.title === title);
-    if (!linkedTask || linkedTask.category === '일상') titles.add(title);
+    // strict: linkedTask 있고 카테고리 '일상' 일 때만 추가 (옛 ghost streak entry 차단 — task 삭제됐는데 streak key 잔존 case)
+    if (linkedTask && linkedTask.category === '일상') titles.add(title);
   });
   if (titles.size === 0 && typeof getRecurringHabits === 'function') {
     getRecurringHabits().forEach(title => { if (title) titles.add(title); });
