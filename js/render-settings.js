@@ -578,11 +578,21 @@ function _getCategoryCleanupCandidates() {
     !t.completed &&
     (t.category === '미분류' || !_NAV_VALID_CATEGORIES.includes(t.category))
   );
-  return { eventCandidates, unclassified };
+  // 옛 silent fallback 시기 (M3 SHIPPED 2026-05-24 이전) 잘못 분류된 일상 monthly/yearly task 추정.
+  // daily/weekly 는 진짜 habit 가능성 ↑ → 의도적 제외 (false positive 차단)
+  const confirmed = Array.isArray(appState.confirmedLifeHabits) ? appState.confirmedLifeHabits : [];
+  const habitSuspects = tasks.filter(t =>
+    !t.completed &&
+    t.category === '일상' &&
+    t.repeatType &&
+    (t.repeatType === 'monthly' || t.repeatType === 'yearly') &&
+    !confirmed.includes(t.title)
+  );
+  return { eventCandidates, unclassified, habitSuspects };
 }
 
 function _renderCategoryCleanupSection() {
-  const { eventCandidates, unclassified } = _getCategoryCleanupCandidates();
+  const { eventCandidates, unclassified, habitSuspects } = _getCategoryCleanupCandidates();
 
   const recHtml = eventCandidates.length > 0 ? `
     <div style="background: rgba(6, 182, 212, 0.08); border-left: 3px solid var(--cat-이벤트); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 10px;">
@@ -619,7 +629,27 @@ function _renderCategoryCleanupSection() {
     </div>
   ` : '';
 
-  const emptyHtml = (eventCandidates.length === 0 && unclassified.length === 0) ? `
+  const suspectHtml = habitSuspects.length > 0 ? `
+    <div style="background: rgba(167, 139, 250, 0.08); border-left: 3px solid var(--cat-자기계발); border-radius: var(--radius-sm); padding: 10px; margin-top: 10px;">
+      <div style="font-weight: 600; color: var(--cat-자기계발); margin-bottom: 4px;">🔍 옛 분류 의심 — 일상+월/년 반복 task ${habitSuspects.length}개</div>
+      <div style="font-size: var(--font-xs); color: var(--text-secondary); margin-bottom: 8px;">옛 silent fallback (~2026-05-24 이전) 시기 본업/부업 의도였는데 일상으로 저장됐을 가능성. 재분류하거나 진짜 일상이면 "유지" — 다음에 다시 안 뜸</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        ${habitSuspects.slice(0, 10).map(t => `
+          <div style="display: flex; align-items: center; gap: 8px; padding: 6px; background: var(--bg-tertiary); border-radius: var(--radius-sm);">
+            <span style="flex: 1; font-size: var(--font-sm);">${escapeHtml(t.title)} <span style="color: var(--text-muted); font-size: var(--font-xs);">(${escapeHtml(t.repeatType)})</span></span>
+            <select onchange="reclassifyTaskCategory('${escapeAttr(t.id)}', this.value)" style="padding: 4px 8px; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: var(--font-xs);">
+              <option value="" selected disabled>재분류...</option>
+              ${ucOptions}
+            </select>
+            <button onclick="confirmLifeHabit('${escapeAttr(t.title)}')" style="padding: 4px 10px; background: transparent; color: var(--text-secondary); border: 1px solid var(--border-light); border-radius: var(--radius-sm); font-size: var(--font-xs); cursor: pointer;" title="진짜 일상 습관임 — 다시 surface 안 함">유지</button>
+          </div>
+        `).join('')}
+        ${habitSuspects.length > 10 ? `<div style="color: var(--text-muted); font-size: var(--font-xs); margin-top: 4px;">외 ${habitSuspects.length - 10}개 — 위 task 처리 후 새로고침</div>` : ''}
+      </div>
+    </div>
+  ` : '';
+
+  const emptyHtml = (eventCandidates.length === 0 && unclassified.length === 0 && habitSuspects.length === 0) ? `
     <div style="text-align: center; padding: 16px; color: var(--text-secondary); font-size: var(--font-sm);">✅ 모든 task가 분류됐어. 추천 작업 없음.</div>
   ` : '';
 
@@ -628,10 +658,27 @@ function _renderCategoryCleanupSection() {
       <div class="settings-section-title">🏷️ 카테고리 정리</div>
       ${recHtml}
       ${ucHtml}
+      ${suspectHtml}
       ${emptyHtml}
     </div>
   `;
 }
+
+function confirmLifeHabit(title) {
+  if (!title) return;
+  if (!Array.isArray(appState.confirmedLifeHabits)) appState.confirmedLifeHabits = [];
+  if (!appState.confirmedLifeHabits.includes(title)) {
+    appState.confirmedLifeHabits.push(title);
+  }
+  if (typeof saveState === 'function') saveState();
+  if (typeof showToast === 'function') showToast(`'${escapeHtml(title)}' — 일상 습관으로 유지`, 'success');
+  // settings modal 재 render — list 갱신
+  if (typeof closeSettings === 'function' && typeof openSettings === 'function') {
+    closeSettings();
+    setTimeout(() => openSettings(), 100);
+  }
+}
+window.confirmLifeHabit = confirmLifeHabit;
 
 function applyEventReclassifyRecommendation() {
   const { eventCandidates } = _getCategoryCleanupCandidates();
