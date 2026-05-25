@@ -84,7 +84,12 @@ function _getLifeHabitTitles() {
     if (linkedTask && linkedTask.category === '일상') titles.add(title);
   });
   if (titles.size === 0 && typeof getRecurringHabits === 'function') {
-    getRecurringHabits().forEach(title => { if (title) titles.add(title); });
+    // strict: getRecurringHabits()도 category 무필터로 본업/부업/이벤트 title 반환 가능 — 일상 task 만 cross-check
+    getRecurringHabits().forEach(title => {
+      if (!title) return;
+      const linkedTask = tasks.find(task => task.title === title);
+      if (linkedTask && linkedTask.category === '일상') titles.add(title);
+    });
   }
   return Array.from(titles).sort();
 }
@@ -504,6 +509,7 @@ function _renderLifeTaskSection(pendingTasks, completedTasks) {
         <span>가족 ${familyCount}</span>
         <span>이벤트 ${eventCount}</span>
       </div>
+      <div class="life-quick-input-hint" style="font-size: var(--font-xs); color: var(--text-muted); margin: 2px 0 6px;">prefix: #자기계발 #이벤트 #가족 (없으면 일상)</div>
       ${filtered.length > 0 ? (
         activeFilter === 'all'
           ? `<div class="life-task-groups">

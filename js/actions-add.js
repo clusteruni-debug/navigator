@@ -22,10 +22,20 @@ function quickAddLifeTask() {
   let title = input.value.trim();
   let category = '일상';
 
-  // #가족 태그 감지
-  if (title.includes('#가족')) {
-    category = '가족';
-    title = title.replace('#가족', '').trim();
+  // 카테고리 prefix 감지 (PLAN-2TIER-GRID Phase A 후속 — 자기계발/이벤트 추가, life 탭 sub-tab task view 4 sub-group 호환)
+  // 검사 순서 중요: 더 긴 prefix 먼저 (substring match 충돌 방지)
+  const lifePrefixMap = [
+    { prefix: '#자기계발', category: '자기계발' },
+    { prefix: '#이벤트', category: '이벤트' },
+    { prefix: '#가족', category: '가족' },
+    { prefix: '#일상', category: '일상' }
+  ];
+  for (const { prefix, category: cat } of lifePrefixMap) {
+    if (title.includes(prefix)) {
+      category = cat;
+      title = title.replace(prefix, '').trim();
+      break;
+    }
   }
 
   const newTask = {

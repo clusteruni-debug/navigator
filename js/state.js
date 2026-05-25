@@ -47,6 +47,10 @@ function loadState() {
     const parsedHabitStreaks = safeParseJSON('navigator-habitStreaks', null);
     if (parsedHabitStreaks) appState.habitStreaks = parsedHabitStreaks;
 
+    // 일상 습관 유지 list 로드 (cleanup UI에서 "유지" 누른 title — PLAN-2TIER-GRID Phase D)
+    const parsedConfirmedLifeHabits = safeParseJSON('navigator-confirmedLifeHabits', null);
+    if (Array.isArray(parsedConfirmedLifeHabits)) appState.confirmedLifeHabits = parsedConfirmedLifeHabits;
+
     // 결심 트래커 로드
     const parsedResolutions = safeParseJSON('navigator-resolutions', null);
     if (parsedResolutions) appState.resolutions = parsedResolutions;
@@ -170,6 +174,7 @@ function _doSaveState(immediate = false) {
       localStorage.setItem('navigator-settings', JSON.stringify(appState.settings));
       localStorage.setItem('navigator-streak', JSON.stringify(appState.streak));
       localStorage.setItem('navigator-habitStreaks', JSON.stringify(appState.habitStreaks || {}));
+      localStorage.setItem('navigator-confirmedLifeHabits', JSON.stringify(appState.confirmedLifeHabits || []));
       localStorage.setItem('navigator-templates', JSON.stringify(appState.templates));
       localStorage.setItem('navigator-weekly-plan', JSON.stringify(appState.weeklyPlan));
       localStorage.setItem('navigator-work-projects', JSON.stringify(appState.workProjects));
@@ -231,6 +236,7 @@ function _doSaveStateLocalOnly() {
     localStorage.setItem('navigator-settings', JSON.stringify(appState.settings));
     localStorage.setItem('navigator-streak', JSON.stringify(appState.streak));
     localStorage.setItem('navigator-habitStreaks', JSON.stringify(appState.habitStreaks || {}));
+    localStorage.setItem('navigator-confirmedLifeHabits', JSON.stringify(appState.confirmedLifeHabits || []));
     localStorage.setItem('navigator-templates', JSON.stringify(appState.templates));
     localStorage.setItem('navigator-weekly-plan', JSON.stringify(appState.weeklyPlan));
     localStorage.setItem('navigator-work-projects', JSON.stringify(appState.workProjects));

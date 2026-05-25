@@ -552,6 +552,7 @@ body[data-theme="light"] .life-rhythm-primary {
 }
 
 .life-section-header.cat-일상 { border-left-color: var(--cat-일상); color: var(--cat-일상); }
+.life-section-header.cat-자기계발 { border-left-color: var(--cat-자기계발); color: var(--cat-자기계발); }
 .life-section-header.cat-가족 { border-left-color: var(--cat-가족); color: var(--cat-가족); }
 .life-section-header.cat-이벤트 { border-left-color: var(--cat-이벤트); color: var(--cat-이벤트); }
 
@@ -613,6 +614,18 @@ body[data-theme="light"] .life-rhythm-primary {
   color: var(--cat-가족);
 }
 
+.life-filter-chip.cat-자기계발.active {
+  background: color-mix(in srgb, var(--cat-자기계발) 12%, transparent);
+  border-color: var(--cat-자기계발);
+  color: var(--cat-자기계발);
+}
+
+.life-filter-chip.cat-이벤트.active {
+  background: color-mix(in srgb, var(--cat-이벤트) 12%, transparent);
+  border-color: var(--cat-이벤트);
+  color: var(--cat-이벤트);
+}
+
 .life-filter-swatch {
   width: 8px;
   height: 8px;
@@ -622,6 +635,14 @@ body[data-theme="light"] .life-rhythm-primary {
 
 .life-filter-chip.cat-가족 .life-filter-swatch {
   background: var(--cat-가족);
+}
+
+.life-filter-chip.cat-자기계발 .life-filter-swatch {
+  background: var(--cat-자기계발);
+}
+
+.life-filter-chip.cat-이벤트 .life-filter-swatch {
+  background: var(--cat-이벤트);
 }
 
 .life-task-row {

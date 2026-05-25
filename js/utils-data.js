@@ -99,7 +99,7 @@ function validateTask(task) {
   const validated = {
     id: typeof task.id === 'number' ? String(task.id) : task.id,
     title: String(task.title).trim().substring(0, 500),
-    // category enum = utils.js _NAV_VALID_CATEGORIES (6개) true single source reference. script load order: utils.js → utils-data.js per navigator-v5.html line 238-239
+    // category enum = utils.js _NAV_VALID_CATEGORIES (7개 — 본업/부업/자기계발/일상/가족/이벤트/미분류) true single source reference. script load order: utils.js → utils-data.js per navigator-v5.html line 238-239
     category: _NAV_VALID_CATEGORIES.includes(task.category) ? task.category : '미분류',
     completed: Boolean(task.completed),
     completedAt: task.completedAt || null,
