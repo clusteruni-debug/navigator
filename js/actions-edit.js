@@ -54,6 +54,7 @@ function getQuickEditCategoryFields(category, task) {
     }
     case '본업':
       return ''; // 본업은 본업 탭에서 직접 추가
+    case '자기계발':
     case '일상':
     case '가족':
       return `
@@ -106,6 +107,7 @@ function showQuickEditModal(task) {
       <select class="work-modal-input" id="quick-edit-category" onchange="updateQuickEditCategoryFields(this.value)">
         <option value="본업" ${task.category === '본업' ? 'selected' : ''}>💼 본업</option>
         <option value="부업" ${task.category === '부업' ? 'selected' : ''}>💰 부업</option>
+        <option value="자기계발" ${task.category === '자기계발' ? 'selected' : ''}>📚 자기계발</option>
         <option value="일상" ${task.category === '일상' ? 'selected' : ''}>🌅 일상</option>
         <option value="가족" ${task.category === '가족' ? 'selected' : ''}>👨‍👩‍👧 가족</option>
         <option value="이벤트" ${task.category === '이벤트' ? 'selected' : ''}>🎟️ 이벤트</option>

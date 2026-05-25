@@ -2,7 +2,7 @@
 // 렌더링 - 전체 목록 탭
 // ============================================
 
-const ALL_TASK_CATEGORIES = ['본업', '부업', '일상', '가족', '이벤트'];
+const ALL_TASK_CATEGORIES = ['본업', '부업', '자기계발', '일상', '가족', '이벤트'];
 const ALL_TASK_TIME_GROUPS = [
   { id: 'today', label: '오늘', empty: '오늘 마감인 진행 중 할일이 없습니다.' },
   { id: 'week', label: '이번 주', empty: '이번 주 마감 할일이 없습니다.' },
@@ -280,8 +280,19 @@ function _renderAllTimeView(query, categoryFilter) {
   return ALL_TASK_TIME_GROUPS.map(group => _renderAllTimeGroup(group, groups[group.id])).join('');
 }
 
+const ALL_TASK_WORK_GROUP = ['본업', '부업', '자기계발'];
+const ALL_TASK_LIFE_GROUP = ['일상', '가족', '이벤트'];
+
 function _renderAllCategoryBoard(query) {
-  return `<div class="category-columns all-category-kanban">${ALL_TASK_CATEGORIES.map(category => _renderCategoryColumn(category, query)).join('')}</div>`;
+  const renderTier = (label, cats, tierId) => `
+    <section class="all-tier-row" data-tier-group="${escapeAttr(tierId)}" aria-label="${escapeAttr(label)} 카테고리 그룹">
+      <header class="all-tier-header"><span class="all-tier-label">${escapeHtml(label)}</span></header>
+      <div class="category-columns all-category-kanban all-tier-grid">${cats.map(c => _renderCategoryColumn(c, query)).join('')}</div>
+    </section>`;
+  return `<div class="all-category-kanban-tiered">
+    ${renderTier('일', ALL_TASK_WORK_GROUP, 'work')}
+    ${renderTier('생활', ALL_TASK_LIFE_GROUP, 'life')}
+  </div>`;
 }
 
 function navigateAllTasksCategory(category) {

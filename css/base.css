@@ -37,9 +37,10 @@
       --border-color: rgba(148, 163, 184, 0.18);
       --border-light: rgba(148, 163, 184, 0.15);
 
-      /* 카테고리 색상 */
+      /* 카테고리 색상 — work-group (본업/부업/자기계발) cool tones, life-group (일상/가족/이벤트) warm tones */
       --cat-본업: #667eea;
       --cat-부업: #f093fb;
+      --cat-자기계발: #a78bfa;
       --cat-일상: #48bb78;
       --cat-가족: #f6ad55;
       --cat-이벤트: #06b6d4;

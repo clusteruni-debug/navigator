@@ -8,7 +8,7 @@ const HISTORY_SUB_TABS = [
   { id: 'stats', label: '통계', icon: 'bar-chart' }
 ];
 
-const HISTORY_CATEGORIES = ['전체', '본업', '부업', '일상', '가족', '이벤트'];
+const HISTORY_CATEGORIES = ['전체', '본업', '부업', '자기계발', '일상', '가족', '이벤트'];
 const HISTORY_SOURCES = [
   { id: 'all', label: '전체' },
   { id: 'task', label: '일반' },

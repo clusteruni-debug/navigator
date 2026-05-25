@@ -521,6 +521,7 @@
 
     .cat-tag.cat-본업 { background: color-mix(in srgb, var(--cat-본업) 16%, transparent); color: var(--cat-본업); }
     .cat-tag.cat-부업 { background: color-mix(in srgb, var(--cat-부업) 16%, transparent); color: var(--cat-부업); }
+    .cat-tag.cat-자기계발 { background: color-mix(in srgb, var(--cat-자기계발) 16%, transparent); color: var(--cat-자기계발); }
     .cat-tag.cat-일상 { background: color-mix(in srgb, var(--cat-일상) 16%, transparent); color: var(--cat-일상); }
     .cat-tag.cat-가족 { background: color-mix(in srgb, var(--cat-가족) 16%, transparent); color: var(--cat-가족); }
     .cat-tag.cat-이벤트 { background: color-mix(in srgb, var(--cat-이벤트) 16%, transparent); color: var(--cat-이벤트); }

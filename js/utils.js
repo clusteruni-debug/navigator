@@ -15,10 +15,10 @@ function generateId() {
  * 사용자 입력을 직접 삽입할 때 사용. allowlist 외엔 '미분류' 폴백.
  * escapeAttr만으론 CSS-context의 `)`, `(`, `;` 등을 못 막으므로 enum 검증이 정공.
  *
- * Single source of truth — utils-data.js validateTask whitelist와 동일 6 enum (2026-05-24 M8 align).
- * '이벤트' = 일회성 task (deadline 있지만 반복 없음) / '미분류' = silent fallback 차단 sentinel + cleanup UI surface
+ * Single source of truth — utils-data.js validateTask whitelist와 동일 7 enum (2026-05-25 '자기계발' 추가, PLAN-2TIER-GRID Phase A).
+ * '자기계발' = work-group 일이지만 시간 axis는 매일 반복 가능 / '이벤트' = 일회성 task / '미분류' = silent fallback 차단 sentinel
  */
-const _NAV_VALID_CATEGORIES = ['본업', '부업', '일상', '가족', '이벤트', '미분류'];
+const _NAV_VALID_CATEGORIES = ['본업', '부업', '자기계발', '일상', '가족', '이벤트', '미분류'];
 function safeCatId(category) {
   return _NAV_VALID_CATEGORIES.includes(category) ? category : '미분류';
 }

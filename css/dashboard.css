@@ -264,8 +264,10 @@
 
     .pie-legend-color.본업 { background: var(--cat-본업); }
     .pie-legend-color.부업 { background: var(--cat-부업); }
+    .pie-legend-color.자기계발 { background: var(--cat-자기계발); }
     .pie-legend-color.일상 { background: var(--cat-일상); }
     .pie-legend-color.가족 { background: var(--cat-가족); }
+    .pie-legend-color.이벤트 { background: var(--cat-이벤트); }
     .pie-legend-color.기타 { background: var(--text-muted); }
 
     .pie-legend-value {
@@ -754,8 +756,10 @@
 .day-timeline-task.pending.urgent { background: var(--accent-danger); }
 .day-timeline-task.본업 { box-shadow: 0 0 0 1px var(--cat-본업); }
 .day-timeline-task.부업 { box-shadow: 0 0 0 1px var(--cat-부업); }
+.day-timeline-task.자기계발 { box-shadow: 0 0 0 1px var(--cat-자기계발); }
 .day-timeline-task.일상 { box-shadow: 0 0 0 1px var(--cat-일상); }
 .day-timeline-task.가족 { box-shadow: 0 0 0 1px var(--cat-가족); }
+.day-timeline-task.이벤트 { box-shadow: 0 0 0 1px var(--cat-이벤트); }
 
 .day-timeline-now {
   position: absolute;
@@ -1091,8 +1095,10 @@
 
 .heatmap-row-label.본업 { color: var(--cat-본업); }
 .heatmap-row-label.부업 { color: var(--cat-부업); }
+.heatmap-row-label.자기계발 { color: var(--cat-자기계발); }
 .heatmap-row-label.일상 { color: var(--cat-일상); }
 .heatmap-row-label.가족 { color: var(--cat-가족); }
+.heatmap-row-label.이벤트 { color: var(--cat-이벤트); }
 
 .heatmap-cell {
   display: flex;

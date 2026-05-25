@@ -102,11 +102,23 @@ function _isLifeHabitDoneToday(title) {
   });
 }
 
+function _findHabitTaskId(title) {
+  const tasks = appState.tasks || [];
+  const match = tasks.find(task =>
+    task.category === '일상' &&
+    task.title === title &&
+    task.repeatType &&
+    task.repeatType !== 'none'
+  );
+  return match ? match.id : null;
+}
+
 function _getLifeHabitRows() {
   return _getLifeHabitTitles().slice(0, 6).map(title => {
     const done = _isLifeHabitDoneToday(title);
     const streak = (appState.habitStreaks && appState.habitStreaks[title] && appState.habitStreaks[title].current) || (done ? 1 : 0);
-    return { title: title, done: done, streak: streak };
+    const taskId = _findHabitTaskId(title);
+    return { title: title, done: done, streak: streak, taskId: taskId };
   });
 }
 
@@ -137,10 +149,39 @@ function toggleLifeHabit(title) {
 window.toggleLifeHabit = toggleLifeHabit;
 
 function setLifeTaskFilter(filter) {
-  appState.lifeTaskFilter = ['all', 'life', 'family', 'event'].includes(filter) ? filter : 'all';
+  appState.lifeTaskFilter = ['all', 'life', 'family', 'event', 'selfdev'].includes(filter) ? filter : 'all';
   renderStatic();
 }
 window.setLifeTaskFilter = setLifeTaskFilter;
+
+function setLifeMainSubTab(view) {
+  appState.lifeMainSubTab = ['habits', 'tasks'].includes(view) ? view : 'habits';
+  renderStatic();
+}
+window.setLifeMainSubTab = setLifeMainSubTab;
+
+function _renderLifeMainSubTabNav(activeSubTab) {
+  const tabs = [
+    { id: 'habits', label: '습관', icon: 'target', desc: '리듬·약·습관·결심' },
+    { id: 'tasks', label: '할일', icon: 'list', desc: '일상·가족·이벤트 task' }
+  ];
+  return `
+    <div class="life-subtab-nav" role="tablist" aria-label="일상 탭 sub-view 선택">
+      ${tabs.map(tab => `
+        <button class="life-subtab-btn ${activeSubTab === tab.id ? 'active' : ''}"
+                type="button"
+                role="tab"
+                aria-selected="${activeSubTab === tab.id}"
+                onclick="setLifeMainSubTab('${tab.id}')"
+                data-life-subtab="${tab.id}">
+          ${_lifeIcon(tab.icon, 14)}
+          <span class="life-subtab-label">${escapeHtml(tab.label)}</span>
+          <span class="life-subtab-desc">${escapeHtml(tab.desc)}</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+}
 
 function _isLifeTaskDueToday(task, todayEnd) {
   if (task.completed) return false;
@@ -295,6 +336,9 @@ function _renderLifeHabitSection(habitRows) {
   return `
     <section class="life-section-card life-habit-section" aria-labelledby="life-habit-title">
       ${_renderLifeSectionHeading('오늘 습관', doneCount + ' / ' + habitRows.length, 'target', 'life-habit-title')}
+      <div class="life-habit-criteria-caption" role="note">
+        카테고리 '일상' + 반복 task 상위 6개 자동 표시. 항목 변경은 원본 task 편집 ✎
+      </div>
       ${habitRows.length > 0 ? `
         <div class="life-habit-grid" role="list">
           ${habitRows.map(row => `
@@ -304,13 +348,22 @@ function _renderLifeHabitSection(habitRows) {
                 ${_lifeIcon('flame', 13)}
                 <span>${row.streak}</span>
               </span>
-              <button class="life-habit-toggle ${row.done ? 'done' : ''}"
-                      type="button"
-                      onclick="toggleLifeHabit('${escapeAttr(row.title)}')"
-                      aria-pressed="${row.done ? 'true' : 'false'}"
-                      aria-label="${escapeAttr(row.title + (row.done ? ' 완료됨' : ' 완료'))}">
-                ${row.done ? _lifeIcon('check', 14) : ''}
-              </button>
+              <div class="life-habit-actions">
+                ${row.taskId ? `<button class="life-habit-edit"
+                        type="button"
+                        onclick="event.stopPropagation(); editTask('${escapeAttr(row.taskId)}')"
+                        aria-label="${escapeAttr(row.title + ' 원본 task 편집')}"
+                        title="원본 task 편집">
+                  ${_lifeIcon('edit', 14)}
+                </button>` : ''}
+                <button class="life-habit-toggle ${row.done ? 'done' : ''}"
+                        type="button"
+                        onclick="toggleLifeHabit('${escapeAttr(row.title)}')"
+                        aria-pressed="${row.done ? 'true' : 'false'}"
+                        aria-label="${escapeAttr(row.title + (row.done ? ' 완료됨' : ' 완료'))}">
+                  ${row.done ? _lifeIcon('check', 14) : ''}
+                </button>
+              </div>
             </div>
           `).join('')}
         </div>
@@ -389,7 +442,8 @@ function _renderLifeTaskFilter(activeFilter) {
     { key: 'all', label: '전체', cat: '' },
     { key: 'life', label: '일상', cat: '일상' },
     { key: 'family', label: '가족', cat: '가족' },
-    { key: 'event', label: '이벤트', cat: '이벤트' }
+    { key: 'event', label: '이벤트', cat: '이벤트' },
+    { key: 'selfdev', label: '자기계발', cat: '자기계발' }
   ];
   return `
     <div class="life-filter-chips" role="group" aria-label="일상 task 필터">
@@ -412,15 +466,18 @@ function _renderLifeTaskSection(pendingTasks, completedTasks) {
     if (activeFilter === 'life') return task.category === '일상';
     if (activeFilter === 'family') return task.category === '가족';
     if (activeFilter === 'event') return task.category === '이벤트';
+    if (activeFilter === 'selfdev') return task.category === '자기계발';
     return true;
   });
   const lifeCount = pendingTasks.filter(task => task.category === '일상').length;
   const familyCount = pendingTasks.filter(task => task.category === '가족').length;
   const eventCount = pendingTasks.filter(task => task.category === '이벤트').length;
+  const selfDevCount = pendingTasks.filter(task => task.category === '자기계발').length;
 
   const lifeGroup = filtered.filter(t => t.category === '일상');
   const familyGroup = filtered.filter(t => t.category === '가족');
   const eventGroup = filtered.filter(t => t.category === '이벤트');
+  const selfDevGroup = filtered.filter(t => t.category === '자기계발');
 
   const renderSubGroup = (groupTasks, label, catClass) => `
     <div class="life-section-header cat-${catClass}" role="group" aria-label="${escapeAttr(label)} 그룹">
@@ -442,6 +499,7 @@ function _renderLifeTaskSection(pendingTasks, completedTasks) {
       </div>
       <div class="life-task-count-row">
         <span>일상 ${lifeCount}</span>
+        <span>자기계발 ${selfDevCount}</span>
         <span>가족 ${familyCount}</span>
         <span>이벤트 ${eventCount}</span>
       </div>
@@ -449,13 +507,14 @@ function _renderLifeTaskSection(pendingTasks, completedTasks) {
         activeFilter === 'all'
           ? `<div class="life-task-groups">
               ${renderSubGroup(lifeGroup, '일상', '일상')}
+              ${renderSubGroup(selfDevGroup, '자기계발', '자기계발')}
               ${renderSubGroup(familyGroup, '가족', '가족')}
               ${renderSubGroup(eventGroup, '이벤트', '이벤트')}
             </div>`
           : `<div class="life-task-list">
               ${filtered.map(task => _renderLifeTaskItem(task)).join('')}
             </div>`
-      ) : '<div class="life-empty-inline">표시할 일상/가족/이벤트 task가 없습니다</div>'}
+      ) : '<div class="life-empty-inline">표시할 일상/자기계발/가족/이벤트 task가 없습니다</div>'}
       ${completedTasks.length > 0 ? `
         <details class="life-completed-details">
           <summary>오늘 완료 ${completedTasks.length}</summary>
@@ -535,7 +594,7 @@ function renderLifeTab() {
   const todayEnd = new Date(now);
   todayEnd.setHours(23, 59, 59, 999);
 
-  const lifeTasks = (appState.tasks || []).filter(task => task.category === '일상' || task.category === '가족' || task.category === '이벤트');
+  const lifeTasks = (appState.tasks || []).filter(task => task.category === '일상' || task.category === '가족' || task.category === '이벤트' || task.category === '자기계발');
   const pendingTasks = lifeTasks
     .filter(task => _isLifeTaskDueToday(task, todayEnd))
     .sort(_sortLifeTasks);
@@ -547,6 +606,7 @@ function renderLifeTab() {
   const habitDone = habitRows.filter(row => row.done).length;
   const familyTasks = pendingTasks.filter(task => task.category === '가족');
   const maxHabitStreak = habitRows.reduce((max, row) => Math.max(max, row.streak || 0), 0);
+  const subTab = ['habits', 'tasks'].includes(appState.lifeMainSubTab) ? appState.lifeMainSubTab : 'habits';
 
   return `
     <div class="life-shell">
@@ -583,22 +643,27 @@ function renderLifeTab() {
         </div>
       </div>
 
-      ${_renderLifeRhythmSection(rhythmItems)}
-      ${_renderLifeMedicationSection(medicationSummary)}
-      ${_renderLifeHabitSection(habitRows)}
-      ${_renderResolutionSection()}
-      <div class="life-quick-add">
-        <input
-          type="text"
-          class="life-quick-input"
-          placeholder="일상/가족 작업 추가 (#가족 붙이면 가족)"
-          id="life-quick-input"
-          aria-label="일상 또는 가족 작업 빠른 추가"
-          onkeydown="if(event.key==='Enter') quickAddLifeTask()"
-        >
-        <button class="life-quick-btn" type="button" onclick="quickAddLifeTask()" aria-label="빠른 작업 추가">${_lifeIcon('plus', 16)}</button>
-      </div>
-      ${_renderLifeTaskSection(pendingTasks, completedTasks)}
+      ${_renderLifeMainSubTabNav(subTab)}
+
+      ${subTab === 'habits' ? `
+        ${_renderLifeRhythmSection(rhythmItems)}
+        ${_renderLifeMedicationSection(medicationSummary)}
+        ${_renderLifeHabitSection(habitRows)}
+        ${_renderResolutionSection()}
+      ` : `
+        <div class="life-quick-add">
+          <input
+            type="text"
+            class="life-quick-input"
+            placeholder="일상/가족/이벤트 task 추가 (#가족 #이벤트 prefix)"
+            id="life-quick-input"
+            aria-label="일상 task 빠른 추가"
+            onkeydown="if(event.key==='Enter') quickAddLifeTask()"
+          >
+          <button class="life-quick-btn" type="button" onclick="quickAddLifeTask()" aria-label="빠른 작업 추가">${_lifeIcon('plus', 16)}</button>
+        </div>
+        ${_renderLifeTaskSection(pendingTasks, completedTasks)}
+      `}
     </div>
   `;
 }

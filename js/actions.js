@@ -71,8 +71,11 @@ function getCategoryIcon(category) {
   switch(category) {
     case '본업': return '💼';
     case '부업': return '💰';
+    case '자기계발': return '📚';
     case '일상': return '🏠';
     case '가족': return '👨‍👩‍👧';
+    case '이벤트': return '🎟️';
+    case '미분류': return '❓';
     default: return '📌';
   }
 }

@@ -399,7 +399,7 @@ function renderActionTab(ctx) {
             type="text"
             id="quick-add-input"
             class="quick-add-input"
-            placeholder="+ 새 작업 추가 (#본업 #부업 #일상 #가족)"
+            placeholder="+ 새 작업 추가 (#본업 #부업 #자기계발 #일상 #가족 #이벤트)"
             value="${escapeHtml(appState.quickAddValue)}"
             onkeypress="if(event.key==='Enter') quickAdd()"
           >
@@ -605,6 +605,7 @@ function _renderDetailedAddForm(categoryFields) {
         <select class="form-select" id="detailed-category" onchange="updateDetailedTaskCategory(this.value)">
           <option value="본업" ${appState.detailedTask.category === '본업' ? 'selected' : ''}>본업</option>
           <option value="부업" ${appState.detailedTask.category === '부업' ? 'selected' : ''}>부업</option>
+          <option value="자기계발" ${appState.detailedTask.category === '자기계발' ? 'selected' : ''}>자기계발</option>
           <option value="일상" ${appState.detailedTask.category === '일상' ? 'selected' : ''}>일상</option>
           <option value="가족" ${appState.detailedTask.category === '가족' ? 'selected' : ''}>가족</option>
           <option value="이벤트" ${appState.detailedTask.category === '이벤트' ? 'selected' : ''}>이벤트</option>

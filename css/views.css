@@ -621,8 +621,15 @@
     .all-row-action { display: inline-flex; align-items: center; justify-content: center; min-width: var(--touch-target-min); height: 28px; padding: 0 7px; background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: var(--radius-sm); color: var(--text-secondary); font-family: inherit; font-size: var(--font-xs); font-weight: 700; cursor: pointer; transition: background-color 0.15s, border-color 0.15s; }
     .all-row-action:hover { background: var(--bg-primary); border-color: var(--accent-primary); }
     .all-row-action.danger:hover { border-color: var(--accent-danger); }
-    .all-category-kanban { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: stretch; }
-    @media (max-width: 640px) { .all-category-kanban { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    .all-category-kanban { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
+    @media (max-width: 640px) { .all-category-kanban { grid-template-columns: 1fr; } }
+    /* 2-tier grid wrapper: WORK 그룹(본업/부업/자기계발) 위 + LIFE 그룹(일상/가족/이벤트) 아래 */
+    .all-category-kanban-tiered { display: flex; flex-direction: column; gap: var(--space-4, 16px); }
+    .all-tier-row { display: flex; flex-direction: column; gap: var(--space-2, 8px); }
+    .all-tier-header { padding: 0 var(--space-2, 8px); }
+    .all-tier-label { font-size: var(--font-sm, 13px); font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .all-tier-row[data-tier-group="work"] .all-tier-label { color: var(--cat-본업); }
+    .all-tier-row[data-tier-group="life"] .all-tier-label { color: var(--cat-일상); }
     .all-category-kanban .cat-column { min-height: 260px; background: var(--bg-primary); }
     .all-category-kanban .cat-column-head { grid-template-columns: 1fr auto auto; }
     .all-category-kanban .all-time-task-row.compact { grid-template-columns: auto minmax(0, 1fr) auto; min-height: var(--touch-target-min); padding: 7px 8px 7px 12px; border-radius: var(--radius-sm); }

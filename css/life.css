@@ -352,12 +352,95 @@ body[data-theme="light"] .life-rhythm-primary {
 .life-habit-row {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 32px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 10px;
   min-height: 44px;
   padding: 8px 10px 8px 14px;
   overflow: hidden;
+}
+
+.life-habit-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.life-habit-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.life-habit-edit:hover {
+  background: var(--bg-secondary);
+  border-color: var(--cat-일상);
+  color: var(--cat-일상);
+}
+
+.life-habit-criteria-caption {
+  margin: 4px 14px 8px;
+  padding: 6px 10px;
+  background: color-mix(in srgb, var(--cat-일상) 6%, transparent);
+  border-left: 2px solid var(--cat-일상);
+  border-radius: var(--radius-sm, 8px);
+  color: var(--text-muted);
+  font-size: var(--font-xs, 12px);
+  line-height: 1.4;
+}
+
+/* sub-tab nav (habits / tasks) — PLAN-2TIER-GRID Phase C */
+.life-subtab-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.life-subtab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-height: var(--touch-target-min, 44px);
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md, 12px);
+  color: var(--text-secondary);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.life-subtab-btn:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--cat-일상);
+}
+
+.life-subtab-btn.active {
+  background: color-mix(in srgb, var(--cat-일상) 12%, var(--bg-secondary));
+  border-color: var(--cat-일상);
+  color: var(--text-primary);
+}
+
+.life-subtab-btn .life-subtab-label {
+  font-size: var(--font-sm, 13px);
+  font-weight: 700;
+}
+
+.life-subtab-btn .life-subtab-desc {
+  font-size: var(--font-xs, 12px);
+  color: var(--text-muted);
 }
 
 .life-habit-row::before,
