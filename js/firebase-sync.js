@@ -228,6 +228,7 @@ async function _doSyncToFirebase() {
       settings: appState.settings,
       streak: appState.streak,
       habitStreaks: appState.habitStreaks || {},
+      confirmedLifeHabits: appState.confirmedLifeHabits || [],
       templates: appState.templates,
       availableTags: appState.availableTags,
       workProjects: appState.workProjects,
@@ -420,6 +421,10 @@ async function loadFromFirebase() {
         // 태그 병합 (양쪽 합집합)
         const mergedTags = [...new Set([...(appState.availableTags || []), ...data.availableTags])];
         appState.availableTags = mergedTags;
+      }
+      if (Array.isArray(data.confirmedLifeHabits)) {
+        // 일상 습관 confirm list 병합 (양쪽 합집합 — additive only)
+        appState.confirmedLifeHabits = [...new Set([...(appState.confirmedLifeHabits || []), ...data.confirmedLifeHabits])];
       }
       // 본업 프로젝트: ID 기반 병합 (deletedIds 전달)
       appState.workProjects = mergeById(appState.workProjects, data.workProjects, appState.deletedIds.workProjects);
@@ -688,6 +693,9 @@ function startRealtimeSync() {
         }
         // 템플릿: ID 기반 병합 (deletedIds 전달)
         appState.templates = mergeById(appState.templates, data.templates, appState.deletedIds.templates);
+        if (Array.isArray(data.confirmedLifeHabits)) {
+          appState.confirmedLifeHabits = [...new Set([...(appState.confirmedLifeHabits || []), ...data.confirmedLifeHabits])];
+        }
         if (data.availableTags) {
           appState.availableTags = [...new Set([...(appState.availableTags || []), ...data.availableTags])];
         }
