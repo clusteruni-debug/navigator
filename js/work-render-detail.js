@@ -173,10 +173,10 @@ function renderWorkProjectDetail(project) {
         </div>
         <!-- 주요 액션 + 더보기 -->
         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-          <button class="work-project-action-btn" onclick="copyProjectToSlack('${escapeAttr(project.id)}')">💬 슬랙 복사</button>
-          <button class="work-project-action-btn" onclick="showFormExportMenu(event, '${escapeAttr(project.id)}')">📝 양식 출력</button>
-          <button class="work-project-action-btn" onclick="showMetaEditor('${escapeAttr(project.id)}')">ℹ️ 프로젝트 정보</button>
-          <button class="work-project-action-btn" onclick="showProjectMoreMenu(event, '${escapeAttr(project.id)}')">⋯ 더보기</button>
+          <button class="work-project-action-btn" onclick="copyProjectToSlack('${escapeAttr(project.id)}')" title="슬랙용 복사" aria-label="슬랙용 복사"><span aria-hidden="true">💬</span> 슬랙 복사</button>
+          <button class="work-project-action-btn" onclick="showFormExportMenu(event, '${escapeAttr(project.id)}')" title="양식 출력" aria-label="양식 출력"><span aria-hidden="true">📝</span> 양식 출력</button>
+          <button class="work-project-action-btn" onclick="showMetaEditor('${escapeAttr(project.id)}')" title="프로젝트 정보" aria-label="프로젝트 정보"><span aria-hidden="true">ℹ️</span> 프로젝트 정보</button>
+          <button class="work-project-action-btn" onclick="showProjectMoreMenu(event, '${escapeAttr(project.id)}')" title="더보기 메뉴" aria-label="더보기 메뉴"><span aria-hidden="true">⋯</span> 더보기</button>
         </div>
       </div>
 
@@ -273,8 +273,12 @@ function renderWorkProjectDetail(project) {
                 <div class="work-stage-title">
                   <span class="work-stage-collapse-toggle" onclick="toggleStageCollapse('${escapeAttr(project.id)}', ${stageIdx})" title="${isCollapsed ? '펼치기' : '접기'}" style="cursor: pointer; font-size: 12px; color: var(--text-muted); width: 16px; text-align: center; flex-shrink: 0;">${isCollapsed ? '▶' : '▼'}</span>
                   <div class="work-stage-checkbox ${stage.completed ? 'checked' : ''}"
-                       onclick="toggleStageComplete('${escapeAttr(project.id)}', ${stageIdx})">
-                    ${stage.completed ? '✓' : ''}
+                       role="button" tabindex="0"
+                       aria-pressed="${stage.completed ? 'true' : 'false'}"
+                       aria-label="단계 ${stage.completed ? '완료 해제' : '완료 표시'}"
+                       onclick="toggleStageComplete('${escapeAttr(project.id)}', ${stageIdx})"
+                       onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleStageComplete('${escapeAttr(project.id)}', ${stageIdx});}">
+                    ${stage.completed ? '☑' : '☐'}
                   </div>
                   <span class="work-stage-number">${stageIdx + 1}</span>
                   <span class="work-stage-name" onclick="promptRenameStage('${escapeAttr(project.id)}', ${stageIdx}, '${escapeAttr(stageName)}')" style="cursor: pointer;" title="클릭하여 이름 변경">${escapeHtml(stageName)}</span>
@@ -306,7 +310,7 @@ function renderWorkProjectDetail(project) {
                     <button class="work-stage-add-task" onclick="copyStageToSlack('${escapeAttr(project.id)}', ${stageIdx})" title="슬랙용 복사" aria-label="슬랙용 복사">💬</button>
                     <button class="work-stage-add-task" onclick="promptRenameStage('${escapeAttr(project.id)}', ${stageIdx}, '${escapeAttr(stageName)}')" title="단계 이름 변경" aria-label="단계 이름 변경">${svgIcon('edit', 14)}</button>
                     <button class="work-stage-add-task" onclick="showWorkModal('stage-deadline', '${escapeAttr(project.id)}', ${stageIdx})" title="단계 일정 설정" aria-label="단계 일정 설정">📅</button>
-                    <button class="work-stage-add-task" onclick="deleteProjectStage('${escapeAttr(project.id)}', ${stageIdx})" title="단계 삭제" aria-label="단계 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
+                    <button class="work-stage-add-task" onclick="if(destructiveConfirm('이 단계와 하위 항목을 모두 삭제할까요?', 'stage-${escapeAttr(project.id)}-${stageIdx}')){ deleteProjectStage('${escapeAttr(project.id)}', ${stageIdx}); }" title="단계 삭제 (5초 안 재클릭 시 확인 생략)" aria-label="단계 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
                   </div>
                   <button class="work-stage-add-task" onclick="showWorkModal('subcategory', '${escapeAttr(project.id)}', ${stageIdx})">+ 중분류</button>
                 </div>
@@ -332,8 +336,12 @@ function renderWorkProjectDetail(project) {
                         <span class="work-drag-handle" draggable="true" ondragstart="handleSubcategoryDragStart(event, '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="드래그하여 순서 변경">≡</span>
                         <span class="work-subcategory-collapse-toggle" onclick="toggleSubcategoryCollapse('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="${isSubcatCollapsed ? '펼치기' : '접기'}" style="cursor: pointer; font-size: 12px; color: var(--text-muted); width: 16px; text-align: center; flex-shrink: 0;">${isSubcatCollapsed ? '▶' : '▼'}</span>
                         <div class="work-subcategory-checkbox ${subcatAllDone ? 'checked' : ''}"
-                             onclick="toggleSubcategoryComplete('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})">
-                          ${subcatAllDone ? '✓' : ''}
+                             role="button" tabindex="0"
+                             aria-pressed="${subcatAllDone ? 'true' : 'false'}"
+                             aria-label="중분류 ${subcatAllDone ? '완료 해제' : '완료 표시'}"
+                             onclick="toggleSubcategoryComplete('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})"
+                             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSubcategoryComplete('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx});}">
+                          ${subcatAllDone ? '☑' : '☐'}
                         </div>
                         <span class="work-subcategory-name" onclick="promptRenameSubcategory('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="클릭하여 이름 변경">${escapeHtml(subcat.name)}</span>
                         <span class="work-subcategory-toggle">(${subcatCompletedCount}/${subcatTotalCount})</span>
@@ -355,7 +363,7 @@ function renderWorkProjectDetail(project) {
                         <button class="work-task-action" onclick="promptRenameSubcategory('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="중분류 이름 변경">${svgIcon('edit', 14)}</button>
                         <button class="work-task-action" onclick="showNotionCopyMenu(event, '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="Notion 진행상황 복사">📋</button>
                         <button class="work-task-action" onclick="showWorkModal('subcat-deadline', '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="중분류 일정" aria-label="중분류 일정 설정">📅</button>
-                        <button class="work-task-action" onclick="deleteSubcategory('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="중분류 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
+                        <button class="work-task-action" onclick="if(destructiveConfirm('이 중분류와 하위 항목을 모두 삭제할까요?', 'subcat-${escapeAttr(project.id)}-${stageIdx}-${subcatIdx}')){ deleteSubcategory('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx}); }" title="중분류 삭제 (5초 안 재클릭 시 확인 생략)" aria-label="중분류 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
                         <button class="work-task-action" onclick="showWorkModal('task', '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})">+ 항목</button>
                       </div>
                     </div>
@@ -478,12 +486,12 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
         <div class="work-task-actions">
           <button class="work-task-action" onclick="promptRenameWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})">${svgIcon('edit', 14)}</button>
           <button class="work-task-action" onclick="promptTaskDeadline('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="마감일 설정" aria-label="마감일 설정">📅</button>
-          <button class="work-task-action" onclick="showWorkModal('log', '${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" aria-label="기록 추가">+ 기록</button>
+          <button class="work-task-action add-record-btn" onclick="showWorkModal('log', '${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" aria-label="기록 추가">+ 기록</button>
           ${hasLongLogs ? `<button class="work-task-action" onclick="event.stopPropagation(); toggleAllWorkLogContents('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="긴 기록 본문 일괄 접기/펴기" aria-label="기록 본문 일괄 토글">📖</button>` : ''}
           <button class="work-task-action" onclick="event.stopPropagation(); toggleCanStartEarly('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="${task.canStartEarly ? '선제적 시작 해제' : '선제적 시작 설정'}" aria-label="선제적 시작 토글" style="${task.canStartEarly ? 'color: var(--accent-primary);' : ''}">💡</button>
           <button class="work-task-action" onclick="event.stopPropagation(); copyWorkTaskToSlack('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="슬랙 복사" aria-label="슬랙 복사">📋</button>
           ${(!task.subtasks || task.subtasks.length === 0) ? `<button class="work-task-action" onclick="event.stopPropagation(); promptAddFirstWorkTaskSubtask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="하위 항목 추가" aria-label="하위 항목 추가">+ 하위 항목</button>` : ''}
-          <button class="work-task-action" onclick="deleteWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="항목 삭제" aria-label="항목 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
+          <button class="work-task-action" onclick="if(destructiveConfirm('이 항목을 삭제할까요?', 'task-${escapeAttr(projectId)}-${stageIdx}-${subcatIdx}-${taskIdx}')){ deleteWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}); }" title="항목 삭제 (5초 안 재클릭 시 확인 생략)" aria-label="항목 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
         </div>
       </div>
       ${renderTaskEntries(task, projectId, stageIdx, subcatIdx, taskIdx, taskExpandKey, isDetailExpanded)}

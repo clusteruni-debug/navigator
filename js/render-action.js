@@ -371,12 +371,17 @@ function renderActionTab(ctx) {
             ${nextAction.subtasks && nextAction.subtasks.length > 0 ? `
               <div class="next-action-subtasks">
                 ${nextAction.subtasks.slice(0, 5).map((st, idx) => `
-                  <div class="next-action-subtask ${st.completed ? 'completed' : ''}" onclick="if(this._longPressed){this._longPressed=false;return;}toggleSubtaskComplete('${escapeAttr(nextAction.id)}', ${idx})"
+                  <div class="next-action-subtask ${st.completed ? 'completed' : ''}"
+                    role="button" tabindex="0" aria-pressed="${st.completed ? 'true' : 'false'}"
+                    aria-label="${escapeAttr(st.text)} ${st.completed ? '완료 해제' : '완료'} (길게 누르면 과거 날짜 선택)"
+                    onclick="if(this._longPressed){this._longPressed=false;return;}toggleSubtaskComplete('${escapeAttr(nextAction.id)}', ${idx})"
+                    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSubtaskComplete('${escapeAttr(nextAction.id)}', ${idx});}"
                     onpointerdown="this._lpTimer = setTimeout(() => { this._longPressed = true; showSubtaskBackdateMenu('${escapeAttr(nextAction.id)}', ${idx}, this); }, 500)"
                     onpointerup="clearTimeout(this._lpTimer)"
                     onpointerleave="clearTimeout(this._lpTimer)">
                     <span class="next-action-subtask-check">${st.completed ? _renderActionIcon('check', 14) : _renderActionIcon('circle', 14)}</span>
-                    <span>${escapeHtml(st.text)}</span>
+                    <span class="next-action-subtask-label">${escapeHtml(st.text)}</span>
+                    <span class="next-action-subtask-hint" title="길게 눌러서 과거 날짜로 기록" aria-hidden="true">⋯</span>
                   </div>
                 `).join('')}
                 ${nextAction.subtasks.length > 5 ? `<div class="next-action-subtask-more">${nextAction.subtasks.length - 5}개 더</div>` : ''}
@@ -555,7 +560,6 @@ function _renderMedicationSlot(slot, originalIndex, requiredGroup, todayMeds) {
       <span class="medication-btn-time">${escapeHtml(timeVal)}</span>
       ${taken ? '' : '<span class="medication-btn-edit-hint">탭하여 기록</span>'}
       <span class="medication-btn-delete"
-            role="button"
             tabindex="0"
             title="슬롯 삭제"
             aria-label="${escapeAttr(deleteLabel)}"
