@@ -320,3 +320,78 @@ function toggleAllWorkLogContents(projectId, stageIdx, subcatIdx, taskIdx) {
   renderStatic();
 }
 window.toggleAllWorkLogContents = toggleAllWorkLogContents;
+
+// work task의 하위 항목 추가 (사용자 직접 입력)
+function addWorkTaskSubtask(projectId, stageIdx, subcatIdx, taskIdx, text) {
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project) return;
+  const task = project.stages?.[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  if (!task) return;
+  const cleaned = (text || '').trim();
+  if (!cleaned) return;
+  if (!Array.isArray(task.subtasks)) task.subtasks = [];
+  task.subtasks.push({ text: cleaned, completed: false, isRequired: true });
+  project.updatedAt = new Date().toISOString();
+  saveWorkProjects();
+  renderStatic();
+  const focusId = 'work-subtask-add-' + projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx;
+  setTimeout(() => {
+    const input = document.getElementById(focusId);
+    if (input) input.focus();
+  }, 50);
+}
+window.addWorkTaskSubtask = addWorkTaskSubtask;
+
+// 빈 task에서 첫 하위 항목 추가 (prompt 통해)
+function promptAddFirstWorkTaskSubtask(projectId, stageIdx, subcatIdx, taskIdx) {
+  const text = prompt('첫 하위 항목 이름:');
+  if (text === null) return;
+  const cleaned = text.trim();
+  if (!cleaned) return;
+  addWorkTaskSubtask(projectId, stageIdx, subcatIdx, taskIdx, cleaned);
+}
+window.promptAddFirstWorkTaskSubtask = promptAddFirstWorkTaskSubtask;
+
+// work task의 하위 항목 이름 변경
+function renameWorkTaskSubtask(projectId, stageIdx, subcatIdx, taskIdx, subtaskIdx) {
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project) return;
+  const task = project.stages?.[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  if (!task || !task.subtasks?.[subtaskIdx]) return;
+  const current = task.subtasks[subtaskIdx].text || '';
+  const next = prompt('하위 항목 이름:', current);
+  if (next === null) return;
+  const cleaned = next.trim();
+  if (!cleaned) return;
+  task.subtasks[subtaskIdx].text = cleaned;
+  project.updatedAt = new Date().toISOString();
+  saveWorkProjects();
+  renderStatic();
+}
+window.renameWorkTaskSubtask = renameWorkTaskSubtask;
+
+// work task의 하위 항목 삭제
+function removeWorkTaskSubtask(projectId, stageIdx, subcatIdx, taskIdx, subtaskIdx) {
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project) return;
+  const task = project.stages?.[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  if (!task || !task.subtasks?.[subtaskIdx]) return;
+  const target = task.subtasks[subtaskIdx];
+  if (!confirm('"' + (target.text || '') + '" 항목을 삭제할까?')) return;
+  task.subtasks.splice(subtaskIdx, 1);
+  project.updatedAt = new Date().toISOString();
+  saveWorkProjects();
+  renderStatic();
+}
+window.removeWorkTaskSubtask = removeWorkTaskSubtask;
+
+// 인라인 추가 입력란 Enter 처리 (IME 조합 중에는 무시)
+function handleWorkSubtaskAddKey(event, projectId, stageIdx, subcatIdx, taskIdx) {
+  if (event.key !== 'Enter' || event.isComposing) return;
+  event.preventDefault();
+  const text = event.target.value;
+  if (!text.trim()) return;
+  event.target.value = '';
+  addWorkTaskSubtask(projectId, stageIdx, subcatIdx, taskIdx, text);
+}
+window.handleWorkSubtaskAddKey = handleWorkSubtaskAddKey;

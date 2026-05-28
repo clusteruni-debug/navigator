@@ -482,18 +482,32 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
           ${hasLongLogs ? `<button class="work-task-action" onclick="event.stopPropagation(); toggleAllWorkLogContents('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="긴 기록 본문 일괄 접기/펴기" aria-label="기록 본문 일괄 토글">📖</button>` : ''}
           <button class="work-task-action" onclick="event.stopPropagation(); toggleCanStartEarly('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="${task.canStartEarly ? '선제적 시작 해제' : '선제적 시작 설정'}" aria-label="선제적 시작 토글" style="${task.canStartEarly ? 'color: var(--accent-primary);' : ''}">💡</button>
           <button class="work-task-action" onclick="event.stopPropagation(); copyWorkTaskToSlack('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="슬랙 복사" aria-label="슬랙 복사">📋</button>
+          ${(!task.subtasks || task.subtasks.length === 0) ? `<button class="work-task-action" onclick="event.stopPropagation(); promptAddFirstWorkTaskSubtask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="하위 항목 추가" aria-label="하위 항목 추가">+ 하위 항목</button>` : ''}
           <button class="work-task-action" onclick="deleteWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="항목 삭제" aria-label="항목 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
         </div>
       </div>
       ${task.subtasks && task.subtasks.length > 0 ? `
         <div class="work-task-subtasks">
           ${task.subtasks.map((st, idx) => `
-            <div class="work-task-subtask${st.completed ? ' completed' : ''}${st.isRequired === false ? ' optional' : ''}" onclick="event.stopPropagation(); toggleWorkTaskSubtaskComplete('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, ${idx})">
-              <span class="work-task-subtask-check">${st.completed ? '✓' : '○'}</span>
-              <span class="work-task-subtask-text">${escapeHtml(st.text)}</span>
+            <div class="work-task-subtask${st.completed ? ' completed' : ''}${st.isRequired === false ? ' optional' : ''}">
+              <span class="work-task-subtask-check" onclick="event.stopPropagation(); toggleWorkTaskSubtaskComplete('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, ${idx})">${st.completed ? '✓' : '○'}</span>
+              <span class="work-task-subtask-text" onclick="event.stopPropagation(); toggleWorkTaskSubtaskComplete('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, ${idx})">${escapeHtml(st.text)}</span>
               ${st.isRequired === false ? '<span class="work-task-subtask-tag" title="선택 항목">선택</span>' : ''}
+              <div class="work-task-subtask-actions">
+                <button class="work-task-subtask-action" onclick="event.stopPropagation(); renameWorkTaskSubtask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, ${idx})" title="이름 수정" aria-label="이름 수정">${svgIcon('edit', 12)}</button>
+                <button class="work-task-subtask-action" onclick="event.stopPropagation(); removeWorkTaskSubtask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, ${idx})" title="삭제" aria-label="삭제" style="color: var(--accent-danger);">${svgIcon('trash', 12)}</button>
+              </div>
             </div>
           `).join('')}
+          <div class="work-task-subtask-add">
+            <span class="work-task-subtask-add-icon">+</span>
+            <input type="text"
+                   id="work-subtask-add-${projectId}-${stageIdx}-${subcatIdx}-${taskIdx}"
+                   class="work-task-subtask-add-input"
+                   placeholder="하위 항목 추가 (Enter)"
+                   onkeydown="handleWorkSubtaskAddKey(event, '${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})"
+                   onclick="event.stopPropagation()" />
+          </div>
         </div>
       ` : ''}
       ${task.logs && task.logs.length > 0 ? `
@@ -509,14 +523,18 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
             const taskUid = task.id || (pid + '-' + si + '-' + sci + '-' + ti);
             let html = '';
             if (completionLogs.length > 0) {
-              const lastIdx = completionLogs[completionLogs.length - 1]._idx;
-              const lastDate = completionLogs[completionLogs.length - 1].date;
+              const lastLog = completionLogs[completionLogs.length - 1];
+              const lastIdx = lastLog._idx;
+              const lastDate = lastLog.date;
+              const lastChecked = !!lastLog.checked;
               const label = completionLogs.length === 1
                 ? '✓ 완료 (' + lastDate + ')'
                 : '✓ ' + completionLogs.length + '회 완료 (최근: ' + lastDate + ')';
               // 일관성: 모든 log 본문은 renderWorkLogContent를 거침 (completion label은 짧아 항상 그대로 출력)
               const _compLogKey = taskUid + '-log-' + lastIdx;
-              html += '<div class="work-task-log"><span class="work-task-log-date" style="color: var(--accent-success);">' + renderWorkLogContent(label, _compLogKey) + '</span>' +
+              html += '<div class="work-task-log' + (lastChecked ? ' log-checked' : '') + '">' +
+                '<span class="work-task-log-check" role="button" tabindex="0" aria-pressed="' + (lastChecked ? 'true' : 'false') + '" aria-label="기록 체크 토글" onclick="event.stopPropagation(); toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + lastIdx + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();event.stopPropagation();toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + lastIdx + ')}">' + (lastChecked ? '✓' : '○') + '</span>' +
+                '<span class="work-task-log-date" style="color: var(--accent-success);">' + renderWorkLogContent(label, _compLogKey) + '</span>' +
                 '<div class="work-task-log-actions">' +
                   '<button class="work-task-log-action" onclick="editWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + lastIdx + ')" aria-label="기록 편집">✏️</button>' +
                   '<button class="work-task-log-action" onclick="deleteWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + lastIdx + ')" aria-label="기록 삭제">×</button>' +
@@ -532,7 +550,10 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
               hiddenLogs.forEach(log => {
                 const actualIdx = log._idx;
                 const _logKey = taskUid + '-log-' + actualIdx;
-                html += '<div class="work-task-log"><span class="work-task-log-date">' + escapeHtml(log.date) + '</span><div class="work-task-log-content">' + renderWorkLogContent(log.content, _logKey) + '</div>' +
+                const isChecked = !!log.checked;
+                html += '<div class="work-task-log' + (isChecked ? ' log-checked' : '') + '">' +
+                  '<span class="work-task-log-check" role="button" tabindex="0" aria-pressed="' + (isChecked ? 'true' : 'false') + '" aria-label="기록 체크 토글" onclick="event.stopPropagation(); toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();event.stopPropagation();toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')}">' + (isChecked ? '✓' : '○') + '</span>' +
+                  '<span class="work-task-log-date">' + escapeHtml(log.date) + '</span><div class="work-task-log-content">' + renderWorkLogContent(log.content, _logKey) + '</div>' +
                   '<div class="work-task-log-actions">' +
                     '<button class="work-task-log-action" onclick="editWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" aria-label="기록 편집">✏️</button>' +
                     '<button class="work-task-log-action" onclick="copyLogContentToSlack(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" title="슬랙 형식 복사" aria-label="슬랙 형식 복사">📋</button>' +
@@ -545,7 +566,10 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
             visibleLogs.forEach(log => {
               const actualIdx = log._idx;
               const _logKey = taskUid + '-log-' + actualIdx;
-              html += '<div class="work-task-log"><span class="work-task-log-date">' + escapeHtml(log.date) + '</span><div class="work-task-log-content">' + renderWorkLogContent(log.content, _logKey) + '</div>' +
+              const isChecked = !!log.checked;
+              html += '<div class="work-task-log' + (isChecked ? ' log-checked' : '') + '">' +
+                '<span class="work-task-log-check" role="button" tabindex="0" aria-pressed="' + (isChecked ? 'true' : 'false') + '" aria-label="기록 체크 토글" onclick="event.stopPropagation(); toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();event.stopPropagation();toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')}">' + (isChecked ? '✓' : '○') + '</span>' +
+                '<span class="work-task-log-date">' + escapeHtml(log.date) + '</span><div class="work-task-log-content">' + renderWorkLogContent(log.content, _logKey) + '</div>' +
                 '<div class="work-task-log-actions">' +
                   '<button class="work-task-log-action" onclick="editWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" aria-label="기록 편집">✏️</button>' +
                   '<button class="work-task-log-action" onclick="copyLogContentToSlack(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" title="슬랙 형식 복사" aria-label="슬랙 형식 복사">📋</button>' +

@@ -286,6 +286,7 @@ body[data-theme="light"] .life-rhythm-primary {
 }
 
 .life-med-slot {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -301,6 +302,52 @@ body[data-theme="light"] .life-rhythm-primary {
   font: inherit;
   font-size: var(--font-sm);
   transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.life-med-slot-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.life-med-slot:hover .life-med-slot-actions,
+.life-med-slot:focus-within .life-med-slot-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.life-med-slot-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.life-med-slot-action:hover,
+.life-med-slot-action:focus-visible {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.life-med-slot-delete:hover,
+.life-med-slot-delete:focus-visible {
+  color: var(--accent-danger);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .life-med-slot-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .life-med-slot:hover {

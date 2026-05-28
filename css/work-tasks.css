@@ -175,10 +175,44 @@
       padding: 8px 0;
       font-size: 15px;
       border-bottom: 1px solid var(--border-color);
+      align-items: flex-start;
     }
 
     .work-task-log:last-child {
       border-bottom: none;
+    }
+
+    .work-task-log-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .work-task-log-check:hover,
+    .work-task-log-check:focus-visible {
+      background: var(--bg-tertiary);
+      color: var(--accent-primary);
+      outline: none;
+    }
+
+    .work-task-log.log-checked .work-task-log-check {
+      color: var(--accent-success);
+    }
+
+    .work-task-log.log-checked .work-task-log-date,
+    .work-task-log.log-checked .work-task-log-content {
+      text-decoration: line-through;
+      color: var(--text-muted);
     }
 
     .work-task-log-date {

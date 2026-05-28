@@ -438,6 +438,18 @@ function editWorkLog(projectId, stageIdx, subcatIdx, taskIdx, logIdx) {
 }
 window.editWorkLog = editWorkLog;
 
+function toggleWorkLogChecked(projectId, stageIdx, subcatIdx, taskIdx, logIdx) {
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project) return;
+  const task = project.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  if (!task || !task.logs || !task.logs[logIdx]) return;
+  task.logs[logIdx].checked = !task.logs[logIdx].checked;
+  project.updatedAt = new Date().toISOString();
+  saveWorkProjects();
+  renderStatic();
+}
+window.toggleWorkLogChecked = toggleWorkLogChecked;
+
 /**
  * canStartEarly 토글
  */

@@ -1,6 +1,6 @@
 # Navigator (todolist) — AGENTS.md
 
-> Global rules: see `~/.codex/instructions.md`
+> Global rules: see workspace root `AGENTS.md` and `config/codex-global/RUNTIME-CONTRACT.md`.
 
 ## Overview
 - **Stack**: HTML + Vanilla JS + Firebase (Auth/Firestore)
@@ -17,10 +17,9 @@
 - Integration with tgeventbot (event data)
 
 ## Git Permissions (Common, cannot be overridden)
-- **Codex must NEVER execute `git commit` / `git push`.**
-- Codex only performs code modifications + build verification, and reports changed files + verification results upon completion.
-- All commit/push operations are handled centrally by Claude Code (or the user).
-
+- Follow workspace root `AGENTS.md` section 3 and section 16 for Codex git permissions.
+- Codex may create a local commit only through the root gated commit flow; `git push` remains forbidden.
+- Task-specific review-only scopes may be stricter, but this project file must not globally override the root table.
 ## Multi-Platform Execution Context (Common)
 - This project operates on the premise of Windows source files + WSL /mnt/c/... accessing the same files.
 - External (laptop/mobile) work uses SSH -> WSL by default.
@@ -28,18 +27,18 @@
 - If path confusion arises, check the "Development Environment (Multi-Platform)" section in CLAUDE.md first.
 
 <!-- BEGIN: CODEX_GIT_POLICY_BLOCK -->
-## Codex Git Permissions (Workspace-Wide Enforcement)
+## Codex Git Permissions (Workspace Policy)
 
-This section is a workspace-wide mandatory rule and cannot be overridden by project documents.
+Project-local rules inherit root `AGENTS.md` section 3 and section 16.
 
 | Action | Claude Code/User | Codex |
-|--------|:----------------:|:-----:|
-| Code modification | ✅ | ✅ |
-| Build/test verification | ✅ | ✅ |
-| `git commit` | ✅ | **Forbidden** |
-| `git push` | ✅ | **Forbidden** |
+| --- | :---: | :---: |
+| Code modification | yes | yes |
+| Build/test verification | yes | yes |
+| `git commit` | yes | gated local only |
+| `git push` | yes | forbidden |
 
-- Codex only performs code modification + verification + completion reporting.
-- Commits/pushes are handled centrally by Claude Code or the user.
-- If any other statement in this document conflicts, this section takes precedence.
+- Codex may create a local commit only when the root workspace Codex commit gate passes for the task.
+- Codex never pushes. Claude Code or the user handles push and integration ownership.
+- If this project needs stricter review-only behavior for a task, state it in that task's scope; otherwise root policy wins.
 <!-- END: CODEX_GIT_POLICY_BLOCK -->

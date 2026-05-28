@@ -4,10 +4,10 @@
 
 const LIFE_RHYTHM_ITEMS = [
   { key: 'wakeUp', label: '기상', icon: 'sun' },
-  { key: 'homeDepart', label: '오전', icon: 'arrow-right' },
-  { key: 'workArrive', label: '점심', icon: 'coffee' },
-  { key: 'workDepart', label: '오후', icon: 'briefcase' },
-  { key: 'homeArrive', label: '저녁', icon: 'home' },
+  { key: 'homeDepart', label: '집에서 출발', icon: 'arrow-right' },
+  { key: 'workArrive', label: '출근', icon: 'briefcase' },
+  { key: 'workDepart', label: '퇴근', icon: 'clock' },
+  { key: 'homeArrive', label: '집 도착', icon: 'home' },
   { key: 'sleep', label: '취침', icon: 'moon' }
 ];
 
@@ -276,11 +276,14 @@ function _renderLifeRhythmSection(rhythmItems) {
 
 function _renderLifeMedicationSlot(item, records, requiredGroup) {
   const slot = item.slot;
+  const slotIdx = item.idx;
   const taken = !!records[slot.id];
   const value = records[slot.id];
   const timeText = taken && typeof value === 'string' ? value : (taken ? '완료' : '--:--');
   const shortLabel = _lifeShortMedicationLabel(slot);
   const stateLabel = taken ? '기록됨, 탭하여 수정' : '탭하여 기록';
+  const editLabel = (slot.label || shortLabel) + ' 슬롯 편집';
+  const deleteLabel = (slot.label || shortLabel) + ' 슬롯 삭제';
   return `
     <button class="life-med-slot ${taken ? 'taken' : ''} ${requiredGroup ? 'required' : 'optional'}"
             type="button"
@@ -291,6 +294,26 @@ function _renderLifeMedicationSlot(item, records, requiredGroup) {
         <span class="life-med-slot-label">${escapeHtml(shortLabel)}</span>
       </span>
       <span class="life-med-slot-time">${escapeHtml(timeText)}</span>
+      <span class="life-med-slot-actions">
+        <span class="life-med-slot-action life-med-slot-edit"
+              role="button"
+              tabindex="0"
+              title="슬롯 편집"
+              aria-label="${escapeAttr(editLabel)}"
+              onclick="event.stopPropagation(); editMedicationSlot(${slotIdx})"
+              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();editMedicationSlot(${slotIdx})}">
+          ${_lifeIcon('edit', 11)}
+        </span>
+        <span class="life-med-slot-action life-med-slot-delete"
+              role="button"
+              tabindex="0"
+              title="슬롯 삭제"
+              aria-label="${escapeAttr(deleteLabel)}"
+              onclick="event.stopPropagation(); deleteMedicationSlot(${slotIdx})"
+              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();deleteMedicationSlot(${slotIdx})}">
+          ${_lifeIcon('x', 11)}
+        </span>
+      </span>
     </button>
   `;
 }

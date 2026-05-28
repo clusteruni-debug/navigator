@@ -314,6 +314,88 @@
       border-radius: 3px;
       flex-shrink: 0;
     }
+    /* 하위 항목 액션 버튼 (hover 시 표시) */
+    .work-task-subtask-actions {
+      display: flex;
+      gap: 2px;
+      margin-left: auto;
+      opacity: 0;
+      flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+    .work-task-subtask:hover .work-task-subtask-actions,
+    .work-task-subtask:focus-within .work-task-subtask-actions {
+      opacity: 1;
+    }
+    .work-task-subtask-action {
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .work-task-subtask-action:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+    /* 인라인 추가 입력란 (task hover/focus-within 시 표시) */
+    .work-task-subtask-add {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 8px;
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: opacity 0.15s, max-height 0.15s, padding 0.15s;
+    }
+    .work-task-item:hover .work-task-subtask-add,
+    .work-task-subtask-add:focus-within {
+      opacity: 1;
+      max-height: 32px;
+      padding: 4px 8px;
+    }
+    .work-task-subtask-add-icon {
+      width: 16px;
+      flex-shrink: 0;
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+      text-align: center;
+    }
+    .work-task-subtask-add-input {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      background: transparent;
+      font-size: var(--font-sm);
+      font-family: inherit;
+      color: var(--text-primary);
+      padding: 2px 4px;
+      outline: none;
+      border-radius: 4px;
+    }
+    .work-task-subtask-add-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+    .work-task-subtask-add-input:focus {
+      background: var(--bg-tertiary);
+    }
+    @media (hover: none) and (pointer: coarse) {
+      .work-task-subtask-actions { opacity: 1; }
+      .work-task-subtask-add {
+        opacity: 1;
+        max-height: 32px;
+        padding: 4px 8px;
+      }
+    }
     .work-project-list {
       display: flex;
       flex-direction: column;

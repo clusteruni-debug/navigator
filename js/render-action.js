@@ -464,10 +464,10 @@ function _renderRhythmCompact() {
   const rhythm = (todayRhythm.date === today) ? todayRhythm : { wakeUp: null, homeDepart: null, workArrive: null, workDepart: null, homeArrive: null, sleep: null, medications: {} };
   const rhythmItems = [
     { key: 'wakeUp', label: '기상', icon: 'sun', value: rhythm.wakeUp },
-    { key: 'homeDepart', label: '오전', icon: 'arrow-right', value: rhythm.homeDepart },
-    { key: 'workArrive', label: '점심', icon: 'coffee', value: rhythm.workArrive },
-    { key: 'workDepart', label: '오후', icon: 'briefcase', value: rhythm.workDepart },
-    { key: 'homeArrive', label: '저녁', icon: 'home', value: rhythm.homeArrive },
+    { key: 'homeDepart', label: '집에서 출발', icon: 'arrow-right', value: rhythm.homeDepart },
+    { key: 'workArrive', label: '출근', icon: 'briefcase', value: rhythm.workArrive },
+    { key: 'workDepart', label: '퇴근', icon: 'clock', value: rhythm.workDepart },
+    { key: 'homeArrive', label: '집 도착', icon: 'home', value: rhythm.homeArrive },
     { key: 'sleep', label: '취침', icon: 'moon', value: rhythm.sleep }
   ];
   const recordedCount = rhythmItems.filter(item => item.value).length;
