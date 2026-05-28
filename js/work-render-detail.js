@@ -446,8 +446,10 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
 
   // Detail accordion: 3+ logs → default collapsed.
   // P4 review: count user-authored logs only (origin auto-from-subtask:* 제외) — auto-note 누적이 collapse 토글 flip 시키지 않도록.
+  // Round 2 review: hardcoded literal → AUTO_SUBTASK_ORIGIN_PREFIX 상수 (drift 방지).
+  const _autoPrefix = (typeof AUTO_SUBTASK_ORIGIN_PREFIX === 'string') ? AUTO_SUBTASK_ORIGIN_PREFIX : 'auto-from-subtask:';
   const totalLogCount = Array.isArray(task.logs)
-    ? task.logs.filter(l => !l || typeof l.origin !== 'string' || l.origin.indexOf('auto-from-subtask:') !== 0).length
+    ? task.logs.filter(l => !l || typeof l.origin !== 'string' || l.origin.indexOf(_autoPrefix) !== 0).length
     : 0;
   const isCollapsible = totalLogCount >= 3;
   const isDetailExpanded = !isCollapsible || (appState.expandedWorkTaskDetails && appState.expandedWorkTaskDetails[taskExpandKey]);

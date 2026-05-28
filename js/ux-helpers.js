@@ -1,6 +1,6 @@
 // projects/navigator/js/ux-helpers.js
-// P3 UX helpers — destructive confirm (with cooldown) + emoji-label button decorator.
-// Sequential script load — exposes globals: destructiveConfirm, emojiLabelButton.
+// P3 UX helpers — destructive confirm (with cooldown).
+// Sequential script load — exposes globals: destructiveConfirm.
 
 (function() {
   'use strict';

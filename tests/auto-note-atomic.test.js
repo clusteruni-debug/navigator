@@ -6,7 +6,7 @@
 
 const path = require('path');
 const assert = require('assert');
-const { applySubtaskToggle, buildAutoNoteLog, AUTO_SUBTASK_ORIGIN_PREFIX, mapLegacyToEntries } =
+const { applySubtaskToggle, applySubtaskRemove, buildAutoNoteLog, AUTO_SUBTASK_ORIGIN_PREFIX, mapLegacyToEntries } =
   require(path.join(__dirname, '..', 'js', 'entries-model.js'));
 
 let failures = 0;
@@ -118,8 +118,59 @@ console.log('Fixture 9: buildAutoNoteLog standalone shape');
   check('log.checked', log.checked, false);
 }
 
+console.log('Fixture 10: applySubtaskRemove — removes orphan auto-note + clears completedAt');
+{
+  const task = {
+    subtasks: [{ text: 'a' }, { text: 'b' }],
+    logs: []
+  };
+  applySubtaskToggle(task, 0, NOW);
+  check('precondition: 1 auto-note', task.logs.length, 1);
+  applySubtaskRemove(task, 0);
+  check('subtasks length -1', task.subtasks.length, 1);
+  check('remaining subtask is b', task.subtasks[0].text, 'b');
+  check('orphan auto-note gone', task.logs.filter(l => l && l.origin).length, 0);
+}
+
+console.log('Fixture 11: applySubtaskRemove — rebinds higher-index auto-notes');
+{
+  const task = {
+    subtasks: [{ text: 'a' }, { text: 'b' }, { text: 'c' }],
+    logs: []
+  };
+  applySubtaskToggle(task, 1, NOW);
+  applySubtaskToggle(task, 2, NOW);
+  check('precondition: 2 auto-notes', task.logs.filter(l => l && l.origin).length, 2);
+  applySubtaskRemove(task, 0);
+  const origins = task.logs.filter(l => l && l.origin).map(l => l.origin).sort();
+  check('origins shifted -1', origins, [AUTO_SUBTASK_ORIGIN_PREFIX + '0', AUTO_SUBTASK_ORIGIN_PREFIX + '1']);
+  check('subtasks shifted', [task.subtasks[0].text, task.subtasks[1].text], ['b', 'c']);
+}
+
+console.log('Fixture 12: applySubtaskRemove — preserves manual notes (no origin)');
+{
+  const task = {
+    subtasks: [{ text: 'a' }],
+    logs: [{ date: '2026-05-27', content: '수동 메모', checked: false }]
+  };
+  applySubtaskToggle(task, 0, NOW);
+  applySubtaskRemove(task, 0);
+  check('manual note preserved', task.logs.length, 1);
+  check('manual note content', task.logs[0].content, '수동 메모');
+}
+
+console.log('Fixture 13: applySubtaskRemove — idempotent double-call returns false');
+{
+  const task = { subtasks: [{ text: 'a' }], logs: [] };
+  const r1 = applySubtaskRemove(task, 0);
+  const r2 = applySubtaskRemove(task, 0);
+  check('first call ok', r1, true);
+  check('second call (already removed) returns false', r2, false);
+  check('subtasks remained empty', task.subtasks.length, 0);
+}
+
 if (failures > 0) {
   console.error('\nFAILED:', failures, 'assertion(s) failed');
   process.exit(1);
 }
-console.log('\nPASS: P4 atomic write logic (9 fixtures)');
+console.log('\nPASS: P4 atomic write logic (13 fixtures)');

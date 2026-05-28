@@ -134,7 +134,12 @@ function saveWorkProjects() {
  */
 function saveWorkTemplates() {
   if (!appState.user) {
-    localStorage.setItem('navigator-work-templates', JSON.stringify(appState.workTemplates));
+    try {
+      localStorage.setItem('navigator-work-templates', JSON.stringify(appState.workTemplates));
+    } catch (err) {
+      if (typeof console !== 'undefined') console.error('[navigator] 템플릿 저장 실패:', err && err.message);
+      if (typeof showToast === 'function') showToast('저장 공간 부족 — 오래된 항목 정리 필요', 'error');
+    }
   }
   if (appState.user) { syncToFirebase(); }
 }

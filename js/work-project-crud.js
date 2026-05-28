@@ -47,7 +47,9 @@ function deleteProjectStage(projectId, stageIdx) {
 
   const stage = project.stages[stageIdx];
   const stageName = stage.name;
-  if (!confirm(`"${escapeHtml(stageName)}" 단계를 삭제하시겠습니까?\n하위 중분류/작업도 모두 삭제됩니다.`)) return;
+  const cooldownKey = 'stage-' + projectId + '-' + stageIdx;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn(`"${stageName}" 단계와 하위 항목을 모두 삭제할까요?`, cooldownKey)) return;
 
   // expandedWorkLogs + expandedWorkTasks + expandedWorkTaskDetails cleanup
   if (appState.expandedWorkLogs) {
@@ -120,7 +122,9 @@ window.promptRenameStage = promptRenameStage;
  * 프로젝트 삭제
  */
 function deleteWorkProject(projectId) {
-  if (!confirm('이 프로젝트를 삭제하시겠습니까?')) return;
+  const cooldownKey = 'project-' + projectId;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn('이 프로젝트와 모든 단계/항목/기록을 삭제할까요?', cooldownKey)) return;
 
   // expandedWorkLogs + expandedWorkTasks cleanup
   const proj = appState.workProjects.find(p => p.id === projectId);

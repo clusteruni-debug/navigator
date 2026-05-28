@@ -247,7 +247,8 @@ function cycleWorkTaskStatus(projectId, stageIdx, subcatIdx, taskIdx) {
   if (task.status === 'completed') {
     task.completedAt = getLocalDateTimeStr();
     const today = getLocalDateStr();
-    const alreadyLogged = task.logs.some(l => l.date === today && l.content === '✓ 완료');
+    if (!Array.isArray(task.logs)) task.logs = [];
+    const alreadyLogged = task.logs.some(l => l && l.date === today && l.content === '✓ 완료');
     if (!alreadyLogged) {
       task.logs.push({ date: today, content: '✓ 완료' });
     }
@@ -294,7 +295,8 @@ function _doToggleWorkTaskComplete(projectId, stageIdx, subcatIdx, taskIdx) {
   if (!wasCompleted) {
     task.completedAt = getLocalDateTimeStr();
     const today = getLocalDateStr();
-    const alreadyLogged = task.logs.some(l => l.date === today && l.content === '✓ 완료');
+    if (!Array.isArray(task.logs)) task.logs = [];
+    const alreadyLogged = task.logs.some(l => l && l.date === today && l.content === '✓ 완료');
     if (!alreadyLogged) {
       task.logs.push({ date: today, content: '✓ 완료' });
     }
@@ -342,7 +344,8 @@ function toggleSubcategoryComplete(projectId, stageIdx, subcatIdx) {
       if (task.status !== 'completed') {
         task.status = 'completed';
         task.completedAt = getLocalDateTimeStr();
-        const alreadyLogged = task.logs.some(l => l.date === today && l.content === '✓ 완료');
+        if (!Array.isArray(task.logs)) task.logs = [];
+        const alreadyLogged = task.logs.some(l => l && l.date === today && l.content === '✓ 완료');
         if (!alreadyLogged) {
           task.logs.push({ date: today, content: '✓ 완료' });
         }
@@ -390,6 +393,7 @@ function deleteWorkTask(projectId, stageIdx, subcatIdx, taskIdx) {
   project.updatedAt = new Date().toISOString();
   saveWorkProjects();
   renderStatic();
+  if (typeof showToast === 'function') showToast('항목 삭제됨', 'success');
 }
 window.deleteWorkTask = deleteWorkTask;
 
