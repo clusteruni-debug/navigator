@@ -486,100 +486,182 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
           <button class="work-task-action" onclick="deleteWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="항목 삭제" aria-label="항목 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
         </div>
       </div>
-      ${task.subtasks && task.subtasks.length > 0 ? `
-        <div class="work-task-subtasks">
-          ${task.subtasks.map((st, idx) => `
-            <div class="work-task-subtask${st.completed ? ' completed' : ''}${st.isRequired === false ? ' optional' : ''}">
-              <span class="work-task-subtask-check" onclick="event.stopPropagation(); toggleWorkTaskSubtaskComplete('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, ${idx})">${st.completed ? '✓' : '○'}</span>
-              <span class="work-task-subtask-text" onclick="event.stopPropagation(); toggleWorkTaskSubtaskComplete('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, ${idx})">${escapeHtml(st.text)}</span>
-              ${st.isRequired === false ? '<span class="work-task-subtask-tag" title="선택 항목">선택</span>' : ''}
-              <div class="work-task-subtask-actions">
-                <button class="work-task-subtask-action" onclick="event.stopPropagation(); renameWorkTaskSubtask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, ${idx})" title="이름 수정" aria-label="이름 수정">${svgIcon('edit', 12)}</button>
-                <button class="work-task-subtask-action" onclick="event.stopPropagation(); removeWorkTaskSubtask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}, ${idx})" title="삭제" aria-label="삭제" style="color: var(--accent-danger);">${svgIcon('trash', 12)}</button>
-              </div>
-            </div>
-          `).join('')}
-          <div class="work-task-subtask-add">
-            <span class="work-task-subtask-add-icon">+</span>
-            <input type="text"
-                   id="work-subtask-add-${projectId}-${stageIdx}-${subcatIdx}-${taskIdx}"
-                   class="work-task-subtask-add-input"
-                   placeholder="하위 항목 추가 (Enter)"
-                   onkeydown="handleWorkSubtaskAddKey(event, '${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})"
-                   onclick="event.stopPropagation()" />
-          </div>
-        </div>
-      ` : ''}
-      ${task.logs && task.logs.length > 0 ? `
-        <div class="work-task-logs${!isDetailExpanded ? ' work-task-detail-hidden' : ''}" id="task-detail-${taskExpandKey}">
-          ${(() => {
-            // 완료 로그 압축: "✓ 완료" 로그는 하나로 요약
-            // 원본 인덱스를 _idx로 보존 (findIndex 중복 매칭 방지)
-            const indexedLogs = task.logs.map((l, i) => ({ ...l, _idx: i }));
-            const completionLogs = indexedLogs.filter(l => l.content === '✓ 완료');
-            const otherLogs = indexedLogs.filter(l => l.content !== '✓ 완료');
-            const pid = escapeAttr(projectId);
-            const si = Number(stageIdx), sci = Number(subcatIdx), ti = Number(taskIdx);
-            const taskUid = task.id || (pid + '-' + si + '-' + sci + '-' + ti);
-            let html = '';
-            if (completionLogs.length > 0) {
-              const lastLog = completionLogs[completionLogs.length - 1];
-              const lastIdx = lastLog._idx;
-              const lastDate = lastLog.date;
-              const lastChecked = !!lastLog.checked;
-              const label = completionLogs.length === 1
-                ? '✓ 완료 (' + lastDate + ')'
-                : '✓ ' + completionLogs.length + '회 완료 (최근: ' + lastDate + ')';
-              // 일관성: 모든 log 본문은 renderWorkLogContent를 거침 (completion label은 짧아 항상 그대로 출력)
-              const _compLogKey = taskUid + '-log-' + lastIdx;
-              html += '<div class="work-task-log' + (lastChecked ? ' log-checked' : '') + '">' +
-                '<span class="work-task-log-check" role="button" tabindex="0" aria-pressed="' + (lastChecked ? 'true' : 'false') + '" aria-label="기록 체크 토글" onclick="event.stopPropagation(); toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + lastIdx + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();event.stopPropagation();toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + lastIdx + ')}">' + (lastChecked ? '✓' : '○') + '</span>' +
-                '<span class="work-task-log-date" style="color: var(--accent-success);">' + renderWorkLogContent(label, _compLogKey) + '</span>' +
-                '<div class="work-task-log-actions">' +
-                  '<button class="work-task-log-action" onclick="editWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + lastIdx + ')" aria-label="기록 편집">✏️</button>' +
-                  '<button class="work-task-log-action" onclick="deleteWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + lastIdx + ')" aria-label="기록 삭제">×</button>' +
-                '</div></div>';
-            }
-            // 최근 3개만 표시, 나머지는 접기
-            const MAX_VISIBLE_LOGS = 3;
-            const hiddenLogs = otherLogs.length > MAX_VISIBLE_LOGS ? otherLogs.slice(0, otherLogs.length - MAX_VISIBLE_LOGS) : [];
-            const visibleLogs = otherLogs.length > MAX_VISIBLE_LOGS ? otherLogs.slice(otherLogs.length - MAX_VISIBLE_LOGS) : otherLogs;
-            if (hiddenLogs.length > 0) {
-              const wasExpanded = appState.expandedWorkLogs?.[taskUid];
-              html += '<div class="work-task-logs-collapsed' + (wasExpanded ? ' expanded' : '') + '" id="logs-hidden-' + taskUid + '">';
-              hiddenLogs.forEach(log => {
-                const actualIdx = log._idx;
-                const _logKey = taskUid + '-log-' + actualIdx;
-                const isChecked = !!log.checked;
-                html += '<div class="work-task-log' + (isChecked ? ' log-checked' : '') + '">' +
-                  '<span class="work-task-log-check" role="button" tabindex="0" aria-pressed="' + (isChecked ? 'true' : 'false') + '" aria-label="기록 체크 토글" onclick="event.stopPropagation(); toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();event.stopPropagation();toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')}">' + (isChecked ? '✓' : '○') + '</span>' +
-                  '<span class="work-task-log-date">' + escapeHtml(log.date) + '</span><div class="work-task-log-content">' + renderWorkLogContent(log.content, _logKey) + '</div>' +
-                  '<div class="work-task-log-actions">' +
-                    '<button class="work-task-log-action" onclick="editWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" aria-label="기록 편집">✏️</button>' +
-                    '<button class="work-task-log-action" onclick="copyLogContentToSlack(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" title="슬랙 형식 복사" aria-label="슬랙 형식 복사">📋</button>' +
-                    '<button class="work-task-log-action" onclick="deleteWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" aria-label="기록 삭제">×</button>' +
-                  '</div></div>';
-              });
-              html += '</div>';
-              html += '<div class="work-task-logs-toggle" onclick="toggleWorkLogs(\'' + taskUid + '\')" id="logs-toggle-' + taskUid + '">' + (wasExpanded ? '▼' : '▶') + ' 이전 기록 ' + hiddenLogs.length + '개</div>';
-            }
-            visibleLogs.forEach(log => {
-              const actualIdx = log._idx;
-              const _logKey = taskUid + '-log-' + actualIdx;
-              const isChecked = !!log.checked;
-              html += '<div class="work-task-log' + (isChecked ? ' log-checked' : '') + '">' +
-                '<span class="work-task-log-check" role="button" tabindex="0" aria-pressed="' + (isChecked ? 'true' : 'false') + '" aria-label="기록 체크 토글" onclick="event.stopPropagation(); toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();event.stopPropagation();toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')}">' + (isChecked ? '✓' : '○') + '</span>' +
-                '<span class="work-task-log-date">' + escapeHtml(log.date) + '</span><div class="work-task-log-content">' + renderWorkLogContent(log.content, _logKey) + '</div>' +
-                '<div class="work-task-log-actions">' +
-                  '<button class="work-task-log-action" onclick="editWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" aria-label="기록 편집">✏️</button>' +
-                  '<button class="work-task-log-action" onclick="copyLogContentToSlack(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" title="슬랙 형식 복사" aria-label="슬랙 형식 복사">📋</button>' +
-                  '<button class="work-task-log-action" onclick="deleteWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + actualIdx + ')" aria-label="기록 삭제">×</button>' +
-                '</div></div>';
-            });
-            return html;
-          })()}
-        </div>
-      ` : ''}
+      ${renderTaskEntries(task, projectId, stageIdx, subcatIdx, taskIdx, taskExpandKey, isDetailExpanded)}
     </div>
   `;
+}
+
+// === P2 split-area entries renderer (PLAN-NAVIGATOR-SUBTASK-LOG-MERGE) ===
+// Pure read renderer: uses window.mapLegacyToEntries (entries-model.js).
+// All click handlers (toggleWorkTaskSubtaskComplete / toggleWorkLogChecked / etc.)
+// stay on legacy signatures — we only re-place the rows into two boxes.
+
+function renderTaskEntries(task, projectId, stageIdx, subcatIdx, taskIdx, taskUid, isDetailExpanded) {
+  const entries = (typeof mapLegacyToEntries === 'function') ? mapLegacyToEntries(task) : [];
+  const pending = entries.filter(e => e.type === 'subtask' && !e.completed);
+  const recorded = entries.filter(e => e.type === 'note' || (e.type === 'subtask' && e.completed));
+
+  return '<div class="task-entries-split' + (!isDetailExpanded ? ' work-task-detail-hidden' : '') + '" id="task-detail-' + taskUid + '">' +
+    renderEntriesTodoBox(pending, projectId, stageIdx, subcatIdx, taskIdx) +
+    renderEntriesRecordBox(recorded, task, projectId, stageIdx, subcatIdx, taskIdx, taskUid) +
+  '</div>';
+}
+
+function renderEntriesTodoBox(pending, projectId, stageIdx, subcatIdx, taskIdx) {
+  const pid = escapeAttr(projectId);
+  const si = Number(stageIdx), sci = Number(subcatIdx), ti = Number(taskIdx);
+  let html = '<div class="entries-box entries-box-todo">' +
+    '<div class="entries-box-header">할 일<span class="entries-box-count">(' + pending.length + ' 남음)</span></div>';
+  if (pending.length === 0) {
+    html += '<div class="entries-box-empty">다 끝났어</div>';
+  } else {
+    html += '<div class="work-task-subtasks">';
+    pending.forEach(entry => {
+      const idMatch = String(entry.id || '').match(/^sub-(\d+)$/);
+      const legacyIdx = idMatch ? Number(idMatch[1]) : -1;
+      if (legacyIdx < 0) return;
+      const isOptional = entry.isRequired === false;
+      const text = entry.text || '';
+      html += '<div class="work-task-subtask' + (isOptional ? ' optional' : '') + '">' +
+        '<span class="work-task-subtask-check" onclick="event.stopPropagation(); toggleWorkTaskSubtaskComplete(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + legacyIdx + ')">○</span>' +
+        '<span class="work-task-subtask-text" onclick="event.stopPropagation(); toggleWorkTaskSubtaskComplete(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + legacyIdx + ')">' + escapeHtml(text) + '</span>' +
+        (isOptional ? '<span class="work-task-subtask-tag" title="선택 항목">선택</span>' : '') +
+        '<div class="work-task-subtask-actions">' +
+          '<button class="work-task-subtask-action" onclick="event.stopPropagation(); renameWorkTaskSubtask(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + legacyIdx + ')" title="이름 수정" aria-label="이름 수정">' + svgIcon('edit', 12) + '</button>' +
+          '<button class="work-task-subtask-action" onclick="event.stopPropagation(); removeWorkTaskSubtask(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + legacyIdx + ')" title="삭제" aria-label="삭제" style="color: var(--accent-danger);">' + svgIcon('trash', 12) + '</button>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  }
+  html += '<div class="work-task-subtask-add" style="margin-top: 6px;">' +
+    '<span class="work-task-subtask-add-icon">+</span>' +
+    '<input type="text" id="work-subtask-add-' + projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx + '" class="work-task-subtask-add-input" placeholder="하위 항목 추가 (Enter)" onkeydown="handleWorkSubtaskAddKey(event, \'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ')" onclick="event.stopPropagation()" />' +
+  '</div>';
+  html += '</div>';
+  return html;
+}
+
+function renderEntriesRecordBox(recorded, task, projectId, stageIdx, subcatIdx, taskIdx, taskUid) {
+  const pid = escapeAttr(projectId);
+  const si = Number(stageIdx), sci = Number(subcatIdx), ti = Number(taskIdx);
+
+  const noteEntries = recorded.filter(e => e.type === 'note');
+  const completedSubtaskEntries = recorded.filter(e => e.type === 'subtask' && e.completed);
+
+  const compactedNotes = compactCompletionNotes(noteEntries);
+
+  let html = '<div class="entries-box entries-box-record">' +
+    '<div class="entries-box-header">기록<span class="entries-box-count">(' + recorded.length + ')</span></div>';
+
+  if (recorded.length === 0) {
+    html += '<div class="entries-box-empty">아직 기록 없음</div>';
+  } else {
+    html += '<div class="work-task-logs">';
+
+    completedSubtaskEntries.forEach(entry => {
+      const idMatch = String(entry.id || '').match(/^sub-(\d+)$/);
+      const legacyIdx = idMatch ? Number(idMatch[1]) : -1;
+      if (legacyIdx < 0) return;
+      const text = entry.text || '';
+      const dateRaw = entry.completedAt || entry.date || '';
+      const datePill = dateRaw ? '<span class="entry-date-pill">' + escapeHtml(formatRecordDate(dateRaw)) + '</span>' : '';
+      html += '<div class="work-task-log log-completed-subtask">' +
+        '<span class="work-task-log-check entry-record-glyph-done" role="button" tabindex="0" aria-label="완료 항목 되돌리기" onclick="event.stopPropagation(); toggleWorkTaskSubtaskComplete(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + legacyIdx + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();event.stopPropagation();toggleWorkTaskSubtaskComplete(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + legacyIdx + ')}">☑</span>' +
+        '<div class="work-task-log-content">' + escapeHtml(text) + '</div>' +
+        datePill +
+      '</div>';
+    });
+
+    if (compactedNotes.completionLabel) {
+      const cl = compactedNotes.completionLabel;
+      const _compLogKey = taskUid + '-log-' + cl.idx;
+      html += '<div class="work-task-log' + (cl.checked ? ' log-checked' : '') + '">' +
+        '<span class="work-task-log-check" role="button" tabindex="0" aria-pressed="' + (cl.checked ? 'true' : 'false') + '" aria-label="기록 체크 토글" onclick="event.stopPropagation(); toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + cl.idx + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();event.stopPropagation();toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + cl.idx + ')}">' + (cl.checked ? '✓' : '○') + '</span>' +
+        '<span class="work-task-log-date" style="color: var(--accent-success);">' + renderWorkLogContent(cl.label, _compLogKey) + '</span>' +
+        '<div class="work-task-log-actions">' +
+          '<button class="work-task-log-action" onclick="editWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + cl.idx + ')" aria-label="기록 편집">' + svgIcon('edit', 12) + '</button>' +
+          '<button class="work-task-log-action" onclick="deleteWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + cl.idx + ')" aria-label="기록 삭제">×</button>' +
+        '</div></div>';
+    }
+
+    const MAX_VISIBLE_LOGS = 3;
+    const otherNotes = compactedNotes.other;
+    const hiddenNotes = otherNotes.length > MAX_VISIBLE_LOGS ? otherNotes.slice(0, otherNotes.length - MAX_VISIBLE_LOGS) : [];
+    const visibleNotes = otherNotes.length > MAX_VISIBLE_LOGS ? otherNotes.slice(otherNotes.length - MAX_VISIBLE_LOGS) : otherNotes;
+
+    if (hiddenNotes.length > 0) {
+      const wasExpanded = appState.expandedWorkLogs && appState.expandedWorkLogs[taskUid];
+      html += '<div class="work-task-logs-collapsed' + (wasExpanded ? ' expanded' : '') + '" id="logs-hidden-' + taskUid + '">';
+      hiddenNotes.forEach(entry => {
+        html += renderEntriesNoteRow(entry, pid, si, sci, ti, taskUid);
+      });
+      html += '</div>';
+      html += '<div class="work-task-logs-toggle" onclick="toggleWorkLogs(\'' + taskUid + '\')" id="logs-toggle-' + taskUid + '">' + (wasExpanded ? '▼' : '▶') + ' 이전 기록 ' + hiddenNotes.length + '개</div>';
+    }
+
+    visibleNotes.forEach(entry => {
+      html += renderEntriesNoteRow(entry, pid, si, sci, ti, taskUid);
+    });
+
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderEntriesNoteRow(entry, pid, si, sci, ti, taskUid) {
+  const idMatch = String(entry.id || '').match(/^log-(\d+)$/);
+  const legacyIdx = idMatch ? Number(idMatch[1]) : -1;
+  if (legacyIdx < 0) return '';
+  const isChecked = !!entry.checked;
+  const isAutoNote = entry.origin && String(entry.origin).indexOf('auto-from-subtask:') === 0;
+  const autoClass = isAutoNote ? ' entry-auto-note' : '';
+  const _logKey = taskUid + '-log-' + legacyIdx;
+  const dateRaw = entry.date || '';
+  return '<div class="work-task-log' + (isChecked ? ' log-checked' : '') + autoClass + '">' +
+    '<span class="work-task-log-check" role="button" tabindex="0" aria-pressed="' + (isChecked ? 'true' : 'false') + '" aria-label="기록 체크 토글" onclick="event.stopPropagation(); toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + legacyIdx + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();event.stopPropagation();toggleWorkLogChecked(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + legacyIdx + ')}">' + (isChecked ? '✓' : '○') + '</span>' +
+    '<span class="work-task-log-date">' + escapeHtml(dateRaw) + '</span><div class="work-task-log-content">' + renderWorkLogContent(entry.text || '', _logKey) + '</div>' +
+    '<div class="work-task-log-actions">' +
+      '<button class="work-task-log-action" onclick="editWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + legacyIdx + ')" aria-label="기록 편집">' + svgIcon('edit', 12) + '</button>' +
+      '<button class="work-task-log-action" onclick="copyLogContentToSlack(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + legacyIdx + ')" title="슬랙 형식 복사" aria-label="슬랙 형식 복사">📋</button>' +
+      '<button class="work-task-log-action" onclick="deleteWorkLog(\'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ', ' + legacyIdx + ')" aria-label="기록 삭제">×</button>' +
+    '</div></div>';
+}
+
+function compactCompletionNotes(noteEntries) {
+  const completion = [];
+  const other = [];
+  noteEntries.forEach(entry => {
+    if (entry.text === '✓ 완료') completion.push(entry);
+    else other.push(entry);
+  });
+  let completionLabel = null;
+  if (completion.length > 0) {
+    const last = completion[completion.length - 1];
+    const idMatch = String(last.id || '').match(/^log-(\d+)$/);
+    const idx = idMatch ? Number(idMatch[1]) : -1;
+    if (idx >= 0) {
+      const label = completion.length === 1
+        ? '✓ 완료 (' + (last.date || '') + ')'
+        : '✓ ' + completion.length + '회 완료 (최근: ' + (last.date || '') + ')';
+      completionLabel = { idx: idx, label: label, checked: !!last.checked };
+    }
+  }
+  return { completionLabel: completionLabel, other: other };
+}
+
+function formatRecordDate(value) {
+  const text = String(value || '');
+  if (!text) return '';
+  const isoMatch = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) return isoMatch[2] + '/' + isoMatch[3];
+  const monthDayMatch = text.match(/^(\d{2})-(\d{2})/);
+  if (monthDayMatch) return monthDayMatch[1] + '/' + monthDayMatch[2];
+  const parsed = Date.parse(text);
+  if (!Number.isNaN(parsed)) {
+    const d = new Date(parsed);
+    return (d.getMonth() + 1) + '/' + d.getDate();
+  }
+  return text;
 }

@@ -1950,3 +1950,54 @@
     }
 
 /* P0d focus-visible (a11y 2026-05-24) — .task-item-mini removed (no matching JS element, dead on arrival per Round 1 review) */
+
+/* === P2 subtask+log split-area (PLAN-NAVIGATOR-SUBTASK-LOG-MERGE) === */
+.task-entries-split {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.entries-box {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md, 8px);
+  padding: 8px 10px;
+  background: var(--bg-tertiary);
+}
+.entries-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.entries-box-count {
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+.entries-box-empty {
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.entry-auto-note { opacity: 0.85; }
+.entry-auto-note .work-task-log-content { color: var(--text-muted); }
+.entry-record-glyph-done { color: var(--accent-success); }
+.entry-date-pill {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: auto;
+  white-space: nowrap;
+}
+@media (max-width: 375px) {
+  .entries-box { padding: 6px 8px; }
+  .entries-box-header { font-size: 12px; }
+}
+@media (max-width: 320px) {
+  .entries-box-count { display: none; }
+  .entry-date-pill { font-size: 11px; }
+}
