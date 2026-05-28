@@ -372,7 +372,12 @@ function renameWorkTaskSubtask(projectId, stageIdx, subcatIdx, taskIdx, subtaskI
   if (next === null) return;
   const cleaned = next.trim();
   if (!cleaned) return;
-  task.subtasks[subtaskIdx].text = cleaned;
+  // Round 3 review: rename 시 linked auto-note content 도 신규 텍스트로 갱신 (stale 방지).
+  if (typeof applySubtaskRename === 'function') {
+    applySubtaskRename(task, subtaskIdx, cleaned);
+  } else {
+    task.subtasks[subtaskIdx].text = cleaned;
+  }
   project.updatedAt = new Date().toISOString();
   saveWorkProjects();
   renderStatic();

@@ -198,6 +198,21 @@
     return true;
   }
 
+  function applySubtaskRename(task, subtaskIdx, newText) {
+    if (!task || !Array.isArray(task.subtasks) || !task.subtasks[subtaskIdx]) return false;
+    const subtask = task.subtasks[subtaskIdx];
+    const cleaned = String(newText == null ? '' : newText);
+    subtask.text = cleaned;
+    if (Array.isArray(task.logs)) {
+      const originTag = AUTO_SUBTASK_ORIGIN_PREFIX + subtaskIdx;
+      task.logs.forEach(l => {
+        if (!l || l.origin !== originTag) return;
+        l.content = formatAutoSubtaskNoteText(cleaned, l.date);
+      });
+    }
+    return true;
+  }
+
   function applySubtaskToggle(task, subtaskIdx, isoNow) {
     if (!task || !Array.isArray(task.subtasks) || !task.subtasks[subtaskIdx]) return false;
     const subtask = task.subtasks[subtaskIdx];
@@ -229,7 +244,8 @@
     formatAutoSubtaskNoteText,
     buildAutoNoteLog,
     applySubtaskToggle,
-    applySubtaskRemove
+    applySubtaskRemove,
+    applySubtaskRename
   };
 
   if (typeof module !== 'undefined' && module.exports) {

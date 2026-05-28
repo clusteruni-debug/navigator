@@ -455,7 +455,9 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
   const isDetailExpanded = !isCollapsible || (appState.expandedWorkTaskDetails && appState.expandedWorkTaskDetails[taskExpandKey]);
 
   // 긴 log 본문이 하나라도 있으면 일괄 토글 버튼 노출 (250자 OR 5줄 이상 기준)
-  const hasLongLogs = (task.logs || []).some(log => {
+  // Round 3 review: Array.isArray + null log guard 통일 (line 452 와 일관성).
+  const hasLongLogs = (Array.isArray(task.logs) ? task.logs : []).some(log => {
+    if (!log) return false;
     const c = log.content || '';
     return c.length > 250 || c.split('\n').length >= 5;
   });
