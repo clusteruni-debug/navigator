@@ -155,7 +155,9 @@ window.addSubcategory = addSubcategory;
  * 중분류 삭제
  */
 function deleteSubcategory(projectId, stageIdx, subcatIdx) {
-  if (!confirm('이 중분류와 하위 항목을 모두 삭제하시겠습니까?')) return;
+  const cooldownKey = 'subcat-' + projectId + '-' + stageIdx + '-' + subcatIdx;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn('이 중분류와 하위 항목을 모두 삭제할까요?', cooldownKey)) return;
 
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
@@ -359,7 +361,9 @@ window.toggleSubcategoryComplete = toggleSubcategoryComplete;
  * 작업 삭제
  */
 function deleteWorkTask(projectId, stageIdx, subcatIdx, taskIdx) {
-  if (!confirm('이 항목을 삭제하시겠습니까?')) return;
+  const cooldownKey = 'task-' + projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn('이 항목을 삭제할까요?', cooldownKey)) return;
 
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
@@ -398,6 +402,7 @@ function addWorkLog(projectId, stageIdx, subcatIdx, taskIdx, content) {
 
   const task = project.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
   if (!task) return;
+  if (!Array.isArray(task.logs)) task.logs = [];
   const today = getLocalDateStr();
 
   task.logs.push({
@@ -417,7 +422,9 @@ window.addWorkLog = addWorkLog;
  * 로그 삭제
  */
 function deleteWorkLog(projectId, stageIdx, subcatIdx, taskIdx, logIdx) {
-  if (!confirm('이 기록을 삭제하시겠습니까?')) return;
+  const cooldownKey = 'log-' + projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx + '-' + logIdx;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn('이 기록을 삭제할까요?', cooldownKey)) return;
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
 

@@ -158,7 +158,7 @@ function toggleWorkTaskSubtaskComplete(projectId, stageIdx, subcatIdx, taskIdx, 
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
   const task = project.stages?.[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
-  if (!task || !task.subtasks?.[subtaskIdx]) return;
+  if (!task || !Array.isArray(task.subtasks) || !task.subtasks[subtaskIdx]) return;
 
   const isoNow = new Date().toISOString();
   if (typeof applySubtaskToggle === 'function') {
@@ -379,15 +379,22 @@ function renameWorkTaskSubtask(projectId, stageIdx, subcatIdx, taskIdx, subtaskI
 }
 window.renameWorkTaskSubtask = renameWorkTaskSubtask;
 
-// work task의 하위 항목 삭제
+// work task의 하위 항목 삭제 (P4 review: orphan auto-note cleanup + index rebind via applySubtaskRemove)
 function removeWorkTaskSubtask(projectId, stageIdx, subcatIdx, taskIdx, subtaskIdx) {
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
   const task = project.stages?.[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
-  if (!task || !task.subtasks?.[subtaskIdx]) return;
+  if (!task || !Array.isArray(task.subtasks) || !task.subtasks[subtaskIdx]) return;
   const target = task.subtasks[subtaskIdx];
-  if (!confirm('"' + (target.text || '') + '" 항목을 삭제할까?')) return;
-  task.subtasks.splice(subtaskIdx, 1);
+  const cooldownKey = 'subtask-' + projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx + '-' + subtaskIdx;
+  const promptText = '"' + (target.text || '') + '" 항목을 삭제할까?';
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn(promptText, cooldownKey)) return;
+  if (typeof applySubtaskRemove === 'function') {
+    applySubtaskRemove(task, subtaskIdx);
+  } else {
+    task.subtasks.splice(subtaskIdx, 1);
+  }
   project.updatedAt = new Date().toISOString();
   saveWorkProjects();
   renderStatic();

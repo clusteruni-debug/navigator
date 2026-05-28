@@ -1,6 +1,6 @@
-// Navigator Service Worker v6.67
+// Navigator Service Worker v6.68
 // ⚠️ JS/CSS 파일 추가·삭제 시 이 목록과 navigator-v5.html 모두 업데이트 필요
-const CACHE_NAME = 'navigator-v6-67';
+const CACHE_NAME = 'navigator-v6-68';
 const urlsToCache = [
   './navigator-v5.html',
   './manifest.json',
@@ -54,10 +54,10 @@ const urlsToCache = [
   './js/actions-adhd.js',
   './js/actions-repeat.js',
   './js/actions-complete.js',
+  './js/actions-add.js',
   './js/actions-edit.js',
   './js/actions-bulk.js',
   './js/actions-ui.js',
-  './js/actions-add.js',
   './js/actions.js',
   './js/ui-weekly.js',
   './js/ui.js',

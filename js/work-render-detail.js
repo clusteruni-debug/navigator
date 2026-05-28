@@ -310,7 +310,7 @@ function renderWorkProjectDetail(project) {
                     <button class="work-stage-add-task" onclick="copyStageToSlack('${escapeAttr(project.id)}', ${stageIdx})" title="슬랙용 복사" aria-label="슬랙용 복사">💬</button>
                     <button class="work-stage-add-task" onclick="promptRenameStage('${escapeAttr(project.id)}', ${stageIdx}, '${escapeAttr(stageName)}')" title="단계 이름 변경" aria-label="단계 이름 변경">${svgIcon('edit', 14)}</button>
                     <button class="work-stage-add-task" onclick="showWorkModal('stage-deadline', '${escapeAttr(project.id)}', ${stageIdx})" title="단계 일정 설정" aria-label="단계 일정 설정">📅</button>
-                    <button class="work-stage-add-task" onclick="if(destructiveConfirm('이 단계와 하위 항목을 모두 삭제할까요?', 'stage-${escapeAttr(project.id)}-${stageIdx}')){ deleteProjectStage('${escapeAttr(project.id)}', ${stageIdx}); }" title="단계 삭제 (5초 안 재클릭 시 확인 생략)" aria-label="단계 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
+                    <button class="work-stage-add-task" onclick="deleteProjectStage('${escapeAttr(project.id)}', ${stageIdx})" title="단계 삭제" aria-label="단계 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
                   </div>
                   <button class="work-stage-add-task" onclick="showWorkModal('subcategory', '${escapeAttr(project.id)}', ${stageIdx})">+ 중분류</button>
                 </div>
@@ -363,7 +363,7 @@ function renderWorkProjectDetail(project) {
                         <button class="work-task-action" onclick="promptRenameSubcategory('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="중분류 이름 변경">${svgIcon('edit', 14)}</button>
                         <button class="work-task-action" onclick="showNotionCopyMenu(event, '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="Notion 진행상황 복사">📋</button>
                         <button class="work-task-action" onclick="showWorkModal('subcat-deadline', '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="중분류 일정" aria-label="중분류 일정 설정">📅</button>
-                        <button class="work-task-action" onclick="if(destructiveConfirm('이 중분류와 하위 항목을 모두 삭제할까요?', 'subcat-${escapeAttr(project.id)}-${stageIdx}-${subcatIdx}')){ deleteSubcategory('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx}); }" title="중분류 삭제 (5초 안 재클릭 시 확인 생략)" aria-label="중분류 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
+                        <button class="work-task-action" onclick="deleteSubcategory('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="중분류 삭제" aria-label="중분류 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
                         <button class="work-task-action" onclick="showWorkModal('task', '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})">+ 항목</button>
                       </div>
                     </div>
@@ -444,8 +444,11 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
   const taskExpandKey = projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx;
   const isTaskExpanded = appState.expandedWorkTasks && appState.expandedWorkTasks[taskExpandKey];
 
-  // Detail accordion: 3+ logs → default collapsed
-  const totalLogCount = task.logs ? task.logs.length : 0;
+  // Detail accordion: 3+ logs → default collapsed.
+  // P4 review: count user-authored logs only (origin auto-from-subtask:* 제외) — auto-note 누적이 collapse 토글 flip 시키지 않도록.
+  const totalLogCount = Array.isArray(task.logs)
+    ? task.logs.filter(l => !l || typeof l.origin !== 'string' || l.origin.indexOf('auto-from-subtask:') !== 0).length
+    : 0;
   const isCollapsible = totalLogCount >= 3;
   const isDetailExpanded = !isCollapsible || (appState.expandedWorkTaskDetails && appState.expandedWorkTaskDetails[taskExpandKey]);
 
@@ -491,7 +494,7 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
           <button class="work-task-action" onclick="event.stopPropagation(); toggleCanStartEarly('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="${task.canStartEarly ? '선제적 시작 해제' : '선제적 시작 설정'}" aria-label="선제적 시작 토글" style="${task.canStartEarly ? 'color: var(--accent-primary);' : ''}">💡</button>
           <button class="work-task-action" onclick="event.stopPropagation(); copyWorkTaskToSlack('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="슬랙 복사" aria-label="슬랙 복사">📋</button>
           ${(!task.subtasks || task.subtasks.length === 0) ? `<button class="work-task-action" onclick="event.stopPropagation(); promptAddFirstWorkTaskSubtask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="하위 항목 추가" aria-label="하위 항목 추가">+ 하위 항목</button>` : ''}
-          <button class="work-task-action" onclick="if(destructiveConfirm('이 항목을 삭제할까요?', 'task-${escapeAttr(projectId)}-${stageIdx}-${subcatIdx}-${taskIdx}')){ deleteWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx}); }" title="항목 삭제 (5초 안 재클릭 시 확인 생략)" aria-label="항목 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
+          <button class="work-task-action" onclick="deleteWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="항목 삭제" aria-label="항목 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
         </div>
       </div>
       ${renderTaskEntries(task, projectId, stageIdx, subcatIdx, taskIdx, taskExpandKey, isDetailExpanded)}
@@ -505,7 +508,13 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
 // stay on legacy signatures — we only re-place the rows into two boxes.
 
 function renderTaskEntries(task, projectId, stageIdx, subcatIdx, taskIdx, taskUid, isDetailExpanded) {
-  const entries = (typeof mapLegacyToEntries === 'function') ? mapLegacyToEntries(task) : [];
+  let entries;
+  if (typeof mapLegacyToEntries === 'function') {
+    entries = mapLegacyToEntries(task);
+  } else {
+    if (typeof console !== 'undefined') console.error('[navigator] entries-model.js 미로드 — 항목/기록 박스 빈 상태로 표시됨. hard refresh 후 재시도 필요.');
+    entries = [];
+  }
   const pending = entries.filter(e => e.type === 'subtask' && !e.completed);
   const recorded = entries.filter(e => e.type === 'note' || (e.type === 'subtask' && e.completed));
 
@@ -544,7 +553,7 @@ function renderEntriesTodoBox(pending, projectId, stageIdx, subcatIdx, taskIdx) 
   }
   html += '<div class="work-task-subtask-add" style="margin-top: 6px;">' +
     '<span class="work-task-subtask-add-icon">+</span>' +
-    '<input type="text" id="work-subtask-add-' + projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx + '" class="work-task-subtask-add-input" placeholder="하위 항목 추가 (Enter)" onkeydown="handleWorkSubtaskAddKey(event, \'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ')" onclick="event.stopPropagation()" />' +
+    '<input type="text" id="work-subtask-add-' + escapeAttr(projectId) + '-' + si + '-' + sci + '-' + ti + '" class="work-task-subtask-add-input" placeholder="하위 항목 추가 (Enter)" onkeydown="handleWorkSubtaskAddKey(event, \'' + pid + '\', ' + si + ', ' + sci + ', ' + ti + ')" onclick="event.stopPropagation()" />' +
   '</div>';
   html += '</div>';
   return html;
@@ -623,7 +632,8 @@ function renderEntriesNoteRow(entry, pid, si, sci, ti, taskUid) {
   const legacyIdx = idMatch ? Number(idMatch[1]) : -1;
   if (legacyIdx < 0) return '';
   const isChecked = !!entry.checked;
-  const isAutoNote = entry.origin && String(entry.origin).indexOf('auto-from-subtask:') === 0;
+  const autoPrefix = (typeof AUTO_SUBTASK_ORIGIN_PREFIX === 'string') ? AUTO_SUBTASK_ORIGIN_PREFIX : 'auto-from-subtask:';
+  const isAutoNote = entry.origin && String(entry.origin).indexOf(autoPrefix) === 0;
   const autoClass = isAutoNote ? ' entry-auto-note' : '';
   const _logKey = taskUid + '-log-' + legacyIdx;
   const dateRaw = entry.date || '';

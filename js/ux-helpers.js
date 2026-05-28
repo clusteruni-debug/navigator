@@ -31,35 +31,9 @@
     return ok;
   }
 
-  /**
-   * Build an emoji-with-label button. Falls back to aria-label only when showLabel=false.
-   *
-   * @param {string} emoji - emoji or icon glyph
-   * @param {string} label - accessible label
-   * @param {string} onclick - inline onclick handler string
-   * @param {Object} [opts]
-   * @param {string} [opts.ariaLabel] - override aria-label (defaults to label)
-   * @param {string} [opts.className] - button class (defaults to "work-task-action with-label")
-   * @param {string} [opts.title] - tooltip (defaults to label)
-   * @param {boolean} [opts.showLabel=true] - false → hide visible text, keep aria-label
-   * @returns {string} HTML string
-   */
-  function emojiLabelButton(emoji, label, onclick, opts) {
-    opts = opts || {};
-    const ariaLabel = opts.ariaLabel || label || emoji;
-    const className = opts.className || 'work-task-action with-label';
-    const title = opts.title || label || '';
-    const showLabel = opts.showLabel !== false;
-    const safeAria = (typeof escapeAttr === 'function') ? escapeAttr(ariaLabel) : ariaLabel;
-    const safeTitle = (typeof escapeAttr === 'function') ? escapeAttr(title) : title;
-    const safeLabel = (typeof escapeHtml === 'function') ? escapeHtml(label) : label;
-    return '<button class="' + className + '" type="button" onclick="' + onclick + '" ' +
-      'title="' + safeTitle + '" aria-label="' + safeAria + '">' +
-      '<span class="btn-emoji" aria-hidden="true">' + emoji + '</span>' +
-      (showLabel ? '<span class="btn-label">' + safeLabel + '</span>' : '') +
-    '</button>';
-  }
+  // emojiLabelButton helper removed (P3 review): dead code — 12 button fix 들은
+  // inline HTML 로 처리됨 (aria-label + span aria-hidden=true). 후속 phase 에서
+  // 필요해지면 git history 참조.
 
   window.destructiveConfirm = destructiveConfirm;
-  window.emojiLabelButton = emojiLabelButton;
 })();

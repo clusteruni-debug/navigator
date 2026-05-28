@@ -20,8 +20,12 @@
    */
 
   function mapLegacyToEntries(task) {
+    // P4 review: forward-compat early-return. task.entries[] 가 도입되더라도
+    // 잘못된 type/id 가 silent drop 되지 않게 type guard 통해 well-formed 만 통과.
     if (task && Array.isArray(task.entries) && task.entries.length > 0) {
-      return task.entries;
+      const wellFormed = task.entries.every(e => e && typeof e.type === 'string' && (e.type === 'subtask' || e.type === 'note'));
+      if (wellFormed) return task.entries;
+      if (typeof console !== 'undefined') console.warn('[navigator] task.entries[] 가 비표준 — legacy mapper 사용');
     }
 
     if (!task) return [];
@@ -175,6 +179,25 @@
     };
   }
 
+  function applySubtaskRemove(task, subtaskIdx) {
+    if (!task || !Array.isArray(task.subtasks) || !task.subtasks[subtaskIdx]) return false;
+    const deletedTag = AUTO_SUBTASK_ORIGIN_PREFIX + subtaskIdx;
+    const re = new RegExp('^' + AUTO_SUBTASK_ORIGIN_PREFIX.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\d+)$');
+    if (Array.isArray(task.logs)) {
+      task.logs = task.logs.filter(l => !l || l.origin !== deletedTag);
+      task.logs.forEach(l => {
+        if (!l || !l.origin) return;
+        const m = String(l.origin).match(re);
+        if (m) {
+          const idx = Number(m[1]);
+          if (idx > subtaskIdx) l.origin = AUTO_SUBTASK_ORIGIN_PREFIX + (idx - 1);
+        }
+      });
+    }
+    task.subtasks.splice(subtaskIdx, 1);
+    return true;
+  }
+
   function applySubtaskToggle(task, subtaskIdx, isoNow) {
     if (!task || !Array.isArray(task.subtasks) || !task.subtasks[subtaskIdx]) return false;
     const subtask = task.subtasks[subtaskIdx];
@@ -205,7 +228,8 @@
     createAutoSubtaskNoteEntry,
     formatAutoSubtaskNoteText,
     buildAutoNoteLog,
-    applySubtaskToggle
+    applySubtaskToggle,
+    applySubtaskRemove
   };
 
   if (typeof module !== 'undefined' && module.exports) {

@@ -114,7 +114,14 @@ function migrateWorkTaskFields() {
  */
 function saveWorkProjects() {
   if (!appState.user) {
-    localStorage.setItem('navigator-work-projects', JSON.stringify(appState.workProjects));
+    try {
+      localStorage.setItem('navigator-work-projects', JSON.stringify(appState.workProjects));
+    } catch (err) {
+      if (typeof console !== 'undefined') console.error('[navigator] localStorage 저장 실패:', err && err.message);
+      if (typeof showToast === 'function') {
+        showToast('저장 공간 부족 — 오래된 기록 정리 필요', 'error');
+      }
+    }
   }
   // Firebase 동기화 (로그인된 경우)
   if (appState.user) {
