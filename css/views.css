@@ -625,10 +625,12 @@
     @media (max-width: 640px) { .all-category-kanban { grid-template-columns: 1fr; } }
     /* 2-tier grid wrapper: WORK 그룹(본업/부업/자기계발) 위 + LIFE 그룹(일상/가족/이벤트) 아래 */
     .all-category-kanban-tiered { display: flex; flex-direction: column; gap: var(--space-4, 16px); }
-    .all-tier-row { display: flex; flex-direction: column; gap: var(--space-2, 8px); }
-    .all-tier-header { padding: 0 var(--space-2, 8px); }
-    .all-tier-label { font-size: var(--font-sm, 13px); font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .all-tier-row { display: flex; flex-direction: column; gap: var(--space-2, 8px); padding-left: 12px; border-left: 3px solid var(--border-light); }
+    .all-tier-header { padding: 6px 0 8px var(--space-2, 8px); border-bottom: 1px solid var(--border-light); margin-bottom: 4px; }
+    .all-tier-label { font-size: 16px; font-weight: 800; color: var(--text-primary); letter-spacing: 0.01em; }
+    .all-tier-row[data-tier-group="work"] { border-left-color: var(--cat-본업); }
     .all-tier-row[data-tier-group="work"] .all-tier-label { color: var(--cat-본업); }
+    .all-tier-row[data-tier-group="life"] { border-left-color: var(--cat-일상); }
     .all-tier-row[data-tier-group="life"] .all-tier-label { color: var(--cat-일상); }
     .all-category-kanban .cat-column { min-height: 260px; background: var(--bg-primary); }
     .all-category-kanban .cat-column-head { grid-template-columns: 1fr auto auto; }

@@ -459,13 +459,11 @@ function _renderProjectDetail(project) {
   const stage = (project.stages || [])[stageIdx] || { subcategories: [] };
   const stagePanelId = 'work-stage-panel-' + escapeAttr(project.id) + '-' + stageIdx;
   const stageTabId = 'work-stage-tab-' + escapeAttr(project.id) + '-' + stageIdx;
-  const footerType = (stage.subcategories || []).length > 0 ? 'task' : 'subcategory';
-  const footerSuffix = footerType === 'task' ? ',0' : '';
   return '<section class="work-detail-panel" aria-label="프로젝트 상세">' +
     '<div class="work-detail-header"><button class="work-back-btn" onclick="showWorkProjectMaster()">' + _workIcon('chevron-down', 14) + '<span>프로젝트 목록</span></button><div><h2>' + escapeHtml(project.name || '제목 없음') + '</h2><p>' + stats.completedTasks + '/' + stats.totalTasks + ' 항목 · ' + stats.completedStages + '/' + stats.totalStages + ' 단계</p></div><div class="work-detail-actions"><button class="work-icon-action" onclick="renameWorkProject(\'' + escapeAttr(project.id) + '\')" aria-label="프로젝트 이름 변경">' + _workIcon('edit', 14) + '</button><button class="work-icon-action" onclick="showProjectMoreMenu(event, \'' + escapeAttr(project.id) + '\')" aria-label="프로젝트 더보기">' + _workIcon('menu', 14) + '</button></div></div>' +
     _renderStageTabs(project, stageIdx) +
     '<div id="' + stagePanelId + '" class="work-stage-panel" role="tabpanel" aria-labelledby="' + stageTabId + '">' + ((stage.subcategories || []).map((subcat, subcatIdx) => _renderSubcategory(project, stageIdx, subcat, subcatIdx)).join('') || '<div class="work-empty-state"><div class="work-empty-title">중분류가 없습니다</div><button class="work-primary-action" onclick="showWorkModal(\'subcategory\', \'' + escapeAttr(project.id) + '\',' + stageIdx + ')">' + _workIcon('plus', 14) + '<span>중분류 추가</span></button></div>') + '</div>' +
-    '<footer class="work-detail-footer"><span>' + escapeHtml(getStageName(project, stageIdx)) + ' · ' + _stageStats(stage).done + '/' + _stageStats(stage).total + '</span><button class="work-primary-action" onclick="showWorkModal(\'' + footerType + '\', \'' + escapeAttr(project.id) + '\',' + stageIdx + footerSuffix + ')">' + _workIcon('plus', 14) + '<span>항목 추가</span></button></footer>' +
+    '<footer class="work-detail-footer"><span>' + escapeHtml(getStageName(project, stageIdx)) + ' · ' + _stageStats(stage).done + '/' + _stageStats(stage).total + '</span></footer>' +
   '</section>';
 }
 
@@ -497,7 +495,7 @@ function _sortGeneralItems(items) {
 function _renderGeneralQuickAdd() {
   return '<div class="work-general-quick-add">' +
     '<input type="text" id="work-quick-input" class="work-general-quick-input" placeholder="새 일반 업무 추가" onkeypress="if(event.key===\'Enter\') quickAddWorkTask()">' +
-    '<button class="work-primary-action" onclick="quickAddWorkTask()">' + _workIcon('plus', 14) + '<span>추가</span></button>' +
+    '<button class="work-primary-action" onclick="quickAddWorkTask()">' + _workIcon('plus', 14) + '<span>일반업무 추가</span></button>' +
   '</div>';
 }
 

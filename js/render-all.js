@@ -371,7 +371,7 @@ function renderAllTasksTab() {
           <h2 class="all-overview-title"><span class="all-title-bars"><span style="background: var(--cat-본업)"></span><span style="background: var(--cat-부업)"></span><span style="background: var(--cat-일상)"></span><span style="background: var(--cat-가족)"></span></span>할일</h2>
           <div class="all-tasks-summary">총 <strong>${tasks.length}</strong>개 · 진행 중 <strong>${pending.length}</strong>개 · 표시 <strong>${visibleCount}</strong>개</div>
         </div>
-        <button class="all-add-btn" type="button" onclick="openAllTasksCategoryAdd('${escapeAttr(categoryFilter === '전체' ? '일상' : categoryFilter)}')">${_allTasksIcon('plus', 14)} 할일 추가</button>
+        <button class="all-add-btn" type="button" onclick="openAllTasksCategoryAdd('${escapeAttr(categoryFilter === '전체' ? '미분류' : categoryFilter)}')">${_allTasksIcon('plus', 14)} 할일 추가</button>
       </div>
 
       ${_renderAllViewToggle(view)}

@@ -1,0 +1,285 @@
+{
+  "tabClicked": "tab-btn ",
+  "tabsFound": [
+    {
+      "cls": "header-btn shuttle-toggle off",
+      "txt": "😴 OFF",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "header-btn",
+      "txt": "☀️",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "header-btn",
+      "txt": "☁️",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "header-btn",
+      "txt": "🔔",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "notification-btn denied",
+      "txt": "설정",
+      "dataTab": null,
+      "visible": false
+    },
+    {
+      "cls": "header-btn",
+      "txt": "⚙️",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "tab-btn active",
+      "txt": "오늘",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "tab-btn ",
+      "txt": "할일",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "tab-btn ",
+      "txt": "본업",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "tab-btn ",
+      "txt": "이벤트",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "tab-btn ",
+      "txt": "일상",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "tab-btn ",
+      "txt": "더보기 ▾",
+      "dataTab": null,
+      "visible": false
+    },
+    {
+      "cls": "more-menu-item ",
+      "txt": "통근",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "more-menu-item ",
+      "txt": "통계",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "more-menu-item ",
+      "txt": "히스토리",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "more-menu-item ",
+      "txt": "🌙\n자문",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "resolutions-mini-btn",
+      "txt": "일상에서 기록 ▸",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "rhythm-btn ",
+      "txt": "기상\n--:--",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "rhythm-btn ",
+      "txt": "집에서 출발\n--:--",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "rhythm-btn ",
+      "txt": "출근\n--:--",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "rhythm-btn ",
+      "txt": "퇴근\n--:--",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "rhythm-btn ",
+      "txt": "집 도착\n--:--",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "rhythm-btn ",
+      "txt": "취침\n--:--",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "med-compact-slot required",
+      "txt": "아침\n--:--",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "med-compact-slot required",
+      "txt": "점심\n--:--",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "med-compact-slot optional",
+      "txt": "아침\n--:--",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "med-compact-slot optional",
+      "txt": "점심\n--:--",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "med-compact-slot optional",
+      "txt": "저녁\n--:--",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "med-compact-link",
+      "txt": "일상 탭 → 약 복용 전체 관리 →",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "btn btn-primary",
+      "txt": "🚀 샘플 작업으로 시작하기",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "btn btn-secondary",
+      "txt": "빈 상태로 시작하기",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "modal-close",
+      "txt": "×",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "time-option-btn",
+      "txt": "2분",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "time-option-btn",
+      "txt": "5분",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "time-option-btn",
+      "txt": "10분",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "time-option-btn",
+      "txt": "15분",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "time-option-btn",
+      "txt": "20분",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "time-option-btn",
+      "txt": "30분",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "time-option-btn",
+      "txt": "45분",
+      "dataTab": null,
+      "visible": true
+    },
+    {
+      "cls": "time-option-btn",
+      "txt": "1시간",
+      "dataTab": null,
+      "visible": true
+    }
+  ],
+  "addButtonsScan": [
+    {
+      "cls": "quick-add-btn",
+      "txt": "",
+      "parentCls": "quick-add-simple",
+      "onclick": "quickAdd()",
+      "visible": true
+    }
+  ],
+  "addBtnsInWorkArea": [
+    {
+      "sel": ".all-add-btn",
+      "cls": "all-add-btn",
+      "parentCls": "all-overview-header",
+      "parentParent": "all-redesign",
+      "text": "할일 추가"
+    }
+  ],
+  "kanbanStructure": {
+    "selector": "[data-tier-group]",
+    "cls": "all-tier-row",
+    "childCount": 2,
+    "children": [
+      {
+        "cls": "all-tier-header",
+        "tag": "HEADER",
+        "dataAttrs": []
+      },
+      {
+        "cls": "category-columns all-category-kanban all-tier-grid",
+        "tag": "DIV",
+        "dataAttrs": []
+      }
+    ],
+    "outerHTMLPreview": "<section class=\"all-tier-row\" data-tier-group=\"work\" aria-label=\"일 카테고리 그룹\">\n      <header class=\"all-tier-header\"><span class=\"all-tier-label\">일</span></header>\n      <div class=\"category-columns all-category-kanban all-tier-grid\">\n    <div class=\"cat-column empty\" style=\"--task-cat-color: var(--cat-본업);\" data-kanban-category=\"본업\">\n      <div class=\"cat-column-head\">\n        <span class=\"cat-column-name\">본업</span>\n        <span class=\"cat-column-count\">0</span>\n        <button class=\"cat-column-navigate\" type=\"button\" onclick=\"event.stopPropagation(); openAllTasksCategoryAdd('본업')\" aria-label=\"본업 할일 추가\"><svg class=\"svg-icon\" width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"></line><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"></line></svg></button>\n      </div>\n      <div class=\"cat-column-task-list\">\n        <button class=\"cat-column-empty\" type=\"button\" onclick=\"openAllTasksCategoryAdd('본업')\" aria-label=\"본업 할일 추가\"><span>진행 중 없음</span><span class=\"cat-column-empty-action\">추가</span></button>\n      </div>\n    </div>\n    <div class=\"cat-column empty\" style=\"--task-cat-color: var(--cat-부업);\" data-kanban-category=\"부업\">\n      <div class=\"cat-column-head\">\n        <span class=\"cat-column-name\">부업</span>\n        <span class=\"cat-column-count\">0</span>\n        <button class=\"cat-column-navigate\" type=\"button\" onclick=\"event.stopPropagation(); openAllTasksCategoryAdd"
+  },
+  "modalAfterAddClick": null,
+  "consoleLogs": [
+    "[c-log] [daily-reset] 비로그인 → 로컬 기반 checkDailyReset 실행"
+  ]
+}

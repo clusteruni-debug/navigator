@@ -12,9 +12,9 @@ milestones:
   - { id: M6, label: "AUTO_SUBTASK_ORIGIN_PREFIX fallback literal removal (constant drift hazard)", done: false }
 decisions_pending: []
 blockers: []
-depends_on: ["NAVIGATOR-SUBTASK-LOG-MERGE"]
+depends_on: []
 git_strategy: mono
-last_verified: 2026-05-28
+last_verified: 2026-05-29
 ---
 
 # Plan — Navigator Codebase-Wide Destructive-Action Coverage Audit
@@ -134,7 +134,7 @@ Migration: replace fallback with hard `console.error` + early return (`if (typeo
 
 ## References
 
-- PLAN-NAVIGATOR-SUBTASK-LOG-MERGE (parent — SHIPPED 2026-05-28)
+- PLAN-NAVIGATOR-SUBTASK-LOG-MERGE (parent — SHIPPED 2026-05-28, archived under `projects/navigator/docs/plans/done/`; omitted from `depends_on` because the active plan graph excludes `done/` and `archive/` directories)
 - code-review skill MO-9 systemic-class lift criterion
 - memory/qa/NAVIGATOR-SUBTASK-LOG-MERGE-P2/P3/P4-20260528-01.md (round 1-3 evidence)
 - commits b960c5b3 → 6f430a3c → 62488ece → a22b9606 (P2/P3/P4 + review fixes)

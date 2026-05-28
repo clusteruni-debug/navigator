@@ -1,0 +1,72 @@
+{
+  "dismissedActions": [
+    "empty-clicked",
+    "later-clicked",
+    "modal-close-clicked",
+    "modal-close-clicked"
+  ],
+  "workTabClickResult": {
+    "found": true,
+    "cls": "tab-btn "
+  },
+  "workTabAddButtons": [
+    {
+      "sel": ".work-primary-action",
+      "idx": 0,
+      "cls": "work-primary-action",
+      "text": "새 프로젝트",
+      "aria": "",
+      "onclick": "showWorkModal('project')",
+      "parentCls": "work-head-actions",
+      "parentParentCls": "work-redesign-head",
+      "rect": {
+        "x": 1158,
+        "y": 124,
+        "w": 115,
+        "h": 47
+      }
+    }
+  ],
+  "workHierarchyHeaders": [],
+  "addBtnClicked": null,
+  "modalAfterAddClick": null,
+  "allTabClickResult": true,
+  "tierHeaderStyles": [
+    {
+      "group": "work",
+      "headerText": "일",
+      "headerFontSize": "18px",
+      "headerFontWeight": "400",
+      "headerColor": "rgb(241, 245, 249)",
+      "headerBg": "rgba(0, 0, 0, 0)",
+      "headerBorder": "0px none rgb(241, 245, 249)",
+      "headerMargin": "0px",
+      "headerPadding": "0px 16px",
+      "labelStyle": {
+        "fontSize": "16px",
+        "fontWeight": "700",
+        "color": "rgb(102, 126, 234)"
+      }
+    },
+    {
+      "group": "life",
+      "headerText": "생활",
+      "headerFontSize": "18px",
+      "headerFontWeight": "400",
+      "headerColor": "rgb(241, 245, 249)",
+      "headerBg": "rgba(0, 0, 0, 0)",
+      "headerBorder": "0px none rgb(241, 245, 249)",
+      "headerMargin": "0px",
+      "headerPadding": "0px 16px",
+      "labelStyle": {
+        "fontSize": "16px",
+        "fontWeight": "700",
+        "color": "rgb(72, 187, 120)"
+      }
+    }
+  ],
+  "consoleLogs": [
+    "[c-log] [daily-reset] 비로그인 → 로컬 기반 checkDailyReset 실행",
+    "[click-fail] .work-primary-action: elementHandle.click: Timeout 3000ms exceeded.\nCall log:\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div role=\"dialog\" aria-modal=\"true\" data-reflection-modal=\"onboarding\" aria-labelledby=\"reflection-onboarding-title\" class=\"reflection-onboarding-modal-overlay reflection-modal-overlay reflection-modal-open\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div role=\"dialog\" aria-modal=\"true\" data-reflection-modal=\"onboarding\" aria-labelledby=\"reflection-onboarding-title\" class=\"reflection-onboarding-modal-overlay reflection-modal-overlay reflection-modal-open\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    6 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div role=\"dialog\" aria-modal=\"true\" data-reflection-modal=\"onboarding\" aria-labelledby=\"reflection-onboarding-title\" class=\"reflection-onboarding-modal-overlay reflection-modal-overlay reflection-modal-open\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n"
+  ]
+}

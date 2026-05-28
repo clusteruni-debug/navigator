@@ -1072,3 +1072,46 @@
     .work-task-log:hover .work-task-log-actions {
       opacity: 1;
     }
+
+    /* ═══════════════════════════════════════════
+       Role-based add CTA (design system canary, 2026-05-29)
+       Replaces generic .work-stage-add-task / .work-task-action
+       reuse for add intent. add CTA가 다른 CRUD action 묶음과
+       시각상 분리되도록 별도 token + 별도 위치.
+       ═══════════════════════════════════════════ */
+    .work-add-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--cta-add-bg);
+      color: var(--cta-add-text);
+      border: none;
+      padding: var(--cta-add-padding);
+      border-radius: var(--cta-add-radius);
+      font-size: 14px;
+      font-weight: var(--cta-add-font-weight);
+      cursor: pointer;
+      min-height: var(--touch-target-min);
+      transition: background 0.15s;
+    }
+    .work-add-cta:hover { background: var(--cta-add-bg-hover); }
+    .work-add-cta:focus-visible { outline: 2px solid var(--cta-add-text); outline-offset: 2px; }
+
+    .work-add-cta--ghost {
+      background: var(--cta-add-ghost-bg);
+      color: var(--cta-add-ghost-text);
+      border: var(--cta-add-ghost-border);
+      width: 100%;
+      justify-content: center;
+      padding: 12px;
+    }
+    .work-add-cta--ghost:hover { background: var(--cta-add-ghost-bg-hover); }
+
+    /* Layer-end add row — 각 layer(중분류/단계) 카드 바닥에 하나만 둠 */
+    .work-layer-add-row {
+      display: flex;
+      justify-content: flex-start;
+      padding: 8px 0 4px 0;
+      margin-top: 6px;
+    }
+    .work-layer-add-row--center { justify-content: center; }

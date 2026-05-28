@@ -312,7 +312,6 @@ function renderWorkProjectDetail(project) {
                     <button class="work-stage-add-task" onclick="showWorkModal('stage-deadline', '${escapeAttr(project.id)}', ${stageIdx})" title="단계 일정 설정" aria-label="단계 일정 설정">📅</button>
                     <button class="work-stage-add-task" onclick="deleteProjectStage('${escapeAttr(project.id)}', ${stageIdx})" title="단계 삭제" aria-label="단계 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
                   </div>
-                  <button class="work-stage-add-task" onclick="showWorkModal('subcategory', '${escapeAttr(project.id)}', ${stageIdx})">+ 중분류</button>
                 </div>
               </div>
 
@@ -364,26 +363,25 @@ function renderWorkProjectDetail(project) {
                         <button class="work-task-action" onclick="showNotionCopyMenu(event, '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="Notion 진행상황 복사">📋</button>
                         <button class="work-task-action" onclick="showWorkModal('subcat-deadline', '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="중분류 일정" aria-label="중분류 일정 설정">📅</button>
                         <button class="work-task-action" onclick="deleteSubcategory('${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})" title="중분류 삭제" aria-label="중분류 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
-                        <button class="work-task-action" onclick="showWorkModal('task', '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})">+ 항목</button>
                       </div>
                     </div>
-                    ${!isSubcatCollapsed ? (subcat.tasks.length > 0 ? `
-                      <div class="work-task-list">
-                        ${subcat.tasks.map((task, taskIdx) => renderWorkTask(project.id, stageIdx, subcatIdx, task, taskIdx)).join('')}
-                      </div>
-                    ` : '<div style="color: var(--text-muted); font-size: 14px; padding: 8px;">항목 없음</div>') : ''}
+                    ${!isSubcatCollapsed ? `
+                      ${subcat.tasks.length > 0 ? `<div class="work-task-list">${subcat.tasks.map((task, taskIdx) => renderWorkTask(project.id, stageIdx, subcatIdx, task, taskIdx)).join('')}</div>` : '<div style="color: var(--text-muted); font-size: 14px; padding: 8px;">항목 없음</div>'}
+                      <div class="work-layer-add-row"><button class="work-add-cta" onclick="showWorkModal('task', '${escapeAttr(project.id)}', ${stageIdx}, ${subcatIdx})">+ 새 항목</button></div>
+                    ` : ''}
                   </div>
                 `}).join('')}
-              ` : !isCollapsed ? '<div style="color: var(--text-muted); font-size: 15px; padding: 10px;">중분류를 추가하세요</div>' : ''}
+                ${!isCollapsed ? `<div class="work-layer-add-row"><button class="work-add-cta" onclick="showWorkModal('subcategory', '${escapeAttr(project.id)}', ${stageIdx})">+ 새 중분류</button></div>` : ''}
+              ` : !isCollapsed ? `<div class="work-layer-add-row"><button class="work-add-cta" onclick="showWorkModal('subcategory', '${escapeAttr(project.id)}', ${stageIdx})">+ 새 중분류</button></div>` : ''}
             </div>
           `;
         }).join('');
         })()}
 
-        <!-- 새 단계 추가 버튼 -->
-        <div class="work-stage-add-new" style="margin-top: 12px; padding: 12px; border: 2px dashed var(--border-color); border-radius: var(--radius-md); text-align: center;">
-          <button class="work-stage-add-task" onclick="promptAddStage('${escapeAttr(project.id)}')" style="width: 100%; padding: 10px;">
-            + 새 단계 추가
+        <!-- 새 단계 추가 CTA (ghost — bottom of stage list) -->
+        <div class="work-layer-add-row" style="margin-top: 12px;">
+          <button class="work-add-cta work-add-cta--ghost" onclick="promptAddStage('${escapeAttr(project.id)}')">
+            + 새 단계
           </button>
         </div>
       </div>

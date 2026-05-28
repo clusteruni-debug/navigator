@@ -101,6 +101,49 @@
       --space-loose:       var(--space-5);
 
       /* ═══════════════════════════════════════════
+         Role tokens — action prominence
+         (design system canary — 본업 tab first, then mechanical map to other tabs)
+         ═══════════════════════════════════════════ */
+
+      /* Primary add CTA — single prominent per data layer */
+      --cta-add-bg: var(--cat-본업);
+      --cta-add-bg-hover: color-mix(in srgb, var(--cat-본업) 82%, white);
+      --cta-add-text: white;
+      --cta-add-padding: 9px 14px;
+      --cta-add-radius: var(--radius-sm);
+      --cta-add-font-weight: 700;
+
+      /* Ghost add CTA — bottom-of-layer subtle add (e.g. + 새 단계, full-width dashed) */
+      --cta-add-ghost-bg: transparent;
+      --cta-add-ghost-bg-hover: color-mix(in srgb, var(--cat-본업) 10%, transparent);
+      --cta-add-ghost-border: 1.5px dashed var(--cat-본업);
+      --cta-add-ghost-text: var(--cat-본업);
+
+      /* Generic icon action — edit / rename / copy / date / move (muted, no add intent) */
+      --action-icon-bg: transparent;
+      --action-icon-bg-hover: var(--bg-tertiary);
+      --action-icon-color: var(--text-muted);
+      --action-icon-color-hover: var(--text-primary);
+
+      /* Destructive — delete (hover-surface, sparse use) */
+      --action-destructive-color: var(--cat-미분류);
+
+      /* Depth containment — data hierarchy mapped to visual layer
+         (project=L1 page, stage=L2 card, subcategory=L3 card, task=L4 row) */
+      --depth-2-bg: var(--bg-secondary);
+      --depth-2-padding: var(--space-2);
+      --depth-2-radius: var(--radius-md);
+      --depth-2-border: 1px solid var(--border-light);
+
+      --depth-3-bg: var(--bg-card);
+      --depth-3-padding: var(--space-1);
+      --depth-3-radius: var(--radius-sm);
+      --depth-3-border: 1px solid var(--border-light);
+
+      --depth-4-bg: transparent;
+      --depth-4-padding: 8px 12px;
+
+      /* ═══════════════════════════════════════════
          Semantic — purpose aliases
          ═══════════════════════════════════════════ */
 
