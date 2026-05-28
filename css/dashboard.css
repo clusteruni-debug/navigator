@@ -1099,6 +1099,7 @@
 .heatmap-row-label.일상 { color: var(--cat-일상); }
 .heatmap-row-label.가족 { color: var(--cat-가족); }
 .heatmap-row-label.이벤트 { color: var(--cat-이벤트); }
+.heatmap-row-label.미분류 { color: var(--cat-미분류); }
 
 .heatmap-cell {
   display: flex;
