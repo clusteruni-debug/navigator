@@ -3,7 +3,7 @@
 // ============================================
 
 const DASHBOARD_VIEWS = ['전체', '수익', '건강', '패턴'];
-const DASHBOARD_CATEGORIES = ['본업', '부업', '자기계발', '일상', '가족', '이벤트'];
+const DASHBOARD_CATEGORIES = ['본업', '부업', '자기계발', '일상', '가족', '이벤트', '미분류'];
 const DASHBOARD_PERIODS = [
   { key: 'morning', label: '아침' },
   { key: 'lunch', label: '점심' },
@@ -360,7 +360,7 @@ function getCategoryTimeHeatmap() {
     (entries || []).forEach(entry => {
       if (entry._summary || !entry.at) return;
       hasDetailedEntry = true;
-      const category = DASHBOARD_CATEGORIES.includes(entry.c) ? entry.c : '일상';
+      const category = DASHBOARD_CATEGORIES.includes(entry.c) ? entry.c : '미분류';
       const hour = parseInt(String(entry.at).split(':')[0], 10);
       const periodKey = _periodKeyFromHour(hour);
       const cell = rowMap[category].cells.find(item => item.key === periodKey);

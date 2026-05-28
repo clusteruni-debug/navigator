@@ -103,6 +103,11 @@
       /* ═══════════════════════════════════════════
          Role tokens — action prominence
          (design system canary — 본업 tab first, then mechanical map to other tabs)
+         NOTE: --cta-add-* tokens hardwire var(--cat-본업) intentionally for the
+         본업 canary. Round 2 roll-out (할일/일상/이벤트/오늘) will introduce
+         per-group modifier classes (e.g. .work-add-cta.group-life {
+         --cta-add-bg: var(--cat-일상); }) so the same primitive serves other
+         groups without rewriting the base token.
          ═══════════════════════════════════════════ */
 
       /* L1 — Primary fill CTA (top-level + empty state) */
