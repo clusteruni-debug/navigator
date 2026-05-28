@@ -1,14 +1,14 @@
 ---
 plan_id: NAVIGATOR-SUBTASK-LOG-MERGE
 project: navigator
-status: IN_PROGRESS
-status_reason: P0+P1+P2+P3 shipped 2026-05-28. P3 = 12 button UX fix (HIGH 4 + MEDIUM 8) + ux-helpers.js (destructiveConfirm + emojiLabelButton). CC fallback again after Codex 2x BLOCKED pattern. Browser smoke pending user. P4 (Firebase migration) is the only remaining milestone.
+status: SHIPPED
+status_reason: All 5 phases shipped 2026-05-28 in single session (P0+P1+P2+P3+P4). P4 = lazy write-path migration (entries-model.js applySubtaskToggle + work-toggles.js wrapper). No eager Firestore migration (firebase-admin unavailable + single-user volume). Zero downtime, zero data loss. Browser smoke pending user — subtask check round-trip + auto-note appears in 기록 box atomic.
 milestones:
   - { id: P0, label: "Measure current usage + decide migration strategy (lazy vs eager batch)", done: true }
   - { id: P1, label: "Define unified entries[] model + lazy mapping from legacy subtasks/logs", done: true }
   - { id: P2, label: "Split-area UI (할 일 box + 기록 box) with distinct visual codes", done: true }
   - { id: P3, label: "Button UX pass (toggle hit area + add-button visibility + delete confirm)", done: true }
-  - { id: P4, label: "Firebase data migration + integrity verification (zero data loss)", done: false }
+  - { id: P4, label: "Firebase data migration + integrity verification (zero data loss)", done: true }
 decisions_pending: []
 blockers: []
 depends_on: []

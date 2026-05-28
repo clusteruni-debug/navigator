@@ -151,13 +151,22 @@ function saveArchivedReport(projectId) {
 window.saveArchivedReport = saveArchivedReport;
 
 // work task 안 subtask 완료 토글 (RO v3 템플릿의 subtasks 체크리스트)
+// P4: atomic write — check creates auto-note in task.logs[], uncheck removes it.
+// Pure logic lives in entries-model.js applySubtaskToggle; this wrapper handles
+// appState lookup + save + render. Falls back to simple toggle if helper missing.
 function toggleWorkTaskSubtaskComplete(projectId, stageIdx, subcatIdx, taskIdx, subtaskIdx) {
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
   const task = project.stages?.[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
   if (!task || !task.subtasks?.[subtaskIdx]) return;
-  task.subtasks[subtaskIdx].completed = !task.subtasks[subtaskIdx].completed;
-  project.updatedAt = new Date().toISOString();
+
+  const isoNow = new Date().toISOString();
+  if (typeof applySubtaskToggle === 'function') {
+    applySubtaskToggle(task, subtaskIdx, isoNow);
+  } else {
+    task.subtasks[subtaskIdx].completed = !task.subtasks[subtaskIdx].completed;
+  }
+  project.updatedAt = isoNow;
   saveWorkProjects();
   renderStatic();
 }

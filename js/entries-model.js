@@ -166,12 +166,46 @@
     return String(value).padStart(2, '0');
   }
 
+  function buildAutoNoteLog(subtaskText, isoNow, subtaskIdx) {
+    return {
+      date: String(isoNow || ''),
+      content: formatAutoSubtaskNoteText(subtaskText, isoNow),
+      origin: AUTO_SUBTASK_ORIGIN_PREFIX + subtaskIdx,
+      checked: false
+    };
+  }
+
+  function applySubtaskToggle(task, subtaskIdx, isoNow) {
+    if (!task || !Array.isArray(task.subtasks) || !task.subtasks[subtaskIdx]) return false;
+    const subtask = task.subtasks[subtaskIdx];
+    const willComplete = !subtask.completed;
+    const originTag = AUTO_SUBTASK_ORIGIN_PREFIX + subtaskIdx;
+
+    subtask.completed = willComplete;
+    if (willComplete) {
+      subtask.completedAt = String(isoNow || '');
+      if (!Array.isArray(task.logs)) task.logs = [];
+      const hasExisting = task.logs.some(l => l && l.origin === originTag);
+      if (!hasExisting) {
+        task.logs.push(buildAutoNoteLog(subtask.text, isoNow, subtaskIdx));
+      }
+    } else {
+      delete subtask.completedAt;
+      if (Array.isArray(task.logs)) {
+        task.logs = task.logs.filter(l => !l || l.origin !== originTag);
+      }
+    }
+    return true;
+  }
+
   const api = {
     ENTRY_TYPES,
     AUTO_SUBTASK_ORIGIN_PREFIX,
     mapLegacyToEntries,
     createAutoSubtaskNoteEntry,
-    formatAutoSubtaskNoteText
+    formatAutoSubtaskNoteText,
+    buildAutoNoteLog,
+    applySubtaskToggle
   };
 
   if (typeof module !== 'undefined' && module.exports) {
