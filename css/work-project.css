@@ -1101,11 +1101,44 @@
       background: var(--cta-add-ghost-bg);
       color: var(--cta-add-ghost-text);
       border: var(--cta-add-ghost-border);
-      width: 100%;
+      width: auto;
       justify-content: center;
-      padding: 12px;
+      padding: 8px 14px;
+      min-height: 36px;
     }
     .work-add-cta--ghost:hover { background: var(--cta-add-ghost-bg-hover); }
+
+    /* L3 — Outline solid (list 끝, subcategory 추가) */
+    .work-add-cta--outline {
+      background: var(--cta-add-outline-bg);
+      color: var(--cta-add-outline-text);
+      border: var(--cta-add-outline-border);
+      padding: var(--cta-add-outline-padding);
+      font-weight: var(--cta-add-outline-font-weight);
+      font-size: 13px;
+      min-height: 36px;
+    }
+    .work-add-cta--outline:hover {
+      background: var(--cta-add-outline-bg-hover);
+      border-color: var(--cta-add-outline-text);
+    }
+
+    /* L4 — Subtle inline (deepest, task list 안에 박힘) */
+    .work-add-cta--subtle {
+      background: var(--cta-add-subtle-bg);
+      color: var(--cta-add-subtle-text);
+      border: var(--cta-add-subtle-border);
+      padding: var(--cta-add-subtle-padding);
+      font-size: var(--cta-add-subtle-font-size);
+      font-weight: var(--cta-add-subtle-font-weight);
+      min-height: 32px;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .work-add-cta--subtle:hover {
+      background: var(--cta-add-subtle-bg-hover);
+      color: var(--cta-add-subtle-text-hover);
+      border: var(--cta-add-subtle-border-hover);
+    }
 
     /* Layer-end add row — 각 layer(중분류/단계) 카드 바닥에 하나만 둠 */
     .work-layer-add-row {

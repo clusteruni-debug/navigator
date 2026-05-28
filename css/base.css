@@ -105,7 +105,7 @@
          (design system canary — 본업 tab first, then mechanical map to other tabs)
          ═══════════════════════════════════════════ */
 
-      /* Primary add CTA — single prominent per data layer */
+      /* L1 — Primary fill CTA (top-level + empty state) */
       --cta-add-bg: var(--cat-본업);
       --cta-add-bg-hover: color-mix(in srgb, var(--cat-본업) 82%, white);
       --cta-add-text: white;
@@ -113,11 +113,30 @@
       --cta-add-radius: var(--radius-sm);
       --cta-add-font-weight: 700;
 
-      /* Ghost add CTA — bottom-of-layer subtle add (e.g. + 새 단계, full-width dashed) */
+      /* L2 — Ghost dashed CTA (tab nav 안, e.g. + 새 단계) */
       --cta-add-ghost-bg: transparent;
       --cta-add-ghost-bg-hover: color-mix(in srgb, var(--cat-본업) 10%, transparent);
       --cta-add-ghost-border: 1.5px dashed var(--cat-본업);
       --cta-add-ghost-text: var(--cat-본업);
+
+      /* L3 — Outline solid CTA (list 끝, e.g. + 새 중분류) */
+      --cta-add-outline-bg: transparent;
+      --cta-add-outline-bg-hover: color-mix(in srgb, var(--cat-본업) 8%, transparent);
+      --cta-add-outline-border: 1px solid var(--cat-본업);
+      --cta-add-outline-text: var(--cat-본업);
+      --cta-add-outline-padding: 7px 12px;
+      --cta-add-outline-font-weight: 600;
+
+      /* L4 — Subtle inline CTA (deepest, e.g. + 새 항목 in body) */
+      --cta-add-subtle-bg: transparent;
+      --cta-add-subtle-bg-hover: color-mix(in srgb, var(--cat-본업) 6%, transparent);
+      --cta-add-subtle-border: 1px dashed var(--border-color);
+      --cta-add-subtle-border-hover: 1px dashed var(--cat-본업);
+      --cta-add-subtle-text: var(--text-muted);
+      --cta-add-subtle-text-hover: var(--cat-본업);
+      --cta-add-subtle-padding: 6px 10px;
+      --cta-add-subtle-font-weight: 500;
+      --cta-add-subtle-font-size: 13px;
 
       /* Generic icon action — edit / rename / copy / date / move (muted, no add intent) */
       --action-icon-bg: transparent;
