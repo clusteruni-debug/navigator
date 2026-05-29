@@ -282,6 +282,7 @@ function _renderAllTimeView(query, categoryFilter) {
 
 const ALL_TASK_WORK_GROUP = ['본업', '부업', '자기계발'];
 const ALL_TASK_LIFE_GROUP = ['일상', '가족', '이벤트'];
+const ALL_TASK_OTHER_GROUP = ['미분류'];
 
 function _renderAllCategoryBoard(query) {
   const renderTier = (label, cats, tierId) => `
@@ -292,6 +293,7 @@ function _renderAllCategoryBoard(query) {
   return `<div class="all-category-kanban-tiered">
     ${renderTier('일', ALL_TASK_WORK_GROUP, 'work')}
     ${renderTier('생활', ALL_TASK_LIFE_GROUP, 'life')}
+    ${renderTier('기타', ALL_TASK_OTHER_GROUP, 'other')}
   </div>`;
 }
 

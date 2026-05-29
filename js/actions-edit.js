@@ -111,6 +111,7 @@ function showQuickEditModal(task) {
         <option value="일상" ${task.category === '일상' ? 'selected' : ''}>🌅 일상</option>
         <option value="가족" ${task.category === '가족' ? 'selected' : ''}>👨‍👩‍👧 가족</option>
         <option value="이벤트" ${task.category === '이벤트' ? 'selected' : ''}>🎟️ 이벤트</option>
+        <option value="미분류" ${task.category === '미분류' ? 'selected' : ''}>📥 미분류</option>
       </select>
     </div>
     <div class="work-modal-field-row">

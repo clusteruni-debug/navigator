@@ -607,7 +607,7 @@ function _renderCategoryCleanupSection() {
     </div>
   ` : '';
 
-  const ucOptions = ['본업', '부업', '자기계발', '일상', '가족', '이벤트'].map(c =>
+  const ucOptions = ['본업', '부업', '자기계발', '일상', '가족', '이벤트', '미분류'].map(c =>
     `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`
   ).join('');
 
