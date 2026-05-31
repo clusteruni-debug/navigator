@@ -179,7 +179,7 @@ function renderWorkTimeline() {
       p.stages.forEach((stage, si) => {
         (stage.subcategories || []).forEach((sub, sci) => {
           sub.tasks.forEach((task, ti) => {
-            (task.logs || []).forEach(log => {
+            (Array.isArray(task.logs) ? task.logs : []).forEach(log => {
               const key = makeTaskKey(log.date, task.title, p.id, si, sci);
               if (!taskGroups[key]) {
                 taskGroups[key] = {
@@ -433,7 +433,7 @@ function setProjectHistorySort(value) {
   if (!allowed.includes(value)) value = 'date-desc';
   appState.workProjectHistorySort = value;
   appState.workProjectHistoryPage = 0; // 정렬 변경 시 첫 페이지
-  try { localStorage.setItem('nav-project-history-sort', JSON.stringify(value)); } catch (_) {}
+  safeLocalStorageSet('nav-project-history-sort', JSON.stringify(value), { silent: true });
   renderStatic();
 }
 window.setProjectHistorySort = setProjectHistorySort;
@@ -444,7 +444,7 @@ function setActivityHistorySort(value) {
   appState.workActivityHistorySort = value;
   appState.workActivityHistoryPage = 0;
   appState._expandedActivityDates = {};
-  try { localStorage.setItem('nav-activity-history-sort', JSON.stringify(value)); } catch (_) {}
+  safeLocalStorageSet('nav-activity-history-sort', JSON.stringify(value), { silent: true });
   renderStatic();
 }
 window.setActivityHistorySort = setActivityHistorySort;

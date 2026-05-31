@@ -406,7 +406,7 @@ function _renderLifeHabitSection(habitRows) {
  */
 function _renderLifeTaskItem(task) {
   const category = safeCatId(task.category);
-  const hasSubtasks = task.subtasks && task.subtasks.length > 0;
+  const hasSubtasks = Array.isArray(task.subtasks) && task.subtasks.length > 0;
   const doneCount = hasSubtasks ? task.subtasks.filter(s => s.completed).length : 0;
   const totalCount = hasSubtasks ? task.subtasks.length : 0;
   const repeatLabel = task.repeatType && task.repeatType !== 'none'
@@ -730,7 +730,8 @@ window.addResolution = addResolution;
 function resetResolution(id) {
   const r = (appState.resolutions || []).find(item => item.id === id);
   if (!r) return;
-  if (!confirm(`"${r.title}" 카운터를 리셋하시겠습니까?\n(시작일이 오늘로 변경됩니다)`)) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn(`"${r.title}" 카운터를 리셋하시겠습니까?\n(시작일이 오늘로 변경됩니다)`, 'resolution-reset-' + id)) return;
   r.startDate = getLocalDateStr();
   r.updatedAt = new Date().toISOString();
   saveStateImmediate();
@@ -741,7 +742,8 @@ window.resetResolution = resetResolution;
 function deleteResolution(id) {
   const r = (appState.resolutions || []).find(item => item.id === id);
   if (!r) return;
-  if (!confirm(`"${r.title}" 결심을 삭제하시겠습니까?`)) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn(`"${r.title}" 결심을 삭제하시겠습니까?`, 'resolution-del-' + id)) return;
   if (!appState.deletedIds.resolutions) appState.deletedIds.resolutions = {};
   appState.deletedIds.resolutions[id] = new Date().toISOString();
   appState.resolutions = appState.resolutions.filter(item => item.id !== id);

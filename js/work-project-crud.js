@@ -47,7 +47,9 @@ function deleteProjectStage(projectId, stageIdx) {
 
   const stage = project.stages[stageIdx];
   const stageName = stage.name;
-  const cooldownKey = 'stage-' + projectId + '-' + stageIdx;
+  const cooldownKey = (typeof stableCooldownKey === 'function')
+    ? stableCooldownKey('stage', stage.id, [projectId, stageIdx])
+    : ('stage-' + projectId + '-' + stageIdx);
   const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
   if (!confirmFn(`"${stageName}" 단계와 하위 항목을 모두 삭제할까요?`, cooldownKey)) return;
 
@@ -122,7 +124,10 @@ window.promptRenameStage = promptRenameStage;
  * 프로젝트 삭제
  */
 function deleteWorkProject(projectId) {
-  const cooldownKey = 'project-' + projectId;
+  // projectId is the project's own UUID — already splice-invariant; routed through the helper for audit clarity.
+  const cooldownKey = (typeof stableCooldownKey === 'function')
+    ? stableCooldownKey('project', projectId, [projectId])
+    : ('project-' + projectId);
   const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
   if (!confirmFn('이 프로젝트와 모든 단계/항목/기록을 삭제할까요?', cooldownKey)) return;
 
@@ -192,7 +197,7 @@ function copyWorkProjectToClipboard(projectId) {
       subcat.tasks.forEach(task => {
         lines.push(_fmtTaskLine(task, isGeneral ? '' : '  '));
         // 상세 모드: 로그도 포함
-        const recentLogs = task.logs ? task.logs.filter(l => l.content !== '✓ 완료').slice(-2) : [];
+        const recentLogs = Array.isArray(task.logs) ? task.logs.filter(l => l.content !== '✓ 완료').slice(-2) : [];
         recentLogs.forEach(log => {
           lines.push('    ' + log.date + ': ' + log.content);
         });

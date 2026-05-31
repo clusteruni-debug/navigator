@@ -437,7 +437,7 @@ function setupInputHandlers() {
         const lines = parseBulletLines(pastedText);
         if (lines.length > 1) {
           e.preventDefault();
-          if (!appState.detailedTask.subtasks) {
+          if (!Array.isArray(appState.detailedTask.subtasks)) {
             appState.detailedTask.subtasks = [];
           }
           lines.forEach(line => {

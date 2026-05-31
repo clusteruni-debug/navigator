@@ -232,7 +232,7 @@ function addSubtask(text) {
   const rawText = text.trim();
   if (!rawText) return;
 
-  if (!appState.detailedTask.subtasks) {
+  if (!Array.isArray(appState.detailedTask.subtasks)) {
     appState.detailedTask.subtasks = [];
   }
 
@@ -259,7 +259,7 @@ function addSubtask(text) {
  * 서브태스크 제거
  */
 function removeSubtask(index) {
-  if (appState.detailedTask.subtasks) {
+  if (Array.isArray(appState.detailedTask.subtasks)) {
     appState.detailedTask.subtasks.splice(index, 1);
     renderStatic();
     // 포커스 복원: renderStatic() 후 DOM이 재생성되므로 새 input에 포커스
@@ -276,7 +276,7 @@ function removeSubtask(index) {
  * 상세 입력 폼에서 서브태스크 완료 토글
  */
 function toggleDetailedSubtask(index) {
-  if (appState.detailedTask.subtasks && appState.detailedTask.subtasks[index]) {
+  if (Array.isArray(appState.detailedTask.subtasks) && appState.detailedTask.subtasks[index]) {
     appState.detailedTask.subtasks[index].completed = !appState.detailedTask.subtasks[index].completed;
     appState.detailedTask.subtasks[index].completedAt = appState.detailedTask.subtasks[index].completed
       ? new Date().toISOString()
@@ -306,7 +306,7 @@ function toggleDetailedSubtask(index) {
  */
 function toggleSubtaskComplete(taskId, subtaskIndex) {
   const task = appState.tasks.find(t => t.id === taskId);
-  if (task && task.subtasks && task.subtasks[subtaskIndex]) {
+  if (task && Array.isArray(task.subtasks) && task.subtasks[subtaskIndex]) {
     const subtask = task.subtasks[subtaskIndex];
     const prevCompletedAt = subtask.completedAt; // 백데이트 완료 해제 시 원래 날짜 참조용
     subtask.completed = !subtask.completed;
@@ -363,7 +363,7 @@ function toggleSubtaskExpand(taskId) {
 function toggleSubtaskChips(taskId) {
   if (!appState.collapsedSubtaskChips) appState.collapsedSubtaskChips = {};
   appState.collapsedSubtaskChips[taskId] = !appState.collapsedSubtaskChips[taskId];
-  try { localStorage.setItem('navigator-collapsed-subtask-chips', JSON.stringify(appState.collapsedSubtaskChips)); } catch (_) {}
+  safeLocalStorageSet('navigator-collapsed-subtask-chips', JSON.stringify(appState.collapsedSubtaskChips), { silent: true });
   renderStatic();
 }
 window.toggleSubtaskChips = toggleSubtaskChips;

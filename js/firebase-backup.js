@@ -51,7 +51,8 @@ function restoreFromSyncBackup() {
     const wpCount = (backup.workProjects || []).length;
     const timeStr = new Date(backup.timestamp).toLocaleString('ko-KR');
 
-    if (!confirm(
+    const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+    if (!confirmFn(
       `동기화 백업에서 복원하시겠습니까?\n\n` +
       `백업 시각: ${timeStr}\n` +
       `태스크: ${taskCount}개\n` +

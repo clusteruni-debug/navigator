@@ -204,7 +204,7 @@ function getSearchFilteredTasks(tasks) {
       // 태그 검색
       if (t.tags && t.tags.some(tag => tag.toLowerCase().includes(query))) return true;
       // 서브태스크 검색
-      if (t.subtasks && t.subtasks.some(st => st.text.toLowerCase().includes(query))) return true;
+      if (Array.isArray(t.subtasks) && t.subtasks.some(st => st.text.toLowerCase().includes(query))) return true;
       return false;
     });
   }

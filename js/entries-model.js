@@ -236,6 +236,18 @@
     return true;
   }
 
+  // Splice-invariant cooldown key for destructive list-item actions (PLAN M4).
+  // stableId (item.id UUID, or content-derived id for id-less items) keeps the key tied to
+  // the ITEM, not the array position. After deleting item A, the position holds item B whose
+  // id differs, so a rapid second delete re-prompts instead of silently confirming the shifted
+  // item. Without a stableId (legacy pre-UUID data) the per-call sequence makes each key unique
+  // → the cooldown never auto-confirms → every delete re-prompts.
+  let _cooldownFallbackSeq = 0;
+  function stableCooldownKey(prefix, stableId, indexParts) {
+    if (stableId) return prefix + '-' + stableId;
+    return prefix + '-' + (Array.isArray(indexParts) ? indexParts.join('-') : '') + '-fb' + (++_cooldownFallbackSeq);
+  }
+
   const api = {
     ENTRY_TYPES,
     AUTO_SUBTASK_ORIGIN_PREFIX,
@@ -245,7 +257,8 @@
     buildAutoNoteLog,
     applySubtaskToggle,
     applySubtaskRemove,
-    applySubtaskRename
+    applySubtaskRename,
+    stableCooldownKey
   };
 
   if (typeof module !== 'undefined' && module.exports) {

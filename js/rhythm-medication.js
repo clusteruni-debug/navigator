@@ -263,7 +263,7 @@ function addMedicationSlot() {
   if (!label) return;
 
   var icon = prompt('레거시 아이콘 값 (선택):', '') || '\u{1F48A}';
-  var required = confirm('필수 복약인가요? (확인=필수, 취소=선택)');
+  var required = confirm('필수 복약인가요? (확인=필수, 취소=선택)'); // boolean 입력 — 파괴적 아님 (destructiveConfirm 비대상)
 
   if (!appState.lifeRhythm.settings) appState.lifeRhythm.settings = {};
   if (!appState.lifeRhythm.settings.medicationSlots) {
@@ -299,7 +299,7 @@ function editMedicationSlot(idx) {
   var newIcon = prompt('레거시 아이콘 값 (선택):', '');
   if (newIcon === null) newIcon = slot.icon;
   if (!newIcon) newIcon = slot.icon || '\u{1F48A}';
-  var newRequired = confirm('필수 복약인가요? (확인=필수, 취소=선택)');
+  var newRequired = confirm('필수 복약인가요? (확인=필수, 취소=선택)'); // boolean 입력 — 파괴적 아님 (destructiveConfirm 비대상)
 
   slot.label = newLabel;
   slot.icon = newIcon;
@@ -324,7 +324,8 @@ function deleteMedicationSlot(idx) {
   if (idx < 0 || idx >= slots.length) return;
 
   var slot = slots[idx];
-  if (!confirm(slot.label + ' 슬롯을 삭제하시겠습니까?\n(기존 기록은 유지됩니다)')) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn(slot.label + ' 슬롯을 삭제하시겠습니까?\n(기존 기록은 유지됩니다)', 'med-slot-del-' + (slot.id || idx))) return;
 
   slots.splice(idx, 1);
 

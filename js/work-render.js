@@ -123,7 +123,7 @@ function renderWorkGeneralView() {
                   <button class="work-task-action" onclick="deleteTask('${escapeAttr(task.id)}')" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
                 </div>
               </div>
-              ${task.subtasks && task.subtasks.length > 0 ? `
+              ${Array.isArray(task.subtasks) && task.subtasks.length > 0 ? `
                 <div style="padding-left: 32px; margin-top: 4px;">
                   ${task.subtasks.map((st, idx) => `
                     <div style="display: flex; align-items: center; gap: 6px; padding: 3px 0; font-size: 14px; color: ${st.completed ? 'var(--text-muted)' : 'var(--text-primary)'}; ${st.completed ? 'text-decoration: line-through;' : ''} cursor: pointer;" onclick="toggleSubtaskComplete('${escapeAttr(task.id)}', ${idx})">

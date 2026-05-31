@@ -349,12 +349,8 @@
       transform: translateY(-50%);
       font-size: 20px;
       filter: drop-shadow(0 2px 4px var(--shadow-color));
-      animation: runner-bounce 0.5s ease infinite;
-    }
-
-    @keyframes runner-bounce {
-      0%, 100% { transform: translateY(-50%) translateX(0); }
-      50% { transform: translateY(-60%) translateX(2px); }
+      /* persistent looping bounce removed (workspace rule: no persistent looping animation;
+         also reduces constant motion that distracts ADHD focus). Runner sits static at progress edge. */
     }
 
     .daily-goal-finish {

@@ -7,7 +7,8 @@
  * 템플릿 삭제 (soft-delete)
  */
 function deleteWorkTemplate(templateId) {
-  if (!confirm('이 템플릿을 삭제하시겠습니까?')) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn('이 템플릿을 삭제하시겠습니까?', 'tmpl-del-' + templateId)) return;
   if (!appState.deletedIds.workTemplates) appState.deletedIds.workTemplates = {};
   appState.deletedIds.workTemplates[templateId] = new Date().toISOString();
   appState.workTemplates = appState.workTemplates.filter(t => t.id !== templateId);
@@ -41,7 +42,8 @@ window.addTemplateStage = addTemplateStage;
 function deleteTemplateStage(templateId, stageIdx) {
   const template = appState.workTemplates.find(t => t.id === templateId);
   if (!template) return;
-  if (!confirm('이 단계를 삭제하시겠습니까?')) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn('이 단계를 삭제하시겠습니까?')) return;
   if (!template.stageNames) template.stageNames = [];
   template.stageNames.splice(stageIdx, 1);
   template.stages.splice(stageIdx, 1);

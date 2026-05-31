@@ -103,10 +103,23 @@ function resetCompletedRepeatTasks() {
 window.resetCompletedRepeatTasks = resetCompletedRepeatTasks;
 
 /**
+ * 일반 업무 quick-add input 중 현재 보이는 것을 반환.
+ * 전체 탭(work-quick-input-all)과 일반업무 탭(work-quick-input)이 동시에 DOM에 있을 수 있어
+ * 단일 getElementById 는 숨겨진(빈) input 을 잡아 quick-add 가 무음 실패할 수 있었음.
+ * 보이는 패널의 input 우선, 못 찾으면 첫 번째 (기존 동작과 최소 동일 — never worse).
+ */
+function _visibleWorkQuickInput() {
+  const els = document.querySelectorAll('#work-quick-input, #work-quick-input-all');
+  for (let i = 0; i < els.length; i++) { if (els[i].offsetParent !== null) return els[i]; }
+  return els[0] || null;
+}
+window._visibleWorkQuickInput = _visibleWorkQuickInput;
+
+/**
  * 본업 빠른 추가 (프로젝트 없이)
  */
 function quickAddWorkTask() {
-  const input = document.getElementById('work-quick-input');
+  const input = _visibleWorkQuickInput();
   if (!input || !input.value.trim()) return;
 
   const title = input.value.trim();

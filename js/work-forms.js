@@ -451,7 +451,8 @@ function resetFormTemplate() {
   const project = appState.workProjects.find(p => p.id === workModalState.projectId);
   if (!project || !project.formTemplates) return;
 
-  if (!confirm('저장된 템플릿을 삭제하고 기본 양식으로 돌아갈까요?')) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn('저장된 템플릿을 삭제하고 기본 양식으로 돌아갈까요?')) return;
 
   delete project.formTemplates[workModalState.formType];
   if (Object.keys(project.formTemplates).length === 0) {

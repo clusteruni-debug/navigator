@@ -125,8 +125,8 @@ function showRhythmActionMenu(type, event) {
   var menu = document.createElement('div');
   menu.className = 'rhythm-action-menu';
   menu.id = 'rhythm-action-menu';
-  menu.innerHTML = '<button onclick="hideRhythmActionMenu(); editLifeRhythm(\'' + escapeAttr(type) + '\')">✏️ 시간 수정</button>' +
-    '<button class="danger" onclick="hideRhythmActionMenu(); deleteLifeRhythm(\'' + escapeAttr(type) + '\')">🗑️ 기록 삭제</button>';
+  menu.innerHTML = '<button onclick="hideRhythmActionMenu(); editLifeRhythm(\'' + escapeAttr(type) + '\')">' + svgIcon('edit', 14) + ' 시간 수정</button>' +
+    '<button class="danger" onclick="hideRhythmActionMenu(); deleteLifeRhythm(\'' + escapeAttr(type) + '\')">' + svgIcon('trash', 14) + ' 기록 삭제</button>';
 
   document.body.appendChild(overlay);
   document.body.appendChild(menu);
@@ -337,7 +337,7 @@ function checkRhythmDayChange() {
   if (!transitionRhythmDay(appState.lifeRhythm, localToday)) return false;
 
   // updatedAt 없이 로컬만 저장 (빈 데이터는 병합에서 항상 패배)
-  localStorage.setItem('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
+  safeLocalStorageSet('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
   if (appState.user) syncToFirebase(true); // 히스토리 이동만 전파
   console.log('[rhythm] 오늘(' + localToday + ') 리듬 초기화 (updatedAt 없음)');
   return true;
@@ -349,7 +349,7 @@ function saveLifeRhythm() {
     appState.lifeRhythm.today.updatedAt = new Date().toISOString();
   }
   // 항상 localStorage에 저장 (로그인 여부 무관 — 오프라인 폴백 보장)
-  localStorage.setItem('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
+  safeLocalStorageSet('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
   if (appState.user) {
     // 리듬 기록은 즉시 동기화 — 디바운스 중 브라우저 닫기로 유실 방지
     syncToFirebase(true);

@@ -462,7 +462,7 @@ async function loadFromFirebase() {
           settings: mergedRhythmSettings
         };
         // 병합 결과를 localStorage에도 반영
-        localStorage.setItem('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
+        safeLocalStorageSet('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
       }
       // 통근 트래커 병합 (deletedIds 필터링 + updatedAt 기반 최신 우선)
       if (data.commuteTracker) {
@@ -736,7 +736,7 @@ function startRealtimeSync() {
             settings: mergedRhythmSettingsRT
           };
           // 병합 결과를 localStorage에도 반영 — 새로고침 시 이전 데이터로 되돌아가는 문제 방지
-          localStorage.setItem('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
+          safeLocalStorageSet('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
         }
         // 통근 트래커 병합 (실시간 동기화, deletedIds 필터링 + updatedAt 최신 우선)
         if (data.commuteTracker) {
@@ -777,7 +777,7 @@ function startRealtimeSync() {
           appState.commuteTracker.trips = mergedTrips;
           // 설정: cloud 기반 + 로컬 덮어쓰기
           appState.commuteTracker.settings = { ...(cloud.settings || {}), ...(local.settings || {}) };
-          localStorage.setItem('navigator-commute-tracker', JSON.stringify(appState.commuteTracker));
+          safeLocalStorageSet('navigator-commute-tracker', JSON.stringify(appState.commuteTracker));
         }
         // 완료 기록 영구 로그 병합
         if (data.completionLog) {

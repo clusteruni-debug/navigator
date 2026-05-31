@@ -356,7 +356,7 @@ function _renderAllGeneralSection() {
     '</button>' +
     '<div class="work-task-list-redesign">' + (visible.map(item => _renderWorkTaskRow(item)).join('') || '<div class="work-empty-inline">일반 업무 없음</div>') + '</div>' +
     (more > 0 ? '<button class="work-section-more" aria-expanded="' + expanded + '" onclick="toggleWorkGeneralSection()">' + (expanded ? '접기' : '+' + more + '개 더') + '</button>' : '') +
-    '<div class="work-section-quickadd"><input id="work-quick-input" type="text" placeholder="새 일반 업무 추가" onkeydown="if(event.key===\'Enter\') quickAddWorkTask()"><button class="work-icon-action" onclick="quickAddWorkTask()" aria-label="일반 업무 추가">' + _workIcon('plus', 14) + '</button></div>' +
+    '<div class="work-section-quickadd"><input id="work-quick-input-all" type="text" placeholder="새 일반 업무 추가" onkeydown="if(event.key===\'Enter\') quickAddWorkTask()"><button class="work-icon-action" onclick="quickAddWorkTask()" aria-label="일반 업무 추가">' + _workIcon('plus', 14) + '</button></div>' +
   '</section>';
 }
 

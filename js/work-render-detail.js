@@ -445,7 +445,10 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
   // Detail accordion: 3+ logs → default collapsed.
   // P4 review: count user-authored logs only (origin auto-from-subtask:* 제외) — auto-note 누적이 collapse 토글 flip 시키지 않도록.
   // Round 2 review: hardcoded literal → AUTO_SUBTASK_ORIGIN_PREFIX 상수 (drift 방지).
-  const _autoPrefix = (typeof AUTO_SUBTASK_ORIGIN_PREFIX === 'string') ? AUTO_SUBTASK_ORIGIN_PREFIX : 'auto-from-subtask:';
+  // M6: fallback 리터럴 제거 (상수와 drift 위험). 누락 시 silent 마스킹 대신 surface —
+  //     render 중단 막으려 early-return 대신 console.error + 상수 직접 사용 (graceful degrade).
+  if (typeof AUTO_SUBTASK_ORIGIN_PREFIX !== 'string') console.error('[navigator] AUTO_SUBTASK_ORIGIN_PREFIX 누락 — entries-model.js 로드 순서 확인');
+  const _autoPrefix = AUTO_SUBTASK_ORIGIN_PREFIX;
   const totalLogCount = Array.isArray(task.logs)
     ? task.logs.filter(l => !l || typeof l.origin !== 'string' || l.origin.indexOf(_autoPrefix) !== 0).length
     : 0;
@@ -468,17 +471,24 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
          style="${pulseColor !== 'transparent' ? 'border-left: 3px solid ' + pulseColor + ';' : ''}">
       <div class="work-task-header">
         <span class="work-drag-handle" draggable="true" ondragstart="handleWorkTaskDragStart(event, '${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="드래그하여 순서 변경">≡</span>
-        ${isCollapsible ? `<span class="work-task-detail-chevron" data-detail-key="${taskExpandKey}" data-log-count="${totalLogCount}" onclick="event.stopPropagation(); toggleTaskDetailExpand('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="${isDetailExpanded ? '기록 접기' : '기록 펼치기'}">${isDetailExpanded ? '▼' : '▶ ' + totalLogCount + '기록'}</span>` : ''}
+        ${isCollapsible ? `<span class="work-task-detail-chevron" role="button" tabindex="0" aria-expanded="${isDetailExpanded ? 'true' : 'false'}" aria-label="${isDetailExpanded ? '기록 접기' : '기록 펼치기'}" data-detail-key="${taskExpandKey}" data-log-count="${totalLogCount}" onclick="event.stopPropagation(); toggleTaskDetailExpand('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();toggleTaskDetailExpand('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})}" title="${isDetailExpanded ? '기록 접기' : '기록 펼치기'}">${isDetailExpanded ? '▼' : '▶ ' + totalLogCount + '기록'}</span>` : ''}
         <div class="work-task-checkbox ${task.status === 'completed' ? 'checked' : ''}"
+             role="button" tabindex="0"
+             aria-pressed="${task.status === 'completed' ? 'true' : 'false'}"
+             aria-label="${task.status === 'completed' ? '완료 취소' : '완료 표시'}"
              onclick="toggleWorkTaskComplete('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleWorkTaskComplete('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})}"
              title="완료 체크">
           ${task.status === 'completed' ? '✓' : ''}
         </div>
-        <span class="work-status-badge ${task.status}" onclick="cycleWorkTaskStatus('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})"
+        <span class="work-status-badge ${task.status}" role="button" tabindex="0"
+              aria-label="상태 변경 (현재 ${statusInfo.label})"
+              onclick="cycleWorkTaskStatus('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})"
+              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();cycleWorkTaskStatus('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})}"
               title="클릭하여 상태 변경">
           ${statusInfo.label}
         </span>
-        <span class="work-task-priority${(task.priority || 0) > 0 ? ' has-stars' : ''}" onclick="event.stopPropagation(); cycleTaskPriority('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="클릭으로 우선순위 변경 (★0~5, 현재 ${task.priority || 0})">${(task.priority || 0) > 0 ? '★ ' + task.priority : '★'}</span>
+        <span class="work-task-priority${(task.priority || 0) > 0 ? ' has-stars' : ''}" role="button" tabindex="0" aria-label="우선순위 변경 (현재 ${task.priority || 0}/5)" onclick="event.stopPropagation(); cycleTaskPriority('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();cycleTaskPriority('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})}" title="클릭으로 우선순위 변경 (★0~5, 현재 ${task.priority || 0})">${(task.priority || 0) > 0 ? '★ ' + task.priority : '★'}</span>
         ${task.isNewFromV2 ? '<span class="task-meta-badge new-v2" title="v3 신규 항목">v3</span>' : ''}
         ${task.rationaleRef ? '<span class="task-meta-badge rationale" title="근거: ' + escapeAttr(task.rationaleRef) + '">' + escapeHtml(task.rationaleRef) + '</span>' : ''}
         ${task.notes ? '<span class="task-meta-badge note" title="' + escapeAttr(task.notes) + '">ⓘ</span>' : ''}
@@ -495,7 +505,7 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
           ${hasLongLogs ? `<button class="work-task-action" onclick="event.stopPropagation(); toggleAllWorkLogContents('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="긴 기록 본문 일괄 접기/펴기" aria-label="기록 본문 일괄 토글">📖</button>` : ''}
           <button class="work-task-action" onclick="event.stopPropagation(); toggleCanStartEarly('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="${task.canStartEarly ? '선제적 시작 해제' : '선제적 시작 설정'}" aria-label="선제적 시작 토글" style="${task.canStartEarly ? 'color: var(--accent-primary);' : ''}">💡</button>
           <button class="work-task-action" onclick="event.stopPropagation(); copyWorkTaskToSlack('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="슬랙 복사" aria-label="슬랙 복사">📋</button>
-          ${(!task.subtasks || task.subtasks.length === 0) ? `<button class="work-task-action" onclick="event.stopPropagation(); promptAddFirstWorkTaskSubtask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="하위 항목 추가" aria-label="하위 항목 추가">+ 하위 항목</button>` : ''}
+          ${(!Array.isArray(task.subtasks) || task.subtasks.length === 0) ? `<button class="work-task-action" onclick="event.stopPropagation(); promptAddFirstWorkTaskSubtask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="하위 항목 추가" aria-label="하위 항목 추가">+ 하위 항목</button>` : ''}
           <button class="work-task-action" onclick="deleteWorkTask('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="항목 삭제" aria-label="항목 삭제" style="color: var(--accent-danger);">${svgIcon('trash', 14)}</button>
         </div>
       </div>
@@ -634,7 +644,9 @@ function renderEntriesNoteRow(entry, pid, si, sci, ti, taskUid) {
   const legacyIdx = idMatch ? Number(idMatch[1]) : -1;
   if (legacyIdx < 0) return '';
   const isChecked = !!entry.checked;
-  const autoPrefix = (typeof AUTO_SUBTASK_ORIGIN_PREFIX === 'string') ? AUTO_SUBTASK_ORIGIN_PREFIX : 'auto-from-subtask:';
+  // M6: fallback 리터럴 제거 — 상수 직접 사용, 누락 시 console.error 로 surface.
+  if (typeof AUTO_SUBTASK_ORIGIN_PREFIX !== 'string') console.error('[navigator] AUTO_SUBTASK_ORIGIN_PREFIX 누락 — entries-model.js 로드 순서 확인');
+  const autoPrefix = AUTO_SUBTASK_ORIGIN_PREFIX;
   const isAutoNote = entry.origin && String(entry.origin).indexOf(autoPrefix) === 0;
   const autoClass = isAutoNote ? ' entry-auto-note' : '';
   const _logKey = taskUid + '-log-' + legacyIdx;

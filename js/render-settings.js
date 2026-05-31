@@ -73,10 +73,10 @@ function renderSettingsModal() {
                 <div class="settings-section-title">☁️ 클라우드 동기화</div>
                 ${appState.user ? `
                   <div class="user-section">
-                    <img class="user-avatar" src="${appState.user.photoURL || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23667eea%22 width=%22100%22 height=%22100%22 rx=%2250%22/><text x=%2250%22 y=%2265%22 font-size=%2250%22 text-anchor=%22middle%22 fill=%22white%22>👤</text></svg>'}" alt="프로필">
+                    <img class="user-avatar" src="${appState.user.photoURL ? escapeAttr(appState.user.photoURL) : 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23667eea%22 width=%22100%22 height=%22100%22 rx=%2250%22/><text x=%2250%22 y=%2265%22 font-size=%2250%22 text-anchor=%22middle%22 fill=%22white%22>👤</text></svg>'}" alt="프로필">
                     <div class="user-info">
-                      <div class="user-name">${appState.user.displayName || '사용자'}</div>
-                      <div class="user-email">${appState.user.email}</div>
+                      <div class="user-name">${escapeHtml(appState.user.displayName || '사용자')}</div>
+                      <div class="user-email">${escapeHtml(appState.user.email || '')}</div>
                       <div id="sync-indicator" class="sync-status ${appState.syncStatus}">
                         <span class="sync-icon">${appState.syncStatus === 'syncing' ? '🔄' : appState.syncStatus === 'synced' ? '✅' : appState.syncStatus === 'error' ? '⚠️' : '☁️'}</span>
                         ${appState.syncStatus === 'syncing' ? '동기화 중...' : appState.syncStatus === 'synced' ? '동기화됨' : appState.syncStatus === 'error' ? '동기화 오류' : '대기 중'}
@@ -417,7 +417,7 @@ function renderSettingsModal() {
               <div class="settings-section">
                 <div class="settings-section-title">🌙 매일 자문</div>
                 <div class="settings-row">
-                  <label style="flex: 1;">저녁 자문 시각</label>
+                  <label for="reflection-evening-time" style="flex: 1;">저녁 자문 시각</label>
                   <input type="time" id="reflection-evening-time"
                          value="${appState.dailyReflection.settings.eveningTime}"
                          onchange="applyReflectionSettings()"
@@ -432,7 +432,7 @@ function renderSettingsModal() {
                   </label>
                 </div>
                 <div class="settings-row">
-                  <label style="flex: 1;">아침 자문 시각</label>
+                  <label for="reflection-morning-time" style="flex: 1;">아침 자문 시각</label>
                   <input type="time" id="reflection-morning-time"
                          value="${appState.dailyReflection.settings.morningTime || '09:00'}"
                          ${appState.dailyReflection.settings.morningTime ? '' : 'disabled'}
@@ -447,14 +447,14 @@ function renderSettingsModal() {
                       <textarea data-q-time="evening" data-q-idx="${i}"
                                 maxlength="100" rows="2"
                                 onchange="applyReflectionSettings()"
-                                style="padding: 6px 10px; border-radius: 6px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); font-family: inherit; font-size: 13px; resize: vertical;">${(appState.dailyReflection.settings.questions.evening[i]||'').replace(/</g,'&lt;')}</textarea>
+                                style="padding: 6px 10px; border-radius: 6px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); font-family: inherit; font-size: 13px; resize: vertical;">${escapeHtml(appState.dailyReflection.settings.questions.evening[i]||'')}</textarea>
                     `).join('')}
                     <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">아침</div>
                     ${[0,1,2].map(i => `
                       <textarea data-q-time="morning" data-q-idx="${i}"
                                 maxlength="100" rows="2"
                                 onchange="applyReflectionSettings()"
-                                style="padding: 6px 10px; border-radius: 6px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); font-family: inherit; font-size: 13px; resize: vertical;">${(appState.dailyReflection.settings.questions.morning[i]||'').replace(/</g,'&lt;')}</textarea>
+                                style="padding: 6px 10px; border-radius: 6px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); font-family: inherit; font-size: 13px; resize: vertical;">${escapeHtml(appState.dailyReflection.settings.questions.morning[i]||'')}</textarea>
                     `).join('')}
                   </div>
                 </details>
@@ -530,7 +530,8 @@ function applyReflectionSettings() {
 }
 
 function resetReflectionSettings() {
-  if (!confirm('자문 설정을 기본값으로 복원할까요? (시각 / 질문 / 알림 모두 초기화)')) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn('자문 설정을 기본값으로 복원할까요? (시각 / 질문 / 알림 모두 초기화)')) return;
   appState.dailyReflection.settings = {
     eveningTime: '22:00',
     morningTime: null,
@@ -722,7 +723,8 @@ window.unconfirmLifeHabit = unconfirmLifeHabit;
 function applyEventReclassifyRecommendation() {
   const { eventCandidates } = _getCategoryCleanupCandidates();
   if (eventCandidates.length === 0) return;
-  if (!confirm(`${eventCandidates.length}개 task를 '이벤트'로 변경할까요?\n(repeatType=none + deadline 있는 일상 task)`)) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn(`${eventCandidates.length}개 task를 '이벤트'로 변경할까요?\n(repeatType=none + deadline 있는 일상 task)`)) return;
   const now = new Date().toISOString();
   const idSet = new Set(eventCandidates.map(c => c.id));
   appState.tasks = appState.tasks.map(t =>

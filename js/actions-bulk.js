@@ -7,7 +7,8 @@
  * 작업 삭제
  */
 function deleteTask(id) {
-  if (!confirm('정말 삭제하시겠습니까? (휴지통에서 복원 가능)')) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn('정말 삭제하시겠습니까? (휴지통에서 복원 가능)', 'task-del-' + id)) return;
 
   const task = appState.tasks.find(t => t.id === id);
   if (task) {
@@ -20,7 +21,7 @@ function deleteTask(id) {
   // UI 상태 정리: 접힌 서브태스크 칩 제거
   if (appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[id]) {
     delete appState.collapsedSubtaskChips[id];
-    try { localStorage.setItem('navigator-collapsed-subtask-chips', JSON.stringify(appState.collapsedSubtaskChips)); } catch (_) {}
+    safeLocalStorageSet('navigator-collapsed-subtask-chips', JSON.stringify(appState.collapsedSubtaskChips), { silent: true });
   }
   saveState();
   renderStatic();
@@ -69,7 +70,8 @@ function toggleEventSelectAll() {
 function bulkDeleteEvents() {
   const count = _eventBulkSelectedIds.size;
   if (count === 0) return;
-  if (!confirm(count + '개 이벤트를 삭제하시겠습니까? (휴지통에서 복원 가능)')) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn(count + '개 이벤트를 삭제하시겠습니까? (휴지통에서 복원 가능)')) return;
 
   const now = new Date().toISOString();
   _eventBulkSelectedIds.forEach(id => {
@@ -140,7 +142,8 @@ function restoreFromTrash(id) {
  * 휴지통에서 영구 삭제
  */
 function permanentDeleteFromTrash(id) {
-  if (!confirm('영구 삭제하면 복원할 수 없습니다. 진행하시겠습니까?')) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn('영구 삭제하면 복원할 수 없습니다. 진행하시겠습니까?', 'trash-perm-' + id)) return;
   // Soft-Delete: 동기화 시 부활 방지
   if (!appState.deletedIds.trash) appState.deletedIds.trash = {};
   appState.deletedIds.trash[id] = new Date().toISOString();
@@ -155,7 +158,8 @@ function permanentDeleteFromTrash(id) {
  */
 function emptyTrash() {
   if (appState.trash.length === 0) return;
-  if (!confirm('휴지통을 비우면 ' + appState.trash.length + '개 항목이 영구 삭제됩니다. 진행하시겠습니까?')) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn('휴지통을 비우면 ' + appState.trash.length + '개 항목이 영구 삭제됩니다. 진행하시겠습니까?')) return;
   // Soft-Delete: 모든 휴지통 항목의 삭제 기록 추가 (동기화 시 부활 방지)
   if (!appState.deletedIds.trash) appState.deletedIds.trash = {};
   const now = new Date().toISOString();

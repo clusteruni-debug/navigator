@@ -27,7 +27,7 @@ function completeTaskForDate(id, dateStr) {
   const logEntry = { t: task.title, c: task.category, at: timeStr };
   if (task.repeatType && task.repeatType !== 'none') logEntry.r = task.repeatType;
   if (task.expectedRevenue) logEntry.rv = Number(task.expectedRevenue);
-  if (task.subtasks && task.subtasks.length > 0) {
+  if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
     const doneCount = task.subtasks.filter(s => s.completed).length;
     if (doneCount > 0) logEntry.st = doneCount;
   }
@@ -74,7 +74,7 @@ function completeTaskForDate(id, dateStr) {
       updatedTask.completed = false;
       updatedTask.completedAt = null;
       updatedTask.updatedAt = new Date().toISOString();
-      if (updatedTask.subtasks) {
+      if (Array.isArray(updatedTask.subtasks)) {
         updatedTask.subtasks.forEach(st => {
           st.completed = false;
           st.completedAt = null;
@@ -209,7 +209,7 @@ function showSubtaskBackdateMenu(taskId, subtaskIndex, anchorEl) {
   if (!document.body.contains(anchorEl)) return;
 
   const task = appState.tasks.find(t => t.id === taskId);
-  if (!task || !task.subtasks || !task.subtasks[subtaskIndex]) return;
+  if (!task || !Array.isArray(task.subtasks) || !task.subtasks[subtaskIndex]) return;
   const subtask = task.subtasks[subtaskIndex];
 
   // 이미 완료된 서브태스크면 해제
@@ -289,7 +289,7 @@ window.showSubtaskBackdateMenu = showSubtaskBackdateMenu;
  */
 function completeSubtaskForDate(taskId, subtaskIndex, dateStr) {
   const task = appState.tasks.find(t => t.id === taskId);
-  if (!task || !task.subtasks || !task.subtasks[subtaskIndex]) return;
+  if (!task || !Array.isArray(task.subtasks) || !task.subtasks[subtaskIndex]) return;
 
   const subtask = task.subtasks[subtaskIndex];
   subtask.completed = true;
@@ -350,7 +350,7 @@ function completeTask(id) {
   const logEntry = { t: task.title, c: task.category, at: timeStr };
   if (task.repeatType && task.repeatType !== 'none') logEntry.r = task.repeatType;
   if (task.expectedRevenue) logEntry.rv = Number(task.expectedRevenue);
-  if (task.subtasks && task.subtasks.length > 0) {
+  if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
     const doneCount = task.subtasks.filter(s => s.completed).length;
     if (doneCount > 0) logEntry.st = doneCount;
   }

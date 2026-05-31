@@ -40,8 +40,8 @@ function exportData() {
     URL.revokeObjectURL(url);
 
     // 백업/아카이브 시간 기록 (프루닝 안전 게이트에 사용)
-    localStorage.setItem('navigator-last-backup', new Date().toISOString());
-    localStorage.setItem('navigator-last-archive-date', new Date().toISOString());
+    safeLocalStorageSet('navigator-last-backup', new Date().toISOString(), { silent: true });
+    safeLocalStorageSet('navigator-last-archive-date', new Date().toISOString(), { silent: true });
 
     showToast('📦 백업 완료!', 'success');
   } catch (error) {
@@ -196,7 +196,7 @@ function handleFileImport(e) {
           const mergedTrips = { ...(cloud.trips || {}), ...(local.trips || {}) };
           appState.commuteTracker.trips = mergedTrips;
           appState.commuteTracker.settings = { ...(cloud.settings || {}), ...(local.settings || {}) };
-          localStorage.setItem('navigator-commute-tracker', JSON.stringify(appState.commuteTracker));
+          safeLocalStorageSet('navigator-commute-tracker', JSON.stringify(appState.commuteTracker));
         }
         // 완료 기록 로그 병합
         if (data.completionLog) {
@@ -309,7 +309,7 @@ function pruneOldCommuteTrips(years = 2) {
     for (const dateKey of Object.keys(toArchive)) {
       delete trips[dateKey];
     }
-    localStorage.setItem('navigator-commute-tracker', JSON.stringify(appState.commuteTracker));
+    safeLocalStorageSet('navigator-commute-tracker', JSON.stringify(appState.commuteTracker));
     console.log(`[Prune] commuteTracker.trips: ${pruned} entries older than ${cutoff} archived + removed`);
   }
   return pruned;

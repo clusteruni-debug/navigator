@@ -54,7 +54,7 @@ function migrateWorkTaskFields() {
             // 이미 완료된 태스크: 로그에서 최신 완료 날짜를 추출
             // ISO 8601 strict 포맷 'T00:00:00' 사용 — 'T00:00'은 Safari/Android WebView에서 Invalid Date 반환
             if (task.status === 'completed') {
-              const completionLog = (task.logs || []).filter(l => l.content === '✓ 완료');
+              const completionLog = (Array.isArray(task.logs) ? task.logs : []).filter(l => l.content === '✓ 완료');
               if (completionLog.length > 0) {
                 task.completedAt = completionLog[completionLog.length - 1].date + 'T00:00:00';
               } else {
@@ -432,7 +432,7 @@ function getProjectLastActivity(project) {
           const t = new Date(task.completedAt).getTime();
           if (!isNaN(t) && (!latest || t > latest)) latest = t;
         }
-        (task.logs || []).forEach(log => {
+        (Array.isArray(task.logs) ? task.logs : []).forEach(log => {
           if (log.date) {
             const t = new Date(log.date).getTime();
             if (!isNaN(t) && (!latest || t > latest)) latest = t;

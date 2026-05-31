@@ -113,7 +113,7 @@ function copyWorkTaskToSlack(projectId, stageIdx, subcatIdx, taskIdx) {
   if (!task) return;
 
   let text = _fmtTaskLine(task, '');
-  if (task.logs && task.logs.length > 0) {
+  if (Array.isArray(task.logs) && task.logs.length > 0) {
     const recentLogs = task.logs.filter(l => l.content !== '✓ 완료').slice(-3);
     if (recentLogs.length > 0) {
       recentLogs.forEach(log => {

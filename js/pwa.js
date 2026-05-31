@@ -162,7 +162,7 @@ function checkDeadlinesAndNotify() {
 
   // 24시간 이상 된 알림 기록은 삭제
   const recentNotified = notifiedTasks.slice(-100);
-  localStorage.setItem(notifiedKey, JSON.stringify(recentNotified));
+  safeLocalStorageSet(notifiedKey, JSON.stringify(recentNotified));
 }
 
 /**

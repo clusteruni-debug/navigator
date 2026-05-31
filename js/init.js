@@ -110,7 +110,7 @@ checkDeadlinesAndNotify(); // 초기 실행
 document.addEventListener('visibilitychange', async () => {
   if (document.hidden) {
     // 탭 전환/앱 최소화: 리듬 데이터 로컬 백업 + 대기 중인 Firebase 동기화 즉시 플러시
-    localStorage.setItem('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
+    safeLocalStorageSet('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
     if (appState.user && syncDebounceTimer) {
       // syncToFirebase(true)가 내부에서 디바운스 타이머를 취소하고 즉시 실행
       syncToFirebase(true);

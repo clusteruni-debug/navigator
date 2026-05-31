@@ -155,7 +155,10 @@ window.addSubcategory = addSubcategory;
  * 중분류 삭제
  */
 function deleteSubcategory(projectId, stageIdx, subcatIdx) {
-  const cooldownKey = 'subcat-' + projectId + '-' + stageIdx + '-' + subcatIdx;
+  const _scForKey = appState.workProjects.find(p => p.id === projectId)?.stages?.[stageIdx]?.subcategories?.[subcatIdx];
+  const cooldownKey = (typeof stableCooldownKey === 'function')
+    ? stableCooldownKey('subcat', _scForKey && _scForKey.id, [projectId, stageIdx, subcatIdx])
+    : ('subcat-' + projectId + '-' + stageIdx + '-' + subcatIdx);
   const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
   if (!confirmFn('이 중분류와 하위 항목을 모두 삭제할까요?', cooldownKey)) return;
 
@@ -364,7 +367,10 @@ window.toggleSubcategoryComplete = toggleSubcategoryComplete;
  * 작업 삭제
  */
 function deleteWorkTask(projectId, stageIdx, subcatIdx, taskIdx) {
-  const cooldownKey = 'task-' + projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx;
+  const _tForKey = appState.workProjects.find(p => p.id === projectId)?.stages?.[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  const cooldownKey = (typeof stableCooldownKey === 'function')
+    ? stableCooldownKey('task', _tForKey && _tForKey.id, [projectId, stageIdx, subcatIdx, taskIdx])
+    : ('task-' + projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx);
   const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
   if (!confirmFn('이 항목을 삭제할까요?', cooldownKey)) return;
 
@@ -426,14 +432,21 @@ window.addWorkLog = addWorkLog;
  * 로그 삭제
  */
 function deleteWorkLog(projectId, stageIdx, subcatIdx, taskIdx, logIdx) {
-  const cooldownKey = 'log-' + projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx + '-' + logIdx;
+  // logs have no UUID — derive a content-based stable id (task.id|date|content) so a rapid
+  // second delete after splice targets a different log → key differs → re-prompts.
+  const _taskForKey = appState.workProjects.find(p => p.id === projectId)?.stages?.[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
+  const _logForKey = (_taskForKey && Array.isArray(_taskForKey.logs)) ? _taskForKey.logs[logIdx] : null;
+  const _logId = _logForKey ? ((_taskForKey.id || taskIdx) + '|' + (_logForKey.date || '') + '|' + (_logForKey.content || '')) : null;
+  const cooldownKey = (typeof stableCooldownKey === 'function')
+    ? stableCooldownKey('log', _logId, [projectId, stageIdx, subcatIdx, taskIdx, logIdx])
+    : ('log-' + projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx + '-' + logIdx);
   const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
   if (!confirmFn('이 기록을 삭제할까요?', cooldownKey)) return;
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
 
   const task = project.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
-  if (!task || !task.logs) return;
+  if (!task || !Array.isArray(task.logs)) return;
   task.logs.splice(logIdx, 1);
   project.updatedAt = new Date().toISOString();
   saveWorkProjects();
@@ -453,7 +466,7 @@ function toggleWorkLogChecked(projectId, stageIdx, subcatIdx, taskIdx, logIdx) {
   const project = appState.workProjects.find(p => p.id === projectId);
   if (!project) return;
   const task = project.stages[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
-  if (!task || !task.logs || !task.logs[logIdx]) return;
+  if (!task || !Array.isArray(task.logs) || !task.logs[logIdx]) return;
   task.logs[logIdx].checked = !task.logs[logIdx].checked;
   project.updatedAt = new Date().toISOString();
   saveWorkProjects();

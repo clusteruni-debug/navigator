@@ -457,7 +457,7 @@ function showReflectionOnboarding() {
   const settings = appState.dailyReflection?.settings;
   const history = appState.dailyReflection?.history || {};
   if (Object.keys(history).length > 0) {
-    localStorage.setItem('navigator-reflection-onboarded', 'true');
+    safeLocalStorageSet('navigator-reflection-onboarded', 'true');
     return;
   }
   if (!settings?.autoModalEnabled) return;
@@ -495,7 +495,7 @@ function showReflectionOnboarding() {
   const finish = (autoModalOn) => {
     appState.dailyReflection.settings.autoModalEnabled = autoModalOn;
     if (typeof saveState === 'function') saveState();
-    localStorage.setItem('navigator-reflection-onboarded', 'true');
+    safeLocalStorageSet('navigator-reflection-onboarded', 'true');
     document.removeEventListener('keydown', keyHandler);
     overlay.classList.remove('reflection-modal-open');
     setTimeout(() => overlay.remove(), 220);

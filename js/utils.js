@@ -24,6 +24,33 @@ function safeCatId(category) {
 }
 
 // ============================================
+// 💾 localStorage 안전 저장 (QuotaExceeded / 프라이빗 모드 방어)
+// ============================================
+
+/**
+ * localStorage.setItem 안전 래퍼 — quota 초과·프라이빗 모드 거부 시 throw 대신 false 반환.
+ * 단일 키 저장 사이트 전용. 벌크 원자적 저장(state.js _doSaveState)은 외곽 try/catch 유지.
+ * @param {string} key
+ * @param {string} value - 이미 직렬화된 문자열 (JSON.stringify 결과 등)
+ * @param {{silent?: boolean}} [options] - silent=true면 toast 생략 (사소한 UI 선호 저장), console.error는 항상 기록
+ * @returns {boolean} 저장 성공 여부
+ */
+function safeLocalStorageSet(key, value, options) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (err) {
+    if (typeof console !== 'undefined') {
+      console.error('[navigator] localStorage 저장 실패 (' + key + '):', err && err.message);
+    }
+    if (!(options && options.silent) && typeof showToast === 'function') {
+      showToast('저장 공간 부족 — 오래된 기록 정리 필요', 'error');
+    }
+    return false;
+  }
+}
+
+// ============================================
 // 📅 날짜 유틸리티
 // ============================================
 

@@ -35,7 +35,7 @@
     }
 
     .btn-success:hover {
-      filter: brightness(0.9);
+      background: var(--accent-success-hover);
     }
 
     .btn-warning {
@@ -45,7 +45,7 @@
     }
 
     .btn-warning:hover {
-      filter: brightness(0.9);
+      background: var(--accent-warning-hover);
     }
 
     /* Disabled state global (P0 a11y 2026-05-24) — 5-agent audit Fix 5 */
@@ -65,7 +65,7 @@
     }
 
     .btn-danger:hover {
-      filter: brightness(0.9);
+      background: var(--accent-danger-hover);
     }
 
     .btn-secondary {

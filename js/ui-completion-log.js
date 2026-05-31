@@ -161,7 +161,7 @@ function compactOldCompletionLog() {
     console.log(`[compact] completionLog ${compacted}일 압축 완료`);
   }
 
-  localStorage.setItem('navigator-completion-log-compact-date', todayStr);
+  safeLocalStorageSet('navigator-completion-log-compact-date', todayStr);
 }
 
 /**

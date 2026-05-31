@@ -53,7 +53,7 @@ function toggleWorkQuickOwner() {
   renderStatic();
   // 포커스 복원
   setTimeout(() => {
-    const input = document.getElementById('work-quick-input');
+    const input = (typeof _visibleWorkQuickInput === 'function') ? _visibleWorkQuickInput() : document.getElementById('work-quick-input');
     if (input) input.focus();
   }, 50);
 }
@@ -77,7 +77,7 @@ if (typeof appState.workFocusExpanded === 'undefined') {
 
 function toggleWorkFocusExpanded() {
   appState.workFocusExpanded = !appState.workFocusExpanded;
-  try { localStorage.setItem('navigator-work-focus-expanded', appState.workFocusExpanded ? '1' : '0'); } catch (e) {}
+  safeLocalStorageSet('navigator-work-focus-expanded', appState.workFocusExpanded ? '1' : '0', { silent: true });
   renderStatic();
 }
 window.toggleWorkFocusExpanded = toggleWorkFocusExpanded;
@@ -306,7 +306,7 @@ function toggleAllWorkLogContents(projectId, stageIdx, subcatIdx, taskIdx) {
   const stage = project.stages && project.stages[stageIdx];
   const subcat = stage && stage.subcategories && stage.subcategories[subcatIdx];
   const task = subcat && subcat.tasks && subcat.tasks[taskIdx];
-  if (!task || !task.logs) return;
+  if (!task || !Array.isArray(task.logs)) return;
 
   const taskUid = task.id || (projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx);
   // 긴 log만 대상 (짧은 건 처음부터 접기 대상이 아님)
@@ -391,7 +391,12 @@ function removeWorkTaskSubtask(projectId, stageIdx, subcatIdx, taskIdx, subtaskI
   const task = project.stages?.[stageIdx]?.subcategories?.[subcatIdx]?.tasks?.[taskIdx];
   if (!task || !Array.isArray(task.subtasks) || !task.subtasks[subtaskIdx]) return;
   const target = task.subtasks[subtaskIdx];
-  const cooldownKey = 'subtask-' + projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx + '-' + subtaskIdx;
+  // subtasks have no UUID — use task.id|text as stable id (re-prompts after splice when the
+  // shifted subtask text differs). Empty text → null → per-call fallback → always re-prompts.
+  const _stId = target.text ? ((task.id || (projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx)) + '|' + target.text) : null;
+  const cooldownKey = (typeof stableCooldownKey === 'function')
+    ? stableCooldownKey('subtask', _stId, [projectId, stageIdx, subcatIdx, taskIdx, subtaskIdx])
+    : ('subtask-' + projectId + '-' + stageIdx + '-' + subcatIdx + '-' + taskIdx + '-' + subtaskIdx);
   const promptText = '"' + (target.text || '') + '" 항목을 삭제할까?';
   const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
   if (!confirmFn(promptText, cooldownKey)) return;

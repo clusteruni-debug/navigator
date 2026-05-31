@@ -102,7 +102,7 @@ function _getDashboardSubView() {
 function setDashboardSubView(view) {
   if (!DASHBOARD_VIEWS.includes(view)) view = '전체';
   appState.dashboardSubView = view;
-  try { localStorage.setItem('navigator-dashboard-sub-view', view); } catch (_) {}
+  safeLocalStorageSet('navigator-dashboard-sub-view', view, { silent: true });
   if (typeof saveState === 'function') saveState();
   if (typeof renderStatic === 'function') renderStatic();
 }

@@ -529,6 +529,7 @@ body[data-theme="light"] .life-rhythm-primary {
 
 .life-habit-toggle,
 .life-task-check {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -538,6 +539,19 @@ body[data-theme="light"] .life-rhythm-primary {
   color: var(--task-cat-color, var(--cat-일상));
   cursor: pointer;
   transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* a11y: expand tap target to 44px without enlarging the visual control —
+   a transparent centered ::after extends the host's clickable area (clicks dispatch to the host). */
+.life-habit-toggle::after,
+.life-task-check::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--touch-target-min, 44px);
+  height: var(--touch-target-min, 44px);
+  transform: translate(-50%, -50%);
 }
 
 .life-habit-toggle {

@@ -165,7 +165,7 @@ function _renderAllTaskMeta(task) {
   if (task.estimatedTime) meta.push(`<span>${Number(task.estimatedTime)}분</span>`);
   if (task.organizer) meta.push(`<span>${escapeHtml(task.organizer)}</span>`);
   if (task.expectedRevenue) meta.push(`<span>${Number(task.expectedRevenue).toLocaleString()}원</span>`);
-  if (task.subtasks && task.subtasks.length) {
+  if (Array.isArray(task.subtasks) && task.subtasks.length) {
     const done = task.subtasks.filter(st => st.completed).length;
     meta.push(`<span>${done}/${task.subtasks.length}</span>`);
   }

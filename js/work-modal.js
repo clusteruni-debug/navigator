@@ -83,7 +83,7 @@ function confirmWorkModal() {
       const proj = appState.workProjects.find(p => p.id === projectId);
       if (!proj) { showToast('프로젝트를 찾을 수 없습니다', 'error'); return; }
       const t = proj.stages[stageIdx]?.subcategories?.[subcategoryIdx]?.tasks?.[taskIdx];
-      if (!t || !t.logs[logIdx]) { showToast('기록을 찾을 수 없습니다', 'error'); return; }
+      if (!t || !Array.isArray(t.logs) || !t.logs[logIdx]) { showToast('기록을 찾을 수 없습니다', 'error'); return; }
       const log = t.logs[logIdx];
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (log.content === '✓ 완료') {
@@ -269,7 +269,7 @@ function confirmWorkModalAndCopy() {
   const task = project.stages[stageIdx]?.subcategories?.[subcategoryIdx]?.tasks?.[taskIdx];
   if (!task) { showToast('작업을 찾을 수 없습니다', 'error'); return; }
 
-  if (!task.logs) task.logs = [];
+  if (!Array.isArray(task.logs)) task.logs = [];
   task.logs.push({ date: getLocalDateStr(), content: content });
   project.updatedAt = new Date().toISOString();
   saveWorkProjects();

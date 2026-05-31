@@ -6,7 +6,7 @@
 
 function saveCommuteTracker() {
   // 항상 localStorage에 저장 (로그인 여부 무관 — 오프라인 폴백 보장)
-  localStorage.setItem('navigator-commute-tracker', JSON.stringify(appState.commuteTracker));
+  safeLocalStorageSet('navigator-commute-tracker', JSON.stringify(appState.commuteTracker));
   if (appState.user) { syncToFirebase(); }
 }
 
@@ -168,7 +168,9 @@ window.saveCommuteRoute = saveCommuteRoute;
 
 function deleteCommuteRoute(routeId) {
   const route = appState.commuteTracker.routes.find(r => r.id === routeId);
-  if (!route || !confirm('루트 "' + route.name + '"을(를) 삭제하시겠습니까?')) return;
+  if (!route) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn('루트 "' + route.name + '"을(를) 삭제하시겠습니까?', 'commute-route-del-' + routeId)) return;
   appState.commuteTracker.routes = appState.commuteTracker.routes.filter(r => r.id !== routeId);
   // Soft-Delete: 다른 기기 동기화 시 부활 방지
   if (!appState.deletedIds.commuteRoutes) appState.deletedIds.commuteRoutes = {};
@@ -406,7 +408,8 @@ window.showCommuteOnboarding = showCommuteOnboarding;
  */
 function deleteCommuteTrip(dateStr, direction) {
   const dirLabel = direction === 'morning' ? '출근' : '퇴근';
-  if (!confirm(dateStr + ' ' + dirLabel + ' 기록을 삭제하시겠습니까?')) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn(dateStr + ' ' + dirLabel + ' 기록을 삭제하시겠습니까?', 'commute-trip-del-' + dateStr + '|' + direction)) return;
   if (appState.commuteTracker.trips[dateStr]) {
     // Soft-Delete: 동기화 시 부활 방지
     const delKey = dateStr + '|' + direction;

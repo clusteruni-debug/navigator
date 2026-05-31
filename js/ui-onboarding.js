@@ -14,7 +14,7 @@ function showOnboarding() {
  * 온보딩 완료 및 샘플 데이터 추가
  */
 function completeOnboarding(addSamples = true) {
-  localStorage.setItem('navigator-visited', 'true');
+  safeLocalStorageSet('navigator-visited', 'true');
   appState.showOnboarding = false;
 
   if (addSamples) {
@@ -111,7 +111,7 @@ function recordActivity(taskTitle) {
     }
 
     if (!appState.user) {
-      localStorage.setItem('navigator-streak', JSON.stringify(appState.streak));
+      safeLocalStorageSet('navigator-streak', JSON.stringify(appState.streak));
     }
 
     if (appState.streak.current > 1) {
@@ -140,7 +140,7 @@ function recordActivity(taskTitle) {
       appState.habitStreaks[taskTitle] = hs;
 
       if (!appState.user) {
-        localStorage.setItem('navigator-habitStreaks', JSON.stringify(appState.habitStreaks));
+        safeLocalStorageSet('navigator-habitStreaks', JSON.stringify(appState.habitStreaks));
       }
     }
   }

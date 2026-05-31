@@ -368,7 +368,7 @@ function renderActionTab(ctx) {
               ${nextAction.deadline ? _renderDeadlineMeta(nextAction.deadline) : ''}
               ${nextAction.expectedRevenue ? `<span class="meta-chip">${_renderActionIcon('dollar', 13)}${Number(nextAction.expectedRevenue).toLocaleString()}원</span>` : ''}
             </div>
-            ${nextAction.subtasks && nextAction.subtasks.length > 0 ? `
+            ${Array.isArray(nextAction.subtasks) && nextAction.subtasks.length > 0 ? `
               <div class="next-action-subtasks">
                 ${nextAction.subtasks.slice(0, 5).map((st, idx) => `
                   <div class="next-action-subtask ${st.completed ? 'completed' : ''}"

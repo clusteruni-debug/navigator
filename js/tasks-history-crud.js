@@ -111,7 +111,9 @@ function deleteCompletionLogEntry(dateStr, index) {
   const entries = (appState.completionLog || {})[dateStr];
   if (!entries || !entries[index]) return;
 
-  if (!confirm(`"${entries[index].t}" 기록을 삭제하시겠습니까?`)) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  const _delCooldownKey = 'log-del-' + dateStr + '|' + (entries[index].t || '') + '|' + (entries[index].at || '');
+  if (!confirmFn(`"${entries[index].t}" 기록을 삭제하시겠습니까?`, _delCooldownKey)) return;
 
   // Soft-Delete: 동기화 시 부활 방지
   const entry = entries[index];
@@ -135,7 +137,8 @@ window.deleteCompletionLogEntry = deleteCompletionLogEntry;
  * (completionLog에 없는 항목도 deletedIds에 등록하여 비표시)
  */
 function hideTaskFromHistory(dateStr, title, timeStr) {
-  if (!confirm(`"${title}" 기록을 히스토리에서 숨기시겠습니까?`)) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn(`"${title}" 기록을 히스토리에서 숨기시겠습니까?`, 'log-hide-' + dateStr + '|' + title + '|' + timeStr)) return;
 
   if (!appState.deletedIds.completionLog) appState.deletedIds.completionLog = {};
   const delKey = dateStr + '|' + title + '|' + timeStr;
@@ -240,7 +243,8 @@ window.applyEditCompletionLog = applyEditCompletionLog;
 function clearCompletionLogDate(dateStr) {
   const entries = (appState.completionLog || {})[dateStr];
   if (!entries || entries.length === 0) return;
-  if (!confirm(`${dateStr} 기록 ${entries.length}개를 모두 삭제하시겠습니까?`)) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn(`${dateStr} 기록 ${entries.length}개를 모두 삭제하시겠습니까?`)) return;
 
   // Soft-Delete: 모든 항목 삭제 기록 추가
   if (!appState.deletedIds.completionLog) appState.deletedIds.completionLog = {};
@@ -323,7 +327,8 @@ function applyClearLogRange() {
   }
 
   if (count === 0) { showToast('해당 기간에 삭제할 기록이 없습니다', 'warning'); return; }
-  if (!confirm(`${from} ~ ${to} 기간의 기록 ${count}개를 삭제하시겠습니까?`)) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn(`${from} ~ ${to} 기간의 기록 ${count}개를 삭제하시겠습니까?`)) return;
 
   // Soft-Delete: 모든 대상 항목 삭제 기록 추가
   if (!appState.deletedIds.completionLog) appState.deletedIds.completionLog = {};
@@ -379,7 +384,8 @@ function clearAllCompletionLog() {
   count += taskOnlyCount;
 
   if (count === 0) { showToast('삭제할 기록이 없습니다', 'warning'); return; }
-  if (!confirm(`완료 기록 ${count}개를 전부 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn(`완료 기록 ${count}개를 전부 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) return;
 
   // Soft-Delete: 모든 항목 삭제 기록 추가
   if (!appState.deletedIds.completionLog) appState.deletedIds.completionLog = {};

@@ -70,7 +70,7 @@ function checkDailyReset() {
     }
 
     // 서브태스크 완료 상태도 초기화 (각 서브태스크의 논리적 완료일 기준)
-    if (task.subtasks && task.subtasks.length > 0) {
+    if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
       let subtaskChanged = false;
       task.subtasks.forEach(st => {
         if (!st.completed) return;
@@ -142,7 +142,7 @@ function checkDailyReset() {
     checkDailyRepeatStreak();
   }
 
-  localStorage.setItem('navigator-last-reset-date', logicalToday);
+  safeLocalStorageSet('navigator-last-reset-date', logicalToday);
 
   if (changed) {
     console.log(`[daily-reset] 반복 태스크 초기화 완료 (하루 시작: ${dayStartHour}시)`);
@@ -186,7 +186,7 @@ function checkDailyRepeatStreak() {
     // 어제 반복 태스크를 전부 완료하지 못함 → 스트릭 리셋
     appState.streak.current = 0;
     if (!appState.user) {
-      localStorage.setItem('navigator-streak', JSON.stringify(appState.streak));
+      safeLocalStorageSet('navigator-streak', JSON.stringify(appState.streak));
     }
     console.log('[daily-reset] 어제 미완료 반복 태스크 있음 → 스트릭 리셋');
   }

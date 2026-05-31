@@ -1,15 +1,15 @@
 ---
 plan_id: NAVIGATOR-DESTRUCTIVE-COVERAGE-AUDIT
 project: navigator
-status: PROPOSED
-status_reason: "MO-9 systemic-class lift from PLAN-NAVIGATOR-SUBTASK-LOG-MERGE review Round 1/2/3. Three rounds surfaced the same architectural class: helper-defined-but-applied-to-subset-of-sites. Round 4+ would surface more sites of the same class — codebase-wide audit is the structural fix."
+status: IN_PROGRESS
+status_reason: "All six milestones implemented + verified 2026-05-29 (36 files node --check clean; 5 test files pass incl. new cooldown-key fixture). M5 verified unnecessary — expandedWorkTaskDetails is ephemeral (no localStorage/Firebase persistence), so a threshold change cannot leave stale keys across a reload. Pending /code-review (Rule #14) + sw.js bump + standalone deploy before SHIPPED."
 milestones:
-  - { id: M1, label: "destructiveConfirm coverage audit + remaining sites migration", done: false }
-  - { id: M2, label: "Array.isArray(task.logs) coverage audit + missing sites guard", done: false }
-  - { id: M3, label: "localStorage.setItem coverage audit + missing sites try/catch", done: false }
-  - { id: M4, label: "cooldownKey stable-ID migration (index → task.id/subcat.id/stage.id)", done: false }
-  - { id: M5, label: "isCollapsible threshold change — appState.expandedWorkTaskDetails migration", done: false }
-  - { id: M6, label: "AUTO_SUBTASK_ORIGIN_PREFIX fallback literal removal (constant drift hazard)", done: false }
+  - { id: M1, label: "destructiveConfirm coverage audit + remaining sites migration", done: true }
+  - { id: M2, label: "Array.isArray(task.logs) coverage audit + missing sites guard", done: true }
+  - { id: M3, label: "localStorage.setItem coverage audit + missing sites try/catch", done: true }
+  - { id: M4, label: "cooldownKey stable-ID migration (index → task.id/subcat.id/stage.id)", done: true }
+  - { id: M5, label: "isCollapsible threshold change — appState.expandedWorkTaskDetails migration", done: true }
+  - { id: M6, label: "AUTO_SUBTASK_ORIGIN_PREFIX fallback literal removal (constant drift hazard)", done: true }
 decisions_pending: []
 blockers: []
 depends_on: []
@@ -125,6 +125,19 @@ Migration: replace fallback with hard `console.error` + early return (`if (typeo
 - [ ] cooldownKey stable-ID migration complete + new fixture covers splice scenario
 - [ ] migrateExpandedDetails helper added + tested
 - [ ] `grep -rn "'auto-from-subtask:'" projects/navigator/js/` returns only entries-model.js (constant definition)
+
+## Resolution (2026-05-29)
+
+| Milestone | Outcome | Evidence |
+|---|---|---|
+| M1 | 16 destructive `confirm()` sites routed through `destructiveConfirm`/`confirmFn` (actions-bulk ×4, tasks-history-crud ×5, commute ×2, render-life ×2, work-template-crud ×2, work-forms, rhythm-medication slot-delete, render-settings ×2, firebase-backup restore). Non-destructive confirms (unsaved-content close, boolean-input medication, recovery/import prompts) intentionally left bare + 2 documented inline. | `grep 'confirm(' js/` → remaining 8 all non-destructive |
+| M2 | 26 `task.logs`/`task.subtasks` accesses migrated to `Array.isArray` guards (10 logs + 15 subtasks) + 1 real bug fixed (work-modal.js edit-log guarded `t.logs[logIdx]` that threw when `t.logs` undefined). | node --check clean |
+| M3 | `safeLocalStorageSet(key, value, {silent})` helper added to utils.js; 29 unprotected/empty-catch `setItem` sites migrated (loud for data, silent for trivial UI prefs). state.js bulk save kept on outer try/catch (single atomic error, not 21 toasts). | `grep setItem` → remaining all inside try/catch |
+| M4 | `stableCooldownKey()` helper added to entries-model.js (item.id-based, splice-invariant; per-call sequence fallback for id-less legacy data) + 6 delete sites migrated + 6-case regression test (`tests/cooldown-key.test.js`). | `node tests/cooldown-key.test.js` 6/0 |
+| M5 | **Verified unnecessary.** `expandedWorkTaskDetails` is referenced nowhere in state.js / firebase-sync.js / init.js — it is in-memory only, re-initialised to `{}` (work-toggles.js:243) on every page load. A threshold-change deploy forces a reload → fresh map → no stale keys can survive. The migration would be dead code. (Optional future enhancement: *persist* expand/collapse prefs — separate scope, not this plan.) | `grep expandedWork` in state/sync/init → 0 |
+| M6 | 2 fallback-literal sites (work-render-detail.js) replaced with direct `AUTO_SUBTASK_ORIGIN_PREFIX` use + `console.error` surface on missing (graceful degrade, not early-return — early-return would abort task render). | `grep "'auto-from-subtask:'"` → entries-model.js definition only |
+
+> **Design note (MO-0 structural surface)**: the per-site `Array.isArray` (M2) and try/catch (M3) coverage is the plan's chosen approach. A normalize-on-load alternative (coerce `task.logs`/`task.subtasks` to arrays at load, wrap all saves once) would centralise the invariant but is an architectural change out of this plan's scope — recorded here for a future ADR if the per-site count keeps growing.
 
 ## Out of Scope
 
