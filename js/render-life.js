@@ -558,6 +558,81 @@ function _renderLifeTaskSection(pendingTasks, completedTasks) {
 }
 
 /**
+ * 결심 시작일(YYYY-MM-DD) ~ 기준 시각(ms) 사이 경과 일수.
+ */
+function _resolutionDaysBetween(startDateStr, endMs) {
+  const [sy, sm, sd] = String(startDateStr || '').split('-').map(Number);
+  if (!sy) return 0;
+  const startMs = new Date(sy, sm - 1, sd).getTime();
+  return isNaN(startMs) ? 0 : Math.max(0, Math.floor((endMs - startMs) / 86400000));
+}
+
+/**
+ * YYYY-MM-DD -> "M/D" (요약/타임라인 표시용).
+ */
+function _fmtResolutionDate(dateStr) {
+  const [, m, d] = String(dateStr || '').split('-');
+  return (m && d) ? `${Number(m)}/${Number(d)}` : '—';
+}
+
+// 결심 타임라인에 한 번에 보여줄 과거 리셋 기록 최대 행 수 (초과분은 "N개 더 있음"으로 요약).
+const RESOLUTION_TIMELINE_MAX_ROWS = 20;
+
+/**
+ * 결심 1개 카드 + 요약 + 타임라인 토글 HTML.
+ */
+function _renderResolutionItem(r, todayMs) {
+  const id = escapeAttr(r.id);
+  const days = _resolutionDaysBetween(r.startDate, todayMs);
+  // resetHistory 항목이 손상돼(null/비객체) 들어와도 렌더 전체가 죽지 않도록 객체만 통과시킨다.
+  const history = (Array.isArray(r.resetHistory) ? r.resetHistory : []).filter(h => h && typeof h === 'object');
+  const resetCount = history.length;
+  const best = history.reduce((max, h) => Math.max(max, Number(h.days) || 0), days);
+  const expanded = !!(appState.expandedResolutions && appState.expandedResolutions[r.id]);
+
+  // 타임라인: 진행 중 구간(최상단) + 과거 리셋 기록(최신순). 다른 리스트와 동일하게 행 수를 cap.
+  const pastRows = history.slice().reverse();
+  const shownRows = pastRows.slice(0, RESOLUTION_TIMELINE_MAX_ROWS);
+  const hiddenRowCount = pastRows.length - shownRows.length;
+  const timelineRows = [
+    `<div class="resolution-timeline-row current">
+       <span class="resolution-timeline-period">${_fmtResolutionDate(r.startDate)} ~ 진행 중</span>
+       <span class="resolution-timeline-days">${days}일</span>
+     </div>`,
+    ...shownRows.map(h => `
+      <div class="resolution-timeline-row">
+        <span class="resolution-timeline-period">${_fmtResolutionDate(h.start)} ~ ${_fmtResolutionDate(h.end)}</span>
+        <span class="resolution-timeline-days">${Number(h.days) || 0}일</span>
+      </div>`),
+    hiddenRowCount > 0
+      ? `<div class="resolution-timeline-row resolution-timeline-more">이전 기록 ${hiddenRowCount}개 더 있음</div>`
+      : ''
+  ].join('');
+
+  return `
+    <div class="resolution-item">
+      <div class="resolution-card ${r.icon ? 'has-icon' : ''}" role="button" tabindex="0" onclick="editResolution('${id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();editResolution('${id}')}">
+        ${r.icon ? `<div class="resolution-icon" aria-hidden="true">${escapeHtml(r.icon)}</div>` : ''}
+        <div class="resolution-info">
+          <div class="resolution-name">${escapeHtml(r.title)}</div>
+          <div class="resolution-days"><span class="resolution-day-count">${days}</span>일째</div>
+          <div class="resolution-meta">시작 ${_fmtResolutionDate(r.startDate)} · 리셋 ${resetCount}회 · 최장 ${best}일</div>
+        </div>
+        <div class="resolution-actions">
+          <button class="life-icon-btn" type="button" onclick="event.stopPropagation(); resetResolution('${id}')" title="리셋" aria-label="${escapeAttr(r.title)} 리셋">${_lifeIcon('rotate-ccw', 14)}</button>
+          <button class="life-icon-btn danger" type="button" onclick="event.stopPropagation(); deleteResolution('${id}')" title="삭제" aria-label="${escapeAttr(r.title)} 삭제">${_lifeIcon('trash', 14)}</button>
+        </div>
+      </div>
+      <button class="resolution-timeline-toggle ${expanded ? 'expanded' : ''}" type="button" onclick="toggleResolutionTimeline('${id}')" aria-expanded="${expanded}" aria-label="${escapeAttr(r.title)} 타임라인 ${expanded ? '접기' : '펼치기'}">
+        <span>타임라인 ${expanded ? '접기' : '펼치기'}${resetCount > 0 ? ` (${resetCount + 1})` : ''}</span>
+        ${_lifeIcon('chevron-down', 13)}
+      </button>
+      ${expanded ? `<div class="resolution-timeline">${timelineRows}</div>` : ''}
+    </div>
+  `;
+}
+
+/**
  * 결심 트래커 섹션 HTML (오늘 탭 + 일상 탭 공통)
  */
 function _renderResolutionSection() {
@@ -570,24 +645,7 @@ function _renderResolutionSection() {
       ${_renderLifeSectionHeading('결심 트래커', resolutions.length ? resolutions.length + '개' : '', 'target', 'life-resolution-title')}
       ${resolutions.length > 0 ? `
         <div class="resolution-list">
-          ${resolutions.map(r => {
-            const [sy, sm, sd] = (r.startDate || '').split('-').map(Number);
-            const startMs = sy ? new Date(sy, sm - 1, sd).getTime() : todayMs;
-            const days = isNaN(startMs) ? 0 : Math.max(0, Math.floor((todayMs - startMs) / 86400000));
-            return `
-              <div class="resolution-card ${r.icon ? 'has-icon' : ''}" role="button" tabindex="0" onclick="editResolution('${escapeAttr(r.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();editResolution('${escapeAttr(r.id)}')}">
-                ${r.icon ? `<div class="resolution-icon" aria-hidden="true">${escapeHtml(r.icon)}</div>` : ''}
-                <div class="resolution-info">
-                  <div class="resolution-name">${escapeHtml(r.title)}</div>
-                  <div class="resolution-days"><span class="resolution-day-count">${days}</span>일째</div>
-                </div>
-                <div class="resolution-actions">
-                  <button class="life-icon-btn" type="button" onclick="event.stopPropagation(); resetResolution('${escapeAttr(r.id)}')" title="리셋" aria-label="${escapeAttr(r.title)} 리셋">${_lifeIcon('rotate-ccw', 14)}</button>
-                  <button class="life-icon-btn danger" type="button" onclick="event.stopPropagation(); deleteResolution('${escapeAttr(r.id)}')" title="삭제" aria-label="${escapeAttr(r.title)} 삭제">${_lifeIcon('trash', 14)}</button>
-                </div>
-              </div>
-            `;
-          }).join('')}
+          ${resolutions.map(r => _renderResolutionItem(r, todayMs)).join('')}
         </div>
       ` : '<div class="resolution-empty">결심을 추가하면 오늘 탭의 기록 버튼과 연결됩니다</div>'}
       <div class="life-section-foot">
@@ -731,13 +789,39 @@ function resetResolution(id) {
   const r = (appState.resolutions || []).find(item => item.id === id);
   if (!r) return;
   const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
-  if (!confirmFn(`"${r.title}" 카운터를 리셋하시겠습니까?\n(시작일이 오늘로 변경됩니다)`, 'resolution-reset-' + id)) return;
-  r.startDate = getLocalDateStr();
+  if (!confirmFn(`"${r.title}" 카운터를 리셋하시겠습니까?\n(현재 기록이 타임라인에 저장되고 시작일이 오늘로 변경됩니다)`, 'resolution-reset-' + id)) return;
+  const today = getLocalDateStr();
+  const now = new Date();
+  const todayMs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const days = _resolutionDaysBetween(r.startDate, todayMs);
+  if (!Array.isArray(r.resetHistory)) r.resetHistory = [];
+  // KNOWN LIMITATION: resetHistory rides the whole-object last-writer-wins merge
+  // (firebase-merge.js mergeById keeps the resolution with the newer updatedAt).
+  // If another device makes ANY edit to the SAME resolution before this reset syncs
+  // — not just a competing reset, but also a title/icon/startDate edit via
+  // editResolution — that newer-updatedAt object wins and this reset's appended
+  // resetHistory row AND startDate change are silently dropped (no per-field/array
+  // union). Acceptable for infrequent deliberate resets on a single primary device;
+  // revisit with a union-merge on resetHistory if multi-device history fidelity
+  // becomes a requirement.
+  r.resetHistory.push({ start: r.startDate || today, end: today, days });
+  r.startDate = today;
   r.updatedAt = new Date().toISOString();
   saveStateImmediate();
   renderStatic();
 }
 window.resetResolution = resetResolution;
+
+function toggleResolutionTimeline(id) {
+  if (!appState.expandedResolutions) appState.expandedResolutions = {};
+  if (appState.expandedResolutions[id]) {
+    delete appState.expandedResolutions[id];
+  } else {
+    appState.expandedResolutions[id] = true;
+  }
+  renderStatic();
+}
+window.toggleResolutionTimeline = toggleResolutionTimeline;
 
 function deleteResolution(id) {
   const r = (appState.resolutions || []).find(item => item.id === id);
@@ -747,6 +831,7 @@ function deleteResolution(id) {
   if (!appState.deletedIds.resolutions) appState.deletedIds.resolutions = {};
   appState.deletedIds.resolutions[id] = new Date().toISOString();
   appState.resolutions = appState.resolutions.filter(item => item.id !== id);
+  if (appState.expandedResolutions) delete appState.expandedResolutions[id];
   saveStateImmediate();
   renderStatic();
 }

@@ -901,6 +901,75 @@ body[data-theme="light"] .life-rhythm-primary {
   font-weight: 700;
 }
 
+.life-shell .resolution-item {
+  display: grid;
+  gap: 0;
+}
+
+.life-shell .resolution-meta {
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: var(--font-xs);
+}
+
+.life-shell .resolution-timeline-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-self: start;
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: var(--font-xs);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.life-shell .resolution-timeline-toggle:hover {
+  background: var(--bg-secondary);
+}
+
+.life-shell .resolution-timeline-toggle.expanded svg {
+  transform: rotate(180deg);
+}
+
+.life-shell .resolution-timeline {
+  display: grid;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 8px 10px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+}
+
+.life-shell .resolution-timeline-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+}
+
+.life-shell .resolution-timeline-period {
+  color: var(--text-muted);
+}
+
+.life-shell .resolution-timeline-row.current .resolution-timeline-days {
+  color: var(--cat-일상);
+  font-weight: 700;
+}
+
+.life-shell .resolution-timeline-more {
+  justify-content: center;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 .backdate-menu {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);

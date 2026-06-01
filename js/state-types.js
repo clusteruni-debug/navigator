@@ -420,7 +420,7 @@ const appState = {
   },
   habitStreaks: {},                  // 습관별 스트릭: { "작업제목": { current, best, lastActiveDate } }
   habitFilter: 'all',               // 습관 트래커 필터: 'all' 또는 작업 제목
-  resolutions: [],                   // 결심 트래커: [{ id, title, startDate, icon, active, createdAt }]
+  resolutions: [],                   // 결심 트래커: [{ id, title, startDate, icon, active, createdAt, resetHistory: [{ start, end, days }] }] (resetCount는 resetHistory.length로 렌더 시 파생)
   showOnboarding: false,           // 온보딩 모달 표시
   moreMenuOpen: false,             // 더보기 메뉴 열림 상태
   // 포모도로 상태
@@ -519,6 +519,7 @@ const appState = {
   showCelebration: false,          // 축하 효과 표시
   lastMotivation: '',              // 마지막 동기부여 메시지
   expandedSubtasks: {},             // 펼쳐진 서브태스크 목록 (taskId: true/false)
+  expandedResolutions: {},          // 펼쳐진 결심 타임라인 (resolutionId: true, UI only)
   collapsedSubtaskChips: safeParseJSON('navigator-collapsed-subtask-chips', {}), // 접힌 서브태스크 칩 (UI only, localStorage)
   collapsedSubcategories: {},       // 접힌 중분류 (projectId-stageIdx-subcatIdx: true)
   // 주간 계획
