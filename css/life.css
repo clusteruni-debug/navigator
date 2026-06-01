@@ -965,6 +965,7 @@ body[data-theme="light"] .life-rhythm-primary {
 }
 
 .life-shell .resolution-timeline-more {
+  display: flex;
   justify-content: center;
   color: var(--text-muted);
   font-style: italic;
