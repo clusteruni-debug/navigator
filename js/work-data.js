@@ -652,6 +652,41 @@ function completeWorkProject(projectId) {
 window.completeWorkProject = completeWorkProject;
 
 /**
+ * 완료된 프로젝트의 완료일(completedAt)을 사용자가 직접 수정 (backdate 등).
+ * dateStr = 'YYYY-MM-DD' (input[type=date]). 표시 경로가 substring(0,10)만 보므로
+ * 고른 날짜 + 현재 로컬 시각으로 strict ISO 로컬 datetime을 만들어 UTC 날짜 밀림을 피한다.
+ */
+function setWorkProjectCompletedAt(projectId, dateStr) {
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project || !project.completed) return;
+
+  // 빈 값/형식 오류/달력상 불가능한 날짜(2026-02-31 등) 거부 → 화면 date input을
+  // 저장된 완료일로 되돌려 desync 방지 (native picker는 빈 값/유효값만 보내지만
+  // 콘솔 호출·손상 데이터 방어). round-trip 비교로 rollover(2026-02-31→3/3) 탐지 —
+  // new Date('2026-02-31') 는 V8에서 NaN 아니라 3/3 으로 굴러가므로 isNaN 검사론 부족.
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr || '');
+  let valid = false;
+  if (m) {
+    const y = +m[1], mo = +m[2], d = +m[3];
+    const probe = new Date(y, mo - 1, d);
+    valid = probe.getFullYear() === y && probe.getMonth() === mo - 1 && probe.getDate() === d;
+  }
+  if (!valid) {
+    renderStatic();
+    return;
+  }
+
+  const localTime = getLocalDateTimeStr().substring(10); // 'THH:mm:ss'
+  project.completedAt = dateStr + localTime;
+  project.updatedAt = new Date().toISOString();
+
+  saveWorkProjects();
+  renderStatic();
+  showToast('완료일이 변경되었습니다', 'success');
+}
+window.setWorkProjectCompletedAt = setWorkProjectCompletedAt;
+
+/**
  * 프로젝트 보류 토글
  */
 function holdWorkProject(projectId) {

@@ -488,6 +488,96 @@
       color: var(--accent-danger);
     }
 
+    /* ended 탭: 정렬 컨트롤 + 완료일 인라인 편집 + 페이지네이션 */
+    .work-ended-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 4px 0 8px;
+    }
+
+    .work-ended-range {
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .work-ended-date-prefix {
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+    }
+
+    .work-ended-date-input {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      font-size: var(--font-xs);
+      font-family: inherit;
+      padding: 3px 6px;
+      cursor: pointer;
+      font-variant-numeric: tabular-nums;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .work-ended-date-input:hover,
+    .work-ended-date-input:focus-visible {
+      border-color: var(--cat-본업);
+      background: color-mix(in srgb, var(--cat-본업) 8%, var(--bg-primary));
+    }
+
+    .work-ended-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .work-ended-page-btn {
+      min-width: var(--touch-target-min);
+      min-height: var(--touch-target-min);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 7px;
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: var(--font-sm);
+      font-variant-numeric: tabular-nums;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .work-ended-page-btn:hover {
+      background: var(--bg-secondary);
+      border-color: var(--border-light);
+    }
+
+    .work-ended-page-btn.active.cat-work {
+      background: color-mix(in srgb, var(--cat-본업) 16%, var(--bg-primary));
+      border-color: color-mix(in srgb, var(--cat-본업) 45%, var(--border-color));
+      color: var(--cat-본업);
+      font-weight: 700;
+    }
+
+    .work-ended-page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .work-ended-page-ellipsis {
+      color: var(--text-muted);
+      padding: 0 2px;
+      align-self: center;
+    }
+
     .work-project-grid-redesign {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));

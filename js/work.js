@@ -1,6 +1,8 @@
 const WORK_REDESIGN_SUBTABS = ['all', 'projects', 'general', 'ended'];
 const WORK_REDESIGN_PROJECT_VIEWS = ['cards', 'calendar', 'timeline'];
 const WORK_REDESIGN_GENERAL_SORTS = ['deadline', 'recent', 'time'];
+const WORK_ENDED_SORTS = ['recent', 'oldest', 'name'];
+const WORK_ENDED_PAGE_SIZE = 10;
 
 function _workIcon(name, size) {
   if (typeof _renderActionIcon === 'function') {
@@ -17,6 +19,12 @@ function _ensureWorkRedesignState() {
     appState.workProjectView = WORK_REDESIGN_PROJECT_VIEWS.includes(appState.workView) ? appState.workView : 'cards';
   }
   if (!WORK_REDESIGN_GENERAL_SORTS.includes(appState.workGeneralSort)) appState.workGeneralSort = 'deadline';
+  if (!appState.workEndedSort || typeof appState.workEndedSort !== 'object') {
+    appState.workEndedSort = { completed: 'recent', archived: 'recent' };
+  }
+  if (!appState.workEndedPage || typeof appState.workEndedPage !== 'object') {
+    appState.workEndedPage = { completed: 1, archived: 1 };
+  }
 }
 
 function _isActiveWorkProject(project) {
@@ -539,49 +547,151 @@ function _renderWorkGeneralTab() {
   '</div>';
 }
 
+// ── ended 탭: 정렬 + 페이지네이션 헬퍼 ──────────────────────────────
+function _sortEndedList(list, sortKey, dateField) {
+  const arr = list.slice();
+  if (sortKey === 'name') {
+    arr.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'));
+  } else if (sortKey === 'oldest') {
+    arr.sort((a, b) => new Date(a[dateField] || 0) - new Date(b[dateField] || 0));
+  } else { // 'recent' (기본)
+    arr.sort((a, b) => new Date(b[dateField] || 0) - new Date(a[dateField] || 0));
+  }
+  return arr;
+}
+
+function _endedSortLabel(key) {
+  if (key === 'oldest') return '오래된순';
+  if (key === 'name') return '이름순';
+  return '최신순';
+}
+
+function _renderEndedSortChips(group, current) {
+  return '<div class="work-chip-row work-ended-sort" role="group" aria-label="정렬">' +
+    WORK_ENDED_SORTS.map(key => {
+      const active = current === key;
+      return '<button class="work-chip ' + (active ? 'active cat-work' : '') + '" role="button" aria-pressed="' + active + '" onclick="setWorkEndedSort(\'' + group + '\',\'' + key + '\')">' + escapeHtml(_endedSortLabel(key)) + '</button>';
+    }).join('') +
+  '</div>';
+}
+
+// 윈도우드 페이지 번호: 총 7p 이하 전부, 초과 시 1 … cur-1 cur cur+1 … last
+function _endedPageNumbers(page, totalPages) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+  const wanted = [1, totalPages, page, page - 1, page + 1].filter(p => p >= 1 && p <= totalPages);
+  const sorted = [...new Set(wanted)].sort((a, b) => a - b);
+  const out = [];
+  let prev = 0;
+  for (const p of sorted) {
+    if (p - prev > 1) out.push('…');
+    out.push(p);
+    prev = p;
+  }
+  return out;
+}
+
+function _renderEndedPagination(group, page, totalPages) {
+  if (totalPages <= 1) return '';
+  const prevDisabled = page <= 1;
+  const nextDisabled = page >= totalPages;
+  const nums = _endedPageNumbers(page, totalPages).map(p => {
+    if (p === '…') return '<span class="work-ended-page-ellipsis" aria-hidden="true">…</span>';
+    const active = p === page;
+    return '<button class="work-ended-page-btn ' + (active ? 'active cat-work' : '') + '"' + (active ? ' aria-current="page"' : '') + ' onclick="setWorkEndedPage(\'' + group + '\',' + p + ')" aria-label="' + p + '페이지">' + p + '</button>';
+  }).join('');
+  return '<nav class="work-ended-pagination" aria-label="페이지 이동">' +
+    '<button class="work-ended-page-btn nav"' + (prevDisabled ? ' disabled' : '') + ' onclick="setWorkEndedPage(\'' + group + '\',' + (page - 1) + ')" aria-label="이전 페이지">◂</button>' +
+    nums +
+    '<button class="work-ended-page-btn nav"' + (nextDisabled ? ' disabled' : '') + ' onclick="setWorkEndedPage(\'' + group + '\',' + (page + 1) + ')" aria-label="다음 페이지">▸</button>' +
+  '</nav>';
+}
+
+function setWorkEndedSort(group, key) {
+  if (group !== 'completed' && group !== 'archived') return;
+  if (!WORK_ENDED_SORTS.includes(key)) return;
+  _ensureWorkRedesignState();
+  appState.workEndedSort[group] = key;
+  appState.workEndedPage[group] = 1; // 정렬 변경 시 1페이지로
+  renderStatic();
+}
+window.setWorkEndedSort = setWorkEndedSort;
+
+function setWorkEndedPage(group, page) {
+  if (group !== 'completed' && group !== 'archived') return;
+  const n = parseInt(page, 10);
+  if (!Number.isFinite(n) || n < 1) return;
+  _ensureWorkRedesignState();
+  appState.workEndedPage[group] = n; // 상한 clamp는 그룹 렌더에서 처리
+  renderStatic();
+}
+window.setWorkEndedPage = setWorkEndedPage;
+
 function _renderEndedProjectRow(project, type) {
   const isCompleted = type === 'completed';
-  const date = isCompleted ? project.completedAt : project.updatedAt;
-  const dateLabel = _formatShortDate(date) || '날짜 없음';
-  const actionLabel = isCompleted ? '↩ 완료 취소' : '📤 복원';
-  const action = isCompleted
+  const dateField = isCompleted ? 'completedAt' : 'updatedAt';
+  const rawDate = project[dateField];
+  const restoreLabel = isCompleted ? '↩ 완료 취소' : '📤 복원';
+  const restoreAction = isCompleted
     ? "completeWorkProject('" + escapeAttr(project.id) + "')"
     : "archiveWorkProject('" + escapeAttr(project.id) + "')";
-  const meta = (isCompleted ? '완료일' : '보관일') + ' · ' + dateLabel;
+
+  // 완료 행: 완료일 인라인 date input(수정 가능) / 보관 행: 보관일 정적 표시
+  const dateCell = isCompleted
+    ? '<span class="work-ended-date-prefix">완료일</span>' +
+      '<input type="date" class="work-ended-date-input" value="' + escapeAttr(rawDate ? String(rawDate).substring(0, 10) : '') + '" onclick="event.stopPropagation();" onchange="event.stopPropagation(); setWorkProjectCompletedAt(\'' + escapeAttr(project.id) + '\', this.value)" aria-label="완료일 수정" title="완료일 수정 (클릭)">'
+    : '<span>보관일 · ' + escapeHtml(_formatShortDate(rawDate) || '날짜 없음') + '</span>';
 
   return '<div class="work-redesign-task-row cat-work completed">' +
     '<span class="work-row-check cat-work" aria-hidden="true">' + _workIcon(isCompleted ? 'check' : 'archive', 14) + '</span>' +
     '<div class="work-row-main">' +
       '<div class="work-row-title">' + escapeHtml(project.name || '제목 없음') + '</div>' +
-      '<div class="work-row-meta"><span class="work-cat-tag">본업</span><span>' + escapeHtml(meta) + '</span></div>' +
+      '<div class="work-row-meta"><span class="work-cat-tag">본업</span>' + dateCell + '</div>' +
     '</div>' +
-    _renderDdayChip(null, dateLabel) +
     '<div class="work-row-actions">' +
-      '<button class="work-row-action" onclick="event.stopPropagation(); ' + action + '" title="' + escapeAttr(actionLabel) + '" aria-label="' + escapeAttr(actionLabel) + '">' + escapeHtml(actionLabel) + '</button>' +
+      '<button class="work-row-action" onclick="event.stopPropagation(); renameWorkProject(\'' + escapeAttr(project.id) + '\')" title="이름 수정" aria-label="이름 수정">' + _workIcon('edit', 14) + '</button>' +
+      '<button class="work-row-action" onclick="event.stopPropagation(); ' + restoreAction + '" title="' + escapeAttr(restoreLabel) + '" aria-label="' + escapeAttr(restoreLabel) + '">' + escapeHtml(restoreLabel) + '</button>' +
     '</div>' +
   '</div>';
 }
 
 function _renderEndedProjectGroup(title, projects, type) {
+  _ensureWorkRedesignState();
+  const sortKey = appState.workEndedSort[type] || 'recent';
+  const dateField = type === 'completed' ? 'completedAt' : 'updatedAt';
+  const sorted = _sortEndedList(projects, sortKey, dateField);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / WORK_ENDED_PAGE_SIZE));
+  let page = appState.workEndedPage[type] || 1;
+  if (page > totalPages) page = totalPages;
+  if (page < 1) page = 1;
+  appState.workEndedPage[type] = page; // clamp 결과 다시 저장
+  const start = (page - 1) * WORK_ENDED_PAGE_SIZE;
+  const pageItems = sorted.slice(start, start + WORK_ENDED_PAGE_SIZE);
+
+  const rangeNote = sorted.length > WORK_ENDED_PAGE_SIZE
+    ? '<small class="work-ended-range">' + (start + 1) + '–' + (start + pageItems.length) + ' / ' + sorted.length + '</small>'
+    : '';
+
   return '<section class="work-project-section" data-work-ended-group="' + escapeAttr(type) + '">' +
     '<div class="work-project-section-head" aria-label="' + escapeAttr(title) + '">' +
       '<span class="work-project-section-title"><strong>' + escapeHtml(title) + '</strong><small>종료된 본업 프로젝트</small></span>' +
       '<span class="work-project-section-tail">' + _workIcon(type === 'completed' ? 'check' : 'archive', 14) + '</span>' +
     '</div>' +
+    (sorted.length > 1 ? '<div class="work-ended-controls">' + _renderEndedSortChips(type, sortKey) + rangeNote + '</div>' : '') +
     '<div class="work-task-list-redesign">' +
-      (projects.map(project => _renderEndedProjectRow(project, type)).join('') || '<div class="work-empty-inline">프로젝트 없음</div>') +
+      (pageItems.map(project => _renderEndedProjectRow(project, type)).join('') || '<div class="work-empty-inline">프로젝트 없음</div>') +
     '</div>' +
+    _renderEndedPagination(type, page, totalPages) +
   '</section>';
 }
 
 function _renderWorkEndedTab() {
+  _ensureWorkRedesignState();
   const projects = appState.workProjects || [];
-  const completedList = projects
-    .filter(project => project.completed)
-    .sort((a, b) => new Date(b.completedAt || 0) - new Date(a.completedAt || 0));
-  const archivedList = projects
-    .filter(project => project.archived && !project.completed)
-    .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+  const completedList = projects.filter(project => project.completed);
+  const archivedList = projects.filter(project => project.archived && !project.completed);
 
   if (completedList.length === 0 && archivedList.length === 0) {
     return '<div class="work-subtab-content active" id="work-subtab-panel-ended" role="tabpanel" aria-labelledby="work-subtab-btn-ended" data-work-subtab="ended">' +
