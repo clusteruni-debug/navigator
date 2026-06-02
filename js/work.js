@@ -239,9 +239,10 @@ function _completedThisWeekCount() {
 
 // 완료된 일반업무 전체 (이전엔 최근 7일만 — 사용자 요청으로 전체 노출, 표시는 페이지네이션으로 렌더 상한)
 function _completedGeneralItems() {
+  // 완료된 일반업무 전체. completedAt 없는 완료건(import/sync 등)도 updatedAt fallback으로
+  // 노출 — 두 목록 모두에서 사라지는 view-loss 방지 (self-heal)
   return _collectGeneralWorkItems(true)
-    .filter(item => !!item.completedAt)
-    .sort((a, b) => new Date(b.completedAt || 0) - new Date(a.completedAt || 0));
+    .sort((a, b) => new Date(b.completedAt || b.updatedAt || 0) - new Date(a.completedAt || a.updatedAt || 0));
 }
 
 function _renderWorkHeader(activeCount) {
@@ -523,7 +524,7 @@ function _renderRecentDoneExpander(doneItems) {
     const start = (page - 1) * WORK_ENDED_PAGE_SIZE;
     const pageItems = doneItems.slice(start, start + WORK_ENDED_PAGE_SIZE);
     body = '<div class="work-recent-done-body">' +
-      (pageItems.map(item => '<div class="work-recent-done-row"><span>' + escapeHtml(item.title || '제목 없음') + '</span><time>' + escapeHtml(_formatShortDate(item.completedAt)) + '</time></div>').join('') || '<div class="work-recent-done-empty">완료 기록이 없습니다</div>') +
+      (pageItems.map(item => '<div class="work-recent-done-row"><span>' + escapeHtml(item.title || '제목 없음') + '</span><time>' + escapeHtml(_formatShortDate(item.completedAt || item.updatedAt)) + '</time></div>').join('') || '<div class="work-recent-done-empty">완료 기록이 없습니다</div>') +
       _renderGeneralDonePagination(page, totalPages) +
       '<button class="work-history-link" onclick="switchTab(\'history\')">일반 업무 히스토리 열기</button>' +
     '</div>';
@@ -686,6 +687,7 @@ function _renderEndedProjectRow(project, type) {
     ? '<span class="work-ended-date-prefix">완료일</span>' +
       '<span class="work-ended-date-field">' +
         '<span class="work-ended-date-text">' + escapeHtml(_formatKoreanDate(rawDate)) + '</span>' +
+        '<span class="work-ended-date-cal" aria-hidden="true">' + _workIcon('calendar', 12) + '</span>' +
         '<input type="date" class="work-ended-date-overlay" value="' + escapeAttr(rawDate ? String(rawDate).substring(0, 10) : '') + '" onclick="event.stopPropagation(); if(this.showPicker){try{this.showPicker()}catch(e){}}" onchange="event.stopPropagation(); setWorkProjectCompletedAt(\'' + escapeAttr(project.id) + '\', this.value)" aria-label="완료일 수정">' +
       '</span>'
     : '<span class="work-ended-date-static">보관일 · ' + escapeHtml(_formatShortDate(rawDate) || '날짜 없음') + '</span>';

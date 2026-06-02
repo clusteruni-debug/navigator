@@ -517,11 +517,22 @@
       position: relative;
       display: inline-flex;
       align-items: center;
+      gap: 5px;
       border-radius: 6px;
       padding: 2px 7px;
       border: 1px solid var(--border-color);
       background: var(--bg-primary);
       transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .work-ended-date-cal {
+      display: inline-flex;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .work-ended-date-field:hover .work-ended-date-cal {
+      color: var(--cat-본업);
     }
 
     .work-ended-date-field:hover,
