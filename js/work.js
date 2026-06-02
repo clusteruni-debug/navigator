@@ -743,12 +743,14 @@ function _renderWorkEndedTab() {
   // 뒤로가기(showWorkProjectMaster)가 workEndedDetailId를 비워 목록으로 복귀
   if (appState.workEndedDetailId) {
     const detailProj = (appState.workProjects || []).find(p => p.id === appState.workEndedDetailId);
-    if (detailProj) {
+    // 완료/보관 상태일 때만 상세 유지 — 상세에서 '완료 취소'/'복원'으로 활성이 되면(또는 삭제되면)
+    // 가드가 풀려 목록으로 자동 복귀 (활성 프로젝트가 완료·보관 탭에 남는 category leak 방지)
+    if (detailProj && (detailProj.completed || detailProj.archived)) {
       return '<div class="work-subtab-content active" id="work-subtab-panel-ended" role="tabpanel" aria-labelledby="work-subtab-btn-ended" data-work-subtab="ended">' +
         '<div class="work-ended-detail">' + _renderProjectDetail(detailProj) + '</div>' +
       '</div>';
     }
-    appState.workEndedDetailId = null; // 프로젝트가 사라졌으면 목록으로 복귀
+    appState.workEndedDetailId = null; // 없음/활성 전환/삭제 → 목록으로 복귀
   }
   const projects = appState.workProjects || [];
   const completedList = projects.filter(project => project.completed);
@@ -792,6 +794,7 @@ function renderWorkProjects() {
 function setWorkSubTab(tab) {
   if (!WORK_REDESIGN_SUBTABS.includes(tab)) return;
   appState.workSubTab = tab;
+  appState.workEndedDetailId = null; // 탭 전환/재진입 시 완료·보관 상세 드릴인 해제 (탭 버튼 = 목록 루트)
   if (tab === 'projects' && !WORK_REDESIGN_PROJECT_VIEWS.includes(appState.workProjectView)) appState.workProjectView = 'cards';
   renderStatic();
 }
