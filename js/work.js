@@ -50,6 +50,13 @@ function _formatShortDate(dateStr) {
   return (d.getMonth() + 1) + '/' + d.getDate();
 }
 
+// 완료일 표시용 한국식 전체 날짜 (YYYY.MM.DD) — native date input의 로케일 US 형식 대체
+function _formatKoreanDate(dateStr) {
+  const d = _parseLocalDate(dateStr);
+  if (!d) return '날짜 없음';
+  return d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0');
+}
+
 function _deadlineLabel(dateStr) {
   const days = _daysUntil(dateStr);
   if (days === null) return '마감 없음';
@@ -637,17 +644,22 @@ function _renderEndedProjectRow(project, type) {
     ? "completeWorkProject('" + escapeAttr(project.id) + "')"
     : "archiveWorkProject('" + escapeAttr(project.id) + "')";
 
-  // 완료 행: 완료일 인라인 date input(수정 가능) / 보관 행: 보관일 정적 표시
+  // 완료 행: 완료일 = 한국식 텍스트(YYYY.MM.DD) + 투명 date input 오버레이(클릭 시 native picker)
+  //          → 로케일 US 형식/회색 폼박스 대신 앱 톤에 맞는 칩, 편집 편의 유지
+  // 보관 행: 보관일 정적 표시
   const dateCell = isCompleted
     ? '<span class="work-ended-date-prefix">완료일</span>' +
-      '<input type="date" class="work-ended-date-input" value="' + escapeAttr(rawDate ? String(rawDate).substring(0, 10) : '') + '" onclick="event.stopPropagation();" onchange="event.stopPropagation(); setWorkProjectCompletedAt(\'' + escapeAttr(project.id) + '\', this.value)" aria-label="완료일 수정" title="완료일 수정 (클릭)">'
-    : '<span>보관일 · ' + escapeHtml(_formatShortDate(rawDate) || '날짜 없음') + '</span>';
+      '<span class="work-ended-date-field">' +
+        '<span class="work-ended-date-text">' + escapeHtml(_formatKoreanDate(rawDate)) + '</span>' +
+        '<input type="date" class="work-ended-date-overlay" value="' + escapeAttr(rawDate ? String(rawDate).substring(0, 10) : '') + '" onclick="event.stopPropagation(); if(this.showPicker){try{this.showPicker()}catch(e){}}" onchange="event.stopPropagation(); setWorkProjectCompletedAt(\'' + escapeAttr(project.id) + '\', this.value)" aria-label="완료일 수정">' +
+      '</span>'
+    : '<span class="work-ended-date-static">보관일 · ' + escapeHtml(_formatShortDate(rawDate) || '날짜 없음') + '</span>';
 
   return '<div class="work-redesign-task-row cat-work completed">' +
     '<span class="work-row-check cat-work" aria-hidden="true">' + _workIcon(isCompleted ? 'check' : 'archive', 14) + '</span>' +
     '<div class="work-row-main">' +
       '<div class="work-row-title">' + escapeHtml(project.name || '제목 없음') + '</div>' +
-      '<div class="work-row-meta"><span class="work-cat-tag">본업</span>' + dateCell + '</div>' +
+      '<div class="work-row-meta">' + dateCell + '</div>' +
     '</div>' +
     '<div class="work-row-actions">' +
       '<button class="work-row-action" onclick="event.stopPropagation(); renameWorkProject(\'' + escapeAttr(project.id) + '\')" title="이름 수정" aria-label="이름 수정">' + _workIcon('edit', 14) + '</button>' +
@@ -723,7 +735,7 @@ function renderWorkProjects() {
   return '<div class="work-projects-container work-redesign">' +
     _renderWorkHeader(activeProjects.length) +
     _renderWorkSubtabs() +
-    _renderWorkAnchors(activeProjects) +
+    (appState.workSubTab === 'ended' ? '' : _renderWorkAnchors(activeProjects)) +
     content +
   '</div>';
 }

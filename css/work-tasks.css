@@ -505,28 +505,50 @@
       white-space: nowrap;
     }
 
-    .work-ended-date-prefix {
+    .work-ended-date-prefix,
+    .work-ended-date-static {
       color: var(--text-muted);
       font-size: var(--font-xs);
     }
 
-    .work-ended-date-input {
-      border: 1px solid var(--border-color);
+    /* 완료일: 한국식 텍스트(YYYY.MM.DD) 위에 투명 date input 오버레이 → 클릭 시 native picker.
+       로케일 US 형식/회색 폼박스 대신 앱 톤에 맞는 칩 */
+    .work-ended-date-field {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
       border-radius: 6px;
+      padding: 2px 7px;
+      border: 1px solid var(--border-color);
       background: var(--bg-primary);
-      color: var(--text-secondary);
-      font-size: var(--font-xs);
-      font-family: inherit;
-      padding: 3px 6px;
-      cursor: pointer;
-      font-variant-numeric: tabular-nums;
       transition: background-color 0.2s, border-color 0.2s;
     }
 
-    .work-ended-date-input:hover,
-    .work-ended-date-input:focus-visible {
+    .work-ended-date-field:hover,
+    .work-ended-date-field:focus-within {
       border-color: var(--cat-본업);
       background: color-mix(in srgb, var(--cat-본업) 8%, var(--bg-primary));
+    }
+
+    .work-ended-date-text {
+      color: var(--text-secondary);
+      font-size: var(--font-xs);
+      font-variant-numeric: tabular-nums;
+      pointer-events: none;
+    }
+
+    .work-ended-date-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      opacity: 0;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     .work-ended-pagination {
