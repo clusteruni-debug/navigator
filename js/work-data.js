@@ -107,6 +107,31 @@ function migrateWorkTaskFields() {
   return migrated;
 }
 
+/**
+ * WorkProject lifecycle field migration: seed manual completion once.
+ * @returns {boolean} true if any project was updated
+ */
+function migrateWorkProjectLifecycleFields() {
+  let migrated = false;
+  const now = new Date().toISOString();
+
+  appState.workProjects.forEach(project => {
+    if (project.completed === undefined) {
+      project.completed = Array.isArray(project.stages) && isProjectCompleted(project);
+      project.completedAt = project.completed ? (project.updatedAt || now) : null;
+      migrated = true;
+    } else if (project.completedAt === undefined) {
+      project.completedAt = project.completed ? (project.updatedAt || now) : null;
+      migrated = true;
+    }
+  });
+
+  if (migrated) {
+    console.log('[migration] WorkProject lifecycle fields migrated (completed, completedAt)');
+  }
+  return migrated;
+}
+
 // DEFAULT_WORK_TEMPLATES, seedDefaultTemplates → work-templates.js로 분리됨
 
 /**
@@ -167,6 +192,9 @@ function loadWorkProjects() {
         }
       });
 
+      // Migration: add WorkProject lifecycle fields.
+      needsSave = migrateWorkProjectLifecycleFields() || needsSave;
+
       // 마이그레이션: WorkTask에 owner/estimatedTime/completedAt 필드 추가
       needsSave = migrateWorkTaskFields() || needsSave;
 
@@ -222,6 +250,8 @@ function duplicateWorkProject(projectId) {
   newProject.createdAt = new Date().toISOString();
   newProject.updatedAt = new Date().toISOString();
   newProject.archived = false;
+  newProject.completed = false;
+  newProject.completedAt = null;
 
   // 모든 단계와 항목 초기화 + id 재생성
   newProject.stages.forEach(stage => {
@@ -454,6 +484,7 @@ window.getProjectLastActivity = getProjectLastActivity;
  * 완료된 프로젝트는 stale 검사 제외 (정의상 더 이상 업데이트 안 됨)
  */
 function getProjectStaleDays(project) {
+  if (project.completed) return 0;
   if (typeof isProjectCompleted === 'function' && isProjectCompleted(project)) return 0;
   const last = getProjectLastActivity(project);
   if (!last) return 0;
@@ -466,6 +497,7 @@ window.getProjectStaleDays = getProjectStaleDays;
  * 완료된 프로젝트는 0 반환 (이미 종료된 프로젝트의 미완료 task는 의도된 미수행으로 간주)
  */
 function getOverdueTaskCount(project) {
+  if (project.completed) return 0;
   if (typeof isProjectCompleted === 'function' && isProjectCompleted(project)) return 0;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -493,7 +525,7 @@ function getCrossProjectPriorityTasks() {
   const sevenDaysFromNow = new Date(today);
   sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
 
-  appState.workProjects.filter(p => !p.archived && !p.onHold).forEach(project => {
+  appState.workProjects.filter(p => !p.archived && !p.onHold && !p.completed).forEach(project => {
     // 완료된 프로젝트는 ★★★+ 평면 뷰에서 제외 (이미 종료)
     if (typeof isProjectCompleted === 'function' && isProjectCompleted(project)) return;
     (project.stages || []).forEach((stage, si) => {
@@ -596,6 +628,28 @@ function archiveWorkProject(projectId) {
   showToast(project.archived ? '아카이브됨' : '아카이브 해제됨', 'success');
 }
 window.archiveWorkProject = archiveWorkProject;
+
+/**
+ * Toggle manual project completion.
+ */
+function completeWorkProject(projectId) {
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project) return;
+
+  project.completed = !project.completed;
+  project.completedAt = project.completed ? new Date().toISOString() : null;
+  project.updatedAt = new Date().toISOString();
+
+  if (project.completed && appState.activeWorkProject === projectId) {
+    const active = appState.workProjects.find(p => !p.completed && !p.archived && !p.onHold);
+    appState.activeWorkProject = active ? active.id : null;
+  }
+
+  saveWorkProjects();
+  renderStatic();
+  showToast(project.completed ? '완료 처리됨' : '완료 취소됨', 'success');
+}
+window.completeWorkProject = completeWorkProject;
 
 /**
  * 프로젝트 보류 토글

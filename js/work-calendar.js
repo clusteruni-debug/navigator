@@ -12,7 +12,7 @@ function renderWorkCalendarView() {
   var activeAll = appState.workProjects.filter(function(p) { return !p.archived; });
   // 기본: 진행중 + 마감없음(활성)만 표시
   var defaultProjects = activeAll.filter(function(p) {
-    return !p.onHold && !isProjectCompleted(p);
+    return !p.onHold && !p.completed && !isProjectCompleted(p);
   });
   // 토글 시 완료/보류도 포함
   var showAll = appState.scheduleShowAll || false;
@@ -193,7 +193,8 @@ function renderWorkCalendarView() {
   var startDow = firstDay.getDay();
 
   var deadlineMap = {};
-  appState.workProjects.filter(function(p) { return !p.archived; }).forEach(function(p, pIdx) {
+  // 마감 그리드도 스케줄 바와 동일한 toggle-aware 목록(projects) 사용 — 완료/보류 표시 일관성
+  projects.forEach(function(p, pIdx) {
     var pColor = projectColors[pIdx % projectColors.length];
     if (p.deadline) {
       var pdStr = p.deadline.substring(0, 10);

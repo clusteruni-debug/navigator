@@ -192,6 +192,7 @@ function showProjectMoreMenu(event, projectId) {
     { label: '📋 복제', fn: `duplicateWorkProject('${escapeAttr(projectId)}')` },
     { label: project.onHold ? '▶ 재개' : '⏸ 보류', fn: `holdWorkProject('${escapeAttr(projectId)}')` },
     { label: '💾 템플릿', fn: `saveAsTemplate('${escapeAttr(projectId)}')` },
+    { label: project.completed ? '↩ 완료 취소' : '✅ 완료', fn: `completeWorkProject('${escapeAttr(projectId)}')` },
     { label: project.archived ? '📤 복원' : '📦 보관', fn: `archiveWorkProject('${escapeAttr(projectId)}')` },
     { label: '🗑 삭제', fn: `deleteWorkProject('${escapeAttr(projectId)}')`, danger: true }
   ];

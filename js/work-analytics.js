@@ -68,7 +68,7 @@ function calculateProjectPulse(project) {
  */
 function getWorkFocus() {
   const candidates = [];
-  appState.workProjects.filter(p => !p.archived && !p.onHold).forEach(p => {
+  appState.workProjects.filter(p => !p.archived && !p.onHold && !p.completed).forEach(p => {
     (p.stages || []).forEach((stage, si) => {
       (stage.subcategories || []).forEach((sub, sci) => {
         (sub.tasks || []).forEach((task, ti) => {
@@ -191,7 +191,7 @@ function getRemainingWorkdays() {
  */
 function calculateWorkload() {
   const myTasks = appState.workProjects
-    .filter(p => !p.archived && !p.onHold)
+    .filter(p => !p.archived && !p.onHold && !p.completed)
     .flatMap(p => getAllProjectTasks(p))
     .filter(t => t.owner === 'me' && t.status !== 'completed');
 

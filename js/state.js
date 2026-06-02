@@ -81,9 +81,13 @@ function loadState() {
     const parsedWorkProjects = safeParseJSON('navigator-work-projects', null);
     if (parsedWorkProjects) {
       appState.workProjects = parsedWorkProjects;
+      // lifecycle 필드 시드 마이그레이션 — loadWorkProjects()가 orphaned(호출처 0)라 실제 load 경로인 여기서 실행
+      if (typeof migrateWorkProjectLifecycleFields === 'function' && migrateWorkProjectLifecycleFields()) {
+        localStorage.setItem('navigator-work-projects', JSON.stringify(appState.workProjects));
+      }
       // 첫 프로젝트 자동 선택
       if (appState.workProjects.length > 0 && !appState.activeWorkProject) {
-        const activeProject = appState.workProjects.find(p => !p.archived);
+        const activeProject = appState.workProjects.find(p => !p.archived && !p.onHold && !p.completed);
         appState.activeWorkProject = activeProject ? activeProject.id : null;
       }
     }

@@ -1,4 +1,4 @@
-const WORK_REDESIGN_SUBTABS = ['all', 'projects', 'general'];
+const WORK_REDESIGN_SUBTABS = ['all', 'projects', 'general', 'ended'];
 const WORK_REDESIGN_PROJECT_VIEWS = ['cards', 'calendar', 'timeline'];
 const WORK_REDESIGN_GENERAL_SORTS = ['deadline', 'recent', 'time'];
 
@@ -20,7 +20,7 @@ function _ensureWorkRedesignState() {
 }
 
 function _isActiveWorkProject(project) {
-  return !!project && !project.archived && !project.onHold && !isProjectCompleted(project);
+  return !!project && !project.archived && !project.onHold && !project.completed;
 }
 
 function _parseLocalDate(dateStr) {
@@ -89,7 +89,7 @@ function _projectStats(project) {
 
 function _collectProjectWorkItems() {
   const items = [];
-  (appState.workProjects || []).filter(p => !p.archived && !p.onHold).forEach(project => {
+  (appState.workProjects || []).filter(p => !p.archived && !p.onHold && !p.completed).forEach(project => {
     if (isProjectCompleted(project)) return;
     (project.stages || []).forEach((stage, stageIdx) => {
       (stage.subcategories || []).forEach((subcat, subcatIdx) => {
@@ -252,7 +252,8 @@ function _renderWorkSubtabs() {
   const tabs = [
     { key: 'all', label: '전체', icon: 'list' },
     { key: 'projects', label: '프로젝트', icon: 'briefcase' },
-    { key: 'general', label: '일반업무', icon: 'check' }
+    { key: 'general', label: '일반업무', icon: 'check' },
+    { key: 'ended', label: '완료·보관', icon: 'archive' }
   ];
   return '<div class="work-subtabs" role="tablist" aria-label="본업 하위 탭">' +
     tabs.map(tab => {
@@ -538,6 +539,64 @@ function _renderWorkGeneralTab() {
   '</div>';
 }
 
+function _renderEndedProjectRow(project, type) {
+  const isCompleted = type === 'completed';
+  const date = isCompleted ? project.completedAt : project.updatedAt;
+  const dateLabel = _formatShortDate(date) || '날짜 없음';
+  const actionLabel = isCompleted ? '↩ 완료 취소' : '📤 복원';
+  const action = isCompleted
+    ? "completeWorkProject('" + escapeAttr(project.id) + "')"
+    : "archiveWorkProject('" + escapeAttr(project.id) + "')";
+  const meta = (isCompleted ? '완료일' : '보관일') + ' · ' + dateLabel;
+
+  return '<div class="work-redesign-task-row cat-work completed">' +
+    '<span class="work-row-check cat-work" aria-hidden="true">' + _workIcon(isCompleted ? 'check' : 'archive', 14) + '</span>' +
+    '<div class="work-row-main">' +
+      '<div class="work-row-title">' + escapeHtml(project.name || '제목 없음') + '</div>' +
+      '<div class="work-row-meta"><span class="work-cat-tag">본업</span><span>' + escapeHtml(meta) + '</span></div>' +
+    '</div>' +
+    _renderDdayChip(null, dateLabel) +
+    '<div class="work-row-actions">' +
+      '<button class="work-row-action" onclick="event.stopPropagation(); ' + action + '" title="' + escapeAttr(actionLabel) + '" aria-label="' + escapeAttr(actionLabel) + '">' + escapeHtml(actionLabel) + '</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function _renderEndedProjectGroup(title, projects, type) {
+  return '<section class="work-project-section" data-work-ended-group="' + escapeAttr(type) + '">' +
+    '<div class="work-project-section-head" aria-label="' + escapeAttr(title) + '">' +
+      '<span class="work-project-section-title"><strong>' + escapeHtml(title) + '</strong><small>종료된 본업 프로젝트</small></span>' +
+      '<span class="work-project-section-tail">' + _workIcon(type === 'completed' ? 'check' : 'archive', 14) + '</span>' +
+    '</div>' +
+    '<div class="work-task-list-redesign">' +
+      (projects.map(project => _renderEndedProjectRow(project, type)).join('') || '<div class="work-empty-inline">프로젝트 없음</div>') +
+    '</div>' +
+  '</section>';
+}
+
+function _renderWorkEndedTab() {
+  const projects = appState.workProjects || [];
+  const completedList = projects
+    .filter(project => project.completed)
+    .sort((a, b) => new Date(b.completedAt || 0) - new Date(a.completedAt || 0));
+  const archivedList = projects
+    .filter(project => project.archived && !project.completed)
+    .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+
+  if (completedList.length === 0 && archivedList.length === 0) {
+    return '<div class="work-subtab-content active" id="work-subtab-panel-ended" role="tabpanel" aria-labelledby="work-subtab-btn-ended" data-work-subtab="ended">' +
+      '<div class="work-empty-state"><div class="work-empty-title">완료하거나 보관한 프로젝트가 없습니다.</div><div class="work-empty-desc">프로젝트 더보기 메뉴에서 완료 또는 보관을 선택하면 여기에 표시됩니다.</div></div>' +
+    '</div>';
+  }
+
+  return '<div class="work-subtab-content active" id="work-subtab-panel-ended" role="tabpanel" aria-labelledby="work-subtab-btn-ended" data-work-subtab="ended">' +
+    '<div class="work-project-dashboard">' +
+      _renderEndedProjectGroup('✅ 완료 (' + completedList.length + ')', completedList, 'completed') +
+      _renderEndedProjectGroup('📦 보관 (' + archivedList.length + ')', archivedList, 'archived') +
+    '</div>' +
+  '</div>';
+}
+
 function renderWorkProjects() {
   _ensureWorkRedesignState();
 
@@ -548,6 +607,7 @@ function renderWorkProjects() {
   let content = '';
   if (appState.workSubTab === 'all') content = _renderWorkAllTab(activeProjects);
   else if (appState.workSubTab === 'general') content = _renderWorkGeneralTab();
+  else if (appState.workSubTab === 'ended') content = _renderWorkEndedTab();
   else content = _renderWorkProjectsTab(activeProjects);
 
   return '<div class="work-projects-container work-redesign">' +

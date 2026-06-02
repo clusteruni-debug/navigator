@@ -122,6 +122,8 @@ const SUPABASE_CACHE_TTL = 3 * 60 * 1000; // 3분
  * @property {string} createdAt - 생성 시각 (ISO 8601)
  * @property {string} updatedAt - 수정 시각 (ISO 8601)
  * @property {boolean} [archived] - 아카이브 여부
+ * @property {boolean} [completed] - Manual lifecycle completion state
+ * @property {string|null} [completedAt] - Manual completion timestamp (ISO 8601)
  */
 
 /**

@@ -120,7 +120,7 @@ function renderWorkTimeline() {
         const fmtDate = (d) => d ? (new Date(d).getMonth()+1) + '/' + new Date(d).getDate() : '';
         const created = p.createdAt ? fmtDate(p.createdAt) : '-';
         const deadline = p.deadline ? fmtDate(p.deadline) : '-';
-        const isComplete = p.stages.length > 0 && p.stages.every(s => s.completed);
+        const isComplete = p.completed || (p.stages.length > 0 && p.stages.every(s => s.completed));
 
         return '<div style="background: var(--bg-secondary); border-radius: 12px; padding: 16px; margin-bottom: 12px; cursor: pointer;" onclick="openWorkProjectDetail(\'' + escapeAttr(p.id) + '\');">' +
           '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">' +
