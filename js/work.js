@@ -25,6 +25,7 @@ function _ensureWorkRedesignState() {
   if (!appState.workEndedPage || typeof appState.workEndedPage !== 'object') {
     appState.workEndedPage = { completed: 1, archived: 1 };
   }
+  if (typeof appState.workGeneralDonePage !== 'number' || appState.workGeneralDonePage < 1) appState.workGeneralDonePage = 1;
 }
 
 function _isActiveWorkProject(project) {
@@ -236,15 +237,10 @@ function _completedThisWeekCount() {
   return count;
 }
 
-function _recentCompletedGeneralItems() {
-  const today = _parseLocalDate(getLocalDateStr());
-  const since = new Date(today);
-  since.setDate(since.getDate() - 6);
+// 완료된 일반업무 전체 (이전엔 최근 7일만 — 사용자 요청으로 전체 노출, 표시는 페이지네이션으로 렌더 상한)
+function _completedGeneralItems() {
   return _collectGeneralWorkItems(true)
-    .filter(item => {
-      const d = _parseLocalDate(item.completedAt);
-      return d && d >= since && d <= today;
-    })
+    .filter(item => !!item.completedAt)
     .sort((a, b) => new Date(b.completedAt || 0) - new Date(a.completedAt || 0));
 }
 
@@ -515,26 +511,65 @@ function _renderGeneralQuickAdd() {
   '</div>';
 }
 
-function _renderRecentDoneExpander(recentItems) {
+function _renderRecentDoneExpander(doneItems) {
   const expanded = !!appState.workRecentDoneExpanded;
+  let body = '';
+  if (expanded) {
+    const totalPages = Math.max(1, Math.ceil(doneItems.length / WORK_ENDED_PAGE_SIZE));
+    let page = appState.workGeneralDonePage || 1;
+    if (page > totalPages) page = totalPages;
+    if (page < 1) page = 1;
+    appState.workGeneralDonePage = page; // clamp 결과 저장
+    const start = (page - 1) * WORK_ENDED_PAGE_SIZE;
+    const pageItems = doneItems.slice(start, start + WORK_ENDED_PAGE_SIZE);
+    body = '<div class="work-recent-done-body">' +
+      (pageItems.map(item => '<div class="work-recent-done-row"><span>' + escapeHtml(item.title || '제목 없음') + '</span><time>' + escapeHtml(_formatShortDate(item.completedAt)) + '</time></div>').join('') || '<div class="work-recent-done-empty">완료 기록이 없습니다</div>') +
+      _renderGeneralDonePagination(page, totalPages) +
+      '<button class="work-history-link" onclick="switchTab(\'history\')">일반 업무 히스토리 열기</button>' +
+    '</div>';
+  }
   return '<div class="work-recent-done">' +
     '<button class="work-recent-done-head" onclick="toggleWorkRecentDone()">' +
-      '<span>' + _workIcon('check', 14) + '최근 7일 완료 <strong>' + recentItems.length + '</strong></span>' +
+      '<span>' + _workIcon('check', 14) + '완료 <strong>' + doneItems.length + '</strong></span>' +
       '<span>' + _workIcon(expanded ? 'chevron-down' : 'chevron-right', 14) + '</span>' +
     '</button>' +
-    (expanded ? '<div class="work-recent-done-body">' +
-      (recentItems.slice(0, 3).map(item => '<div class="work-recent-done-row"><span>' + escapeHtml(item.title || '제목 없음') + '</span><time>' + escapeHtml(_formatShortDate(item.completedAt)) + '</time></div>').join('') || '<div class="work-recent-done-empty">최근 완료 기록이 없습니다</div>') +
-      '<button class="work-history-link" onclick="switchTab(\'history\')">일반 업무 히스토리 열기</button>' +
-    '</div>' : '') +
+    body +
   '</div>';
 }
+
+// 완료 일반업무 페이지네이션 — ended 탭과 동일 버튼/윈도잉 재사용, 핸들러만 별도
+function _renderGeneralDonePagination(page, totalPages) {
+  if (totalPages <= 1) return '';
+  const prevDisabled = page <= 1;
+  const nextDisabled = page >= totalPages;
+  const nums = _endedPageNumbers(page, totalPages).map(p => {
+    if (p === '…') return '<span class="work-ended-page-ellipsis" aria-hidden="true">…</span>';
+    const active = p === page;
+    return '<button class="work-ended-page-btn ' + (active ? 'active cat-work' : '') + '"' + (active ? ' aria-current="page"' : '') + ' onclick="setWorkGeneralDonePage(' + p + ')" aria-label="' + p + '페이지">' + p + '</button>';
+  }).join('');
+  return '<nav class="work-ended-pagination" aria-label="완료 일반업무 페이지 이동">' +
+    '<button class="work-ended-page-btn nav"' + (prevDisabled ? ' disabled' : '') + ' onclick="setWorkGeneralDonePage(' + (page - 1) + ')" aria-label="이전 페이지">◂</button>' +
+    nums +
+    '<button class="work-ended-page-btn nav"' + (nextDisabled ? ' disabled' : '') + ' onclick="setWorkGeneralDonePage(' + (page + 1) + ')" aria-label="다음 페이지">▸</button>' +
+  '</nav>';
+}
+
+function setWorkGeneralDonePage(page) {
+  const n = parseInt(page, 10);
+  if (!Number.isFinite(n) || n < 1) return;
+  _ensureWorkRedesignState();
+  appState.workGeneralDonePage = n;
+  appState.workRecentDoneExpanded = true; // 페이지 이동 시 펼침 유지
+  renderStatic();
+}
+window.setWorkGeneralDonePage = setWorkGeneralDonePage;
 
 function _renderWorkGeneralTab() {
   const items = _sortGeneralItems(_collectGeneralWorkItems(false));
   const visibleCount = appState.workShowAllGeneralTasks ? items.length : 5;
   const visibleItems = items.slice(0, visibleCount);
   const moreCount = Math.max(0, items.length - visibleCount);
-  const recentItems = _recentCompletedGeneralItems();
+  const doneItems = _completedGeneralItems();
 
   return '<div class="work-subtab-content active" id="work-subtab-panel-general" role="tabpanel" aria-labelledby="work-subtab-btn-general" data-work-subtab="general">' +
     _renderGeneralQuickAdd() +
@@ -550,7 +585,7 @@ function _renderWorkGeneralTab() {
       (visibleItems.map(item => _renderWorkTaskRow(item)).join('') || '<div class="work-empty-state"><div class="work-empty-title">일반 업무가 없습니다</div><div class="work-empty-desc">프로젝트와 연결되지 않은 본업 task가 여기에 모입니다</div></div>') +
     '</div>' +
     (moreCount > 0 ? '<button class="work-more-row" onclick="appState.workShowAllGeneralTasks=true; renderStatic();">+' + moreCount + '개 더 보기</button>' : '') +
-    _renderRecentDoneExpander(recentItems) +
+    _renderRecentDoneExpander(doneItems) +
   '</div>';
 }
 
