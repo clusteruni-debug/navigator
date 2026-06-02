@@ -562,6 +562,43 @@
       appearance: none;
     }
 
+    /* 완료·보관 행 제목 = 상세 열기 버튼 (활성 프로젝트처럼 클릭 → 드릴인) */
+    .work-ended-open-title {
+      appearance: none;
+      -webkit-appearance: none;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      max-width: 100%;
+    }
+
+    .work-ended-open-title:hover,
+    .work-ended-open-title:focus-visible {
+      color: var(--cat-본업);
+    }
+
+    .work-ended-open-chevron {
+      display: inline-flex;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .work-ended-open-title:hover .work-ended-open-chevron {
+      color: var(--cat-본업);
+    }
+
+    /* 완료·보관 상세는 단독 렌더(master 목록 없음) — 데스크톱서도 '프로젝트 목록' back 버튼 노출 */
+    .work-ended-detail .work-back-btn {
+      display: inline-flex;
+    }
+
     .work-ended-pagination {
       display: flex;
       align-items: center;

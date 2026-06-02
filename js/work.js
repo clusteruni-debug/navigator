@@ -26,6 +26,7 @@ function _ensureWorkRedesignState() {
     appState.workEndedPage = { completed: 1, archived: 1 };
   }
   if (typeof appState.workGeneralDonePage !== 'number' || appState.workGeneralDonePage < 1) appState.workGeneralDonePage = 1;
+  if (appState.workEndedDetailId === undefined) appState.workEndedDetailId = null;
 }
 
 function _isActiveWorkProject(project) {
@@ -695,7 +696,7 @@ function _renderEndedProjectRow(project, type) {
   return '<div class="work-redesign-task-row cat-work completed">' +
     '<span class="work-row-check cat-work" aria-hidden="true">' + _workIcon(isCompleted ? 'check' : 'archive', 14) + '</span>' +
     '<div class="work-row-main">' +
-      '<div class="work-row-title">' + escapeHtml(project.name || '제목 없음') + '</div>' +
+      '<button class="work-row-title work-ended-open-title" onclick="event.stopPropagation(); openEndedProjectDetail(\'' + escapeAttr(project.id) + '\')" aria-label="' + escapeAttr((project.name || '제목 없음') + ' 상세 열기') + '">' + escapeHtml(project.name || '제목 없음') + '<span class="work-ended-open-chevron" aria-hidden="true">' + _workIcon('chevron-right', 14) + '</span></button>' +
       '<div class="work-row-meta">' + dateCell + '</div>' +
     '</div>' +
     '<div class="work-row-actions">' +
@@ -738,6 +739,17 @@ function _renderEndedProjectGroup(title, projects, type) {
 
 function _renderWorkEndedTab() {
   _ensureWorkRedesignState();
+  // 완료/보관 프로젝트 상세 드릴인 — 활성 프로젝트와 동일한 _renderProjectDetail 재사용,
+  // 뒤로가기(showWorkProjectMaster)가 workEndedDetailId를 비워 목록으로 복귀
+  if (appState.workEndedDetailId) {
+    const detailProj = (appState.workProjects || []).find(p => p.id === appState.workEndedDetailId);
+    if (detailProj) {
+      return '<div class="work-subtab-content active" id="work-subtab-panel-ended" role="tabpanel" aria-labelledby="work-subtab-btn-ended" data-work-subtab="ended">' +
+        '<div class="work-ended-detail">' + _renderProjectDetail(detailProj) + '</div>' +
+      '</div>';
+    }
+    appState.workEndedDetailId = null; // 프로젝트가 사라졌으면 목록으로 복귀
+  }
   const projects = appState.workProjects || [];
   const completedList = projects.filter(project => project.completed);
   const archivedList = projects.filter(project => project.archived && !project.completed);
@@ -804,7 +816,16 @@ function openWorkProjectDetail(projectId) {
 }
 window.openWorkProjectDetail = openWorkProjectDetail;
 
-function showWorkProjectMaster() { appState.workMobileDrillIn = false; renderStatic(); }
+// 완료·보관 프로젝트 상세를 ended 탭 안에서 드릴인 (활성 프로젝트 탭으로 전환하지 않음 —
+// 그쪽은 활성 목록만 sourcing하므로 완료 프로젝트가 안 보임). 기존 _renderProjectDetail 재사용.
+function openEndedProjectDetail(projectId) {
+  _ensureWorkRedesignState();
+  appState.workEndedDetailId = projectId;
+  renderStatic();
+}
+window.openEndedProjectDetail = openEndedProjectDetail;
+
+function showWorkProjectMaster() { appState.workMobileDrillIn = false; appState.workEndedDetailId = null; renderStatic(); }
 window.showWorkProjectMaster = showWorkProjectMaster;
 
 function setWorkStage(projectId, stageIdx) {
