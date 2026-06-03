@@ -235,7 +235,7 @@ function copyNotionProgress(projectId, stageIdx, subcatIdx, range) {
 
   const text = lines.join('\n');
   const label = range === 'today' ? '오늘' : '이번 주';
-  navigator.clipboard.writeText(text).then(() => {
+  (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => {
     showToast('Notion 진행상황 복사됨 (' + label + ')', 'success');
   }).catch(() => {
     const ta = document.createElement('textarea');

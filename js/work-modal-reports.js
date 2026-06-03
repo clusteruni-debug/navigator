@@ -14,6 +14,7 @@ function showMMReportModal() {
   const modal = document.getElementById('work-input-modal');
   const title = document.getElementById('work-modal-title');
   const body = document.getElementById('work-modal-body');
+  if (!modal || !title || !body) return;
 
   workModalState = { type: 'mm-report', projectId: null, stageIdx: null, subcategoryIdx: null, taskIdx: null };
 
@@ -55,14 +56,16 @@ window.showMMReportModal = showMMReportModal;
  */
 function renderMMReport() {
   const monthInput = document.getElementById('mm-report-month');
-  if (!monthInput) return;
+  if (!monthInput || !monthInput.value) return;
 
   const [yearStr, monthStr] = monthInput.value.split('-');
   const year = parseInt(yearStr);
   const month = parseInt(monthStr);
+  if (isNaN(year) || isNaN(month)) return;
 
   const report = generateMMReport(year, month);
   const output = document.getElementById('mm-report-output');
+  if (!output) return;
   const copyBtn = document.getElementById('mm-report-copy-btn');
 
   if (!report) {
@@ -107,7 +110,7 @@ function copyMMReport() {
   if (!reportEl) return;
 
   const text = reportEl.textContent;
-  navigator.clipboard.writeText(text).then(() => {
+  (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => {
     showToast('MM 리포트 클립보드에 복사됨', 'success');
   }).catch(() => {
     // Deprecated fallback — navigator.clipboard 미지원 환경용 (execCommand 향후 제거 예정)
@@ -130,7 +133,7 @@ function copyMMProportionTable() {
   if (!el) return;
 
   const text = el.textContent;
-  navigator.clipboard.writeText(text).then(() => {
+  (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => {
     showToast('비율 테이블 클립보드에 복사됨', 'success');
   }).catch(() => {
     const ta = document.createElement('textarea');
