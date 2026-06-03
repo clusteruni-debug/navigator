@@ -425,7 +425,7 @@ function loadLifeRhythm() {
       // 마이그레이션된 데이터를 localStorage에만 저장 (updatedAt 갱신 안 함)
       // saveLifeRhythm()을 호출하면 updatedAt이 갱신되어,
       // loadFromFirebase 병합 시 빈 로컬 데이터가 클라우드 데이터를 덮어쓰는 버그 발생
-      localStorage.setItem('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
+      safeLocalStorageSet('navigator-life-rhythm', JSON.stringify(appState.lifeRhythm));
     } catch (e) {
       console.error('라이프 리듬 데이터 로드 실패:', e);
     }

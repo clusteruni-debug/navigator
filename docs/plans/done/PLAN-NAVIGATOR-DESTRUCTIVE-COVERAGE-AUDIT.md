@@ -1,8 +1,8 @@
 ---
 plan_id: NAVIGATOR-DESTRUCTIVE-COVERAGE-AUDIT
 project: navigator
-status: IN_PROGRESS
-status_reason: "All six milestones implemented + verified 2026-05-29 (36 files node --check clean; 5 test files pass incl. new cooldown-key fixture). M5 verified unnecessary — expandedWorkTaskDetails is ephemeral (no localStorage/Firebase persistence), so a threshold change cannot leave stale keys across a reload. Pending /code-review (Rule #14) + sw.js bump + standalone deploy before SHIPPED."
+status: SHIPPED
+status_reason: "All 3 pre-SHIPPED gates met 2026-06-03: (1) Rule#14 separate-reviewer pass = SHIPPED-READY (M1-M6 all PASS, 0 CRITICAL, 2 non-blocking MEDIUM: actions-bulk.js:11 inline-but-splice-safe key, rhythm.js:428 guarded raw setItem); (2) sw.js v6.86 bumped by later work; (3) standalone deploy verified live (clusteruni-debug/navigator HEAD = workspace aa7f6fc5, sw v6.86 match). M1-M6 invariants re-verified in CURRENT code despite 13 later commits."
 milestones:
   - { id: M1, label: "destructiveConfirm coverage audit + remaining sites migration", done: true }
   - { id: M2, label: "Array.isArray(task.logs) coverage audit + missing sites guard", done: true }
@@ -14,7 +14,7 @@ decisions_pending: []
 blockers: []
 depends_on: []
 git_strategy: mono
-last_verified: 2026-05-29
+last_verified: 2026-06-03
 ---
 
 # Plan — Navigator Codebase-Wide Destructive-Action Coverage Audit

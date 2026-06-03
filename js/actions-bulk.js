@@ -8,7 +8,10 @@
  */
 function deleteTask(id) {
   const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
-  if (!confirmFn('정말 삭제하시겠습니까? (휴지통에서 복원 가능)', 'task-del-' + id)) return;
+  const cooldownKey = (typeof stableCooldownKey === 'function')
+    ? stableCooldownKey('task-del', id)
+    : 'task-del-' + id;
+  if (!confirmFn('정말 삭제하시겠습니까? (휴지통에서 복원 가능)', cooldownKey)) return;
 
   const task = appState.tasks.find(t => t.id === id);
   if (task) {
