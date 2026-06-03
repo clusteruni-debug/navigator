@@ -994,26 +994,6 @@ function _renderHabitGrid() {
   `;
 }
 
-// Dead backward-compat aliases (0 external callers per grep 2026-05-21). Kept
-// during transition window — remove in next cleanup pass once external code
-// confirms no late binding via window. Note: revenueStats argument is silently
-// ignored by _renderDashRevenuePanel (computes its own via getRevenueStats).
-function _renderDashRevenue(revenueStats) {
-  return _renderDashRevenuePanel({ revenueStats });
-}
-
-function _renderDashLifeRhythm() {
-  return _renderDashHealthPanel({});
-}
-
-function _renderDashProductivityInsights() {
-  return _renderDashPatternsPanel({});
-}
-
-function _renderDashWeeklyMonthly() {
-  return '';
-}
-
 if (typeof window !== 'undefined') {
   window.setDashboardSubView = setDashboardSubView;
   window.getDayTimelineData = getDayTimelineData;

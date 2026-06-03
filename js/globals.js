@@ -19,7 +19,7 @@ const _navFunctions = {
   getRepeatLabel, setScheduleFilter, getTasksByDate, formatTime,
   setSearchQuery, clearSearch, setCategoryFilter,
   // 서브태스크
-  toggleSubtaskComplete, toggleSubtaskExpand, toggleDetailedSubtask, addSubtask, removeSubtask,
+  toggleSubtaskComplete, toggleDetailedSubtask, addSubtask, removeSubtask,
   // 주간 리뷰
   showWeeklyReview, closeWeeklyReview,
   // 포커스/단축키

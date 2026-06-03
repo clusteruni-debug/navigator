@@ -427,7 +427,7 @@ function uncompleteTask(id) {
 
   // 오늘 완료한 작업인지 확인
   const wasCompletedToday = task.completedAt &&
-    new Date(task.completedAt).toDateString() === new Date().toDateString();
+    getLocalDateStr(new Date(task.completedAt)) === getLocalDateStr();
 
   // completionLog에서 해당 기록 제거
   if (task.completedAt) {

@@ -296,15 +296,3 @@ async function uncompleteSupabaseEvent(supabaseId) {
   }
 }
 window.uncompleteSupabaseEvent = uncompleteSupabaseEvent;
-
-// ============================================
-// 수신 이벤트 섹션 렌더링
-// ============================================
-
-function _renderSupabaseSection(pending, _, isLoading, error) {
-  return _renderEventsToolbar(isLoading, error);
-}
-
-function _renderSupabaseCard(event) {
-  return _renderUnifiedEventCard(_buildUnifiedEvents([event], [])[0]);
-}

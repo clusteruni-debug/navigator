@@ -138,21 +138,6 @@ function saveTemplates() {
 }
 
 /**
- * 템플릿 로드 (localStorage)
- */
-function loadTemplates() {
-  try {
-    const saved = localStorage.getItem('navigator-templates');
-    if (saved) {
-      appState.templates = JSON.parse(saved);
-    }
-  } catch (e) {
-    console.error('템플릿 로드 실패:', e);
-    appState.templates = [];
-  }
-}
-
-/**
  * 셔틀 상태 토글
  */
 function toggleShuttle() {

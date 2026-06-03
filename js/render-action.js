@@ -576,7 +576,7 @@ function _renderMedicationSlot(slot, originalIndex, requiredGroup, todayMeds) {
  */
 function _renderPomodoroIfActive() {
   const pomo = appState.pomodoro;
-  const currentTask = pomo.currentTaskId ? appState.tasks.find(t => t.id === pomo.currentTaskId) : null;
+  const currentTask = pomo.currentTaskId ? (appState.tasks || []).find(t => t.id === pomo.currentTaskId) : null;
   if (!pomo.isRunning && !pomo.isBreak && pomo.completedPomodoros === 0) {
     return '';
   }

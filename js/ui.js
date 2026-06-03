@@ -110,29 +110,6 @@ function closeTimeInputModal() {
 }
 
 /**
- * 시간 예측 정확도 계산
- */
-function getTimeAccuracy() {
-  const tasksWithBoth = appState.tasks.filter(t =>
-    t.completed && t.estimatedTime && t.actualTime
-  );
-
-  if (tasksWithBoth.length < 3) return null;
-
-  const totalEstimated = tasksWithBoth.reduce((sum, t) => sum + t.estimatedTime, 0);
-  const totalActual = tasksWithBoth.reduce((sum, t) => sum + t.actualTime, 0);
-  const ratio = totalActual / totalEstimated;
-
-  return {
-    ratio: ratio.toFixed(2),
-    message: ratio > 1.2 ? '예상보다 시간이 더 걸려요' :
-             ratio < 0.8 ? '예상보다 빨리 끝내요!' :
-             '시간 예측이 정확해요!',
-    count: tasksWithBoth.length
-  };
-}
-
-/**
  * 오늘의 명언 가져오기
  */
 function getDailyQuote() {

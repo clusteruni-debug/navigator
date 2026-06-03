@@ -371,11 +371,6 @@ function renderHistoryCalendarWidget() {
 }
 window.renderHistoryCalendarWidget = renderHistoryCalendarWidget;
 
-function renderCalendar() {
-  return renderHistoryCalendarWidget();
-}
-window.renderCalendar = renderCalendar;
-
 function _renderHistoryCalendarSubTab(stats) {
   return `
     <div class="history-calendar-layout">
@@ -523,11 +518,6 @@ function _renderHistoryListSubTab() {
   `;
 }
 
-function renderRecentHistory() {
-  return _renderHistoryListSubTab();
-}
-window.renderRecentHistory = renderRecentHistory;
-
 function _renderHistoryDateGroup(dateStr, entries, index) {
   const isExpanded = _isHistoryDateExpanded(dateStr, index);
   const dayRevenue = entries.reduce((sum, entry) => sum + (Number(entry.expectedRevenue) || 0), 0);
@@ -622,54 +612,3 @@ function _renderBreakdownBars(counts, total, items) {
     </div>`;
 }
 
-function _renderCompletedBrowse() {
-  if (!appState.completedBrowseState) appState.completedBrowseState = { page: 0, expandedDates: {} };
-  const state = appState.completedBrowseState;
-  const grouped = getHistoryGroupedEntries();
-  const allDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
-  const perPage = 7;
-  const totalPages = Math.max(1, Math.ceil(allDates.length / perPage));
-  const page = Math.min(state.page || 0, totalPages - 1);
-  const pagedDates = allDates.slice(page * perPage, (page + 1) * perPage);
-
-  if (allDates.length === 0) return '<div class="empty-state" style="padding:40px 20px;">완료된 작업이 없습니다.</div>';
-
-  return `
-    <div class="completed-browse">
-      ${pagedDates.map(dateStr => {
-        const tasks = grouped[dateStr];
-        const isExpanded = !!state.expandedDates[dateStr];
-        const dayRevenue = tasks.reduce((sum, task) => sum + (Number(task.expectedRevenue) || 0), 0);
-        return `
-          <div class="history-date-group">
-            <button class="history-date-header" type="button" onclick="toggleCompletedBrowseDate('${dateStr}')">
-              <span class="history-date-title">${_historyDateTitle(dateStr)}</span>
-              <span class="history-date-count">${tasks.length}개 완료${dayRevenue > 0 ? ' · ' + dayRevenue.toLocaleString() + '원' : ''}</span>
-            </button>
-            <div class="history-date-tasks ${isExpanded ? 'show' : ''}">
-              ${tasks.map(task => _renderHistoryEntryRow(task, dateStr, false)).join('')}
-            </div>
-          </div>`;
-      }).join('')}
-      ${totalPages > 1 ? `
-        <div class="history-pagination">
-          <button class="history-page-btn" type="button" onclick="navigateCompletedBrowsePage(${page - 1})" ${page <= 0 ? 'disabled' : ''}>이전</button>
-          <span>${page + 1} / ${totalPages}</span>
-          <button class="history-page-btn" type="button" onclick="navigateCompletedBrowsePage(${page + 1})" ${page >= totalPages - 1 ? 'disabled' : ''}>다음</button>
-        </div>` : ''}
-    </div>`;
-}
-
-function toggleCompletedBrowseDate(dateStr) {
-  if (!appState.completedBrowseState) appState.completedBrowseState = { page: 0, expandedDates: {} };
-  appState.completedBrowseState.expandedDates[dateStr] = !appState.completedBrowseState.expandedDates[dateStr];
-  renderStatic();
-}
-window.toggleCompletedBrowseDate = toggleCompletedBrowseDate;
-
-function navigateCompletedBrowsePage(page) {
-  if (!appState.completedBrowseState) appState.completedBrowseState = { page: 0, expandedDates: {} };
-  appState.completedBrowseState.page = Math.max(0, page);
-  renderStatic();
-}
-window.navigateCompletedBrowsePage = navigateCompletedBrowsePage;

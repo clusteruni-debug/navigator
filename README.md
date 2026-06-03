@@ -69,23 +69,24 @@
 
 ## Tech Stack
 
-### Current (v5.1 - HTML Prototype + PWA)
-- **Frontend**: Vanilla JavaScript
-- **Storage**: LocalStorage
+### Current (v5.1 - Modular Vanilla JS + Firebase + PWA)
+- **Frontend**: Vanilla JavaScript (74 modules in js/, sequential script loading — no bundler)
+- **Storage**: Firebase (Auth/Firestore) + LocalStorage dual storage (localStorage-only when logged out)
 - **PWA**: manifest.json + Service Worker
-- **Deployment**: Local HTML file
+- **Deployment**: GitHub Pages (Actions auto-build)
 
 ### File Structure
 ```
-navigator-app/
-├── navigator-v5.html     # Main app
+navigator/
+├── navigator-v5.html     # HTML shell (334 lines) + sequential <script> tags (load order critical)
+├── js/                   # 74 modular files (utils, state, firebase-sync, render-*, work-*, actions-*, reflection-*)
+├── css/                  # 32 feature-split stylesheets
 ├── manifest.json         # PWA configuration
 ├── sw.js                 # Service Worker
-├── README.md             # Project introduction
-├── CONTEXT.md            # Full context
-├── ROADMAP.md            # Development roadmap
 ├── ARCHITECTURE.md       # Technical design
 ├── DECISIONS.md          # Design decision records
+├── DESIGN.md             # Design system & UI rules
+├── CONTEXT.md            # Full context
 ├── WORKFLOW.md           # Git guide
 ├── SETUP-GUIDE.md        # Initial setup
 └── TROUBLESHOOTING.md    # Troubleshooting
@@ -176,7 +177,7 @@ start navigator-v5.html # Windows
 Essential documents for understanding the project:
 
 1. **[CONTEXT.md](./CONTEXT.md)** - Full context and background
-2. **[ROADMAP.md](./ROADMAP.md)** - Development roadmap
+2. **[DESIGN.md](./DESIGN.md)** - Design system & UI rules
 3. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Technical design
 4. **[DECISIONS.md](./DECISIONS.md)** - Design decision records
 5. **[WORKFLOW.md](./WORKFLOW.md)** - Git workflow guide

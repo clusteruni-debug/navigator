@@ -19,24 +19,6 @@ function checkWeeklyReview() {
 }
 
 /**
- * 월요일 리마인더 필요 여부 체크
- */
-function checkMondayReminder() {
-  const now = new Date();
-  const dayOfWeek = now.getDay(); // 1 = 월요일
-  const today = now.toDateString();
-
-  // 월요일이고, 오늘 리마인더 안 보여줬고, 닫지 않았으면
-  if (dayOfWeek === 1 &&
-      appState.weeklyPlan.lastReminderDate !== today &&
-      !appState.weeklyPlan.dismissed &&
-      appState.weeklyPlan.focusTasks.length > 0) {
-    return true;
-  }
-  return false;
-}
-
-/**
  * 주간 리뷰 모달 표시
  */
 function showWeeklyReview() {

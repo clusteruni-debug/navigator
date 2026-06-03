@@ -351,13 +351,6 @@ function toggleSubtaskComplete(taskId, subtaskIndex) {
 }
 
 /**
- * 서브태스크 목록 펼치기/접기 (레거시 — toggleSubtaskChips로 위임)
- */
-function toggleSubtaskExpand(taskId) {
-  toggleSubtaskChips(taskId);
-}
-
-/**
  * 서브태스크 칩 접기/펼치기 (태스크 카드 내 서브태스크 칩 목록)
  */
 function toggleSubtaskChips(taskId) {

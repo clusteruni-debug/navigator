@@ -13,7 +13,7 @@ npx serve -p 5000
 GitHub Pages: https://clusteruni-debug.github.io/navigator/navigator-v5.html
 
 ## Architecture
-Modular Vanilla JS (66 files in js/) + navigator-v5.html (HTML shell, 290 lines) + sw.js
+Modular Vanilla JS (74 files in js/) + navigator-v5.html (HTML shell, 334 lines) + sw.js
 Sequential script loading — no ES6 modules or bundler. Load order in navigator-v5.html is critical.
 
 ## Unique Constraints

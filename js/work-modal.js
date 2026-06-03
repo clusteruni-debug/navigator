@@ -92,8 +92,8 @@ function confirmWorkModal() {
           showToast('올바른 날짜를 선택하세요', 'error'); return;
         }
         log.date = newDate;
-        // 기존 시간 보존, 없으면 00:00 폴백
-        const existingTime = t.completedAt ? t.completedAt.split('T')[1] || '00:00' : '00:00';
+        // 기존 시간 보존, 없으면 00:00:00 폴백 (Safari Invalid Date 회피 — work-data.js:59 포맷 일치)
+        const existingTime = t.completedAt ? t.completedAt.split('T')[1] || '00:00:00' : '00:00:00';
         t.completedAt = newDate + 'T' + existingTime;
       } else {
         const newContent = document.getElementById('work-input-content').value.trim();

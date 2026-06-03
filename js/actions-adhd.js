@@ -21,20 +21,6 @@ function stopQuickTimer() {
 window.stopQuickTimer = stopQuickTimer;
 
 /**
- * 퀵타이머 디스플레이 업데이트
- */
-function renderQuickTimerDisplay() {
-  if (!_cachedQuickTimerEl || !_cachedQuickTimerEl.isConnected) {
-    _cachedQuickTimerEl = document.getElementById('quick-timer-display');
-  }
-  if (_cachedQuickTimerEl) {
-    const mins = Math.floor(appState.quickTimer.timeLeft / 60);
-    const secs = appState.quickTimer.timeLeft % 60;
-    _cachedQuickTimerEl.textContent = mins + ':' + String(secs).padStart(2, '0');
-  }
-}
-
-/**
  * 동기부여 메시지 표시
  */
 function showMotivation(message) {

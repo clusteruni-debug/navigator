@@ -250,7 +250,7 @@ function renderSettingsModal() {
                     return medSlots.map((slot, idx) => `
                       <div class="settings-row" style="padding: 10px 0; border-bottom: 1px solid var(--border-color);">
                         <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                          <span style="font-size: 18px;">${slot.icon}</span>
+                          <span style="font-size: 18px;">${escapeHtml(slot.icon)}</span>
                           <div style="flex: 1;">
                             <div style="font-size: 16px; font-weight: 500;">${escapeHtml(slot.label)}</div>
                             <div style="font-size: 15px; color: var(--text-muted);">${slot.required ? '필수' : '선택'}</div>

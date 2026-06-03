@@ -481,6 +481,3 @@ function _renderLocalEventsSection(pendingEvents) {
   `;
 }
 
-function _renderLocalEventCard(task) {
-  return _renderUnifiedEventCard(_buildUnifiedEvents([], [task])[0]);
-}
