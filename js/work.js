@@ -257,6 +257,7 @@ function _renderWorkHeader(activeCount) {
       '<button class="work-primary-action" onclick="showWorkModal(\'project\')">' + _workIcon('plus', 14) + '<span>새 프로젝트</span></button>' +
       '<button class="work-icon-action" onclick="createRoV3Project()" title="RO v3 프로젝트" aria-label="RO v3 프로젝트">' + _workIcon('clipboard-list', 15) + '</button>' +
       '<button class="work-icon-action" onclick="showWorkModal(\'template-manage\')" title="템플릿 관리" aria-label="템플릿 관리">' + _workIcon('list', 15) + '</button>' +
+      '<button class="work-icon-action" onclick="showMMReportModal()" title="MM 리포트" aria-label="MM 리포트">' + _workIcon('calendar', 15) + '</button>' +
     '</div>' +
   '</div>';
 }
