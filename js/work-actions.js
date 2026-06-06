@@ -576,6 +576,38 @@ function reorderSubcategory(projectId, stageIdx, fromIdx, toIdx) {
 window.reorderSubcategory = reorderSubcategory;
 
 /**
+ * 중분류 인접 이동 (위/아래 버튼 전용)
+ * reorderSubcategory는 drag-drop용 경계 가드(toIdx >= len 차단) 때문에
+ * 인접 아래이동에서 off-by-one이 발생 → 버튼 이동은 별도 swap 헬퍼 사용.
+ * dir: -1(위) / +1(아래). 같은 단계 내에서만 인접 항목과 자리 교환.
+ */
+function moveSubcategory(projectId, stageIdx, subcatIdx, dir) {
+  const project = appState.workProjects.find(p => p.id === projectId);
+  if (!project) return;
+  const stage = project.stages && project.stages[stageIdx];
+  if (!stage || !stage.subcategories) return;
+  const arr = stage.subcategories;
+  const target = subcatIdx + dir;
+  if (subcatIdx < 0 || subcatIdx >= arr.length || target < 0 || target >= arr.length) return;
+
+  const [moved] = arr.splice(subcatIdx, 1);
+  arr.splice(target, 0, moved);
+
+  // reorderSubcategory와 동일한 UI 상태 매핑 (펼침 상태 보존). (fromIdx, finalIdx) 의미.
+  const stagePrefix = projectId + '-' + stageIdx + '-';
+  _remapStateKeys(appState.collapsedSubcategories, stagePrefix, subcatIdx, target);
+  _remapStateKeys(appState.expandedWorkTasks, stagePrefix, subcatIdx, target);
+  _remapStateKeys(appState.expandedWorkTaskDetails, stagePrefix, subcatIdx, target);
+  _remapStateKeys(appState.expandedWorkLogContents, stagePrefix, subcatIdx, target);
+
+  project.updatedAt = new Date().toISOString();
+  saveWorkProjects();
+  renderStatic();
+  showToast('중분류 순서 변경됨', 'success');
+}
+window.moveSubcategory = moveSubcategory;
+
+/**
  * 작업 항목 순서 재정렬 (같은 중분류 내에서만)
  */
 function reorderWorkTask(projectId, stageIdx, subcatIdx, fromIdx, toIdx) {

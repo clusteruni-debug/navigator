@@ -75,6 +75,7 @@ function renderNextUpBlock(project) {
     '<div class="work-next-up-list">' + itemsHtml + '</div>' +
     '</div>';
 }
+window.renderNextUpBlock = renderNextUpBlock; // work.js _renderProjectExtras에서 호출 — 로드순서 무관 안전화
 
 /**
  * 긴 log 본문 자동 접기 — content가 250자 OR 5줄 이상이면 미리보기 + 더보기 토글

@@ -452,19 +452,144 @@ function _renderStageTabs(project, activeIdx) {
   }).join('') + '<button class="work-add-cta work-add-cta--ghost" onclick="promptAddStage(\'' + escapeAttr(project.id) + '\')" aria-label="새 단계 추가" title="새 단계 추가">' + _workIcon('plus', 14) + '<span>단계</span></button>' + '</div>';
 }
 
+// 단계/중분류 공용 날짜 칩 (시작~종료 / 시작~ / ~종료)
+function _renderWorkDateChip(startDate, endDate, cls) {
+  const s = _parseLocalDate(startDate);
+  const e = _parseLocalDate(endDate);
+  if (!s && !e) return ''; // 둘 다 없거나 invalid → 칩 생략 (NaN/NaN 방지)
+  const fmt = (dt) => (dt.getMonth() + 1) + '/' + dt.getDate();
+  let range;
+  if (s && e) range = fmt(s) + '~' + fmt(e);
+  else if (s) range = fmt(s) + '~';
+  else range = '~' + fmt(e);
+  return '<span class="' + (cls || 'work-subcat-date') + '" style="margin-left:8px;font-size:13px;color:var(--text-muted);flex-shrink:0;">' + range + '</span>';
+}
+
 function _renderSubcategory(project, stageIdx, subcat, subcatIdx) {
+  const pid = escapeAttr(project.id);
   const key = project.id + '-' + stageIdx + '-' + subcatIdx;
-  const val = appState.collapsedSubcategories && appState.collapsedSubcategories[key];
   const done = (subcat.tasks || []).filter(task => task.status === 'completed').length;
   const total = (subcat.tasks || []).length;
-  const expanded = val === 'explicit-expanded' || (val !== 'explicit-collapsed' && done < total);
-  const bodyId = 'work-subcat-panel-' + escapeAttr(key);
-  return '<section class="work-v3-subcat" aria-expanded="' + expanded + '">' +
-    '<button class="work-v3-subcat-head" aria-expanded="' + expanded + '" aria-controls="' + bodyId + '" onclick="toggleSubcategoryCollapse(\'' + escapeAttr(project.id) + '\',' + stageIdx + ',' + subcatIdx + ')">' +
-      '<span>' + _workIcon(expanded ? 'chevron-down' : 'menu', 13) + escapeHtml(subcat.name || '중분류') + '</span><strong>' + done + '/' + total + '</strong>' +
-    '</button>' +
-    (expanded ? '<div id="' + bodyId + '" class="work-v3-subcat-body">' + ((subcat.tasks || []).map((task, taskIdx) => renderWorkTask(project.id, stageIdx, subcatIdx, task, taskIdx)).join('') || '<div class="work-empty-inline">항목 없음</div>') + '<div class="work-layer-add-row"><button class="work-add-cta work-add-cta--subtle" onclick="showWorkModal(\'task\', \'' + escapeAttr(project.id) + '\',' + stageIdx + ',' + subcatIdx + ')" aria-label="새 항목 추가">' + _workIcon('plus', 14) + '<span>새 항목</span></button></div>' + '</div>' : '') +
-  '</section>';
+  const allDone = (total > 0 && done === total) || (total === 0 && !!subcat._completed);
+  const scVal = appState.collapsedSubcategories && appState.collapsedSubcategories[key];
+  const isCollapsed = scVal === 'explicit-collapsed' ? true
+    : scVal === 'explicit-expanded' ? false
+    : allDone; // 기본: 전부 완료된 중분류만 접힘
+  const count = (project.stages[stageIdx].subcategories || []).length;
+  const dateHtml = _renderWorkDateChip(subcat.startDate, subcat.endDate, 'work-subcat-date');
+  return '<div class="work-subcategory">' +
+    '<div class="work-subcategory-header">' +
+      '<div class="work-subcategory-title">' +
+        '<span class="work-subcategory-collapse-toggle" onclick="toggleSubcategoryCollapse(\'' + pid + '\',' + stageIdx + ',' + subcatIdx + ')" title="' + (isCollapsed ? '펼치기' : '접기') + '" style="cursor:pointer;color:var(--text-muted);flex-shrink:0;display:inline-flex;align-items:center;">' + _workIcon(isCollapsed ? 'chevron-right' : 'chevron-down', 13) + '</span>' +
+        '<div class="work-subcategory-checkbox' + (allDone ? ' checked' : '') + '" role="button" tabindex="0" aria-pressed="' + allDone + '" aria-label="중분류 ' + (allDone ? '완료 해제' : '완료 표시') + '" onclick="toggleSubcategoryComplete(\'' + pid + '\',' + stageIdx + ',' + subcatIdx + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();toggleSubcategoryComplete(\'' + pid + '\',' + stageIdx + ',' + subcatIdx + ');}">' + (allDone ? '☑' : '☐') + '</div>' +
+        '<span class="work-subcategory-name" onclick="promptRenameSubcategory(\'' + pid + '\',' + stageIdx + ',' + subcatIdx + ')" title="클릭하여 이름 변경">' + escapeHtml(subcat.name || '중분류') + '</span>' +
+        '<span class="work-subcategory-toggle">(' + done + '/' + total + ')</span>' +
+        dateHtml +
+      '</div>' +
+      '<div class="work-subcategory-actions">' +
+        (subcatIdx > 0 ? '<button class="work-task-action" onclick="moveSubcategory(\'' + pid + '\',' + stageIdx + ',' + subcatIdx + ',-1)" title="위로 이동" aria-label="중분류 위로 이동">▲</button>' : '') +
+        (subcatIdx < count - 1 ? '<button class="work-task-action" onclick="moveSubcategory(\'' + pid + '\',' + stageIdx + ',' + subcatIdx + ',1)" title="아래로 이동" aria-label="중분류 아래로 이동">▼</button>' : '') +
+        '<button class="work-task-action" onclick="promptRenameSubcategory(\'' + pid + '\',' + stageIdx + ',' + subcatIdx + ')" title="이름 변경" aria-label="중분류 이름 변경">' + _workIcon('edit', 14) + '</button>' +
+        '<button class="work-task-action" onclick="showWorkModal(\'subcat-deadline\',\'' + pid + '\',' + stageIdx + ',' + subcatIdx + ')" title="일정 설정" aria-label="중분류 일정 설정">' + _workIcon('calendar', 14) + '</button>' +
+        '<button class="work-task-action" onclick="deleteSubcategory(\'' + pid + '\',' + stageIdx + ',' + subcatIdx + ')" title="삭제" aria-label="중분류 삭제" style="color:var(--accent-danger);">' + _workIcon('trash', 14) + '</button>' +
+      '</div>' +
+    '</div>' +
+    (!isCollapsed ?
+      ((subcat.tasks || []).length > 0
+        ? '<div class="work-task-list">' + (subcat.tasks || []).map((task, taskIdx) => renderWorkTask(project.id, stageIdx, subcatIdx, task, taskIdx)).join('') + '</div>'
+        : '<div class="work-empty-inline" style="padding:8px;color:var(--text-muted);">항목 없음</div>') +
+      '<div class="work-layer-add-row"><button class="work-add-cta work-add-cta--subtle" onclick="showWorkModal(\'task\',\'' + pid + '\',' + stageIdx + ',' + subcatIdx + ')" aria-label="새 항목 추가">' + _workIcon('plus', 14) + '<span>새 항목</span></button></div>'
+      : '') +
+  '</div>';
+}
+
+// 활성 단계 관리 툴바 (완료체크 / 이름변경 / 위·아래 이동 / 일정 / 삭제)
+function _renderStageToolbar(project, stageIdx, stage) {
+  const pid = escapeAttr(project.id);
+  const stageName = getStageName(project, stageIdx);
+  const total = (project.stages || []).length;
+  const dateHtml = _renderWorkDateChip(stage.startDate, stage.endDate, 'work-stage-date');
+  return '<div class="work-stage-toolbar">' +
+    '<div class="work-stage-toolbar-title">' +
+      '<div class="work-stage-checkbox' + (stage.completed ? ' checked' : '') + '" role="button" tabindex="0" aria-pressed="' + (stage.completed ? 'true' : 'false') + '" aria-label="단계 ' + (stage.completed ? '완료 해제' : '완료 표시') + '" onclick="toggleStageComplete(\'' + pid + '\',' + stageIdx + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();toggleStageComplete(\'' + pid + '\',' + stageIdx + ');}">' + (stage.completed ? '☑' : '☐') + '</div>' +
+      '<span class="work-stage-name" onclick="promptRenameStage(\'' + pid + '\',' + stageIdx + ',\'' + escapeAttr(stageName) + '\')" title="클릭하여 이름 변경">' + escapeHtml(stageName) + '</span>' +
+      dateHtml +
+    '</div>' +
+    '<div class="work-stage-actions">' +
+      (stageIdx > 0 ? '<button class="work-stage-add-task" onclick="moveStage(\'' + pid + '\',' + stageIdx + ',\'up\')" title="위로 이동" aria-label="단계 위로 이동">▲</button>' : '') +
+      (stageIdx < total - 1 ? '<button class="work-stage-add-task" onclick="moveStage(\'' + pid + '\',' + stageIdx + ',\'down\')" title="아래로 이동" aria-label="단계 아래로 이동">▼</button>' : '') +
+      '<button class="work-stage-add-task" onclick="promptRenameStage(\'' + pid + '\',' + stageIdx + ',\'' + escapeAttr(stageName) + '\')" title="이름 변경" aria-label="단계 이름 변경">' + _workIcon('edit', 14) + '</button>' +
+      '<button class="work-stage-add-task" onclick="showWorkModal(\'stage-deadline\',\'' + pid + '\',' + stageIdx + ')" title="일정 설정" aria-label="단계 일정 설정">' + _workIcon('calendar', 14) + '</button>' +
+      '<button class="work-stage-add-task" onclick="deleteProjectStage(\'' + pid + '\',' + stageIdx + ')" title="단계 삭제" aria-label="단계 삭제" style="color:var(--accent-danger);">' + _workIcon('trash', 14) + '</button>' +
+    '</div>' +
+  '</div>';
+}
+
+// 프로젝트 보조 블록 (진행률 / 일정 / Next Up / 개요 / 메타 / 양식출력 / 빠른작성)
+function _renderProjectExtras(project, stats) {
+  const pid = escapeAttr(project.id);
+  const fmt = (dt) => (dt.getMonth() + 1) + '/' + dt.getDate();
+
+  const pct = stats.totalTasks > 0 ? Math.round(stats.completedTasks / stats.totalTasks * 100) : 0;
+  // 진행률 바 — 항목/단계 카운트는 헤더 <p>에 이미 있어 % 만 표기 (중복 회피)
+  const progressHtml = '<div class="work-project-progress"><div class="work-project-progress-bar"><div class="work-project-progress-fill" style="width:' + pct + '%"></div></div><span class="work-project-progress-text">' + pct + '%</span></div>';
+
+  let scheduleHtml;
+  const sDate = _parseLocalDate(project.startDate);
+  const dDate = _parseLocalDate(project.deadline);
+  if (sDate || dDate) {
+    let dday = '';
+    if (dDate) {
+      const dl = _daysUntil(project.deadline); // 로컬 앵커 — TZ shift로 D-day 어긋남 방지
+      const cls = dl < 0 ? 'overdue' : dl <= 3 ? 'soon' : '';
+      const txt = dl < 0 ? 'D+' + Math.abs(dl) : dl === 0 ? 'D-Day' : 'D-' + dl;
+      dday = '<span class="work-deadline ' + cls + '">' + txt + '</span>';
+    }
+    const range = sDate && dDate ? fmt(sDate) + ' ~ ' + fmt(dDate)
+      : sDate ? fmt(sDate) + ' ~' : '~ ' + fmt(dDate);
+    scheduleHtml = '<div class="work-schedule" onclick="showWorkModal(\'deadline\',\'' + pid + '\')" style="cursor:pointer;display:flex;align-items:center;gap:8px;"><span class="work-date-range">' + _workIcon('calendar', 13) + ' ' + range + '</span>' + dday + '</div>';
+  } else {
+    scheduleHtml = '<button class="work-deadline none" onclick="showWorkModal(\'deadline\',\'' + pid + '\')">' + _workIcon('plus', 12) + ' 일정 설정</button>';
+  }
+
+  // renderNextUpBlock throw가 패널 전체를 blank 시키지 않도록 격리
+  let nextUpHtml = '';
+  try { if (typeof renderNextUpBlock === 'function') nextUpHtml = renderNextUpBlock(project) || ''; } catch (_) { nextUpHtml = ''; }
+
+  const descHtml = project.description
+    ? '<div class="work-project-desc-box" style="font-size:14px;color:var(--text-secondary);padding:8px 12px;background:var(--bg-tertiary);border-radius:8px;cursor:pointer;" onclick="editProjectDescription(\'' + pid + '\')" title="클릭하여 개요 수정">' + renderFormattedText(project.description) + '</div>'
+    : '<button class="work-add-cta work-add-cta--subtle" onclick="editProjectDescription(\'' + pid + '\')">' + _workIcon('plus', 13) + '<span>프로젝트 개요 추가</span></button>';
+
+  const metaHtml = (() => {
+    const m = project.meta || {};
+    const items = [];
+    if (m.methodology) items.push('방법론: ' + escapeHtml(m.methodology));
+    if (m.targetPlatform) items.push('플랫폼: ' + escapeHtml(m.targetPlatform));
+    if (m.participantCount) { let p = '인원: ' + m.participantCount + '명'; if (m.bufferCount) p += ' (버퍼 ' + m.bufferCount + '명)'; items.push(p); }
+    if (m.testDate) items.push('테스트일: ' + escapeHtml(m.testDate));
+    if (m.location) items.push('장소: ' + escapeHtml(m.location));
+    if (m.outsourcingCompany) items.push('외주: ' + escapeHtml(m.outsourcingCompany));
+    if (!items.length) return '';
+    const collapsed = !appState.workMetaExpanded || !appState.workMetaExpanded[project.id];
+    return '<div class="work-meta-collapse"><div class="work-meta-collapse-header" onclick="toggleWorkMetaCollapse(\'' + pid + '\')">' + _workIcon(collapsed ? 'chevron-right' : 'chevron-down', 12) + '<span>프로젝트 정보</span></div><div class="work-meta-collapse-body' + (collapsed ? ' collapsed' : '') + '" onclick="showMetaEditor(\'' + pid + '\')" style="cursor:pointer;" title="클릭하여 편집">' + items.join(' · ') + '</div></div>';
+  })();
+
+  const extraActions = '<div class="work-detail-extra-actions" style="display:flex;gap:8px;flex-wrap:wrap;">' +
+    '<button class="work-project-action-btn" onclick="showFormExportMenu(event,\'' + pid + '\')" aria-label="양식 출력">' + _workIcon('edit', 14) + '<span>양식 출력</span></button>' +
+    '<button class="work-project-action-btn" onclick="showMetaEditor(\'' + pid + '\')" aria-label="프로젝트 정보 편집">' + _workIcon('list', 14) + '<span>프로젝트 정보</span></button>' +
+  '</div>';
+
+  const sketchHtml = (() => {
+    const expanded = appState.workSketchExpanded && appState.workSketchExpanded[project.id];
+    const ph = '예: └ 음료 구매 ★★★★★ (4/27)';
+    return '<div class="work-sketch-area"><div class="work-sketch-header" onclick="toggleWorkSketchExpanded(\'' + pid + '\')"><span class="work-sketch-toggle-icon">' + _workIcon(expanded ? 'chevron-down' : 'chevron-right', 12) + '</span><span class="work-sketch-title">빠른 작성</span><span class="work-sketch-hint">메모장처럼 들여쓰기 + ★ + (4/27)</span></div>' +
+      (expanded
+        ? '<textarea id="work-sketch-textarea-' + pid + '" class="work-sketch-textarea" placeholder="' + escapeAttr(ph) + '"></textarea><div class="work-sketch-actions"><button class="work-sketch-btn-apply" onclick="applySketchFromInput(\'' + pid + '\')">트리에 추가</button><span class="work-sketch-help">들여쓰기 0=단계 / └=묶음 / 4+=항목</span></div>'
+        : '<div class="work-sketch-collapsed-hint" onclick="toggleWorkSketchExpanded(\'' + pid + '\')">클릭해서 펼치기 — 메모장 텍스트 paste로 단계/항목 한 번에 입력</div>'
+      ) + '</div>';
+  })();
+
+  return '<div class="work-detail-extras">' + progressHtml + scheduleHtml + nextUpHtml + descHtml + metaHtml + extraActions + sketchHtml + '</div>';
 }
 
 function _renderProjectDetail(project) {
@@ -476,8 +601,9 @@ function _renderProjectDetail(project) {
   const stageTabId = 'work-stage-tab-' + escapeAttr(project.id) + '-' + stageIdx;
   return '<section class="work-detail-panel" aria-label="프로젝트 상세">' +
     '<div class="work-detail-header"><button class="work-back-btn" onclick="showWorkProjectMaster()">' + _workIcon('chevron-down', 14) + '<span>프로젝트 목록</span></button><div><h2>' + escapeHtml(project.name || '제목 없음') + '</h2><p>' + stats.completedTasks + '/' + stats.totalTasks + ' 항목 · ' + stats.completedStages + '/' + stats.totalStages + ' 단계</p></div><div class="work-detail-actions"><button class="work-icon-action" onclick="renameWorkProject(\'' + escapeAttr(project.id) + '\')" aria-label="프로젝트 이름 변경">' + _workIcon('edit', 14) + '</button><button class="work-icon-action" onclick="showProjectMoreMenu(event, \'' + escapeAttr(project.id) + '\')" aria-label="프로젝트 더보기">' + _workIcon('menu', 14) + '</button></div></div>' +
+    _renderProjectExtras(project, stats) +
     _renderStageTabs(project, stageIdx) +
-    '<div id="' + stagePanelId + '" class="work-stage-panel" role="tabpanel" aria-labelledby="' + stageTabId + '">' + ((stage.subcategories || []).length > 0 ? ((stage.subcategories || []).map((subcat, subcatIdx) => _renderSubcategory(project, stageIdx, subcat, subcatIdx)).join('') + '<div class="work-layer-add-row"><button class="work-add-cta work-add-cta--outline" onclick="showWorkModal(\'subcategory\', \'' + escapeAttr(project.id) + '\',' + stageIdx + ')" aria-label="새 중분류 추가">' + _workIcon('plus', 14) + '<span>새 중분류</span></button></div>') : '<div class="work-empty-state"><div class="work-empty-title">중분류가 없습니다</div><button class="work-add-cta" onclick="showWorkModal(\'subcategory\', \'' + escapeAttr(project.id) + '\',' + stageIdx + ')">' + _workIcon('plus', 14) + '<span>새 중분류</span></button></div>') + '</div>' +
+    '<div id="' + stagePanelId + '" class="work-stage-panel" role="tabpanel" aria-labelledby="' + stageTabId + '">' + ((project.stages || []).length > 0 ? _renderStageToolbar(project, stageIdx, stage) : '') + ((stage.subcategories || []).length > 0 ? ((stage.subcategories || []).map((subcat, subcatIdx) => _renderSubcategory(project, stageIdx, subcat, subcatIdx)).join('') + '<div class="work-layer-add-row"><button class="work-add-cta work-add-cta--outline" onclick="showWorkModal(\'subcategory\', \'' + escapeAttr(project.id) + '\',' + stageIdx + ')" aria-label="새 중분류 추가">' + _workIcon('plus', 14) + '<span>새 중분류</span></button></div>') : '<div class="work-empty-state"><div class="work-empty-title">중분류가 없습니다</div><button class="work-add-cta" onclick="showWorkModal(\'subcategory\', \'' + escapeAttr(project.id) + '\',' + stageIdx + ')">' + _workIcon('plus', 14) + '<span>새 중분류</span></button></div>') + '</div>' +
     '<footer class="work-detail-footer"><span>' + escapeHtml(getStageName(project, stageIdx)) + ' · ' + _stageStats(stage).done + '/' + _stageStats(stage).total + '</span></footer>' +
   '</section>';
 }
