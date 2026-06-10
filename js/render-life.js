@@ -218,6 +218,9 @@ function _getLifeCompletedToday(lifeTasks) {
 function _lifeTaskUrgencyClass(task) {
   if (!task.deadline || typeof getUrgencyLevel !== 'function') return '';
   const urgency = getUrgencyLevel(task);
+  // 반복 연체는 칩 텍스트('오늘')와 톤 일치 — 빨간 '오늘' 칩/행 방지 (오늘 탭 preview와 동일 규칙)
+  const isRepeat = task.repeatType && task.repeatType !== 'none';
+  if (isRepeat && urgency === 'expired') return 'warn';
   if (urgency === 'expired' || urgency === 'urgent') return 'urgent';
   if (urgency === 'warning') return 'warn';
   return '';
