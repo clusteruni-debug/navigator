@@ -818,3 +818,14 @@
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
+
+    /* 검색/필터 무결과 상태 — 빈 '오늘' 그룹 메시지 대신 사유 명시 */
+    .all-no-results {
+      padding: 28px 16px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: var(--font-sm);
+      background: var(--bg-secondary);
+      border: 1px dashed var(--border-color);
+      border-radius: var(--radius-md);
+    }

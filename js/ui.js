@@ -379,7 +379,7 @@ function toggleFocusMode() {
 /**
  * 마감시간 포맷팅
  */
-function formatDeadline(deadline) {
+function formatDeadline(deadline, isRepeat) {
   const now = new Date();
   const d = new Date(deadline);
   if (isNaN(d.getTime())) return '';
@@ -387,6 +387,8 @@ function formatDeadline(deadline) {
   const hoursLeft = (d - now) / (1000 * 60 * 60);
 
   if (hoursLeft < 0) {
+    // 반복 작업: 누적 연체 표기는 의미 없음 — 오늘 기준
+    if (isRepeat) return '오늘';
     const overdue = Math.abs(hoursLeft);
     if (overdue < 1) return `${Math.round(overdue * 60)}분 지남`;
     if (overdue < 24) return `${Math.round(overdue)}시간 지남`;
@@ -410,8 +412,8 @@ function formatDeadline(deadline) {
 /**
  * Deadline chip HTML — urgency 색상 분리
  */
-function formatDeadlineChip(deadline) {
-  const text = formatDeadline(deadline);
+function formatDeadlineChip(deadline, isRepeat) {
+  const text = formatDeadline(deadline, isRepeat);
   if (!text) return '';
   const now = new Date();
   const d = new Date(deadline);
@@ -419,5 +421,6 @@ function formatDeadlineChip(deadline) {
   let cls = 'normal';
   if (hoursLeft < 3) cls = 'urgent';
   else if (hoursLeft < 24) cls = 'soon';
+  if (isRepeat && hoursLeft < 0) cls = 'soon'; // 반복 '오늘'은 빨강 대신 주의 톤
   return `<span class="deadline-chip ${cls}">${text}</span>`;
 }

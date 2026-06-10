@@ -228,7 +228,7 @@ function _renderLifeDeadlineChip(task) {
     if (task.repeatType && task.repeatType !== 'none') return '<span class="life-dday-chip none">오늘</span>';
     return '';
   }
-  const text = formatDeadline(task.deadline);
+  const text = formatDeadline(task.deadline, task.repeatType && task.repeatType !== 'none');
   if (!text) return '';
   const urgency = _lifeTaskUrgencyClass(task);
   return `<span class="life-dday-chip ${urgency || 'none'}">${escapeHtml(text)}</span>`;

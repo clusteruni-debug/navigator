@@ -31,7 +31,7 @@ function getEffectiveSupabaseEventStatus(event) {
 
 let _supabaseHighlightRetryId = null;
 let _supabaseHighlightFrame = null;
-const SUPABASE_EVENT_CACHE_STORAGE_KEY = 'navigator-supabase-events-cache-v1';
+const SUPABASE_EVENT_CACHE_STORAGE_KEY = 'navigator-supabase-events-cache-v2'; // v2: rewardCurrency 필드 추가 — v1 캐시는 통화 없이 '원' 오표기
 
 function _hydrateSupabaseEventCache() {
   try {

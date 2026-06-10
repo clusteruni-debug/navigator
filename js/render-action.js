@@ -64,13 +64,13 @@ function _getActionUrgencyText(urgencyClass) {
   return labels[urgencyClass] || labels.normal;
 }
 
-function _renderDeadlineMeta(deadline) {
-  const text = formatDeadline(deadline);
+function _renderDeadlineMeta(deadline, isRepeat) {
+  const text = formatDeadline(deadline, isRepeat);
   if (!text) return '';
   const now = new Date();
   const d = new Date(deadline);
   const hoursLeft = (d - now) / (1000 * 60 * 60);
-  const warningClass = hoursLeft < 24 ? ' warning' : '';
+  const warningClass = (hoursLeft < 24 && !(isRepeat && hoursLeft < 0)) ? ' warning' : '';
   return `<span class="meta-chip${warningClass}">${_renderActionIcon('alert-triangle', 13)}${escapeHtml(text)}</span>`;
 }
 
@@ -215,10 +215,12 @@ window.openResolutionRecordModal = openResolutionRecordModal;
 
 function _getPreviewDeadlineChip(task) {
   if (!task.deadline) return '';
-  const text = formatDeadline(task.deadline);
+  const isRepeat = task.repeatType && task.repeatType !== 'none';
+  const text = formatDeadline(task.deadline, isRepeat);
   if (!text) return '';
   const urgency = getUrgencyLevel(task);
-  const cls = urgency === 'expired' || urgency === 'urgent' ? 'urgent' : urgency === 'warning' ? 'warn' : '';
+  let cls = urgency === 'expired' || urgency === 'urgent' ? 'urgent' : urgency === 'warning' ? 'warn' : '';
+  if (isRepeat && text === '오늘') cls = 'warn'; // 반복 '오늘'은 빨강 대신 주의 톤
   return `<span class="dday-chip ${cls}">${escapeHtml(text)}</span>`;
 }
 
@@ -358,14 +360,14 @@ function renderActionTab(ctx) {
                 ${urgencyClass === 'normal' ? _renderActionIcon('target', 13) : _renderActionIcon('alert-triangle', 13)}
                 ${_getActionUrgencyText(urgencyClass)}
               </span>
-              ${nextAction.deadline ? `<span class="next-action-deadline">${escapeHtml(formatDeadline(nextAction.deadline))}</span>` : ''}
+              ${nextAction.deadline ? `<span class="next-action-deadline">${escapeHtml(formatDeadline(nextAction.deadline, nextAction.repeatType && nextAction.repeatType !== 'none'))}</span>` : ''}
             </div>
             <div class="next-action-title">${escapeHtml(nextAction.title)}</div>
             <div class="next-action-meta">
               <span class="meta-chip category">${_renderActionIcon('circle-fill', 13)}${escapeHtml(nextAction.category)}</span>
               ${nextAction.repeatType && nextAction.repeatType !== 'none' ? `<span class="meta-chip">${_renderActionIcon('repeat', 13)}${escapeHtml(getRepeatLabel(nextAction.repeatType, nextAction))}</span>` : ''}
               ${nextAction.estimatedTime ? `<span class="meta-chip">${_renderActionIcon('clock', 13)}${nextAction.estimatedTime}분</span>` : ''}
-              ${nextAction.deadline ? _renderDeadlineMeta(nextAction.deadline) : ''}
+              ${nextAction.deadline ? _renderDeadlineMeta(nextAction.deadline, nextAction.repeatType && nextAction.repeatType !== 'none') : ''}
               ${nextAction.expectedRevenue ? `<span class="meta-chip">${_renderActionIcon('dollar', 13)}${Number(nextAction.expectedRevenue).toLocaleString()}원</span>` : ''}
             </div>
             ${Array.isArray(nextAction.subtasks) && nextAction.subtasks.length > 0 ? `

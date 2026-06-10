@@ -599,7 +599,7 @@ function _renderDashUrgent(urgentTasks) {
           ${tasks.map(task => `
             <div class="urgent-item">
               <div class="urgent-item-title">${_safeText(task.title)}</div>
-              <div class="urgent-item-time">${formatDeadlineChip(task.deadline)}</div>
+              <div class="urgent-item-time">${formatDeadlineChip(task.deadline, task.repeatType && task.repeatType !== 'none')}</div>
             </div>
           `).join('')}
         </div>

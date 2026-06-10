@@ -280,6 +280,12 @@ function _renderAllAnchor(kind, icon, label, value) {
 
 function _renderAllTimeView(query, categoryFilter) {
   const groups = _getAllTaskTimeGroups(query, categoryFilter);
+  // 검색/필터 활성 + 결과 0 — '오늘 마감 없음' 빈 그룹은 사유를 오도. 전용 무결과 상태로
+  const hasActiveFilter = Boolean(query) || (categoryFilter && categoryFilter !== '전체');
+  const totalShown = Object.values(groups).reduce((sum, list) => sum + list.length, 0);
+  if (hasActiveFilter && totalShown === 0) {
+    return `<div class="all-no-results">${query ? `'${escapeHtml(query)}' 검색 결과가 없습니다.` : `${escapeHtml(categoryFilter)} 카테고리에 진행 중 할일이 없습니다.`}</div>`;
+  }
   // 빈 그룹은 노이즈 — 오늘(상태 피드백 가치 있음)만 항상 표시, 나머지는 task 있을 때만
   return ALL_TASK_TIME_GROUPS
     .filter(group => group.id === 'today' || (groups[group.id] && groups[group.id].length > 0))
