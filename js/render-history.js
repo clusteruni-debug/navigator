@@ -357,8 +357,8 @@ function renderHistoryCalendarWidget() {
       <div class="calendar-header">
         <div class="calendar-title">${year}년 ${monthNames[month]}</div>
         <div class="calendar-nav">
-          <button class="calendar-nav-btn" type="button" onclick="prevMonth()" aria-label="이전 달">&lt;</button>
-          <button class="calendar-nav-btn" type="button" onclick="nextMonth()" aria-label="다음 달">&gt;</button>
+          <button class="calendar-nav-btn" type="button" onclick="prevMonth()" aria-label="이전 달">${svgIcon('chevron-left', 16)}</button>
+          <button class="calendar-nav-btn" type="button" onclick="nextMonth()" aria-label="다음 달">${svgIcon('chevron-right', 16)}</button>
         </div>
       </div>
       <div class="calendar-weekdays" aria-hidden="true">

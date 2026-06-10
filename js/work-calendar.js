@@ -264,8 +264,8 @@ function renderWorkCalendarView() {
     '<div class="calendar-header">' +
       '<div class="calendar-title">' + viewYear + '년 ' + monthNames[viewMonth] + '</div>' +
       '<div class="calendar-nav">' +
-        '<button class="calendar-nav-btn" onclick="navigateWorkCalendar(-1)">◀</button>' +
-        '<button class="calendar-nav-btn" onclick="navigateWorkCalendar(1)">▶</button>' +
+        '<button class="calendar-nav-btn" onclick="navigateWorkCalendar(-1)" aria-label="이전 달">' + svgIcon('chevron-left', 16) + '</button>' +
+        '<button class="calendar-nav-btn" onclick="navigateWorkCalendar(1)" aria-label="다음 달">' + svgIcon('chevron-right', 16) + '</button>' +
       '</div>' +
     '</div>' +
     '<div class="calendar-weekdays"><div class="calendar-weekday">일</div><div class="calendar-weekday">월</div><div class="calendar-weekday">화</div><div class="calendar-weekday">수</div><div class="calendar-weekday">목</div><div class="calendar-weekday">금</div><div class="calendar-weekday">토</div></div>' +

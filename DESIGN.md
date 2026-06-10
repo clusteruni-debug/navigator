@@ -246,7 +246,7 @@ You are building a feature for Navigator (ADHD-friendly task manager). The desig
 
 - Korean throughout, sentence case. Section eyebrows/overlines in English (URGENT, COMMUTE, Reflection) were removed 2026-06-10 — Korean titles stand alone.
 - Emoji policy: decorative emoji inside TEXT labels (settings section titles, empty states, streak 🔥) is allowed; emoji as the SOLE content of a control (button, toggle, status icon) is forbidden — use `svgIcon()` (Lucide stroke set in `js/utils.js`).
-- Allowed English terms (technical vocabulary, do not localize): `inbox` (GTD no-deadline bucket), `D-Day`/`D-N`/`D+N` (deadline format), `GO` (link-open action).
+- Allowed English terms (technical vocabulary, do not localize): `inbox` (GTD no-deadline bucket), `D-Day`/`D-N`/`D+N` (deadline format), `GO` (link-open action), `ON`/`OFF` (toggle state), `ESC` (keyboard hint chip).
 - Press feedback `transform: scale(0.95–0.98)` on `:active` and modal entrance `scale+fade` (`modalIn`) are sanctioned motion patterns — the "no transform" rule applies to HOVER only.
 - Button labels: verb-first ("추가", "수정", "삭제")
 - Category names are the user's own Korean terms — never translate or abbreviate
