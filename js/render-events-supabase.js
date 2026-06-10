@@ -35,6 +35,7 @@ const SUPABASE_EVENT_CACHE_STORAGE_KEY = 'navigator-supabase-events-cache-v2'; /
 
 function _hydrateSupabaseEventCache() {
   try {
+    localStorage.removeItem('navigator-supabase-events-cache-v1'); // v1 잔존 엔트리 1회성 정리
     const cached = safeParseJSON(SUPABASE_EVENT_CACHE_STORAGE_KEY, null);
     if (!cached || !Array.isArray(cached.data)) return;
     _supabaseEventCache.data = cached.data.map(event => ({

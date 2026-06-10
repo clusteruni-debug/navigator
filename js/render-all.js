@@ -284,7 +284,8 @@ function _renderAllTimeView(query, categoryFilter) {
   const hasActiveFilter = Boolean(query) || (categoryFilter && categoryFilter !== '전체');
   const totalShown = Object.values(groups).reduce((sum, list) => sum + list.length, 0);
   if (hasActiveFilter && totalShown === 0) {
-    return `<div class="all-no-results">${query ? `'${escapeHtml(query)}' 검색 결과가 없습니다.` : `${escapeHtml(categoryFilter)} 카테고리에 진행 중 할일이 없습니다.`}</div>`;
+    const displayQuery = String(appState.allTasksSearch || '').trim(); // 소문자 정규화본 말고 입력 원문
+    return `<div class="all-no-results">${query ? `'${escapeHtml(displayQuery)}' 검색 결과가 없습니다.` : `${escapeHtml(categoryFilter)} 카테고리에 진행 중 할일이 없습니다.`}</div>`;
   }
   // 빈 그룹은 노이즈 — 오늘(상태 피드백 가치 있음)만 항상 표시, 나머지는 task 있을 때만
   return ALL_TASK_TIME_GROUPS

@@ -226,7 +226,10 @@ function _getPreviewDeadlineChip(task) {
 
 function _renderTodayPreviewTask(task) {
   const urgency = getUrgencyLevel(task);
-  const rowUrgency = urgency === 'expired' || urgency === 'urgent' ? 'urgent' : urgency === 'warning' ? 'warn' : '';
+  const isRepeat = task.repeatType && task.repeatType !== 'none';
+  // 반복 연체는 칩('오늘'/warn)과 행 배경 톤 일치 — 빨강 행 + 주황 칩 혼합 신호 방지
+  const rowUrgency = (isRepeat && urgency === 'expired') ? 'warn'
+    : urgency === 'expired' || urgency === 'urgent' ? 'urgent' : urgency === 'warning' ? 'warn' : '';
   const category = safeCatId(task.category);
   return `
     <div class="task-row action-task-preview-row cat-${category} ${rowUrgency}" style="--task-cat-color: var(--cat-${category})" data-task-id="${escapeAttr(task.id)}">
