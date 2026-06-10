@@ -205,7 +205,6 @@
       flex: 1;
       background: var(--accent-color);
       border-radius: 4px 4px 0 0;
-      min-height: var(--touch-target-min);
       opacity: 0.7;
       transition: opacity 0.2s;
     }

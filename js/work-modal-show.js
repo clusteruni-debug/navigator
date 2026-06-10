@@ -95,7 +95,7 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
       titleText = '📋 진행 기록 추가';
       bodyHtml = `
         <div class="work-modal-field">
-          <label class="work-modal-label">진행 내용 <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">(Slack에서 붙여넣으면 자동 변환)</span></label>
+          <label class="work-modal-label">진행 내용 <span style="font-size: 12px; color: var(--text-muted); font-weight: normal;">(Slack에서 붙여넣으면 자동 변환)</span></label>
           <textarea class="work-modal-textarea" id="work-input-content" onpaste="handleSlackPasteToWorkModal(event)" placeholder="* 진행 내용을 입력하세요\n   * 세부 내용" autofocus></textarea>
         </div>
       `;
@@ -126,7 +126,7 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
       } else {
         bodyHtml = `
           <div class="work-modal-field">
-            <label class="work-modal-label">기록 내용 <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">(Slack에서 붙여넣으면 자동 변환)</span></label>
+            <label class="work-modal-label">기록 내용 <span style="font-size: 12px; color: var(--text-muted); font-weight: normal;">(Slack에서 붙여넣으면 자동 변환)</span></label>
             <textarea class="work-modal-textarea" id="work-input-content" onpaste="handleSlackPasteToWorkModal(event)" autofocus>${escapeHtml(editLog?.content || '')}</textarea>
           </div>
           <div class="work-modal-field">
@@ -241,7 +241,7 @@ function showWorkModal(type, projectId = null, stageIdx = null, subcatIdx = null
           <label class="work-modal-label">JSON 템플릿 붙여넣기</label>
           <textarea class="work-modal-input" id="work-input-template-json" rows="10"
             placeholder='{"name": "템플릿 이름", "stageNames": ["단계1", ...], "stages": [{"subcategories": [{"name": "분류", "tasks": [{"title": "작업"}]}]}]}'
-            style="font-family: monospace; font-size: 14px; resize: vertical; min-height: 150px;"></textarea>
+            style="font-family: var(--font-mono); font-size: 14px; resize: vertical; min-height: 150px;"></textarea>
           <div style="font-size: 15px; color: var(--text-muted); margin-top: 8px;">
             프로젝트에서 📤 내보내기한 JSON을 붙여넣으세요.<br>
             가져온 템플릿은 모든 기기에서 자동 동기화됩니다.

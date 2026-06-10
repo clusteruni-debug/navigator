@@ -388,7 +388,7 @@ function openFormExportModal(projectId, formType) {
 
   body.innerHTML =
     '<div class="work-modal-field">' +
-      '<textarea class="work-modal-textarea" id="form-export-text" rows="15" style="font-family: monospace; font-size: 14px; resize: vertical; min-height: 250px; line-height: 1.6;">' + escapeHtml(text) + '</textarea>' +
+      '<textarea class="work-modal-textarea" id="form-export-text" rows="15" style="font-family: var(--font-mono); font-size: 14px; resize: vertical; min-height: 250px; line-height: 1.6;">' + escapeHtml(text) + '</textarea>' +
     '</div>' +
     '<div style="display: flex; gap: 8px;">' +
       '<button type="button" onclick="copyFormExportText()" style="flex: 1; padding: 12px; background: var(--accent-primary); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; min-height: 44px;">📋 복사</button>' +

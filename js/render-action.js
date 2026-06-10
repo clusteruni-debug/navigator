@@ -695,9 +695,9 @@ function _renderDetailedAddForm(categoryFields) {
         <div class="subtasks-container">
           ${(appState.detailedTask.subtasks || []).map((subtask, index) => `
             <div class="subtask-item ${subtask.completed ? 'completed' : ''}">
-              <button class="subtask-list-check" onclick="toggleDetailedSubtask(${index})" aria-label="서브태스크 ${index + 1} 토글">${subtask.completed ? '✓' : index + 1}</button>
+              <button class="subtask-list-check" onclick="toggleDetailedSubtask(${index})" aria-label="서브태스크 ${index + 1} 토글">${subtask.completed ? _renderActionIcon('check', 12) : index + 1}</button>
               <span class="subtask-text ${subtask.completed ? 'completed' : ''}" style="${subtask.completed ? 'text-decoration: line-through; color: var(--text-muted);' : ''}">${escapeHtml(subtask.text)}</span>
-              <button class="subtask-remove" onclick="removeSubtask(${index})">×</button>
+              <button class="subtask-remove" onclick="removeSubtask(${index})" aria-label="서브태스크 삭제">${_renderActionIcon('x', 12)}</button>
             </div>
           `).join('')}
           <div class="subtask-add">
@@ -707,8 +707,8 @@ function _renderDetailedAddForm(categoryFields) {
       </div>
 
       ${appState.editingTaskId ? `
-        <button class="btn btn-primary" onclick="detailedAdd()">✓ 수정 완료</button>
-        <button class="btn btn-secondary" onclick="cancelEdit()">✕ 취소</button>
+        <button class="btn btn-primary" onclick="detailedAdd()">${_renderActionIcon('check', 14)} 수정 완료</button>
+        <button class="btn btn-secondary" onclick="cancelEdit()">${_renderActionIcon('x', 14)} 취소</button>
       ` : `
         <button class="btn btn-primary" onclick="detailedAdd()">추가하기</button>
       `}

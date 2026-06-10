@@ -496,7 +496,7 @@ function renderWorkTask(projectId, stageIdx, subcatIdx, task, taskIdx) {
         <span id="task-title-${taskExpandKey}" class="work-task-title ${task.status === 'completed' ? 'completed' : ''}${isTaskExpanded ? ' expanded' : ''}"
               onclick="toggleTaskExpand('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})"
               title="${escapeAttr(task.title)}">${escapeHtml(task.title)}</span>
-        ${task.canStartEarly ? '<span style="font-size: 11px; background: var(--accent-primary-alpha); color: var(--accent-primary); padding: 1px 6px; border-radius: 4px; white-space: nowrap;" title="미리 시작 가능">선제</span>' : ''}
+        ${task.canStartEarly ? '<span style="font-size: 12px; background: var(--accent-primary-alpha); color: var(--accent-primary); padding: 1px 6px; border-radius: 4px; white-space: nowrap;" title="미리 시작 가능">선제</span>' : ''}
         ${task.status === 'completed' && task.completedAt ? `<span class="work-task-completed-at" onclick="event.stopPropagation(); editWorkTaskCompletedAt('${escapeAttr(projectId)}', ${stageIdx}, ${subcatIdx}, ${taskIdx})" title="클릭하여 완료일 수정" style="font-size: 12px; color: var(--accent-success); cursor: pointer; white-space: nowrap; padding: 1px 6px; background: var(--accent-success-alpha); border-radius: 4px;">✓ ${escapeHtml(task.completedAt.substring(5, 10).replace('-', '/'))}</span>` : ''}
         ${deadlineHtml}
         <div class="work-task-actions">

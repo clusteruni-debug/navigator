@@ -296,7 +296,7 @@ function renderStatic() {
                       onpointerdown="this._lpTimer = setTimeout(() => { this._longPressed = true; showBackdateMenu('${escapeAttr(task.id)}', this); }, 500)"
                       onpointerup="clearTimeout(this._lpTimer)"
                       onpointerleave="clearTimeout(this._lpTimer)"
-                      aria-label="작업 완료 (길게 누르면 날짜 선택)">✓</button>
+                      aria-label="작업 완료 (길게 누르면 날짜 선택)">${svgIcon('check', 14)}</button>
                   </div>
                 </div>
               `).join('')}
