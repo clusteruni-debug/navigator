@@ -285,8 +285,13 @@ function renderHistoryTab() {
           <div class="history-summary">완료 ${stats.total}개 · 활동일 ${stats.activeDays}일 · 연속 ${Number(stats.streak.current) || 0}일</div>
         </div>
         <div class="history-actions">
-          <button class="history-action" type="button" onclick="showClearLogRangeModal()">${_historyIcon('trash', 14)}<span>기간 삭제</span></button>
-          <button class="history-action danger" type="button" onclick="clearAllCompletionLog()">${_historyIcon('trash', 14)}<span>전체 삭제</span></button>
+          <details class="history-manage">
+            <summary class="history-action" aria-label="기록 관리 메뉴">${_historyIcon('more', 16)}<span>관리</span></summary>
+            <div class="history-manage-menu" role="menu">
+              <button class="history-manage-item" type="button" role="menuitem" onclick="showClearLogRangeModal()">${_historyIcon('trash', 14)}<span>기간 삭제</span></button>
+              <button class="history-manage-item danger" type="button" role="menuitem" onclick="clearAllCompletionLog()">${_historyIcon('trash', 14)}<span>전체 삭제</span></button>
+            </div>
+          </details>
         </div>
       </div>
 

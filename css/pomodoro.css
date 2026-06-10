@@ -29,7 +29,7 @@
     .pomodoro-time {
       font-size: 56px;
       font-weight: bold;
-      font-family: monospace;
+      font-family: var(--font-mono);
       margin-bottom: 8px;
     }
 

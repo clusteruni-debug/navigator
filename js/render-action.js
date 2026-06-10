@@ -130,7 +130,7 @@ function _renderActionAnchors(filteredTasks, completedToday) {
         <span class="anchor-value">${anchors.completed}</span>
       </div>
       <div class="anchor celebration tab-anchor">
-        <span class="anchor-label">streak</span>
+        <span class="anchor-label">연속</span>
         <span class="anchor-value">${_renderActionIcon('flame', 15)}${anchors.streak}</span>
       </div>
     </div>
@@ -249,7 +249,7 @@ function _renderTodayTaskPreview(filteredTasks) {
   if (pendingTasks.length === 0) return '';
   const previewTasks = pendingTasks.slice(0, 3);
   return `
-    ${_renderActionSectionTitle('오늘 task preview', `상위 ${previewTasks.length} / 진행 중 ${pendingTasks.length}`)}
+    ${_renderActionSectionTitle('오늘 미리보기', `상위 ${previewTasks.length} / 진행 중 ${pendingTasks.length}`)}
     <div class="today-task-preview">
       ${previewTasks.map(task => _renderTodayPreviewTask(task)).join('')}
     </div>

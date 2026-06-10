@@ -301,7 +301,7 @@
     }
 
     .quick-timer-display {
-      font-family: 'SF Mono', 'Monaco', monospace;
+      font-family: var(--font-mono);
       font-weight: bold;
     }
 

@@ -16,7 +16,7 @@ function renderCommuteTab() {
 
   let content = '<section class="commute-shell" aria-labelledby="commute-title">';
   content += '<div class="commute-topbar">';
-  content += '<div class="commute-heading"><span class="commute-eyebrow">Commute</span><h2 id="commute-title">' + _commuteIcon('bus', 20) + '통근</h2>';
+  content += '<div class="commute-heading"><h2 id="commute-title">' + _commuteIcon('bus', 20) + '통근</h2>';
   content += '<p>셔틀 ' + (appState.shuttleSuccess ? '성공' : '미탑승') + ' · 현재 모드 ' + escapeHtml(summary.modeLabel) + '</p></div>';
   content += '<div class="commute-top-actions">';
   content += '<button type="button" class="commute-icon-action" onclick="openCommuteRouteModal()" aria-label="경로 추가" title="경로 추가">' + _commuteIcon('plus', 16) + '</button>';
@@ -37,7 +37,7 @@ function renderCommuteTab() {
   content += '<div class="commute-anchors tab-anchor-row" aria-label="통근 요약">';
   content += _renderCommuteAnchor('셔틀 상태', appState.shuttleSuccess ? '성공' : '미탑승', appState.shuttleSuccess ? 'success' : 'warn');
   content += _renderCommuteAnchor('현재 모드', summary.modeLabel, 'work');
-  content += _renderCommuteAnchor('이번 주', summary.weekTrips + ' trip', '');
+  content += _renderCommuteAnchor('이번 주', summary.weekTrips + '회', '');
   content += _renderCommuteAnchor('다음 이동', summary.nextMove, 'warn');
   content += '</div>';
 

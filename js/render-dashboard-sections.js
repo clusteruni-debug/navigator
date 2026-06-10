@@ -68,9 +68,6 @@ function _durationLabel(minutes) {
   return m + '분';
 }
 
-function _sectionLabel(text) {
-  return '<div class="section-label">' + _safeText(text) + '</div>';
-}
 
 function _dashIcon(name, size) {
   const paths = {
@@ -474,7 +471,6 @@ function _renderDayTimeline() {
   const timeline = getDayTimelineData();
   return `
     <div class="dashboard-section">
-      ${_sectionLabel('TODAY TIMELINE')}
       <div class="dashboard-title">하루 타임라인</div>
       <div class="day-timeline-axis">
         <span>00</span><span>06</span><span>12</span><span>18</span><span>24</span>
@@ -520,7 +516,6 @@ function _renderDashWeeklySummary() {
 
   return `
     <div class="dashboard-section weekly-report">
-      ${_sectionLabel('WEEKLY SUMMARY')}
       <div class="weekly-report-header">
         <div class="dashboard-title">이번 주 요약</div>
         <div class="weekly-report-period">${formatDate(weekStart)} - ${formatDate(weekEnd)}</div>
@@ -532,14 +527,14 @@ function _renderDashWeeklySummary() {
           ${report.change !== 0 ? `<div class="weekly-stat-change ${report.change > 0 ? 'positive' : 'negative'}">${report.change > 0 ? '+' : '-'}${Math.abs(report.change)} vs 지난주</div>` : ''}
         </div>
         <div class="weekly-stat">
-          <div class="weekly-stat-value positive">${_safeText(report.bestDay)}요일</div>
+          <div class="weekly-stat-value positive">${report.bestDay && report.bestDay !== '-' ? _safeText(report.bestDay) + '요일' : '아직 없음'}</div>
           <div class="weekly-stat-label">생산적인 요일</div>
-          <div class="weekly-stat-change">${_num(report.bestDayCount)}개 완료</div>
+          ${report.bestDayCount > 0 ? `<div class="weekly-stat-change">${_num(report.bestDayCount)}개 완료</div>` : ''}
         </div>
         <div class="weekly-stat">
-          <div class="weekly-stat-value">${_safeText(report.topCategory)}</div>
+          <div class="weekly-stat-value">${report.topCategory && report.topCategory !== '-' ? _safeText(report.topCategory) : '아직 없음'}</div>
           <div class="weekly-stat-label">많이 한 카테고리</div>
-          <div class="weekly-stat-change">${_num(report.topCategoryCount)}개</div>
+          ${report.topCategoryCount > 0 ? `<div class="weekly-stat-change">${_num(report.topCategoryCount)}개</div>` : ''}
         </div>
         <div class="weekly-stat">
           <div class="weekly-stat-value positive">${_num(report.streak)}일</div>
@@ -565,10 +560,17 @@ function _getCategoryStatusRows() {
 }
 
 function _renderDashCategoryStatus(ctx) {
-  const rows = _getCategoryStatusRows(ctx);
+  const rows = _getCategoryStatusRows(ctx).filter(stat => stat.total > 0); // 0/0 빈 행은 노이즈 — 숨김
+  if (rows.length === 0) {
+    return `
+    <div class="dashboard-section">
+      <div class="dashboard-title">카테고리별 현황</div>
+      <div class="dash-empty">아직 등록된 작업이 없습니다.</div>
+    </div>
+  `;
+  }
   return `
     <div class="dashboard-section">
-      ${_sectionLabel('CATEGORY STATUS')}
       <div class="dashboard-title">카테고리별 현황</div>
       <div class="category-stats">
         ${rows.map(stat => `
@@ -591,7 +593,6 @@ function _renderDashUrgent(urgentTasks) {
   const tasks = (urgentTasks || []).slice(0, 2);
   return `
     <div class="dashboard-section primary-tier" id="dash-urgent-section">
-      ${_sectionLabel('URGENT')}
       <div class="dashboard-title">마감 임박</div>
       ${tasks.length > 0 ? `
         <div class="urgent-list">
@@ -616,7 +617,6 @@ function _renderDashRevenuePanel(ctx) {
   return `
     <div class="dash-panel active">
       <div class="dashboard-section revenue-dashboard">
-        ${_sectionLabel('REVENUE')}
         <div class="dashboard-title">수익 대시보드</div>
         <div class="revenue-summary">
           <div class="revenue-card total">
@@ -762,7 +762,6 @@ function _renderDashHealthPanel(ctx) {
   return `
     <div class="dash-panel active">
       <div class="dashboard-section life-rhythm-stats">
-        ${_sectionLabel('SLEEP')}
         <div class="dashboard-title">수면 패턴 7일</div>
         ${rhythmStats.hasData ? `
           <div class="rhythm-bar-chart">
@@ -845,7 +844,6 @@ function _renderDashPatternsPanel(ctx) {
   return `
     <div class="dash-panel active">
       <div class="dashboard-section insights-section">
-        ${_sectionLabel('TIME')}
         <div class="dashboard-title">생산적 시간대</div>
         ${_renderPeriodBars(hourlyProd)}
       </div>

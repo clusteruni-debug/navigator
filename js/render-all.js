@@ -128,6 +128,9 @@ function _getAllTaskDday(task) {
   if (!deadline) return { label: 'inbox', className: 'none' };
   const days = _daysFromToday(deadline);
   const hoursLeft = (deadline - new Date()) / 3600000;
+  // 반복 작업은 누적 연체(D+N)가 의미 없음 — 오늘 기준으로만 표시
+  const isRepeat = task.repeatType && task.repeatType !== 'none';
+  if (isRepeat && days < 0) return { label: '오늘', className: 'warn' };
   if (days < 0) return { label: 'D+' + Math.abs(days), className: 'urgent' };
   if (days === 0 && hoursLeft <= 24) return { label: hoursLeft > 1 ? Math.ceil(hoursLeft) + 'h' : 'D-Day', className: 'urgent' };
   if (days === 0) return { label: 'D-Day', className: 'urgent' };
@@ -277,7 +280,10 @@ function _renderAllAnchor(kind, icon, label, value) {
 
 function _renderAllTimeView(query, categoryFilter) {
   const groups = _getAllTaskTimeGroups(query, categoryFilter);
-  return ALL_TASK_TIME_GROUPS.map(group => _renderAllTimeGroup(group, groups[group.id])).join('');
+  // 빈 그룹은 노이즈 — 오늘(상태 피드백 가치 있음)만 항상 표시, 나머지는 task 있을 때만
+  return ALL_TASK_TIME_GROUPS
+    .filter(group => group.id === 'today' || (groups[group.id] && groups[group.id].length > 0))
+    .map(group => _renderAllTimeGroup(group, groups[group.id])).join('');
 }
 
 const ALL_TASK_WORK_GROUP = ['본업', '부업', '자기계발'];

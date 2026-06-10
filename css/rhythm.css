@@ -158,7 +158,7 @@
       font-size: 14px;
       font-weight: 500;
       color: var(--text-secondary);
-      font-family: 'SF Mono', Monaco, monospace;
+      font-family: var(--font-mono);
     }
 
     .life-rhythm-stats {
@@ -278,7 +278,7 @@
       font-size: 14px;
       font-weight: 500;
       color: var(--text-muted);
-      font-family: 'SF Mono', Monaco, monospace;
+      font-family: var(--font-mono);
       margin-left: auto;
       flex-shrink: 0;
     }

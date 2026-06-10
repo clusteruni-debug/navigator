@@ -166,6 +166,7 @@ async function fetchSupabaseEvents() {
         deadline: msg.deadline,
         link: (msg.urls || [])[0] || null,
         expectedRevenue: analysis.reward_usd || analysis.reward || null,
+        rewardCurrency: analysis.reward_usd ? 'USD' : null, // reward_usd는 달러 — 표시 단위 구분용
         channel: msg.original_channel,
         project: analysis.project || null,
         organizer: analysis.organizer || null,

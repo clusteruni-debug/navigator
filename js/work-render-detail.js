@@ -71,7 +71,7 @@ function renderNextUpBlock(project) {
   }).join('');
 
   return '<div class="work-next-up">' +
-    '<div class="work-next-up-header">▶ 지금 할 일</div>' +
+    '<div class="work-next-up-header">' + svgIcon('play', 13) + ' 지금 할 일</div>' +
     '<div class="work-next-up-list">' + itemsHtml + '</div>' +
     '</div>';
 }
@@ -187,8 +187,8 @@ function renderWorkProjectDetail(project) {
         const placeholder = '예: └ 음료 구매 ★★★★★ (4/27)';
         return '<div class="work-sketch-area">' +
           '<div class="work-sketch-header" onclick="toggleWorkSketchExpanded(\'' + escapeAttr(project.id) + '\')">' +
-            '<span class="work-sketch-toggle-icon">' + (isExpanded ? '▼' : '▶') + '</span>' +
-            '<span class="work-sketch-title">📝 빠른 작성</span>' +
+            '<span class="work-sketch-toggle-icon">' + svgIcon(isExpanded ? 'chevron-down' : 'chevron-right', 13) + '</span>' +
+            '<span class="work-sketch-title">' + svgIcon('file-text', 13) + ' 빠른 작성</span>' +
             '<span class="work-sketch-hint">메모장처럼 들여쓰기 + ★ + (4/27) 자유롭게</span>' +
           '</div>' +
           (isExpanded
@@ -244,8 +244,8 @@ function renderWorkProjectDetail(project) {
         const isCollapsed = !appState.workMetaExpanded || !appState.workMetaExpanded[project.id];
         return '<div class="work-meta-collapse">' +
           '<div class="work-meta-collapse-header" onclick="toggleWorkMetaCollapse(\'' + escapeAttr(project.id) + '\')">' +
-            '<span style="font-size: 12px; width: 12px;">' + (isCollapsed ? '▶' : '▼') + '</span>' +
-            'ℹ️ 프로젝트 정보' +
+            '<span class="work-meta-collapse-icon">' + svgIcon(isCollapsed ? 'chevron-right' : 'chevron-down', 13) + '</span>' +
+            svgIcon('info', 13) + ' 프로젝트 정보' +
           '</div>' +
           '<div class="work-meta-collapse-body' + (isCollapsed ? ' collapsed' : '') + '" onclick="showMetaEditor(\'' + escapeAttr(project.id) + '\')" style="cursor: pointer;" title="클릭하여 편집">' +
             items.join(' · ') +

@@ -183,7 +183,6 @@ function renderReflectionTab() {
     <div class="reflection-tab" aria-labelledby="reflection-tab-title">
       <header class="reflection-tab-header">
         <div>
-          <p class="reflection-tab-kicker">Reflection</p>
           <h2 id="reflection-tab-title">매일 자문</h2>
         </div>
       </header>
@@ -533,7 +532,7 @@ function _getReflectionAspectMeta(aspect) {
   if (activeAspect === 'weekly') {
     return {
       label: '주간',
-      kicker: 'Weekly',
+      kicker: '주간',
       desc: '일주일 단위로 반복된 압력과 다음 주 한계선을 남깁니다.'
     };
   }

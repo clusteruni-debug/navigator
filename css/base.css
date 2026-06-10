@@ -61,7 +61,8 @@
 
       /* 타이포그래피 */
       --font-body: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      --font-mono: 'SF Mono', 'Monaco', monospace;
+      /* 한글 fallback을 generic 앞에: 숫자는 mono(SF Mono/Consolas), 한글은 시스템 폰트 대신 Pretendard */
+      --font-mono: 'SF Mono', 'Monaco', Consolas, 'Pretendard Variable', 'Pretendard', monospace;
       --font-xs: 14px;    /* 최소 가독 크기 */
       --font-sm: 15px;    /* 보조 라벨 */
       --font-base: 16px;  /* 기본 본문 */
@@ -268,7 +269,13 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
-    
+
+    /* 폼 요소는 UA 기본 폰트를 강제함 — body 상속 복원 (버튼 한글만 시스템 폰트로 떨어지는 문제 차단) */
+    button, input, select, textarea {
+      font: inherit;
+      letter-spacing: inherit;
+    }
+
     /* 키보드 포커스 링 — 모든 인터랙티브 요소 (WCAG 2.4.7) */
     button:focus-visible,
     [role="button"]:focus-visible,

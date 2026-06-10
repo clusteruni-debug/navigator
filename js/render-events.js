@@ -77,6 +77,7 @@ function _buildUnifiedEvents(supabaseEvents, localEvents) {
     organizer: event.organizer || event.channel || '',
     type: event.type || event.project || '',
     reward: event.expectedRevenue || '',
+    rewardCurrency: event.rewardCurrency || null,
     date: event.date || '',
     raw: event
   }));
@@ -217,7 +218,7 @@ function _renderEventTimeGroup(group, events) {
     <section class="events-time-group" aria-labelledby="event-group-${group.id}">
       <button class="events-time-header ${group.id}" type="button" onclick="toggleEventGroup('${groupId}')" aria-expanded="${isCollapsed ? 'false' : 'true'}">
         <span id="event-group-${group.id}" class="events-time-title">${svgIcon(group.icon, 16)} ${escapeHtml(group.label)} <span class="count">(${events.length})</span></span>
-        <span class="toggle-icon" aria-hidden="true">${isCollapsed ? '›' : '⌄'}</span>
+        <span class="toggle-icon" aria-hidden="true">${svgIcon(isCollapsed ? 'chevron-right' : 'chevron-down', 14)}</span>
       </button>
       <div class="events-list ${isCollapsed ? 'collapsed' : ''}">
         ${events.length ? events.map(_renderUnifiedEventCard).join('') : '<div class="events-empty compact">해당 구간 이벤트 없음</div>'}
@@ -231,7 +232,7 @@ function _renderUnifiedEventCard(event) {
   const urgency = days !== null && days <= 1 ? 'urgent' : (days !== null && days <= 3 ? 'warning' : '');
   const ddayClass = days !== null && days <= 1 ? 'urgent' : (days !== null && days <= 3 ? 'warn' : 'neutral');
   const dateText = _formatEventDateRange(event);
-  const rewardText = _formatEventReward(event.reward);
+  const rewardText = _formatEventReward(event.reward, event.rewardCurrency);
   const meta = [event.organizer, event.type, dateText].filter(Boolean).join(' · ');
   const safeLink = sanitizeUrl(event.link);
   const ariaTitle = escapeAttr(event.title);
@@ -278,7 +279,7 @@ function _renderEventSubtasks(task) {
   const collapsed = appState.collapsedSubtaskChips && appState.collapsedSubtaskChips[task.id];
   return `
     <div class="event-subtasks" onclick="event.stopPropagation();">
-      <button class="subtask-progress-indicator${done === subtasks.length ? ' all-done' : ''}" onclick="toggleSubtaskChips('${escapeAttr(task.id)}')" title="서브태스크 접기/펼치기" aria-label="서브태스크 ${done}/${subtasks.length} 접기/펼치기">${done}/${subtasks.length} ${collapsed ? '›' : '⌄'}</button>
+      <button class="subtask-progress-indicator${done === subtasks.length ? ' all-done' : ''}" onclick="toggleSubtaskChips('${escapeAttr(task.id)}')" title="서브태스크 접기/펼치기" aria-label="서브태스크 ${done}/${subtasks.length} 접기/펼치기">${done}/${subtasks.length} ${svgIcon(collapsed ? 'chevron-right' : 'chevron-down', 12)}</button>
       ${collapsed ? '' : `
         <div class="subtask-chips event-subtask-chips">
           ${subtasks.map((st, idx) => `
@@ -287,7 +288,7 @@ function _renderEventSubtasks(task) {
               onpointerup="clearTimeout(this._lpTimer)"
               onpointerleave="clearTimeout(this._lpTimer)"
               onpointercancel="clearTimeout(this._lpTimer)">
-              <span class="subtask-chip-check">${st.completed ? '✓' : '○'}</span>${escapeHtml(st.text)}
+              <span class="subtask-chip-check">${svgIcon(st.completed ? 'check' : 'circle', 12)}</span>${escapeHtml(st.text)}
             </span>
           `).join('')}
         </div>
@@ -309,9 +310,13 @@ function _formatShortDate(value) {
   return date ? date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : '';
 }
 
-function _formatEventReward(value) {
+function _formatEventReward(value, currency) {
   if (value === null || value === undefined || value === '') return '';
-  if (typeof value === 'number') return value.toLocaleString() + '원';
+  // EventBot 수신 이벤트는 reward_usd(달러) — '원' 단위로 잘못 붙이면 "3.7원" 류 오표기
+  if (typeof value === 'number') {
+    if (currency === 'USD') return '$' + value.toLocaleString();
+    return value.toLocaleString() + '원';
+  }
   return String(value);
 }
 
@@ -396,7 +401,7 @@ function _renderCompletedLog(completedEvents, localSubmitted) {
     <section class="events-archive-section completed-log-section" aria-label="참여 완료">
       <button class="events-archive-header" type="button" onclick="toggleEventGroup('completed_log')" aria-expanded="${isCollapsed ? 'false' : 'true'}">
         <span>${svgIcon('check', 15)} 참여 완료 (${all.length})</span>
-        <span class="toggle-icon" aria-hidden="true">${isCollapsed ? '›' : '⌄'}</span>
+        <span class="toggle-icon" aria-hidden="true">${svgIcon(isCollapsed ? 'chevron-right' : 'chevron-down', 14)}</span>
       </button>
       <div class="events-archive-body ${isCollapsed ? 'collapsed' : ''}">
         ${rows || '<div class="events-empty compact">참여 완료 이벤트 없음</div>'}
@@ -433,7 +438,7 @@ function _renderLocalEventsSection(pendingEvents) {
         <div class="events-archive-header events-trash-header">
           <button class="events-archive-toggle" type="button" onclick="toggleEventGroup('local_trash')" aria-expanded="${isCollapsed ? 'false' : 'true'}">
             <span>${svgIcon('trash', 15)} 휴지통 (${eventTrash.length})</span>
-            <span class="toggle-icon" aria-hidden="true">${isCollapsed ? '›' : '⌄'}</span>
+            <span class="toggle-icon" aria-hidden="true">${svgIcon(isCollapsed ? 'chevron-right' : 'chevron-down', 14)}</span>
           </button>
           <button class="events-empty-trash" type="button" onclick="emptyTrash()" aria-label="휴지통 비우기">비우기</button>
         </div>

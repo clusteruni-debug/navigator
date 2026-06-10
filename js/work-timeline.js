@@ -122,22 +122,22 @@ function renderWorkTimeline() {
         const deadline = p.deadline ? fmtDate(p.deadline) : '-';
         const isComplete = p.completed || (p.stages.length > 0 && p.stages.every(s => s.completed));
 
-        return '<div style="background: var(--bg-secondary); border-radius: 12px; padding: 16px; margin-bottom: 12px; cursor: pointer;" onclick="openWorkProjectDetail(\'' + escapeAttr(p.id) + '\');">' +
-          '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">' +
-            '<span style="font-size: 16px; font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + (isComplete ? '✅ ' : '📁 ') + escapeHtml(p.name) + '</span>' +
-            '<span style="font-size: 14px; color: var(--text-muted); white-space: nowrap;">' + created + ' ~ ' + deadline + '</span>' +
+        return '<div class="wt-card" onclick="openWorkProjectDetail(\'' + escapeAttr(p.id) + '\');">' +
+          '<div class="wt-card-head">' +
+            '<span class="wt-card-name">' + svgIcon(isComplete ? 'check' : 'folder', 14) + ' ' + escapeHtml(p.name) + '</span>' +
+            '<span class="wt-card-dates">' + created + ' ~ ' + deadline + '</span>' +
           '</div>' +
-          (p.description ? '<div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">' + renderFormattedText(p.description) + '</div>' : '') +
-          '<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">' +
-            '<div style="flex: 1; height: 6px; background: var(--bg-tertiary); border-radius: 3px; overflow: hidden;">' +
-              '<div style="height: 100%; width: ' + progress + '%; background: ' + (isComplete ? 'var(--accent-success)' : 'var(--accent-primary)') + '; border-radius: 3px;"></div>' +
+          (p.description ? '<div class="wt-card-desc">' + renderFormattedText(p.description) + '</div>' : '') +
+          '<div class="wt-progress-row">' +
+            '<div class="wt-progress-track">' +
+              '<div class="wt-progress-fill' + (isComplete ? ' complete' : '') + '" style="width: ' + progress + '%;"></div>' +
             '</div>' +
-            '<span style="font-size: 13px; font-weight: 600; color: var(--text-muted);">' + progress + '%</span>' +
+            '<span class="wt-progress-pct">' + progress + '%</span>' +
           '</div>' +
-          '<div style="font-size: 13px; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap;">' +
-            '<span>📋 ' + completedTasks + '/' + totalTasks + ' 항목</span>' +
-            '<span>✓ ' + completedStages + '/' + p.stages.length + ' 단계</span>' +
-            (p.onHold ? '<span style="color: var(--accent-danger);">⏸ 보류</span>' : '') +
+          '<div class="wt-card-meta">' +
+            '<span>' + svgIcon('clipboard', 13) + ' ' + completedTasks + '/' + totalTasks + ' 항목</span>' +
+            '<span>' + svgIcon('check', 13) + ' ' + completedStages + '/' + p.stages.length + ' 단계</span>' +
+            (p.onHold ? '<span class="wt-hold">' + svgIcon('pause', 13) + ' 보류</span>' : '') +
           '</div>' +
         '</div>';
       }).join('');
@@ -149,14 +149,14 @@ function renderWorkTimeline() {
       const archived = (appState.workProjects || []).filter(p => p.archived);
       if (archived.length > 0) {
         projectHistoryHtml += '<div style="margin-top: 16px;">' +
-          '<div style="font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; cursor: pointer;" onclick="appState.showArchivedTimeline=!appState.showArchivedTimeline; renderStatic();">' +
-            (appState.showArchivedTimeline ? '▼' : '▶') + ' 📦 아카이브 (' + archived.length + ')' +
+          '<div class="wt-archive-head" onclick="appState.showArchivedTimeline=!appState.showArchivedTimeline; renderStatic();">' +
+            svgIcon(appState.showArchivedTimeline ? 'chevron-down' : 'chevron-right', 13) + ' ' + svgIcon('archive', 13) + ' 아카이브 (' + archived.length + ')' +
           '</div>';
         if (appState.showArchivedTimeline) {
           projectHistoryHtml += archived.map(p => {
             const fmtDate = (d) => d ? (new Date(d).getMonth()+1) + '/' + new Date(d).getDate() : '';
-            return '<div style="background: var(--bg-tertiary); border-radius: 8px; padding: 12px; margin-bottom: 8px; opacity: 0.7;">' +
-              '<span style="font-weight: 600;">📦 ' + escapeHtml(p.name) + '</span>' +
+            return '<div class="wt-archive-card">' +
+              '<span style="font-weight: 600;">' + svgIcon('archive', 13) + ' ' + escapeHtml(p.name) + '</span>' +
               '<span style="font-size: 13px; color: var(--text-muted); margin-left: 8px;">' + fmtDate(p.createdAt) + ' ~ ' + (p.deadline ? fmtDate(p.deadline) : '-') + '</span>' +
             '</div>';
           }).join('');
@@ -302,7 +302,7 @@ function renderWorkTimeline() {
 
         return '<div style="margin-bottom: 12px;">' +
           '<div style="font-size: 14px; font-weight: 600; color: var(--text-muted); padding: 8px 4px; border-bottom: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 6px;" onclick="toggleActivityDate(\'' + escapeAttr(date) + '\')">' +
-            '<span style="font-size: 12px; display: inline-block;">' + (isExpanded ? '▼' : '▶') + '</span>' +
+            '<span class="work-meta-collapse-icon">' + svgIcon(isExpanded ? 'chevron-down' : 'chevron-right', 13) + '</span>' +
             '<span>' + escapeHtml(date) + ' (' + groups.length + '건)</span>' +
             (!isExpanded ? '<span style="font-size: 13px; font-weight: 400; color: var(--text-muted); margin-left: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">' + summaryTitles + moreCount + '</span>' : '') +
           '</div>' +
@@ -333,7 +333,7 @@ function renderWorkTimeline() {
 
         return '<div style="margin-bottom: 12px;">' +
           '<div style="font-size: 15px; font-weight: 600; color: var(--text-primary); padding: 10px 8px; border-bottom: 2px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="toggleActivityMonth(\'' + escapeAttr(monthKey) + '\')">' +
-            '<span style="font-size: 12px;">' + (isExp ? '▼' : '▶') + '</span>' +
+            '<span class="work-meta-collapse-icon">' + svgIcon(isExp ? 'chevron-down' : 'chevron-right', 13) + '</span>' +
             '<span>' + escapeHtml(label) + '</span>' +
             '<span style="font-size: 13px; color: var(--text-muted); font-weight: 400;">' + uniqueTasks.length + '개 태스크 · ' + data.logCount + '건 기록</span>' +
           '</div>' +
@@ -360,8 +360,8 @@ function renderWorkTimeline() {
 
         return '<div style="margin-bottom: 12px;">' +
           '<div style="font-size: 15px; font-weight: 600; color: var(--text-primary); padding: 10px 8px; border-bottom: 2px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="toggleActivityProject(\'' + escapeAttr(pName) + '\')">' +
-            '<span style="font-size: 12px;">' + (isExp ? '▼' : '▶') + '</span>' +
-            '<span>📁 ' + escapeHtml(pName) + '</span>' +
+            '<span class="work-meta-collapse-icon">' + svgIcon(isExp ? 'chevron-down' : 'chevron-right', 13) + '</span>' +
+            '<span>' + svgIcon('folder', 13) + ' ' + escapeHtml(pName) + '</span>' +
             '<span style="font-size: 13px; color: var(--text-muted); font-weight: 400;">' + uniqueTasks.length + '개 태스크 · ' + data.logCount + '건 기록</span>' +
           '</div>' +
           (isExp ? data.groups.map(g => _renderGroupCard(g, true)).join('') : '') +

@@ -291,7 +291,7 @@ function showTemplateEditor(templateId) {
 
   workModalState = { type: 'template-edit', projectId: templateId, stageIdx: null, subcategoryIdx: null, taskIdx: null };
 
-  title.textContent = '✏️ 템플릿 편집';
+  title.textContent = '템플릿 편집';
 
   const stageNames = template.stageNames || [];
   const tid = escapeAttr(templateId);

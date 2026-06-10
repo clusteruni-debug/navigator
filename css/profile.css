@@ -215,7 +215,8 @@
 
     .progress-bar {
       height: 8px;
-      background: var(--bg-secondary);
+      /* 고정 surface 색은 light 모드에서 카드와 동화되어 트랙이 사라짐 — theme-aware 믹스 */
+      background: color-mix(in srgb, var(--text-secondary) 14%, transparent);
       border-radius: 4px;
       overflow: hidden;
     }

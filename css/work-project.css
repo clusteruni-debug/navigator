@@ -120,7 +120,7 @@
        Task 메타 뱃지 (v3 신규 / rationale F1~F9 / notes)
        ==================================== */
     .task-meta-badge {
-      font-size: 10px;
+      font-size: 12px;
       padding: 2px 6px;
       border-radius: 4px;
       flex-shrink: 0;
@@ -307,7 +307,7 @@
       min-width: 0;
     }
     .work-task-subtask-tag {
-      font-size: 10px;
+      font-size: 12px;
       padding: 1px 5px;
       background: var(--bg-tertiary);
       color: var(--text-muted);

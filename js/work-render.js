@@ -45,9 +45,9 @@ function renderWorkDashboardCard(project) {
                     : staleDays >= 7  ? 'var(--accent-warning)'
                     : projectPulseColor;
   const staleMetaHtml = staleDays >= 14
-    ? '<span class="work-dashboard-stale danger">⚠ ' + staleDays + '일 정체</span>'
+    ? '<span class="work-dashboard-stale danger">' + svgIcon('alert-triangle', 12) + ' ' + staleDays + '일 정체</span>'
     : staleDays >= 7
-    ? '<span class="work-dashboard-stale warn">⚠ ' + staleDays + '일</span>'
+    ? '<span class="work-dashboard-stale warn">' + svgIcon('alert-triangle', 12) + ' ' + staleDays + '일</span>'
     : '';
 
   return `
@@ -66,7 +66,7 @@ function renderWorkDashboardCard(project) {
       </div>
       ${(project.startDate || project.deadline) ? `
         <div class="work-dashboard-schedule">
-          📅 ${project.startDate ? `${new Date(project.startDate).getMonth() + 1}/${new Date(project.startDate).getDate()}` : ''}
+          ${svgIcon('calendar', 13)} ${project.startDate ? `${new Date(project.startDate).getMonth() + 1}/${new Date(project.startDate).getDate()}` : ''}
           ${project.startDate && project.deadline ? '~' : ''}
           ${project.deadline ? `${new Date(project.deadline).getMonth() + 1}/${new Date(project.deadline).getDate()}` : ''}
         </div>
@@ -77,9 +77,9 @@ function renderWorkDashboardCard(project) {
         `).join('')}
       </div>
       <div class="work-dashboard-meta">
-        <span>📋 ${completedTasks}/${totalTasks} 항목</span>
-        <span>✓ ${completedStages}/${totalStages} 단계</span>
-        ${project.participantGoal ? `<span>👥 ${project.participantCount || 0}/${project.participantGoal}</span>` : ''}
+        <span>${svgIcon('clipboard', 13)} ${completedTasks}/${totalTasks} 항목</span>
+        <span>${svgIcon('check', 13)} ${completedStages}/${totalStages} 단계</span>
+        ${project.participantGoal ? `<span>${svgIcon('users', 13)} ${project.participantCount || 0}/${project.participantGoal}</span>` : ''}
         ${staleMetaHtml}
       </div>
     </div>
@@ -188,17 +188,17 @@ function showProjectMoreMenu(event, projectId) {
   menu.style.left = Math.min(rect.left, window.innerWidth - 180) + 'px';
 
   const items = [
-    { label: '📋 노션/슬랙 복사', fn: `copyWorkProjectToClipboard('${escapeAttr(projectId)}')` },
-    { label: '📋 복제', fn: `duplicateWorkProject('${escapeAttr(projectId)}')` },
-    { label: project.onHold ? '▶ 재개' : '⏸ 보류', fn: `holdWorkProject('${escapeAttr(projectId)}')` },
-    { label: '💾 템플릿', fn: `saveAsTemplate('${escapeAttr(projectId)}')` },
-    { label: project.completed ? '↩ 완료 취소' : '✅ 완료', fn: `completeWorkProject('${escapeAttr(projectId)}')` },
-    { label: project.archived ? '📤 복원' : '📦 보관', fn: `archiveWorkProject('${escapeAttr(projectId)}')` },
-    { label: '🗑 삭제', fn: `deleteWorkProject('${escapeAttr(projectId)}')`, danger: true }
+    { icon: 'copy', label: '노션/슬랙 복사', fn: `copyWorkProjectToClipboard('${escapeAttr(projectId)}')` },
+    { icon: 'copy', label: '복제', fn: `duplicateWorkProject('${escapeAttr(projectId)}')` },
+    { icon: project.onHold ? 'play' : 'pause', label: project.onHold ? '재개' : '보류', fn: `holdWorkProject('${escapeAttr(projectId)}')` },
+    { icon: 'save', label: '템플릿', fn: `saveAsTemplate('${escapeAttr(projectId)}')` },
+    { icon: project.completed ? 'rotate-ccw' : 'check', label: project.completed ? '완료 취소' : '완료', fn: `completeWorkProject('${escapeAttr(projectId)}')` },
+    { icon: project.archived ? 'upload' : 'archive', label: project.archived ? '복원' : '보관', fn: `archiveWorkProject('${escapeAttr(projectId)}')` },
+    { icon: 'trash', label: '삭제', fn: `deleteWorkProject('${escapeAttr(projectId)}')`, danger: true }
   ];
 
   menu.innerHTML = items.map(item =>
-    `<button class="${item.danger ? 'danger' : ''}" onclick="${item.fn}; document.getElementById('project-more-menu')?.remove();">${escapeHtml(item.label)}</button>`
+    `<button class="${item.danger ? 'danger' : ''}" onclick="${item.fn}; document.getElementById('project-more-menu')?.remove();">${svgIcon(item.icon, 14)} ${escapeHtml(item.label)}</button>`
   ).join('');
 
   document.body.appendChild(menu);

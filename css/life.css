@@ -606,7 +606,7 @@ body[data-theme="light"] .life-rhythm-primary {
   padding: 6px 10px;
   margin-top: 4px;
   border-left: 3px solid var(--text-muted);
-  background: rgba(148, 163, 184, 0.05);
+  background: color-mix(in srgb, var(--text-secondary) 6%, transparent);
   border-radius: var(--radius-sm);
   font-size: var(--font-sm);
   font-weight: 600;
@@ -618,7 +618,7 @@ body[data-theme="light"] .life-rhythm-primary {
 .life-section-header.cat-이벤트 { border-left-color: var(--cat-이벤트); color: var(--cat-이벤트); }
 
 .life-section-header-count {
-  background: rgba(148, 163, 184, 0.15);
+  background: color-mix(in srgb, var(--text-secondary) 14%, transparent);
   color: var(--text-secondary);
   padding: 2px 8px;
   border-radius: 999px;

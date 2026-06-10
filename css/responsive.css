@@ -679,7 +679,7 @@
     .commute-recent-detail-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; font-size: 15px; border-bottom: 1px solid var(--border-color); }
     .commute-recent-detail-row:last-of-type { border-bottom: none; }
     .commute-recent-day { width: 70px; font-weight: 500; color: var(--text-secondary); font-size: 14px; flex-shrink: 0; }
-    .commute-recent-times { flex: 1; font-family: 'SF Mono', Monaco, monospace; font-size: 14px; color: var(--text-primary); }
+    .commute-recent-times { flex: 1; font-family: var(--font-mono); font-size: 14px; color: var(--text-primary); }
     .commute-recent-duration { font-weight: 600; color: var(--primary); white-space: nowrap; }
     .commute-recent-avg-summary { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); font-size: 15px; font-weight: 600; color: var(--text-primary); text-align: center; }
     .commute-history-list { display: flex; flex-direction: column; gap: 12px; }
@@ -689,7 +689,7 @@
     .commute-history-trip + .commute-history-trip { border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 4px; }
     .commute-history-dir { font-weight: 500; width: 50px; flex-shrink: 0; }
     .commute-history-route { font-weight: 600; width: 80px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .commute-history-times { flex: 1; font-family: 'SF Mono', Monaco, monospace; color: var(--text-secondary); }
+    .commute-history-times { flex: 1; font-family: var(--font-mono); color: var(--text-secondary); }
     .commute-history-dur { font-weight: 600; color: var(--primary); white-space: nowrap; }
     .commute-history-edit-btn { background: none; border: none; cursor: pointer; font-size: 14px; padding: 2px 4px; opacity: 0.6; transition: opacity 0.15s; flex-shrink: 0; }
     .commute-history-edit-btn:hover { opacity: 1; }

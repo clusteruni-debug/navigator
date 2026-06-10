@@ -12,9 +12,9 @@
 .rhythm-stat-card-wide{width:100%}
 .rhythm-stat-icon{margin-bottom:3px;font-size:18px}
 .rhythm-stat-label{margin-bottom:4px;color:var(--text-muted);font-size:12px}
-.rhythm-stat-value{color:var(--text-primary);font-family:'SF Mono', Monaco, monospace;font-size:18px;font-weight:800}
+.rhythm-stat-value{color:var(--text-primary);font-family:var(--font-mono);font-size:18px;font-weight:800}
 .rhythm-stat-sub{display:grid;gap:2px;margin-top:6px}
-.rhythm-stat-sub-item{color:var(--text-secondary);font-size:11px}
+.rhythm-stat-sub-item{color:var(--text-secondary);font-size:12px}
 .rhythm-stat-med-items{margin-top:4px;font-size:13px;font-weight:700}
 .rhythm-history-toolbar{display:flex;justify-content:center;gap:8px;padding:12px;border-bottom:1px solid var(--border-light)}
 .rhythm-recent-title{margin-bottom:8px;font-weight:800}
@@ -23,7 +23,7 @@
 .rhythm-recent-day:hover{background:var(--bg-tertiary)}
 .rhythm-recent-day.selected{border-color:var(--accent-primary);background:var(--accent-primary-alpha)}
 .rhythm-recent-day.today{font-weight:800}
-.rhythm-recent-day-label, .rhythm-recent-wake, .rhythm-recent-sleep{display:block;font-size:11px;line-height:1.35}
+.rhythm-recent-day-label, .rhythm-recent-wake, .rhythm-recent-sleep{display:block;font-size:12px;line-height:1.35}
 .rhythm-recent-day-label, .rhythm-recent-wake.empty, .rhythm-recent-sleep.empty{color:var(--text-muted)}
 .rhythm-calendar{margin-bottom:12px}
 .rhythm-calendar .calendar-day{min-height:36px}
@@ -37,7 +37,7 @@
 .rhythm-history-today-badge{padding:2px 8px;border-radius:999px;background:var(--accent-primary);color:var(--text-primary);font-size:12px;font-weight:800}
 .rhythm-history-timeline{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}
 .rhythm-history-timeline.six-items{display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:6px}
-.rhythm-history-time{padding:5px 6px;border-radius:var(--radius-sm);font-family:'SF Mono', Monaco, monospace;font-size:13px;text-align:center;cursor:pointer;transition:background-color 0.15s}
+.rhythm-history-time{padding:5px 6px;border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:13px;text-align:center;cursor:pointer;transition:background-color 0.15s}
 .rhythm-history-time:hover{background:var(--bg-tertiary)}
 .rhythm-history-time .empty, .rhythm-history-arrow{color:var(--text-muted)}
 .rhythm-history-meds, .rhythm-history-summary{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
@@ -69,9 +69,9 @@
 .history-panel-title{margin:0 0 10px;color:var(--text-secondary);font-size:13px;font-weight:800}
 .history-week-bars{display:grid;grid-template-columns:repeat(7, minmax(0, 1fr));align-items:end;gap:6px;height:120px;margin-bottom:16px}
 .history-week-bar{min-width:0;height:100%;display:grid;grid-template-rows:18px 1fr 18px;align-items:end;gap:4px;text-align:center}
-.history-week-value, .history-week-label{color:var(--text-muted);font-size:11px;line-height:1}
+.history-week-value, .history-week-label{color:var(--text-muted);font-size:12px;line-height:1}
 .history-week-label.today{color:var(--accent-primary);font-weight:800}
-.history-week-fill{width:100%;min-height: var(--touch-target-min);border-radius:5px 5px 2px 2px;background:color-mix(in srgb, var(--accent-primary) 30%, var(--bg-tertiary))}
+.history-week-fill{width:100%;min-height:2px;border-radius:5px 5px 2px 2px;background:color-mix(in srgb, var(--accent-primary) 30%, var(--bg-tertiary))}
 .history-week-fill.today, .history-breakdown-track span{background:var(--accent-primary)}
 .history-breakdown{display:grid;gap:8px}
 .history-breakdown-row{display:grid;grid-template-columns:minmax(56px, 0.7fr) minmax(80px, 1fr) 32px 38px;align-items:center;gap:8px;color:var(--text-secondary);font-size:12px}
@@ -110,7 +110,7 @@
 .calendar-day.has-activity.level-3{background:color-mix(in srgb, var(--accent-primary) 52%, var(--bg-tertiary))}
 .calendar-day.has-activity.level-4{background:color-mix(in srgb, var(--accent-primary) 70%, var(--bg-tertiary));color:var(--text-primary)}
 .calendar-day-number{font-size:13px}
-.calendar-day-count{position:absolute;right:4px;bottom:3px;color:var(--accent-primary);font-size:10px;font-weight:800}
+.calendar-day-count{position:absolute;right:4px;bottom:3px;color:var(--accent-primary);font-size:12px;font-weight:800}
 .calendar-day.level-4 .calendar-day-count, .calendar-day.selected .calendar-day-count{color:inherit}
 .calendar-day-dot{position:absolute;bottom:4px;width:6px;height:6px;border-radius:50%;background:var(--accent-success)}
 .calendar-legend{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border-light)}
@@ -129,7 +129,7 @@
 .work-calendar .calendar-day-number{margin-bottom:2px;color:var(--text-muted);font-size:13px;font-weight:700;line-height:1}
 .calendar-day-tasks{display:flex;flex:1;flex-direction:column;gap:2px;overflow:hidden}
 .calendar-day-task{overflow:hidden;padding:2px 4px;border-radius:3px;color:var(--text-primary);font-size:12px;line-height:1.3;text-overflow:ellipsis;white-space:nowrap}
-.calendar-day-more{padding-top:1px;color:var(--text-muted);font-size:11px;text-align:center}
+.calendar-day-more{padding-top:1px;color:var(--text-muted);font-size:12px;text-align:center}
 .day-detail.empty{border-style:dashed}
 .day-detail-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border-light)}
 .day-detail-date{color:var(--text-primary);font-size:17px;font-weight:800}
@@ -150,7 +150,7 @@
 .history-task-main{min-width:0;flex:1}
 .history-task-title{color:var(--text-primary);font-size:15px;font-weight:700;overflow-wrap:anywhere}
 .history-task-time{color:var(--text-muted);font-size:13px;white-space:nowrap}
-.history-pill{display:inline-flex;align-items:center;min-height: var(--touch-target-min);padding:2px 7px;border:1px solid color-mix(in srgb, var(--task-cat-color) 35%, var(--border-light));border-radius:999px;color:var(--task-cat-color);font-size:11px;font-weight:800}
+.history-pill{display:inline-flex;align-items:center;padding:2px 7px;border:1px solid color-mix(in srgb, var(--task-cat-color) 35%, var(--border-light));border-radius:999px;color:var(--task-cat-color);font-size:12px;font-weight:800}
 .history-task-actions{flex-wrap:nowrap}
 .history-pagination{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 0 4px;color:var(--text-muted);font-size:13px}
 @media (min-width:480px){.rhythm-stat-grid{grid-template-columns:repeat(3, minmax(0, 1fr))}
@@ -166,3 +166,14 @@
 .work-calendar .calendar-day{min-height:40px}
 .calendar-day-task{font-size:12px}
 }
+
+/* 기록 관리 드롭다운 — 파괴 동작(기간/전체 삭제)을 헤더 상시 노출 대신 메뉴 뒤로 */
+.history-manage{position:relative}
+.history-manage summary{list-style:none;cursor:pointer}
+.history-manage summary::-webkit-details-marker{display:none}
+.history-manage[open] summary{border-color:var(--accent-primary);color:var(--text-primary)}
+.history-manage-menu{position:absolute;right:0;top:calc(100% + 6px);min-width:140px;display:grid;gap:2px;padding:6px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);box-shadow:0 10px 30px var(--shadow-color);z-index:100}
+.history-manage-item{display:flex;align-items:center;gap:8px;min-height:var(--touch-target-min);padding:8px 10px;border:none;border-radius:6px;background:transparent;color:var(--text-secondary);font-size:13px;font-weight:700;cursor:pointer;text-align:left;transition:background-color 0.15s,color 0.15s}
+.history-manage-item:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+.history-manage-item.danger{color:var(--accent-danger)}
+.history-manage-item.danger:hover{background:color-mix(in srgb, var(--accent-danger) 10%, transparent)}

@@ -200,7 +200,7 @@
     .current-time-clock {
       font-size: 28px;
       font-weight: 700;
-      font-family: 'Pretendard Variable', monospace;
+      font-family: var(--font-mono);
       font-variant-numeric: tabular-nums;
       color: white;
       letter-spacing: -0.02em;

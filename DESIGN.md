@@ -128,8 +128,8 @@ Pretendard Variable for all UI text (Korean-optimized, variable weight 100–900
 ### Font stack
 
 - **Body / UI**: `'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
-- **Mono / Numeric**: `'SF Mono', 'Monaco', monospace` — clock, revenue, history timestamps, rhythm metrics
-- **Tokens defined**: `--font-body` and `--font-mono` declared in `css/base.css` `:root`. `body` uses `var(--font-body)`. 9 monospace sites still hardcode font stacks instead of using `var(--font-mono)` (see Hardcoded Audit appendix for follow-up)
+- **Mono / Numeric**: `'SF Mono', 'Monaco', Consolas, 'Pretendard Variable', 'Pretendard', monospace` — clock, revenue, history timestamps, rhythm metrics. Korean fallback sits BEFORE the generic keyword so Korean glyphs inside mono contexts (오전/오후, 분) render in Pretendard instead of the OS default.
+- **Tokens defined**: `--font-body` and `--font-mono` declared in `css/base.css` `:root`. `body` uses `var(--font-body)`; `button/input/select/textarea { font: inherit }` reset restores inheritance for form elements (UA default fonts broke Korean button text). All component mono sites use `var(--font-mono)` (hardcoded-stack audit resolved 2026-06-10).
 
 ### Hierarchy
 
@@ -178,7 +178,7 @@ Pretendard Variable for all UI text (Korean-optimized, variable weight 100–900
 | soon (today) | `var(--accent-warning-alpha)` | `var(--accent-warning)` | "6h" |
 | normal (>1d) | `rgba(148,163,184,0.1)` | `var(--text-secondary)` | "3d" |
 
-All chips: `font-variant-numeric: tabular-nums`, `font-size: 12px`, `font-weight: 600`, `border-radius: 6px`, `padding: 2px 8px`.
+All chips: `font-variant-numeric: tabular-nums`, `font-size: 12px+`, `font-weight: 700`, `border-radius: 999px` (pill — unified with dday-chip family 2026-06-10), `padding: 2px 8px`. Display-only chips must NOT carry `min-height: var(--touch-target-min)` — that rule is for interactive targets; on short labels it inflates chips into circles.
 
 ### Button (`.btn`)
 
@@ -244,7 +244,9 @@ You are building a feature for Navigator (ADHD-friendly task manager). The desig
 
 ### Microcopy rules
 
-- Korean throughout, sentence case
+- Korean throughout, sentence case. Section eyebrows/overlines in English (URGENT, COMMUTE, Reflection) were removed 2026-06-10 — Korean titles stand alone.
+- Emoji policy: decorative emoji inside TEXT labels (settings section titles, empty states, streak 🔥) is allowed; emoji as the SOLE content of a control (button, toggle, status icon) is forbidden — use `svgIcon()` (Lucide stroke set in `js/utils.js`).
+- Press feedback `transform: scale(0.95–0.98)` on `:active` and modal entrance `scale+fade` (`modalIn`) are sanctioned motion patterns — the "no transform" rule applies to HOVER only.
 - Button labels: verb-first ("추가", "수정", "삭제")
 - Category names are the user's own Korean terms — never translate or abbreviate
 - Deadline display: always relative ("2h", "6h", "3d", "내일") — never absolute datetime
@@ -253,7 +255,7 @@ You are building a feature for Navigator (ADHD-friendly task manager). The desig
 
 ---
 
-## Appendix — Hardcoded font stack audit
+## Appendix — Hardcoded font stack audit (RESOLVED 2026-06-10 — all sites now use var(--font-mono))
 
 | File | Line(s) | Current stack | Proposed token |
 |---|---|---|---|

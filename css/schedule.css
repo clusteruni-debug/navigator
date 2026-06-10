@@ -342,11 +342,13 @@
       box-shadow: 0 -10px 40px var(--shadow-color);
       z-index: 10001;
       transform: translateY(100%);
-      transition: transform 0.3s ease;
+      visibility: hidden; /* translateY만으로는 a11y 트리에 남아 숨김 상태에서 키보드 포커스 진입됨 */
+      transition: transform 0.3s ease, visibility 0.3s;
     }
 
     .time-input-modal.show {
       transform: translateY(0);
+      visibility: visible;
     }
 
     .time-input-header {

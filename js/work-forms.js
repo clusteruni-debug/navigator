@@ -20,7 +20,7 @@ function showMetaEditor(projectId) {
 
   workModalState = { type: 'meta-edit', projectId, stageIdx: null, subcategoryIdx: null, taskIdx: null };
 
-  title.textContent = '📋 프로젝트 정보';
+  title.textContent = '프로젝트 정보';
 
   const fields = [
     { key: 'methodology', label: '방법론', placeholder: '예: 사용성 테스트, FGI', type: 'text' },
@@ -43,12 +43,12 @@ function showMetaEditor(projectId) {
       const val = m[f.key] || '';
       if (f.type === 'textarea') {
         return '<div class="work-modal-field">' +
-          '<label class="work-modal-label">' + escapeHtml(f.label) + '</label>' +
+          '<label class="work-modal-label" for="meta-' + f.key + '">' + escapeHtml(f.label) + '</label>' +
           '<textarea class="work-modal-textarea" id="meta-' + f.key + '" placeholder="' + escapeAttr(f.placeholder) + '">' + escapeHtml(val) + '</textarea>' +
         '</div>';
       }
       return '<div class="work-modal-field">' +
-        '<label class="work-modal-label">' + escapeHtml(f.label) + '</label>' +
+        '<label class="work-modal-label" for="meta-' + f.key + '">' + escapeHtml(f.label) + '</label>' +
         '<input type="' + f.type + '" class="work-modal-input" id="meta-' + f.key + '" placeholder="' + escapeAttr(f.placeholder) + '" value="' + escapeAttr(val) + '">' +
       '</div>';
     }).join('') +
