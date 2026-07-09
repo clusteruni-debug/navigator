@@ -1,0 +1,1150 @@
+/* work-project.css - 프로젝트 카드, 상세, 단계, 상태 뱃지 (work.css에서 분리) */
+
+    /* ====================================
+       빠른 작성 텍스트 영역 (메모장 흡수)
+       ==================================== */
+    .work-sketch-area {
+      margin-bottom: 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      overflow: hidden;
+      font-family: var(--font-body);
+    }
+    .work-sketch-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .work-sketch-header:hover { background: var(--bg-tertiary); }
+    .work-sketch-toggle-icon {
+      font-size: var(--font-xs);
+      color: var(--text-muted);
+      flex-shrink: 0;
+      width: 12px;
+    }
+    .work-sketch-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+    .work-sketch-hint {
+      font-size: var(--font-xs);
+      color: var(--text-muted);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .work-sketch-collapsed-hint {
+      padding: 6px 12px;
+      font-size: var(--font-xs);
+      color: var(--text-muted);
+      border-top: 1px dashed var(--border-color);
+      cursor: pointer;
+      font-style: italic;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .work-sketch-collapsed-hint:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+    }
+    .work-sketch-textarea {
+      width: 100%;
+      min-height: 200px;
+      padding: 10px 12px;
+      background: var(--bg-primary);
+      border: none;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: var(--font-sm);
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .work-sketch-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+    }
+    .work-sketch-btn-apply {
+      padding: 6px 14px;
+      background: var(--accent-primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: var(--font-sm);
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background-color 0.2s;
+    }
+    .work-sketch-btn-apply:hover { background: var(--accent-primary-hover); }
+    .work-sketch-help {
+      font-size: var(--font-xs);
+      color: var(--text-muted);
+      font-style: italic;
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* ====================================
+       Task 우선순위 ★ (0-5 cycle)
+       ==================================== */
+    .work-task-priority {
+      font-size: var(--font-xs);
+      letter-spacing: 0.5px;
+      color: var(--accent-warning);
+      cursor: pointer;
+      user-select: none;
+      flex-shrink: 0;
+      opacity: 0.4;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+      font-family: var(--font-body);
+    }
+    .work-task-priority:hover { opacity: 1; }
+    .work-task-priority.has-stars { opacity: 1; }
+
+    /* ====================================
+       Task 메타 뱃지 (v3 신규 / rationale F1~F9 / notes)
+       ==================================== */
+    .task-meta-badge {
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      font-weight: 500;
+      white-space: nowrap;
+      font-family: var(--font-body);
+    }
+    .task-meta-badge.new-v2 {
+      background: var(--accent-primary-alpha);
+      color: var(--accent-primary);
+    }
+    .task-meta-badge.rationale {
+      background: color-mix(in srgb, var(--accent-purple) 15%, transparent);
+      color: var(--accent-purple);
+      cursor: help;
+    }
+    .task-meta-badge.note {
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+      cursor: help;
+      font-size: var(--font-xs);
+    }
+
+    /* ====================================
+       노션 보고서 아카이빙 영역 (project level)
+       ==================================== */
+    .work-archive-area {
+      margin-top: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      overflow: hidden;
+      font-family: var(--font-body);
+    }
+    .work-archive-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .work-archive-header:hover { background: var(--bg-tertiary); }
+    .work-archive-toggle-icon {
+      font-size: var(--font-xs);
+      color: var(--text-muted);
+      flex-shrink: 0;
+      width: 12px;
+    }
+    .work-archive-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+    .work-archive-meta {
+      font-size: var(--font-xs);
+      color: var(--text-muted);
+      flex: 1;
+      min-width: 0;
+    }
+    .work-archive-empty {
+      padding: 14px;
+      font-size: var(--font-sm);
+      color: var(--text-muted);
+      font-style: italic;
+      border-top: 1px dashed var(--border-color);
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .work-archive-empty:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+    }
+    .work-archive-content {
+      padding: 14px;
+      border-top: 1px solid var(--border-color);
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .work-archive-textarea {
+      width: 100%;
+      min-height: 320px;
+      padding: 12px 14px;
+      background: var(--bg-primary);
+      border: none;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: var(--font-sm);
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .work-archive-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+    }
+    .work-archive-btn-save {
+      padding: 6px 14px;
+      background: var(--accent-success);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: var(--font-sm);
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+    .work-archive-btn-save:hover { opacity: 0.85; }
+    .work-archive-btn-cancel {
+      padding: 6px 14px;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: var(--font-sm);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background-color 0.2s;
+    }
+    .work-archive-btn-cancel:hover { background: var(--bg-tertiary); }
+    .work-archive-btn-edit {
+      padding: 4px 10px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: var(--font-xs);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .work-archive-btn-edit:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    /* ====================================
+       Task subtasks (RO v3 체크리스트, work-render-detail.js)
+       ==================================== */
+    .work-task-subtasks {
+      padding: 6px 0 8px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-family: var(--font-body);
+    }
+    .work-task-subtask {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 8px;
+      font-size: var(--font-sm);
+      color: var(--text-primary);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    .work-task-subtask:hover { background: var(--bg-tertiary); }
+    .work-task-subtask.completed {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+    .work-task-subtask.optional .work-task-subtask-text { opacity: 0.7; }
+    .work-task-subtask-check {
+      width: 16px;
+      flex-shrink: 0;
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+    }
+    .work-task-subtask.completed .work-task-subtask-check { color: var(--accent-success); }
+    .work-task-subtask-text {
+      flex: 1;
+      min-width: 0;
+    }
+    .work-task-subtask-tag {
+      font-size: 12px;
+      padding: 1px 5px;
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    /* 하위 항목 액션 버튼 (hover 시 표시) */
+    .work-task-subtask-actions {
+      display: flex;
+      gap: 2px;
+      margin-left: auto;
+      opacity: 0;
+      flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+    .work-task-subtask:hover .work-task-subtask-actions,
+    .work-task-subtask:focus-within .work-task-subtask-actions {
+      opacity: 1;
+    }
+    .work-task-subtask-action {
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .work-task-subtask-action:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+    /* 인라인 추가 입력란 (task hover/focus-within 시 표시) */
+    .work-task-subtask-add {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 8px;
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: opacity 0.15s, max-height 0.15s, padding 0.15s;
+    }
+    .work-task-item:hover .work-task-subtask-add,
+    .work-task-subtask-add:focus-within {
+      opacity: 1;
+      max-height: 32px;
+      padding: 4px 8px;
+    }
+    .work-task-subtask-add-icon {
+      width: 16px;
+      flex-shrink: 0;
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+      text-align: center;
+    }
+    .work-task-subtask-add-input {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      background: transparent;
+      font-size: var(--font-sm);
+      font-family: inherit;
+      color: var(--text-primary);
+      padding: 2px 4px;
+      outline: none;
+      border-radius: 4px;
+    }
+    .work-task-subtask-add-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+    .work-task-subtask-add-input:focus {
+      background: var(--bg-tertiary);
+    }
+    @media (hover: none) and (pointer: coarse) {
+      .work-task-subtask-actions { opacity: 1; }
+      .work-task-subtask-add {
+        opacity: 1;
+        max-height: 32px;
+        padding: 4px 8px;
+      }
+    }
+    .work-project-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* 상태 뱃지 */
+    .work-status-badge {
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .work-status-badge.not-started {
+      background: color-mix(in srgb, var(--accent-neutral) 20%, transparent);
+      color: var(--text-muted);
+    }
+
+    .work-status-badge.in-progress {
+      background: color-mix(in srgb, var(--accent-primary) 20%, transparent);
+      color: var(--accent-primary);
+    }
+
+    .work-status-badge.completed {
+      background: color-mix(in srgb, var(--accent-success) 20%, transparent);
+      color: var(--accent-success);
+    }
+
+    .work-status-badge.blocked {
+      background: color-mix(in srgb, var(--accent-danger) 20%, transparent);
+      color: var(--accent-danger);
+    }
+
+    /* 중분류 스타일 */
+    .work-subcategory {
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--bg-primary);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .work-subcategory-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      cursor: pointer;
+      gap: 8px;
+    }
+
+    .work-subcategory-title {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    /* 중분류 체크박스 */
+    .work-subcategory-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-color);
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .work-subcategory-checkbox:hover {
+      border-color: var(--accent-primary);
+    }
+
+    .work-subcategory-checkbox.checked {
+      background: var(--accent-success);
+      border-color: var(--accent-success);
+      color: white;
+    }
+
+    .work-subcategory-name {
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: background 0.2s;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .work-subcategory-name:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .work-subcategory-toggle {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .work-subcategory-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    /* 단계 체크박스 */
+    .work-stage-checkbox {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--border-color);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .work-stage-checkbox:hover {
+      border-color: var(--accent-primary);
+    }
+
+    .work-stage-checkbox.checked {
+      background: var(--accent-success);
+      border-color: var(--accent-success);
+      color: white;
+    }
+
+    /* 마감일 표시 */
+    .work-deadline {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      background: var(--accent-primary-alpha);
+      color: var(--accent-primary);
+      cursor: pointer;
+    }
+
+    .work-deadline.overdue {
+      background: var(--accent-danger-alpha);
+      color: var(--accent-danger);
+    }
+
+    .work-deadline.soon {
+      background: color-mix(in srgb, var(--pulse-warning) 15%, transparent);
+      color: var(--accent-warning);
+    }
+
+    .work-deadline.none {
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+      border: 1px dashed var(--border-color);
+      flex-shrink: 0;
+    }
+
+    .work-date-range {
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .work-schedule {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .work-project-card {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      border: 1px solid var(--border-light);
+      overflow: hidden;
+      transition: border-color var(--transition-normal);
+    }
+
+    .work-project-card:hover {
+      border-color: var(--border-color);
+    }
+
+    .work-project-card.active {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 20%, transparent);
+    }
+
+    .work-project-header {
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .work-project-info {
+      flex: 1;
+    }
+
+    .work-project-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .work-project-stage {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .work-project-stage-label {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .work-project-stage-name {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--accent-primary);
+      background: var(--accent-primary-alpha);
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+
+    .work-project-progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .work-project-progress-bar {
+      flex: 1;
+      height: 6px;
+      background: var(--bg-tertiary);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .work-project-progress-fill {
+      height: 100%;
+      background: var(--accent-primary);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    .work-project-progress-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .work-project-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .work-project-action-btn {
+      padding: 8px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 15px;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .work-project-action-btn:hover {
+      background: var(--border-color);
+    }
+
+    .work-project-action-btn.delete:hover {
+      background: color-mix(in srgb, var(--accent-danger) 20%, transparent);
+      color: var(--accent-danger);
+    }
+
+    /* 프로젝트 상세 (단계별 체크리스트) */
+    .work-project-detail {
+      border-top: 1px solid var(--border-color);
+      padding: 16px;
+      background: var(--bg-tertiary);
+    }
+
+    .work-stages {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .work-stage {
+      background: var(--bg-secondary);
+      border-radius: 10px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .work-stage.current {
+      border-color: var(--accent-primary);
+      background: var(--accent-primary-alpha);
+    }
+
+    .work-stage.completed {
+      opacity: 0.7;
+    }
+
+    .work-stage.future {
+      color: var(--text-muted);
+      border-style: dashed;
+    }
+
+    /* ============================================
+       Next Up 블록 (본업 프로젝트 상세 상단)
+       ============================================ */
+    .work-next-up {
+      margin: 12px 0 16px;
+      padding: 14px 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-left: 3px solid var(--accent-primary);
+      border-radius: var(--radius-md);
+    }
+    .work-next-up-header {
+      font-size: var(--font-sm);
+      font-weight: 600;
+      color: var(--accent-primary);
+      margin-bottom: 10px;
+      letter-spacing: 0.3px;
+    }
+    .work-next-up-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .work-next-up-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+    }
+    .work-next-up-status {
+      font-size: var(--font-xs);
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--bg-primary);
+      color: var(--text-muted);
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .work-next-up-status.in-progress {
+      background: var(--accent-primary-alpha);
+      color: var(--accent-primary);
+    }
+    .work-next-up-title {
+      color: var(--text-primary);
+      font-weight: 500;
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .work-next-up-meta {
+      font-size: var(--font-xs);
+      color: var(--text-muted);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .work-next-up-deadline {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: var(--font-xs);
+      font-weight: 500;
+      background: var(--bg-primary);
+      color: var(--text-muted);
+    }
+    .work-next-up-deadline.soon {
+      background: var(--accent-warning-alpha);
+      color: var(--accent-warning);
+    }
+    .work-next-up-deadline.overdue {
+      background: var(--accent-danger-alpha);
+      color: var(--accent-danger);
+    }
+    @media (max-width: 640px) {
+      .work-next-up-item {
+        flex-wrap: wrap;
+      }
+      .work-next-up-title {
+        white-space: normal;
+        flex-basis: 100%;
+        order: 2;
+      }
+      .work-next-up-meta {
+        order: 3;
+        flex-basis: 100%;
+        justify-content: flex-start;
+      }
+    }
+
+    /* ============================================
+       긴 log 본문 자동 접기 / 일괄 토글
+       ============================================ */
+    .work-log-content-preview {
+      color: var(--text-primary);
+      opacity: 0.85;
+      display: inline;
+    }
+    .work-log-content-toggle {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 2px 8px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      color: var(--accent-primary);
+      font-size: var(--font-xs);
+      font-weight: 500;
+      cursor: pointer;
+      vertical-align: middle;
+      line-height: 1.4;
+    }
+    .work-log-content-toggle:hover {
+      background: var(--accent-primary-alpha);
+      border-color: var(--accent-primary);
+    }
+
+    /* ============================================
+       드래그 재정렬 (중분류 + 작업 항목)
+       ============================================ */
+    .work-drag-handle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      font-size: 14px;
+      color: var(--text-muted);
+      cursor: grab;
+      user-select: none;
+      flex-shrink: 0;
+      margin-right: 4px;
+      border-radius: 3px;
+      line-height: 1;
+    }
+    .work-drag-handle:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    .work-drag-handle:active {
+      cursor: grabbing;
+    }
+    .work-dragging {
+      opacity: 0.4;
+    }
+    .work-drop-target {
+      outline: 2px dashed var(--accent-primary);
+      outline-offset: -2px;
+    }
+    /* dragstart부터 dragend까지 전역 grabbing 커서 — HTML5 drag는 :active가 안 잡혀서 body 클래스로 처리 */
+    body.work-drag-active,
+    body.work-drag-active * {
+      cursor: grabbing !important;
+    }
+
+    .work-stage-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+
+    .work-stage-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .work-stage-number {
+      width: 24px;
+      height: 24px;
+      background: var(--bg-tertiary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .work-stage-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .work-stage.current .work-stage-number {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .work-stage.completed .work-stage-number {
+      background: var(--accent-success);
+      color: white;
+    }
+
+    .work-stage-add-task {
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px dashed var(--border-color);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .work-stage-add-task:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    /* 스테이지 미니 프로그레스 바 */
+    .work-stage-mini-progress {
+      display: inline-block;
+      width: 40px;
+      height: 4px;
+      background: var(--bg-tertiary);
+      border-radius: 2px;
+      margin-left: 6px;
+      vertical-align: middle;
+      overflow: hidden;
+    }
+
+    .work-stage-mini-progress-fill {
+      display: block;
+      height: 100%;
+      background: var(--accent-success);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    /* 완료된 태스크 dimming */
+    .work-task-completed {
+      opacity: 0.5;
+    }
+
+    .work-task-completed:hover {
+      opacity: 0.8;
+    }
+
+    /* Task 2-1: 더보기 드롭다운 */
+    .work-more-menu {
+      position: fixed;
+      z-index: 9999;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 4px;
+      box-shadow: 0 4px 12px var(--shadow-color);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 160px;
+    }
+
+    .work-more-menu button {
+      display: block;
+      width: 100%;
+      padding: 10px 12px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 14px;
+      cursor: pointer;
+      text-align: left;
+      min-height: 44px;
+    }
+
+    .work-more-menu button:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .work-more-menu button.danger {
+      color: var(--accent-danger);
+    }
+
+    /* Task 2-2: 단계 액션 hover-to-show */
+    .work-stage-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .work-stage:hover .work-stage-actions,
+.work-stage:focus-within .work-stage-actions {
+      opacity: 1;
+    }
+@media (hover: none) and (pointer: coarse) {
+  .work-stage .work-stage-actions { opacity: 1; pointer-events: auto; }
+}
+
+    /* Task 2-3: 프로젝트 메타 정보 접기/펼치기 */
+    .work-meta-collapse {
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .work-meta-collapse-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: background 0.2s;
+    }
+
+    .work-meta-collapse-header:hover {
+      background: var(--bg-secondary);
+    }
+
+    .work-meta-collapse-body {
+      padding: 0 14px 10px;
+      font-size: var(--font-sm);
+      color: var(--text-secondary);
+    }
+
+    .work-meta-collapse-body.collapsed {
+      display: none;
+    }
+
+    /* Task 2-6: 로그 hover 액션 */
+    .work-task-log-actions {
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .work-task-log:hover .work-task-log-actions {
+      opacity: 1;
+    }
+
+    /* ═══════════════════════════════════════════
+       Role-based add CTA (design system canary, 2026-05-29)
+       Replaces generic .work-stage-add-task / .work-task-action
+       reuse for add intent. add CTA가 다른 CRUD action 묶음과
+       시각상 분리되도록 별도 token + 별도 위치.
+       ═══════════════════════════════════════════ */
+    .work-add-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--cta-add-bg);
+      color: var(--cta-add-text);
+      border: none;
+      padding: var(--cta-add-padding);
+      border-radius: var(--cta-add-radius);
+      font-size: 14px;
+      font-weight: var(--cta-add-font-weight);
+      cursor: pointer;
+      min-height: var(--touch-target-min);
+      transition: background 0.15s;
+    }
+    .work-add-cta:hover { background: var(--cta-add-bg-hover); }
+    .work-add-cta:focus-visible { outline: 2px solid var(--cta-add-text); outline-offset: 2px; }
+
+    .work-add-cta--ghost {
+      background: var(--cta-add-ghost-bg);
+      color: var(--cta-add-ghost-text);
+      border: var(--cta-add-ghost-border);
+      width: auto;
+      justify-content: center;
+      padding: 8px 14px;
+      min-height: 36px;
+    }
+    .work-add-cta--ghost:hover { background: var(--cta-add-ghost-bg-hover); }
+
+    /* L3 — Outline solid (list 끝, subcategory 추가) */
+    .work-add-cta--outline {
+      background: var(--cta-add-outline-bg);
+      color: var(--cta-add-outline-text);
+      border: var(--cta-add-outline-border);
+      padding: var(--cta-add-outline-padding);
+      font-weight: var(--cta-add-outline-font-weight);
+      font-size: 13px;
+      min-height: 36px;
+    }
+    .work-add-cta--outline:hover {
+      background: var(--cta-add-outline-bg-hover);
+      border-color: var(--cta-add-outline-text);
+    }
+
+    /* L4 — Subtle inline (deepest, task list 안에 박힘) */
+    .work-add-cta--subtle {
+      background: var(--cta-add-subtle-bg);
+      color: var(--cta-add-subtle-text);
+      border: var(--cta-add-subtle-border);
+      padding: var(--cta-add-subtle-padding);
+      font-size: var(--cta-add-subtle-font-size);
+      font-weight: var(--cta-add-subtle-font-weight);
+      min-height: 32px;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .work-add-cta--subtle:hover {
+      background: var(--cta-add-subtle-bg-hover);
+      color: var(--cta-add-subtle-text-hover);
+      border: var(--cta-add-subtle-border-hover);
+    }
+
+    /* Layer-end add row — 각 layer(중분류/단계) 카드 바닥에 하나만 둠 */
+    .work-layer-add-row {
+      display: flex;
+      justify-content: flex-start;
+      padding: 8px 0 4px 0;
+      margin-top: 6px;
+    }
+    .work-layer-add-row--center { justify-content: center; }

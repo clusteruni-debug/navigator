@@ -1,0 +1,783 @@
+/* work-dashboard.css - 대시보드, 참여자 트래커, 뱃지, 주간 리포트 (work.css에서 분리) */
+    /* 프로젝트 대시보드 */
+    .work-dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .work-dashboard-card {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid var(--border-light);
+      position: relative;
+      overflow: hidden;
+      transition: border-color var(--transition-normal);
+    }
+
+    .work-dashboard-card:hover {
+      border-color: var(--border-color);
+    }
+
+    .work-dashboard-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--accent-primary);
+    }
+
+    .work-dashboard-card.active {
+      border-color: var(--accent-primary);
+      background: var(--accent-primary-alpha);
+    }
+
+    .work-dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .work-dashboard-name {
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .work-dashboard-status {
+      font-size: 14px;
+      padding: 3px 8px;
+      border-radius: 10px;
+    }
+
+    .work-dashboard-stages {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .work-dashboard-stage-dot {
+      width: 24px;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--bg-tertiary);
+    }
+
+    .work-dashboard-stage-dot.completed {
+      background: var(--accent-success);
+    }
+
+    .work-dashboard-stage-dot.current {
+      background: var(--accent-primary);
+    }
+
+    .work-dashboard-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .work-dashboard-schedule {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* 참여자 트래커 */
+    .work-participant-tracker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+
+    .work-participant-label {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .work-participant-count {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--accent-primary);
+    }
+
+    .work-participant-goal {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .work-participant-bar {
+      flex: 1;
+      height: 6px;
+      background: var(--bg-secondary);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .work-participant-fill {
+      height: 100%;
+      background: var(--accent-primary);
+      border-radius: 3px;
+    }
+
+    /* 아카이브 뱃지 */
+    .work-archived-badge {
+      font-size: 14px;
+      padding: 2px 6px;
+      background: color-mix(in srgb, var(--accent-neutral) 20%, transparent);
+      color: var(--text-muted);
+      border-radius: 8px;
+      margin-left: 8px;
+    }
+
+    /* 보류 뱃지 */
+    .work-onhold-badge {
+      font-size: 14px;
+      padding: 2px 6px;
+      background: color-mix(in srgb, var(--accent-danger) 20%, transparent);
+      color: var(--accent-danger);
+      border-radius: 8px;
+      margin-left: 8px;
+    }
+
+    /* 주간 리포트 */
+    .weekly-report {
+      background: var(--accent-primary-alpha);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid color-mix(in srgb, var(--accent-primary) 20%, transparent);
+    }
+
+    .weekly-report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .weekly-report-title {
+      font: var(--text-title-2);
+    }
+
+    .weekly-report-period {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .weekly-report-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .weekly-stat {
+      background: var(--bg-secondary);
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .weekly-stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent-primary);
+    }
+
+    .weekly-stat-value.positive {
+      color: var(--accent-success);
+    }
+
+    .weekly-stat-value.negative {
+      color: var(--accent-danger);
+    }
+
+    .weekly-stat-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .weekly-stat-change {
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .weekly-stat-change.positive {
+      color: var(--accent-success);
+    }
+
+    .weekly-stat-change.negative {
+      color: var(--accent-danger);
+    }
+
+    /* ====================================
+       본업 탭 redesign surface
+       ==================================== */
+    .work-redesign {
+      letter-spacing: 0;
+      display: grid;
+      gap: var(--space-section);
+    }
+
+    .work-redesign button,
+    .work-redesign input {
+      font-family: var(--font-body);
+      letter-spacing: 0;
+    }
+
+    .work-svg-icon,
+    .work-redesign .svg-icon {
+      flex: 0 0 auto;
+      color: currentColor;
+    }
+
+    .work-redesign-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .work-redesign-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      font-size: var(--font-xl);
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .work-title-bar {
+      width: 4px;
+      height: 22px;
+      border-radius: 2px;
+      background: var(--cat-본업);
+      flex: 0 0 auto;
+    }
+
+    .work-title-meta {
+      font-size: var(--font-xs);
+      color: var(--text-muted);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .work-head-actions,
+    .work-project-card-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .work-primary-action,
+    .work-icon-action,
+    .work-project-card-action,
+    .work-row-action,
+    .work-more-row,
+    .work-history-link {
+      min-height: 44px;
+      min-width: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+      text-decoration: none;
+    }
+
+    .work-primary-action {
+      padding: 0 12px;
+      background: color-mix(in srgb, var(--cat-본업) 14%, var(--bg-primary));
+      border-color: color-mix(in srgb, var(--cat-본업) 40%, var(--border-color));
+      color: var(--cat-본업);
+      font-weight: 700;
+    }
+
+    .work-primary-action:hover,
+    .work-icon-action:hover,
+    .work-project-card-action:hover,
+    .work-row-action:hover,
+    .work-more-row:hover,
+    .work-history-link:hover {
+      background: var(--bg-secondary);
+      border-color: var(--border-color);
+    }
+
+    .work-primary-action:hover {
+      background: color-mix(in srgb, var(--cat-본업) 20%, var(--bg-primary));
+      border-color: color-mix(in srgb, var(--cat-본업) 55%, var(--border-color));
+    }
+
+    .work-subtabs,
+    .work-project-view-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-tertiary);
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    .work-subtab-btn,
+    .work-view-toggle-btn,
+    .work-chip {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      padding: 0 12px;
+      font-size: var(--font-sm);
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .work-subtab-btn:hover,
+    .work-view-toggle-btn:hover,
+    .work-chip:hover {
+      background: var(--bg-secondary);
+      border-color: var(--border-light);
+    }
+
+    .work-subtab-btn.active.cat-work,
+    .work-view-toggle-btn.active.cat-work,
+    .work-chip.active.cat-work {
+      background: color-mix(in srgb, var(--cat-본업) 16%, var(--bg-primary));
+      border-color: color-mix(in srgb, var(--cat-본업) 45%, var(--border-color));
+      color: var(--cat-본업);
+      font-weight: 700;
+    }
+
+    .work-anchor-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .work-anchor {
+      min-height: 58px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .work-anchor:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--border-color);
+    }
+
+    .work-anchor strong {
+      color: var(--text-primary);
+      font-size: var(--font-lg);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .work-anchor.urgent strong { color: var(--accent-danger); }
+    .work-anchor.warn strong { color: var(--accent-warning); }
+    .work-anchor.success strong { color: var(--accent-success); }
+    .work-anchor.cat-work strong { color: var(--cat-본업); }
+
+    .work-toolbar,
+    .work-project-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .work-chip-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .work-chip-label {
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+      padding: 0 4px;
+    }
+
+    .work-chip-swatch {
+      width: 9px;
+      height: 9px;
+      border-radius: 3px;
+      background: var(--cat-본업);
+    }
+
+    .work-search {
+      min-height: 44px;
+      min-width: min(100%, 260px);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+    }
+
+    .work-search input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text-primary);
+      font-size: var(--font-sm);
+    }
+
+    .work-focus-panel {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 14px;
+      border: 1px solid color-mix(in srgb, var(--cat-본업) 24%, var(--border-color));
+      border-left: 4px solid var(--cat-본업);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--cat-본업) 8%, var(--bg-primary));
+    }
+
+    .work-focus-panel.complete {
+      border-color: color-mix(in srgb, var(--accent-success) 30%, var(--border-color));
+      border-left-color: var(--accent-success);
+      background: color-mix(in srgb, var(--accent-success) 8%, var(--bg-primary));
+    }
+
+    .work-focus-label {
+      color: var(--cat-본업);
+      font-size: var(--font-xs);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .work-focus-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .work-focus-title {
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: var(--font-md);
+      overflow-wrap: anywhere;
+    }
+
+    .work-focus-meta {
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+      margin-top: 2px;
+      overflow-wrap: anywhere;
+    }
+
+    .work-focus-cta {
+      min-height: 44px;
+      border: 1px solid color-mix(in srgb, var(--cat-본업) 45%, var(--border-color));
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--cat-본업) 18%, var(--bg-primary));
+      color: var(--cat-본업);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 12px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .work-focus-cta:hover {
+      background: color-mix(in srgb, var(--cat-본업) 24%, var(--bg-primary));
+      border-color: color-mix(in srgb, var(--cat-본업) 60%, var(--border-color));
+    }
+
+    .work-time-group,
+    .work-project-cards-view,
+    .work-project-calendar-view,
+    .work-project-timeline-view {
+      display: grid;
+      gap: 8px;
+    }
+
+    .work-section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: var(--font-md);
+      min-height: var(--touch-target-min);
+    }
+
+    .work-section-heading .count {
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .work-calendar-weekdays,
+    .work-calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .work-calendar-weekdays div {
+      min-height: var(--touch-target-min);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+      font-weight: 700;
+    }
+
+    .work-calendar-cell {
+      min-height: 78px;
+      padding: 7px;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      display: grid;
+      align-content: start;
+      gap: 4px;
+      overflow: hidden;
+    }
+
+    .work-calendar-cell.muted {
+      opacity: 0.5;
+    }
+
+    .work-calendar-cell.today {
+      border-color: color-mix(in srgb, var(--cat-본업) 45%, var(--border-color));
+      background: color-mix(in srgb, var(--cat-본업) 8%, var(--bg-secondary));
+    }
+
+    .work-calendar-cell.deadline {
+      border-color: color-mix(in srgb, var(--cat-본업) 40%, var(--border-color));
+    }
+
+    .work-calendar-cell.deadline.urgent {
+      border-color: color-mix(in srgb, var(--accent-danger) 50%, var(--border-color));
+      background: color-mix(in srgb, var(--accent-danger) 9%, var(--bg-secondary));
+    }
+
+    .work-calendar-cell.deadline.warn {
+      border-color: color-mix(in srgb, var(--accent-warning) 50%, var(--border-color));
+      background: color-mix(in srgb, var(--accent-warning) 9%, var(--bg-secondary));
+    }
+
+    .work-calendar-day {
+      color: var(--text-primary);
+      font-size: var(--font-xs);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .work-calendar-deadline,
+    .work-calendar-more {
+      color: var(--cat-본업);
+      font-size: var(--font-xs);
+      font-weight: 700;
+      overflow-wrap: anywhere;
+      line-height: 1.25;
+    }
+
+    .work-calendar-more {
+      color: var(--text-muted);
+    }
+
+    .work-timeline-row {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+    }
+
+    .work-timeline-row-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--text-primary);
+      font-size: var(--font-sm);
+    }
+
+    .work-timeline-row-head span,
+    .work-timeline-meta {
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+    }
+
+    .work-phase-track {
+      display: flex;
+      align-items: stretch;
+      min-height: var(--touch-target-min);
+      border-radius: 7px;
+      overflow: hidden;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+    }
+
+    .work-phase-bar {
+      min-width: var(--touch-target-min);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
+      color: var(--text-secondary);
+      font-size: var(--font-xs);
+      border-right: 1px solid var(--border-light);
+      overflow: hidden;
+    }
+
+    .work-phase-bar span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .work-phase-bar.completed {
+      background: color-mix(in srgb, var(--cat-본업) 55%, var(--bg-tertiary));
+      color: var(--text-primary);
+    }
+
+    .work-phase-bar.current {
+      background: color-mix(in srgb, var(--accent-warning) 45%, var(--bg-tertiary));
+      color: var(--text-primary);
+    }
+
+    .work-timeline-legend {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--text-muted);
+      font-size: var(--font-xs);
+    }
+
+    .work-timeline-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .work-timeline-legend i {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+    }
+
+    .work-timeline-legend i.completed {
+      background: color-mix(in srgb, var(--cat-본업) 55%, var(--bg-tertiary));
+    }
+
+    .work-timeline-legend i.current {
+      background: color-mix(in srgb, var(--accent-warning) 45%, var(--bg-tertiary));
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      .work-row-actions {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .work-project-grid-redesign {
+        grid-template-columns: 1fr;
+      }
+
+      .work-anchor-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .work-redesign-task-row {
+        grid-template-columns: 44px minmax(0, 1fr) auto;
+      }
+
+      .work-row-actions {
+        grid-column: 2 / 4;
+        justify-self: end;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .work-redesign-head,
+      .work-focus-panel,
+      .work-toolbar,
+      .work-project-toolbar,
+      .work-general-quick-add,
+      .work-timeline-row-head {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .work-head-actions,
+      .work-subtabs,
+      .work-project-view-toggle,
+      .work-chip-row,
+      .work-search,
+      .work-primary-action {
+        width: 100%;
+      }
+
+      .work-subtab-btn,
+      .work-view-toggle-btn,
+      .work-chip {
+        flex: 1 0 auto;
+      }
+
+      .work-anchor-row {
+        grid-template-columns: 1fr;
+      }
+
+      .work-calendar-cell {
+        min-height: 64px;
+        padding: 5px;
+      }
+
+      .work-calendar-deadline {
+        font-size: var(--font-xs);
+      }
+    }

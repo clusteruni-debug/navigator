@@ -1,0 +1,67 @@
+/* typography-override.css — Component overrides mapped to typography role tokens
+   Most font-size setting now handled by --text-* role tokens (base.css).
+   This file maps legacy component classes to appropriate roles.
+   Role tokens (base.css): --text-display / --text-title-1 / --text-title-2 /
+   --text-body-emph / --text-body / --text-label / --text-caption / --text-micro */
+
+    /* === Microscale: counter chips, bar values, indicator badges === */
+    .stat-label,
+    .insight-bar-label,
+    .rhythm-bar-value,
+    .pie-legend-value,
+    .commute-weekday-count,
+    .task-tag,
+    .calendar-day-task,
+    .work-section-toggle {
+      font: var(--text-caption);
+    }
+
+    /* === Caption: meta, indicators, tags, system status === */
+    .user-email,
+    .sync-status,
+    .sync-indicator,
+    .task-item-meta,
+    .category,
+    .tag,
+    .tag-filter-label,
+    .header-date,
+    .offline-indicator,
+    .form-note,
+    .time-remaining-label,
+    .current-time-mode-label,
+    .start-now-btn,
+    .logout-btn,
+    .calendar-weekday,
+    .calendar-day-more,
+    .work-task-action {
+      font: var(--text-caption);
+    }
+
+    /* === Label: form fields, button labels, chart titles === */
+    .rhythm-bar-label,
+    .rhythm-work-label,
+    .rhythm-summary-row,
+    .rhythm-insight-item,
+    .commute-stat-label,
+    .commute-weekday-label,
+    .commute-recommend-confidence,
+    .meta-item,
+    .header p,
+    .shuttle-desc,
+    .insight-label,
+    .form-label,
+    .onboarding-feature p,
+    .rhythm-chart-title,
+    .quick-timer-btn,
+    .shuttle-toggle,
+    .motivation-toast {
+      font: var(--text-label);
+    }
+
+    /* Mobile: calendar cells stay readable on small screens */
+    @media (max-width: 480px) {
+      .calendar-day-task,
+      .calendar-day-more {
+        font: var(--text-label);
+      }
+    }

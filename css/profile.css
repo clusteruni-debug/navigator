@@ -1,0 +1,233 @@
+/* profile.css - 사용자 프로필, 동기화, 백업, 대시보드 기본 */
+    /* 사용자 프로필 & 동기화 */
+    .user-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border-color);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--accent-primary);
+    }
+
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 16px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: -0.01em;
+    }
+
+    .user-email {
+      font-size: 14px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 400;
+    }
+
+    .sync-indicator {
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .login-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px;
+      background: white;
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .login-btn:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .login-btn img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .logout-btn {
+      padding: 6px 12px;
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--accent-danger);
+      border-color: var(--accent-danger);
+    }
+
+    .sync-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .sync-status.syncing {
+      color: var(--accent-primary);
+    }
+
+    .sync-status.synced {
+      color: var(--accent-success);
+    }
+
+    .sync-status.error {
+      color: var(--accent-danger);
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .sync-status.syncing .sync-icon {
+      animation: spin 1s linear infinite;
+    }
+
+    /* 백업 섹션 */
+    .backup-section {
+      background: var(--bg-secondary);
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+    }
+
+    .backup-title {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .backup-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .backup-btn {
+      flex: 1;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .backup-btn:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .backup-btn.export {
+      background: var(--accent-primary);
+    }
+
+    .backup-btn.import {
+      background: var(--accent-success);
+    }
+
+    /* 대시보드 */
+    .dashboard-section {
+      background: var(--bg-secondary);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+    }
+
+    .dashboard-title {
+      font: var(--text-title-2);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .category-stats {
+      display: grid;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .category-stat {
+      background: var(--bg-tertiary);
+      padding: 15px;
+      border-radius: 12px;
+    }
+
+    .category-stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .category-name {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .category-progress {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    .progress-bar {
+      height: 8px;
+      /* 고정 surface 색은 light 모드에서 카드와 동화되어 트랙이 사라짐 — theme-aware 믹스 */
+      background: color-mix(in srgb, var(--text-secondary) 14%, transparent);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      transition: width 0.3s;
+    }
+
+    .progress-fill.본업 { background: var(--cat-본업); }
+    .progress-fill.부업 { background: var(--cat-부업); }
+    .progress-fill.일상 { background: var(--cat-일상); }
+    .progress-fill.가족 { background: var(--cat-가족); }
+

@@ -1,0 +1,640 @@
+/* legacy-shared.css — RESTORED 2026-07-09 (NAVIGATOR-DAILY-LOOP-REVIVAL P0 over-deletion fix) */
+/* schedule.css / pomodoro.css / dashboard.css were grab-bag files, NOT dead-feature-only. */
+/* Live styles deleted with them (commute tab, time-input modal, weekly-plan, review-summary, */
+/* modal-close, filter-chips, celebration) are restored here verbatim from git b9b65d34^. */
+
+/* ===== from deleted schedule.css (commute + shared widgets; 0 dead schedule-tab rules) ===== */
+/* schedule.css - 주간 리뷰, 퀵 필터, 소요시간 입력 모달 */
+    /* 주간 리뷰 모달 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--overlay-heavy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: var(--bg-secondary);
+      border-radius: 20px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px var(--shadow-color);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-header h2 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .modal-close:hover {
+      background: var(--border-color);
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 12px;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-color);
+      justify-content: flex-end;
+    }
+
+    /* 주간 리뷰 요약 */
+    .review-summary {
+      background: var(--accent-primary-alpha);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .review-summary-value {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--accent-primary);
+    }
+
+    .review-summary-label {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .review-summary-compare {
+      font-size: 15px;
+      margin-top: 8px;
+    }
+
+    .review-summary-compare.up {
+      color: var(--accent-success);
+    }
+
+    .review-summary-compare.down {
+      color: var(--accent-danger);
+    }
+
+    /* 다음 주 계획 */
+    .weekly-plan-section {
+      margin-top: 20px;
+    }
+
+    .weekly-plan-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .weekly-plan-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .weekly-plan-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+      border: 2px solid transparent;
+    }
+
+    .weekly-plan-item:hover {
+      background: var(--bg-primary);
+    }
+
+    .weekly-plan-item.selected {
+      border-color: var(--accent-primary);
+      background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+    }
+
+    .weekly-plan-check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .weekly-plan-item.selected .weekly-plan-check {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: white;
+    }
+
+    .weekly-plan-item-title {
+      flex: 1;
+      font-size: 16px;
+    }
+
+    .weekly-plan-item-category {
+      font-size: 14px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--accent-primary) 20%, transparent);
+      color: var(--accent-primary);
+    }
+
+    /* 월요일 리마인더 배너 */
+    .monday-reminder {
+      background: var(--accent-primary);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      color: white;
+    }
+
+    .monday-reminder-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .monday-reminder-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .monday-reminder-close {
+      background: var(--bg-tertiary);
+      border: none;
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .monday-reminder-tasks {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .monday-reminder-task {
+      background: var(--bg-tertiary);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .monday-reminder-task-num {
+      width: 20px;
+      height: 20px;
+      background: var(--bg-tertiary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    /* 퀵 필터 섹션 */
+    .quick-filter-section {
+      margin: 16px 0;
+      padding: 12px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .quick-filter-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .quick-filter-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .quick-filter-help {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--bg-tertiary);
+      color: var(--text-tertiary);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: help;
+    }
+
+    /* 퀵 필터 버튼들 */
+    .quick-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .quick-filter-btn {
+      padding: 8px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      color: var(--text-secondary);
+      font-size: 15px;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .quick-filter-btn:hover {
+      background: var(--bg-secondary);
+      border-color: var(--accent-primary);
+      color: var(--text-primary);
+    }
+
+    .quick-filter-btn.active {
+      background: var(--accent-primary);
+      border-color: transparent;
+      color: white;
+    }
+
+    .quick-filter-btn .filter-count {
+      background: var(--bg-tertiary);
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .quick-filter-btn.active .filter-count {
+      background: var(--bg-tertiary);
+    }
+
+    /* 미루기 횟수 뱃지 */
+    .postpone-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      background: color-mix(in srgb, var(--pulse-warning) 15%, transparent);
+      color: var(--accent-warning);
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .postpone-badge.warning {
+      background: var(--accent-danger-alpha);
+      color: var(--accent-danger);
+    }
+
+    /* 실제 소요시간 입력 모달 */
+    .time-input-modal {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      border-radius: 20px 20px 0 0;
+      padding: 24px;
+      box-shadow: 0 -10px 40px var(--shadow-color);
+      z-index: 10001;
+      transform: translateY(100%);
+      visibility: hidden; /* translateY만으로는 a11y 트리에 남아 숨김 상태에서 키보드 포커스 진입됨 */
+      transition: transform 0.3s ease, visibility 0.3s;
+    }
+
+    .time-input-modal.show {
+      transform: translateY(0);
+      visibility: visible;
+    }
+
+    .time-input-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .time-input-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .time-input-options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .time-option-btn {
+      padding: 14px 10px;
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+      text-align: center;
+    }
+
+    .time-option-btn:hover {
+      border-color: var(--accent-primary);
+    }
+
+    .time-option-btn.selected {
+      background: var(--accent-primary);
+      border-color: transparent;
+      color: white;
+    }
+
+    .time-input-custom {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .time-input-custom input {
+      flex: 1;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 16px;
+    }
+
+/* Commute redesign: schedule.css is shared legacy, not commute-only. */
+.commute-shell { display: flex; flex-direction: column; gap: 12px;
+}
+.commute-topbar, .commute-panel-head, .commute-direction-head { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.commute-heading h2, .commute-panel-head h3, .commute-direction-head h3 { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--text-primary); font-size: var(--font-lg); font-weight: 700; letter-spacing: 0;
+}
+.commute-heading p { margin: 4px 0 0; color: var(--text-secondary); font-size: var(--font-sm);
+}
+.commute-eyebrow, .commute-section-kicker { display: block; color: var(--text-muted); font-size: var(--font-xs); font-weight: 700; letter-spacing: 0; text-transform: uppercase;
+}
+.commute-top-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.commute-icon-action, .commute-mode-btn, .commute-route-manage-actions button, .commute-log-row button, .commute-expand-direction { min-height: var(--touch-target-min); border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+.commute-icon-action { width: 36px; display: inline-flex; align-items: center; justify-content: center;
+}
+.commute-mode-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; font-size: var(--font-sm); font-weight: 700;
+}
+.commute-icon-action:hover, .commute-mode-btn:hover, .commute-route-manage-actions button:hover, .commute-log-row button:hover, .commute-expand-direction:hover { background: var(--bg-tertiary); border-color: var(--accent-primary);
+}
+.commute-shell .commute-sub-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin: 0; padding: 4px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-secondary);
+}
+.commute-shell .commute-sub-tab { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: var(--touch-target-min); padding: 8px 10px; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); font-size: var(--font-sm); font-weight: 700; cursor: pointer; transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+.commute-shell .commute-sub-tab:hover { background: var(--bg-tertiary); border-color: var(--border-color);
+}
+.commute-shell .commute-sub-tab.active { background: color-mix(in srgb, var(--accent-primary) 14%, transparent); border-color: var(--accent-primary); color: var(--text-primary);
+}
+.commute-anchors, .commute-today-grid, .commute-log-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;
+}
+.commute-anchor, .commute-shuttle-card, .commute-mode-card, .commute-log-stats > div { min-width: 0; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-secondary);
+}
+.commute-anchor span, .commute-shuttle-card span, .commute-mode-card span, .commute-log-stats span { display: block; color: var(--text-muted); font-size: var(--font-xs); font-weight: 700; letter-spacing: 0;
+}
+.commute-anchor strong, .commute-shuttle-card strong, .commute-mode-card strong, .commute-log-stats strong { display: block; margin-top: 4px; color: var(--text-primary); font-size: var(--font-md); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.commute-anchor.success, .commute-shuttle-card.on { background: color-mix(in srgb, var(--accent-success) 12%, transparent); border-color: var(--accent-success);
+}
+.commute-anchor.warn { background: color-mix(in srgb, var(--accent-warning) 12%, transparent); border-color: var(--accent-warning);
+}
+.commute-anchor.work { background: color-mix(in srgb, var(--cat-본업) 12%, transparent); border-color: var(--cat-본업);
+}
+.commute-shuttle-card, .commute-mode-card { display: grid; min-height: var(--touch-target-min); grid-template-columns: auto 1fr; align-items: center; column-gap: 10px; text-align: left; cursor: pointer; transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+.commute-shuttle-card:hover, .commute-mode-card:hover { background: var(--bg-tertiary); border-color: var(--accent-primary);
+}
+.commute-card-icon { grid-row: span 2; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--accent-primary) 12%, transparent); color: var(--text-primary);
+}
+.commute-direction-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 4px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-secondary);
+}
+.commute-direction-tab { min-height: var(--touch-target-min); border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); font-size: var(--font-sm); font-weight: 700; cursor: pointer; transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+.commute-direction-tab:hover { background: var(--bg-tertiary); border-color: var(--border-color);
+}
+.commute-direction-tab.active { background: color-mix(in srgb, var(--cat-본업) 14%, transparent); border-color: var(--cat-본업); color: var(--text-primary);
+}
+.commute-direction-card, .commute-route-manage-card, .commute-log-day { padding: 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-card);
+}
+.commute-direction-card { display: flex; flex-direction: column; gap: 12px;
+}
+.commute-direction-head strong { color: var(--text-primary); font-size: var(--font-md); font-variant-numeric: tabular-nums;
+}
+.commute-time-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;
+}
+.commute-time-pair span { padding: 10px 12px; border: 1px solid var(--border-light); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text-primary); font-family: var(--font-mono); font-size: var(--font-sm); text-align: center;
+}
+.commute-current-route { padding-left: 10px; border-left: 3px solid var(--route-color); color: var(--text-secondary); font-size: var(--font-sm); font-weight: 700;
+}
+.commute-route-choice-list, .commute-route-manage-list, .commute-log-list, .commute-secondary-directions { display: flex; flex-direction: column; gap: 8px;
+}
+.commute-route-choice { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 48px; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; text-align: left; transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+.commute-route-choice:hover { background: var(--bg-tertiary); border-color: var(--route-color);
+}
+.commute-route-choice.selected { background: color-mix(in srgb, var(--accent-primary) 10%, transparent); border-color: var(--route-color);
+}
+.commute-route-choice small, .commute-route-manage-card p { display: block; margin: 2px 0 0; color: var(--text-muted); font-size: var(--font-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.commute-route-choice em, .commute-log-row em { color: var(--text-secondary); font-style: normal; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.commute-route-dot { background: var(--route-color);
+}
+.commute-route-manage-card { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 10px; border-left: 3px solid var(--route-color);
+}
+.commute-route-manage-card > span, .commute-log-count { color: var(--text-muted); font-size: var(--font-xs); font-weight: 700;
+}
+.commute-route-manage-actions { display: flex; gap: 4px;
+}
+.commute-route-manage-actions button, .commute-log-row button { width: 34px; min-height: var(--touch-target-min);
+}
+.commute-log-day h4 { margin: 0 0 8px; color: var(--text-primary); font-size: var(--font-sm);
+}
+.commute-log-row { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto auto auto; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--border-light);
+}
+.commute-log-row strong { min-width: 0; overflow: hidden; color: var(--text-primary); text-overflow: ellipsis; white-space: nowrap;
+}
+.commute-log-row span { padding-left: 8px; border-left: 3px solid var(--route-color); color: var(--text-secondary); font-size: var(--font-xs); font-weight: 700;
+}
+.commute-log-stats { grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.commute-empty { border: 1px dashed var(--border-color); border-radius: var(--radius-sm); background: var(--bg-secondary);
+}
+.commute-empty.compact { padding: 12px; text-align: left;
+}
+.commute-color-btn { background: var(--swatch-color);
+}
+.commute-modal-overlay .commute-modal-title, .commute-modal-overlay .commute-modal-actions button { display: inline-flex; align-items: center; gap: 6px;
+}
+.commute-modal-overlay .commute-modal-actions button { justify-content: center; border: 1px solid var(--border-color); border-radius: var(--radius-sm); transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+.commute-modal-overlay .commute-modal-cancel { background: var(--bg-secondary); color: var(--text-secondary);
+}
+.commute-modal-overlay .commute-modal-save { background: color-mix(in srgb, var(--accent-primary) 14%, transparent); border-color: var(--accent-primary); color: var(--text-primary);
+}
+.commute-modal-overlay .commute-modal-actions button:hover { background: var(--bg-tertiary); border-color: var(--accent-primary);
+}
+@media (max-width: 700px) {
+.commute-topbar, .commute-panel-head, .commute-route-manage-card { align-items: stretch; flex-direction: column; grid-template-columns: 1fr;
+}
+.commute-anchors, .commute-today-grid, .commute-log-stats { grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.commute-log-row { grid-template-columns: 44px minmax(0, 1fr) auto;
+}
+.commute-log-row button { grid-column: span 1;
+}
+}
+@media (prefers-reduced-motion: reduce) {
+.commute-shell *, .commute-tag-prompt { animation: none; transition-duration: 0s;
+}
+}
+
+/* ===== filter-chips (from deleted pomodoro.css) ===== */
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-chip {
+      padding: 8px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      color: var(--text-secondary);
+      font-size: 15px;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .filter-chip:hover {
+      border-color: var(--accent-primary);
+    }
+
+    .filter-chip.active {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: white;
+    }
+
+    .filter-chip.본업.active { background: var(--accent-primary); border-color: var(--accent-primary); }
+    .filter-chip.부업.active { background: var(--cat-부업); border-color: var(--cat-부업); }
+    .filter-chip.일상.active { background: var(--accent-success); border-color: var(--accent-success); }
+    .filter-chip.가족.active { background: var(--accent-warning); border-color: var(--accent-warning); }
+
+
+/* ===== celebration effect (from deleted dashboard.css) ===== */
+    /* 축하 효과 */
+    .celebration-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(100vh) rotate(720deg);
+      }
+    }
+
+    .celebration-text {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
+      font-weight: bold;
+      color: var(--accent-celebration);
+      text-shadow: 0 0 20px color-mix(in srgb, var(--accent-celebration) 50%, transparent);
+      animation: celebration-pop 0.5s ease-out;
+      pointer-events: none;
+      z-index: 10000;
+    }
+
+    @keyframes celebration-pop {
+      0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.2);
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+    }

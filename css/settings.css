@@ -1,0 +1,253 @@
+/* settings.css - 알림 설정, 마감 알림, 검색 & 필터, 키보드 단축키 */
+    /* 알림 설정 섹션 */
+    .notification-section {
+      background: var(--bg-secondary);
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+    }
+
+    .notification-title {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .notification-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .notification-text {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    .notification-text.granted {
+      color: var(--accent-success);
+    }
+
+    .notification-text.denied {
+      color: var(--accent-danger);
+    }
+
+    .notification-btn {
+      padding: 10px 16px;
+      background: var(--accent-primary);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .notification-btn:hover {
+      background: var(--accent-primary-hover);
+    }
+
+    .notification-btn:disabled {
+      background: var(--bg-tertiary);
+      cursor: not-allowed;
+    }
+
+    .notification-btn.granted {
+      background: var(--accent-success);
+    }
+
+    .notification-btn.denied {
+      background: var(--accent-danger);
+      cursor: pointer;
+    }
+
+    .notification-btn.denied:hover {
+      background: var(--accent-danger-hover);
+    }
+
+    .notification-help {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: color-mix(in srgb, var(--accent-danger) 10%, transparent);
+      border-radius: 6px;
+    }
+
+    /* 마감 알림 드롭다운 (헤더) */
+    .notification-dropdown-wrapper {
+      position: relative;
+      display: inline-flex;
+    }
+    .notification-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      min-width: 240px;
+      box-shadow: 0 8px 24px var(--shadow-color);
+      z-index: 1000;
+    }
+    .notification-dropdown.show {
+      display: block;
+    }
+    .notification-dropdown .notification-title {
+      margin-bottom: 10px;
+    }
+    .header-btn .notif-dot {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid var(--bg-primary);
+    }
+
+    /* 검색 & 필터 스타일 */
+    .search-filter-section {
+      background: var(--bg-secondary);
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 40px 12px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: white;
+      font-size: 17px;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--text-muted);
+      border: none;
+      color: white;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 키보드 단축키 도움말 */
+    .shortcuts-help {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 15px;
+      z-index: 100;
+      display: none;
+      max-width: 280px;
+      box-shadow: 0 4px 20px var(--shadow-color);
+    }
+
+    .shortcuts-help.show {
+      display: block;
+    }
+
+    .shortcuts-help-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .shortcuts-help-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .shortcut-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .shortcut-item:last-child {
+      border-bottom: none;
+    }
+
+    .shortcut-key {
+      background: var(--bg-tertiary);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: var(--font-mono);
+      color: var(--accent-primary);
+    }
+
+    .shortcut-desc {
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .shortcuts-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      z-index: 99;
+    }
+
+    @media (min-width: 1024px) {
+      .shortcuts-toggle {
+        display: flex;
+      }
+    }
+

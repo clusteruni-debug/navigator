@@ -1,0 +1,175 @@
+/* work-modal.css - 본업 모달, 상태 그룹/옵션 (work.css에서 분리) */
+    /* 프로젝트 추가 모달 */
+    .work-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--overlay-heavy); /* 전역 modal-overlay와 동일 레이어 농도 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .work-modal.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .work-modal-content {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      width: 90%;
+      max-width: 400px;
+      transform: scale(0.9);
+      transition: transform 0.3s;
+    }
+
+    .work-modal.show .work-modal-content {
+      transform: scale(1);
+    }
+
+    .work-modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .work-modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .work-modal-actions button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .work-modal-actions .cancel {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .work-modal-actions .confirm {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .work-modal-field {
+      margin-bottom: 16px;
+    }
+
+    .work-modal-field-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .work-modal-field.half {
+      flex: 1;
+      min-width: 0;
+      margin-bottom: 0;
+    }
+
+    .work-modal-label {
+      display: block;
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .work-modal-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 16px;
+    }
+
+    .work-modal-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+
+    .work-modal-textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 16px;
+      min-height: 150px;
+      max-height: 400px;
+      resize: vertical;
+      white-space: pre-wrap;
+      font-family: inherit;
+      line-height: 1.6;
+    }
+
+    .work-modal-textarea:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+
+    /* 상태 선택 버튼 그룹 */
+    .work-status-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .work-status-option {
+      padding: 8px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      color: var(--text-secondary);
+      font-size: 15px;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .work-status-option:hover {
+      border-color: var(--accent-primary);
+    }
+
+    .work-status-option.selected {
+      background: var(--accent-primary);
+      border-color: transparent;
+      color: white;
+    }
+
+    .work-status-option.selected.in-progress {
+      background: var(--accent-primary);
+    }
+
+    .work-status-option.selected.completed {
+      background: var(--accent-success);
+    }
+
+    .work-status-option.selected.blocked {
+      background: var(--accent-danger);
+    }
+
+    /* Template pill (project creation modal) */
+    .template-pill {
+      text-align: left;
+    }
+
+    .template-pill span {
+      font-weight: 400;
+    }

@@ -1,0 +1,32 @@
+/* navigator.css - 메인 스타일 엔트리 */
+/* 원본은 navigator.css.bak 에 백업됨 */
+
+@import url('base.css');
+@import url('nav.css');
+@import url('profile.css');
+@import url('buttons.css');
+@import url('forms.css');
+@import url('header.css');
+@import url('tasks.css');
+@import url('modals.css');
+@import url('subtasks.css');
+@import url('focus.css');
+@import url('habits.css');
+@import url('life.css');
+@import url('work.css');
+@import url('work-project.css');
+@import url('work-tasks.css');
+@import url('work-modal.css');
+@import url('work-dashboard.css');
+@import url('rhythm.css');
+@import url('effects.css');
+@import url('settings.css');
+@import url('views.css');
+@import url('events.css');
+@import url('history.css');
+@import url('responsive.css');
+@import url('command-palette.css');
+@import url('typography-override.css');
+@import url('reflection.css');
+@import url('daily-loop.css');
+@import url('legacy-shared.css');

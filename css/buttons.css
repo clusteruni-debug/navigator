@@ -1,0 +1,136 @@
+/* buttons.css - 버튼 시스템 (tasks.css에서 분리) */
+    /* 버튼 시스템 - 통일된 스타일 */
+    .btn {
+      padding: var(--space-2) var(--space-3);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: var(--space-2);
+      transition: background var(--transition-fast), opacity var(--transition-fast);
+      user-select: none;
+      letter-spacing: -0.01em;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-primary-hover);
+    }
+
+    .btn-success {
+      background: var(--accent-success);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-success:hover {
+      background: var(--accent-success-hover);
+    }
+
+    .btn-warning {
+      background: var(--accent-warning);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-warning:hover {
+      background: var(--accent-warning-hover);
+    }
+
+    /* Disabled state global (P0 a11y 2026-05-24) — 5-agent audit Fix 5 */
+    button:disabled,
+    .btn:disabled,
+    .btn-small:disabled,
+    [role="button"][aria-disabled="true"] {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .btn-danger {
+      background: var(--accent-danger);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-danger:hover {
+      background: var(--accent-danger-hover);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border-color);
+    }
+
+    .btn-small {
+      padding: var(--space-1) 14px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      cursor: pointer;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      transition: background-color var(--transition-fast);
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      min-height: 44px;
+      min-width: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-small:hover {
+      background: var(--bg-hover);
+    }
+
+    .btn-small.delete {
+      background: var(--accent-danger);
+      color: white;
+    }
+
+    .btn-small.go {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .btn-small.complete {
+      background: var(--accent-success);
+      color: white;
+    }
+
+    .btn-small.uncomplete {
+      background: var(--accent-warning);
+      color: white;
+    }
+
+    .btn-small.edit {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .btn-small.copy {
+      background: var(--cat-부업);
+      color: white;
+    }
+
+    .btn-large {
+      padding: 16px 32px;
+      font-size: 18px;
+    }

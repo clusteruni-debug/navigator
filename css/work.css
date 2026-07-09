@@ -1,0 +1,744 @@
+/* work.css - 본업 컨테이너, 셀렉터, 탭, 헤더, 빠른 추가, 일반 작업, 뷰 탭 */
+    /* ========================================
+       본업 프로젝트 관리
+       ======================================== */
+    .work-projects-container {
+      padding: 16px;
+    }
+
+    /* 프로젝트 탭 네비게이션 */
+    .work-project-selector {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+    }
+
+    .work-project-selector-label {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .work-project-select {
+      flex: 1;
+      padding: 10px 14px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 16px;
+      cursor: pointer;
+      appearance: none;
+      /* --accent-primary (#667eea) 테마 간 동일 — select에서 ::after 미지원으로 background-image 유지 */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+
+    .work-project-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 20%, transparent);
+    }
+
+    .work-project-select optgroup {
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .work-project-select option {
+      padding: 8px;
+    }
+
+    .work-project-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .work-project-tab {
+      padding: 10px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .work-project-tab:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .work-project-tab.active {
+      background: var(--accent-primary);
+      border-color: transparent;
+      color: white;
+    }
+
+    .work-project-tab-add {
+      padding: 10px 16px;
+      background: transparent;
+      border: 1px dashed var(--border-color);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .work-project-tab-add:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    .work-projects-header {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    /* 프로젝트명 + 일정을 한 줄로 배치 */
+    .work-project-info-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .work-projects-title {
+      font-size: 18px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex-shrink: 1;
+    }
+
+    .work-section-title {
+      font: var(--text-title-2);
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      padding-left: 12px;
+      border-left: 3px solid var(--accent-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .work-section-title.clickable {
+      cursor: pointer;
+      padding: 8px 12px;
+      margin: -8px -12px 12px -12px;
+      border-radius: 8px;
+      border-left: 3px solid var(--text-muted);
+      transition: background 0.2s;
+    }
+
+    .work-section-title.clickable:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .work-section-toggle {
+      font-size: 14px;
+      color: var(--text-muted);
+      width: 12px;
+    }
+
+    .work-project-add-btn {
+      padding: 8px 16px;
+      background: var(--accent-primary);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .work-project-add-btn:hover {
+      background: var(--accent-primary-hover);
+    }
+
+    /* 본업 빠른 추가 */
+    .work-quick-add {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .work-quick-input {
+      flex: 1;
+      padding: 10px 14px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 16px;
+    }
+
+    .work-quick-input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .work-quick-btn {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    /* Owner 토글 버튼 */
+    .work-owner-toggle {
+      padding: 6px 10px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .work-owner-toggle.other {
+      background: var(--accent-danger-alpha);
+      border-color: color-mix(in srgb, var(--accent-danger) 40%, transparent);
+      color: var(--accent-danger);
+    }
+
+    /* 본업 일반 작업 */
+    .work-general-tasks {
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .work-general-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+
+    .work-general-item-wrapper {
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .work-general-item-wrapper:last-child {
+      border-bottom: none;
+    }
+
+    .work-general-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+    }
+
+    .work-general-subtasks {
+      padding: 8px 0 8px 32px;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .work-general-subtask {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      font-size: 15px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .work-general-subtask:hover {
+      background: var(--bg-secondary);
+    }
+
+    .work-general-subtask.completed {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    .work-general-subtask .subtask-check {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .work-general-subtask.completed .subtask-check {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+
+    .work-general-delete-btn {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s, background-color 0.2s, color 0.2s;
+    }
+
+    .work-general-item:hover .work-general-delete-btn,
+    .work-general-item:focus-within .work-general-delete-btn {
+      opacity: 1;
+    }
+    @media (hover: none) and (pointer: coarse) {
+      .work-general-item .work-general-delete-btn { opacity: 1; }
+    }
+
+    .work-general-delete-btn:hover {
+      background: var(--accent-danger-alpha);
+      color: var(--danger);
+    }
+
+    .work-general-edit-btn {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s, background-color 0.2s, color 0.2s;
+    }
+
+    .work-general-item:hover .work-general-edit-btn,
+    .work-general-item:focus-within .work-general-edit-btn {
+      opacity: 1;
+    }
+    @media (hover: none) and (pointer: coarse) {
+      .work-general-item .work-general-edit-btn { opacity: 1; }
+    }
+
+    .work-general-edit-btn:hover {
+      background: var(--accent-primary-alpha);
+      color: var(--accent-primary);
+    }
+
+    /* 모바일 touch override — Round 1 per-button @media blocks (line 333-335 + 361-363) cover this already; redundant combined block removed Round 2 */
+
+    .work-general-deadline {
+      font-size: var(--font-sm);
+      color: var(--accent-warning);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .work-general-item-title {
+      flex: 1;
+      font-size: 16px;
+      cursor: pointer;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .work-general-item-title:hover {
+      color: var(--accent-primary);
+    }
+
+    .work-general-more {
+      font-size: 14px;
+      color: var(--text-tertiary);
+      text-align: center;
+      padding-top: 8px;
+    }
+
+    /* 뷰 전환 탭 */
+    .work-view-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .work-view-tab {
+      padding: 8px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .work-view-tab.active {
+      background: var(--accent-primary-alpha);
+      color: var(--accent-primary);
+      border-color: color-mix(in srgb, var(--accent-primary) 30%, transparent);
+    }
+
+    /* ====================================
+       Compact 부하 게이지 (한 줄)
+       ==================================== */
+    .work-load-compact {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: var(--font-sm);
+      font-family: var(--font-body);
+    }
+    .work-load-compact-label {
+      color: var(--text-secondary);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .work-load-compact-bar {
+      flex: 1;
+      height: 4px;
+      background: var(--bg-tertiary);
+      border-radius: 2px;
+      overflow: hidden;
+      min-width: 60px;
+    }
+    .work-load-compact-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+    .work-load-compact-status {
+      font-weight: 600;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .work-load-compact-meta {
+      color: var(--text-muted);
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+      font-size: var(--font-xs);
+    }
+
+    /* ====================================
+       Compact "지금 집중" 위젯 (한 줄, 클릭으로 펼침)
+       ==================================== */
+    .work-focus-compact {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-left: 3px solid var(--accent-primary);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+      font-family: var(--font-body);
+    }
+    .work-focus-compact:hover {
+      background: var(--bg-tertiary);
+    }
+    .work-focus-compact-label {
+      font-size: var(--font-sm);
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .work-focus-compact-title {
+      font-size: 15px;
+      font-weight: 600;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .work-focus-compact-ctx {
+      font-size: var(--font-xs);
+      color: var(--text-muted);
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .work-focus-compact-btn {
+      padding: 4px 12px;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: var(--font-sm);
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+      min-height: var(--touch-target-min);
+      transition: opacity 0.2s;
+    }
+    .work-focus-compact-btn:hover {
+      opacity: 0.85;
+    }
+    @media (hover: none) and (pointer: coarse) {
+      .work-focus-compact { padding: 10px 12px; }
+      .work-focus-compact-btn { min-height: var(--touch-target-min); padding: 6px 14px; }
+    }
+
+    /* ====================================
+       진행중 카드 영역 (view tabs 위로 끌어올려진 메인 영역)
+       ==================================== */
+    .work-section-pinned {
+      margin-bottom: 14px;
+    }
+    .work-section-pinned .work-section-title {
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    /* ====================================
+       ★★★+ 평면 뷰 placeholder (다음 commit에서 활성화)
+       ==================================== */
+    .work-priority-placeholder {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg-tertiary);
+      border: 1px dashed var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: var(--font-sm);
+      color: var(--text-muted);
+    }
+    .work-priority-placeholder-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    /* ====================================
+       ★★★+ 평면 뷰 (cross-project 우선순위 모음)
+       ==================================== */
+    .work-priority-list {
+      margin-bottom: 14px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      font-family: var(--font-body);
+    }
+    .work-priority-list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .work-priority-list-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .work-priority-list-count {
+      font-size: var(--font-xs);
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .work-priority-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border-light);
+      transition: background-color 0.2s;
+    }
+    .work-priority-item:last-child { border-bottom: none; }
+    .work-priority-item:hover { background: var(--bg-tertiary); }
+    .work-priority-item-stars {
+      font-size: var(--font-xs);
+      color: var(--accent-warning);
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .work-priority-item-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .work-priority-item-ctx {
+      font-size: var(--font-xs);
+      color: var(--text-muted);
+      flex-shrink: 0;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .work-priority-item-deadline {
+      font-size: var(--font-xs);
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+    }
+    .work-priority-item-deadline.soon {
+      background: var(--accent-warning-alpha);
+      color: var(--accent-warning);
+    }
+    .work-priority-item-deadline.overdue {
+      background: var(--accent-danger-alpha);
+      color: var(--accent-danger);
+    }
+    .work-priority-more {
+      padding: 6px 14px;
+      text-align: center;
+      font-size: var(--font-xs);
+      color: var(--text-muted);
+      background: var(--bg-tertiary);
+      font-style: italic;
+    }
+
+    /* ====================================
+       Risk-alerts (stale + overdue)
+       ==================================== */
+    .work-risk-alerts {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+      font-family: var(--font-body);
+    }
+    .work-risk-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-left: 3px solid var(--accent-neutral);
+      border-radius: 8px;
+      font-size: var(--font-sm);
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .work-risk-item:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-primary);
+    }
+    .work-risk-item.warn { border-left-color: var(--accent-warning); }
+    .work-risk-item.danger { border-left-color: var(--accent-danger); }
+    .work-risk-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .work-risk-label {
+      font-weight: 600;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+    .work-risk-target {
+      flex: 1;
+      min-width: 0;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ====================================
+       진행중 카드 stale 메타
+       ==================================== */
+    .work-dashboard-stale {
+      font-size: var(--font-xs);
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .work-dashboard-stale.warn {
+      background: var(--accent-warning-alpha);
+      color: var(--accent-warning);
+    }
+    .work-dashboard-stale.danger {
+      background: var(--accent-danger-alpha);
+      color: var(--accent-danger);
+    }
+
+/* P0d focus-visible (a11y 2026-05-24) — .work-priority-item removed Round 2 (no matching JS markup) */
+
+    /* ====================================
+       타임라인(기록 탭) 카드 — work-timeline.js inline style 추출 (2026-06-10)
+       ==================================== */
+    .wt-card {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+    .wt-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .wt-card-name { font-size: 16px; font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+    .wt-card-dates { font-size: 14px; color: var(--text-muted); white-space: nowrap; }
+    .wt-card-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+    .wt-progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .wt-progress-track { flex: 1; height: 6px; background: color-mix(in srgb, var(--text-secondary) 14%, transparent); border-radius: 3px; overflow: hidden; }
+    .wt-progress-fill { height: 100%; background: var(--accent-primary); border-radius: 3px; }
+    .wt-progress-fill.complete { background: var(--accent-success); }
+    .wt-progress-pct { font-size: 13px; font-weight: 600; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .wt-card-meta { font-size: 13px; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+    .wt-card-meta .svg-icon { vertical-align: -2px; }
+    .wt-hold { color: var(--accent-danger); }
+    .wt-archive-head { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .wt-archive-card { background: var(--bg-tertiary); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; opacity: 0.7; }
+    .work-meta-collapse-icon { display: inline-flex; width: 14px; }

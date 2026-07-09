@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#667eea">
+  <!-- 보안 헤더 (X-Frame-Options는 HTTP 헤더 전용 — meta 태그 무효) -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23667eea' width='100' height='100' rx='20'/%3E%3Ctext x='50' y='68' font-size='50' text-anchor='middle' fill='white'%3E⚡%3C/text%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect fill='%23667eea' width='180' height='180' rx='36'/%3E%3Ctext x='90' y='122' font-size='90' text-anchor='middle' fill='white'%3E⚡%3C/text%3E%3C/svg%3E">
+  <title>Navigator - 생존형 할일 관리</title>
+
+  <!-- Pretendard 폰트 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getAuth, signInWithPopup, signOut, GoogleAuthProvider, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { initializeFirestore, persistentLocalCache, persistentSingleTabManager, doc, setDoc, getDoc, getDocFromServer, onSnapshot, runTransaction, waitForPendingWrites } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+    // Firebase 설정
+    // ⚠️ 보안 참고: Firebase API 키는 클라이언트 측에서 사용되도록 설계되었습니다.
+    // 실제 보안은 Firebase Console의 Firestore Security Rules에서 관리됩니다.
+    // 권장 보안 규칙 (Firebase Console > Firestore > Rules):
+    // rules_version = '2';
+    // service cloud.firestore {
+    //   match /databases/{database}/documents {
+    //     match /users/{userId} {
+    //       allow read, write: if request.auth != null && request.auth.uid == userId;
+    //     }
+    //   }
+    // }
+    const firebaseConfig = {
+      apiKey: "AIzaSyDryb8MH0Mwkh1yP8yPCjdTbEvjr97mmmE",
+      authDomain: "navigator-todo.firebaseapp.com",
+      projectId: "navigator-todo",
+      storageBucket: "navigator-todo.firebasestorage.app",
+      messagingSenderId: "1020977741609",
+      appId: "1:1020977741609:web:32ec5ad48329f80a3f0138"
+    };
+
+    // Firebase 초기화
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentSingleTabManager({ forceOwnership: true })
+      })
+    });
+    const provider = new GoogleAuthProvider();
+
+    // 전역 변수로 노출
+    window.firebaseAuth = auth;
+    window.firebaseDb = db;
+    window.firebaseProvider = provider;
+    window.firebaseSignIn = signInWithPopup;
+    window.firebaseSignOut = signOut;
+    window.firebaseDoc = doc;
+    window.firebaseSetDoc = setDoc;
+    window.firebaseGetDoc = getDoc;
+    window.firebaseGetDocFromServer = getDocFromServer;
+    window.firebaseRunTransaction = runTransaction;
+    window.firebaseOnSnapshot = onSnapshot;
+    window.firebaseWaitForPendingWrites = waitForPendingWrites;
+    window.firebaseOnAuthStateChanged = onAuthStateChanged;
+
+    // Firebase 준비 완료 이벤트
+    window.dispatchEvent(new Event('firebase-ready'));
+  </script>
+  <link rel="stylesheet" href="css/navigator.css">
+</head>
+<body>
+  <a href="#root" class="skip-link">본문으로 건너뛰기</a>
+  <div id="root" role="main"></div>
+
+  <!-- 완료 애니메이션 오버레이 -->
+  <div id="completion-overlay" class="completion-overlay">
+    <div class="completion-content">
+      <div class="completion-check">✓</div>
+      <div class="completion-text">완료!</div>
+      <div id="completion-streak" class="completion-streak"></div>
+      <div id="completion-task-title" class="completion-task-title"></div>
+    </div>
+  </div>
+
+  <!-- 파일 업로드용 히든 인풋 -->
+  <input type="file" id="file-import" class="hidden-input" accept=".json">
+
+  <!-- 실제 소요시간 입력 모달 -->
+  <div id="time-input-modal" class="time-input-modal">
+    <div class="time-input-header">
+      <span class="time-input-title">⏱️ 실제로 얼마나 걸렸나요?</span>
+      <button class="modal-close" onclick="closeTimeInputModal()">×</button>
+    </div>
+    <div class="time-input-options">
+      <button class="time-option-btn" onclick="saveActualTime(2)">2분</button>
+      <button class="time-option-btn" onclick="saveActualTime(5)">5분</button>
+      <button class="time-option-btn" onclick="saveActualTime(10)">10분</button>
+      <button class="time-option-btn" onclick="saveActualTime(15)">15분</button>
+      <button class="time-option-btn" onclick="saveActualTime(20)">20분</button>
+      <button class="time-option-btn" onclick="saveActualTime(30)">30분</button>
+      <button class="time-option-btn" onclick="saveActualTime(45)">45분</button>
+      <button class="time-option-btn" onclick="saveActualTime(60)">1시간</button>
+    </div>
+    <div class="time-input-custom">
+      <input type="number" id="custom-time-input" placeholder="직접 입력 (분)" min="1" max="480">
+      <button class="btn btn-primary" onclick="saveActualTime(parseInt(document.getElementById('custom-time-input').value))">저장</button>
+      <button class="btn btn-secondary" onclick="closeTimeInputModal()">건너뛰기</button>
+    </div>
+  </div>
+
+  <!-- 주간 리뷰 모달 -->
+  <div id="weekly-review-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content weekly-review-modal">
+      <div class="modal-header">
+        <h2 id="weekly-review-title">📊 이번 주 리뷰</h2>
+        <button class="modal-close" onclick="closeWeeklyReview()">×</button>
+      </div>
+      <div id="weekly-review-content" class="modal-body">
+        <!-- 동적으로 채워짐 -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeWeeklyReview()">나중에</button>
+        <button class="btn btn-primary" onclick="saveWeeklyPlan()">저장하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 본업 프로젝트 입력 모달 -->
+  <div id="work-input-modal" class="work-modal">
+    <div class="work-modal-content">
+      <div class="work-modal-title" id="work-modal-title">새 프로젝트</div>
+      <div id="work-modal-body">
+        <!-- 동적으로 채워짐 -->
+      </div>
+      <div class="work-modal-actions">
+        <button class="cancel" onclick="closeWorkModal()">취소</button>
+        <button class="confirm" onclick="confirmWorkModal()">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 빠른 수정 모달 (탭 이동 없이) -->
+  <div id="quick-edit-modal" class="work-modal">
+    <div class="work-modal-content" style="max-width: 400px;">
+      <div class="work-modal-title">✏️ 작업 수정</div>
+      <div id="quick-edit-body">
+        <!-- 동적으로 채워짐 -->
+      </div>
+      <div class="work-modal-actions">
+        <button class="cancel" onclick="closeQuickEditModal()">취소</button>
+        <button class="confirm" onclick="saveQuickEdit()">저장</button>
+      </div>
+      <div style="text-align: center; margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+        <button class="btn-small" onclick="openFullEdit()" style="background: var(--bg-tertiary); color: var(--text-secondary);">
+          📝 상세 편집
+        </button>
+        <button class="btn-small" onclick="openArticleEditor(appState.quickEditTaskId)" style="background: var(--bg-tertiary); color: var(--text-secondary);">
+          ✍️ 아티클 작성
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 키보드 단축키 도움말 (PC) -->
+  <button class="shortcuts-toggle" onclick="toggleShortcutsHelp()" title="단축키 도움말" aria-label="단축키 도움말">⌨️</button>
+  <div id="shortcuts-help" class="shortcuts-help">
+    <div class="shortcuts-help-title">
+      <span>⌨️ 키보드 단축키</span>
+      <button class="shortcuts-help-close" onclick="toggleShortcutsHelp()">×</button>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-desc">새 작업 추가</span>
+      <span class="shortcut-key">N</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-desc">검색</span>
+      <span class="shortcut-key">Ctrl+F</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-desc">첫 Task 완료</span>
+      <span class="shortcut-key">Ctrl+D</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-desc">액션 탭</span>
+      <span class="shortcut-key">1</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-desc">업무 탭</span>
+      <span class="shortcut-key">2</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-desc">이벤트 탭</span>
+      <span class="shortcut-key">3</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-desc">할일 탭</span>
+      <span class="shortcut-key">4</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-desc">히스토리 탭</span>
+      <span class="shortcut-key">5</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-desc">통근 탭</span>
+      <span class="shortcut-key">6</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-desc">셔틀 토글</span>
+      <span class="shortcut-key">S</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-desc">도움말</span>
+      <span class="shortcut-key">?</span>
+    </div>
+  </div>
+
+  <!-- 스크립트 로드 실패 감지 (capture phase — 리소스 에러 포착) -->
+  <script>
+  (function() {
+    var f = [];
+    window.addEventListener('error', function(e) {
+      if (e.target && e.target.tagName === 'SCRIPT' && e.target.src) {
+        f.push(e.target.src.split('/').pop());
+      }
+    }, true);
+    window.__failedScripts = f;
+  })();
+  </script>
+
+  <!-- JS 모듈 (로드 순서 중요) -->
+  <script src="js/utils.js"></script>
+  <script src="js/utils-data.js"></script>
+  <script src="js/utils-daily.js"></script>
+  <script src="js/state-types.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/daily-loop.js"></script>
+  <script src="js/firebase-merge.js"></script>
+  <script src="js/firebase-backup.js"></script>
+  <script src="js/firebase-sync.js"></script>
+  <script src="js/tasks.js"></script>
+  <script src="js/tasks-insights.js"></script>
+  <script src="js/tasks-history.js"></script>
+  <script src="js/tasks-history-crud.js"></script>
+  <script src="js/actions-adhd.js"></script>
+  <script src="js/actions-repeat.js"></script>
+  <script src="js/actions-complete.js"></script>
+  <script src="js/actions-add.js"></script>
+  <script src="js/actions-edit.js"></script>
+  <script src="js/actions-bulk.js"></script>
+  <script src="js/actions-ui.js"></script>
+  <script src="js/actions.js"></script>
+  <script src="js/ui-weekly.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/ui-data.js"></script>
+  <script src="js/ui-completion-log.js"></script>
+  <script src="js/ui-onboarding.js"></script>
+  <script src="js/render-forms.js"></script>
+  <script src="js/render-action.js"></script>
+  <script src="js/render-events-supabase.js"></script>
+  <script src="js/event-continuity.js"></script>
+  <script src="js/render-events.js"></script>
+  <script src="js/render-life.js"></script>
+  <script src="js/render-history.js"></script>
+  <script src="js/render-all.js"></script>
+  <script src="js/render-settings.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/globals.js"></script>
+  <script src="js/work-data.js"></script>
+  <script src="js/work-templates.js"></script>
+  <script src="js/work-ro-template.js"></script>
+  <script src="js/work-clipboard.js"></script>
+  <script src="js/work-analytics.js"></script>
+  <script src="js/work-reports.js"></script>
+  <script src="js/work-modal-show.js"></script>
+  <script src="js/work-modal.js"></script>
+  <script src="js/work-modal-reports.js"></script>
+  <script src="js/work-template-crud.js"></script>
+  <script src="js/work-project-crud.js"></script>
+  <script src="js/work-actions.js"></script>
+  <script src="js/work-forms.js"></script>
+  <script src="js/work-calendar.js"></script>
+  <script src="js/entries-model.js"></script>
+  <script src="js/ux-helpers.js"></script>
+  <script src="js/work-render-detail.js"></script>
+  <script src="js/work-render.js"></script>
+  <script src="js/work-timeline.js"></script>
+  <script src="js/work-toggles.js"></script>
+  <script src="js/work.js"></script>
+  <script src="js/pwa.js"></script>
+  <script src="js/commute.js"></script>
+  <script src="js/commute-render.js"></script>
+  <script src="js/rhythm-medication.js"></script>
+  <script src="js/rhythm-merge.js"></script>
+  <script src="js/rhythm-stats.js"></script>
+  <script src="js/rhythm-history.js"></script>
+  <script src="js/rhythm.js"></script>
+  <script src="js/command-palette.js"></script>
+  <script src="js/reflection.js"></script>
+  <script src="js/reflection-render.js"></script>
+  <script src="js/reflection-trigger.js"></script>
+  <script src="js/reflection-push.js"></script>
+  <script src="js/init.js"></script>
+
+  <!-- 스크립트 로드 실패 시 사용자 알림 배너 -->
+  <script>
+  if (window.__failedScripts && window.__failedScripts.length > 0) {
+    console.error('[APP] \uB85C\uB4DC \uC2E4\uD328:', window.__failedScripts.join(', '));
+    var b = document.createElement('div');
+    b.style.cssText = 'position:fixed;top:0;left:0;right:0;padding:12px 16px;background:#dc2626;color:#fff;font-size:14px;z-index:99999;text-align:center;font-family:system-ui,sans-serif;';
+    b.appendChild(document.createTextNode('\u26A0\uFE0F \uC77C\uBD80 \uAE30\uB2A5\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4 (' + window.__failedScripts.join(', ') + '). '));
+    var rb = document.createElement('button');
+    rb.textContent = '\uC0C8\uB85C\uACE0\uCE68';
+    rb.style.cssText = 'margin-left:8px;padding:4px 12px;background:#fff;color:#dc2626;border:none;border-radius:4px;cursor:pointer;font-weight:600;';
+    rb.onclick = function() { location.reload(); };
+    b.appendChild(rb);
+    var cb = document.createElement('button');
+    cb.textContent = '\u00D7';
+    cb.style.cssText = 'margin-left:8px;padding:2px 8px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:4px;cursor:pointer;font-size:16px;line-height:1;';
+    cb.onclick = function() { b.remove(); };
+    b.appendChild(cb);
+    document.body.prepend(b);
+  }
+  </script>
+</body>
+</html>

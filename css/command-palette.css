@@ -1,0 +1,161 @@
+/* command-palette.css - Cmd/Ctrl+K 커맨드 팔레트 */
+
+.cmd-palette-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--overlay-backdrop);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: min(20vh, 160px);
+  animation: cmd-backdrop-in 0.15s ease-out;
+}
+
+@keyframes cmd-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cmd-palette {
+  width: 560px;
+  max-width: calc(100vw - 32px);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 16px 64px var(--shadow-color);
+  overflow: hidden;
+  animation: cmd-palette-in 0.2s var(--ease-out-expo);
+}
+
+@keyframes cmd-palette-in {
+  from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.cmd-palette-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cmd-palette-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.cmd-palette-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 17px;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+}
+
+.cmd-palette-input::placeholder {
+  color: var(--text-muted);
+}
+
+.cmd-palette-esc {
+  font-size: var(--font-xs);
+  padding: 2px 6px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.cmd-palette-list {
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.cmd-palette-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.cmd-palette-item:hover,
+.cmd-palette-item.selected {
+  background: var(--accent-primary-alpha);
+}
+
+.cmd-palette-item.selected {
+  background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
+}
+
+.cmd-palette-item-icon {
+  font-size: 18px;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.cmd-palette-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cmd-palette-item-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.cmd-palette-item-desc {
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+}
+
+.cmd-palette-empty {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+/* 모바일: 전체 화면 팔레트 */
+@media (max-width: 767px) {
+  .cmd-palette-backdrop {
+    padding-top: 0;
+    align-items: stretch;
+  }
+
+  .cmd-palette {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cmd-palette-list {
+    flex: 1;
+    max-height: none;
+  }
+
+  .cmd-palette-input {
+    font-size: 16px;
+  }
+}

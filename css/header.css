@@ -1,0 +1,78 @@
+/* header.css - 헤더 액션, 날짜, 스트릭 스타일 (tasks.css에서 분리) */
+    /* 헤더 액션 버튼 */
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .header-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      font-size: 20px;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-btn:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .header-btn.active {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+
+    /* 셔틀 토글 버튼 */
+    .header-btn.shuttle-toggle {
+      width: auto;
+      padding: 0 12px;
+      border-radius: 20px;
+      font-size: 15px;
+      font-weight: 600;
+      gap: 4px;
+    }
+
+    .header-btn.shuttle-toggle.on {
+      background: color-mix(in srgb, var(--accent-success) 20%, transparent);
+      border-color: var(--accent-success);
+      color: var(--accent-success);
+    }
+
+    .header-btn.shuttle-toggle.off {
+      background: var(--accent-danger-alpha);
+      border-color: var(--accent-danger);
+      color: var(--accent-danger);
+    }
+
+    /* 헤더 날짜 */
+    .header-date {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .header-streak {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--cat-부업), var(--accent-danger));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: bold;
+      margin-left: 5px;
+    }
+
+    /* 스트릭 stat card */
+    .stat-card.streak {
+      background: color-mix(in srgb, var(--cat-부업) 10%, transparent);
+      border-color: color-mix(in srgb, var(--cat-부업) 30%, transparent);
+    }
+
+    .stat-best {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }

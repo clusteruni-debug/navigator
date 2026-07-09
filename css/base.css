@@ -1,0 +1,874 @@
+/* base.css - 리셋, 다크/라이트 테마 변수, 타이포그래피, 반응형 레이아웃 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 다크 테마 (기본) - Slate Professional (Linear 스타일 네이비 톤) */
+    :root {
+
+      /* ═══════════════════════════════════════════
+         Primitive — raw hex values, mode-agnostic
+         ═══════════════════════════════════════════ */
+
+      /* 8pt 스페이싱 그리드 */
+      --space-1: 8px;
+      --space-2: 16px;
+      --space-3: 24px;
+      --space-4: 32px;
+      --space-5: 40px;
+      --space-6: 48px;
+
+      /* Semantic spacing — section / card / tab-shell 일관 */
+      --space-card: 12px;
+      --space-section: 16px;
+      --space-tab-shell: 14px;
+
+      /* Slate palette */
+      --bg-primary: #0F172A;
+      --bg-secondary: #1E293B;
+      --bg-tertiary: #334155;
+      --bg-card: #273349;
+      --text-primary: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-muted: #94A3B8;  /* WCAG AA 4.5:1+ on bg-primary (prev #7C8FA1 = 4.2:1 fail) */
+      --border-color: rgba(148, 163, 184, 0.18);
+      --border-light: rgba(148, 163, 184, 0.15);
+
+      /* 카테고리 색상 — work-group (본업/부업/자기계발) cool tones, life-group (일상/가족/이벤트) warm tones */
+      --cat-본업: #667eea;
+      --cat-부업: #f093fb;
+      --cat-자기계발: #a78bfa;
+      --cat-일상: #48bb78;
+      --cat-가족: #f6ad55;
+      --cat-이벤트: #06b6d4;
+      --cat-미분류: #fb7185;
+
+      /* 차트 팔레트 (프로젝트 구분용) */
+      --chart-cyan: #22d3ee;
+      --chart-lavender: #a78bfa;
+      --chart-tangerine: #fb923c;
+      --chart-blue: #4299e1;
+      --chart-teal: #38b2ac;
+      --chart-pink: #ed64a6;
+
+      /* Radius */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+
+      /* 타이포그래피 */
+      --font-body: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      /* 한글 fallback을 generic 앞에: 숫자는 mono(SF Mono/Consolas), 한글은 시스템 폰트 대신 Pretendard */
+      --font-mono: 'SF Mono', 'Monaco', Consolas, 'Pretendard Variable', 'Pretendard', monospace;
+      --font-xs: 14px;    /* 최소 가독 크기 */
+      --font-sm: 15px;    /* 보조 라벨 */
+      --font-base: 16px;  /* 기본 본문 */
+      --font-md: 17px;    /* 강조 본문 */
+      --font-lg: 18px;    /* 소제목 */
+      --font-xl: 20px;    /* 제목 */
+      --font-2xl: 24px;   /* 큰 제목 */
+      --font-3xl: 32px;   /* hero */
+      --font-h1: 28px;    /* h1 semantic */
+      --font-h2: 22px;    /* h2 semantic */
+      --font-h3: 18px;    /* h3 semantic */
+
+      /* Typography roles — font shorthand: weight size/line-height font-family. letter-spacing dropped from shorthand (CSS spec: font-family required, letter-spacing not part of shorthand). */
+      --text-display:    700 32px/1.2 var(--font-body);     /* hero clock, big stat */
+      --text-title-1:    700 24px/1.3 var(--font-body);     /* page title, NextAction hero */
+      --text-title-2:    700 18px/1.4 var(--font-body);     /* section title, card heading */
+      --text-body-emph:  600 17px/1.5 var(--font-body);     /* task title, primary list-item */
+      --text-body:       400 16px/1.6 var(--font-body);     /* default body */
+      --text-label:      500 14px/1.4 var(--font-body);     /* form label, chip label */
+      --text-caption:    500 13px/1.35 var(--font-body);    /* meta, deadline chip text */
+      --text-micro:      600 12px/1.3 var(--font-body);     /* badge, count chip, UPPERCASE */
+
+      /* Weight utility tokens */
+      --weight-bold:    700;
+      --weight-emph:    600;
+      --weight-medium:  500;
+      --weight-regular: 400;
+
+      /* Touch target minimum (iOS HIG 44pt / Material 48dp) */
+      --touch-target-min: 44px;
+
+      /* Spacing semantic alias (existing numeric --space-1..6 kept) */
+      --space-0: 4px;
+      --space-7: 64px;
+      --space-tight:       var(--space-1);
+      --space-comfortable: var(--space-3);
+      --space-loose:       var(--space-5);
+
+      /* ═══════════════════════════════════════════
+         Role tokens — action prominence
+         (design system canary — 본업 tab first, then mechanical map to other tabs)
+         NOTE: --cta-add-* tokens hardwire var(--cat-본업) intentionally for the
+         본업 canary. Round 2 roll-out (할일/일상/이벤트/오늘) will introduce
+         per-group modifier classes (e.g. .work-add-cta.group-life {
+         --cta-add-bg: var(--cat-일상); }) so the same primitive serves other
+         groups without rewriting the base token.
+         ═══════════════════════════════════════════ */
+
+      /* L1 — Primary fill CTA (top-level + empty state) */
+      --cta-add-bg: var(--cat-본업);
+      --cta-add-bg-hover: color-mix(in srgb, var(--cat-본업) 82%, white);
+      --cta-add-text: white;
+      --cta-add-padding: 9px 14px;
+      --cta-add-radius: var(--radius-sm);
+      --cta-add-font-weight: 700;
+
+      /* L2 — Ghost dashed CTA (tab nav 안, e.g. + 새 단계) */
+      --cta-add-ghost-bg: transparent;
+      --cta-add-ghost-bg-hover: color-mix(in srgb, var(--cat-본업) 10%, transparent);
+      --cta-add-ghost-border: 1.5px dashed var(--cat-본업);
+      --cta-add-ghost-text: var(--cat-본업);
+
+      /* L3 — Outline solid CTA (list 끝, e.g. + 새 중분류) */
+      --cta-add-outline-bg: transparent;
+      --cta-add-outline-bg-hover: color-mix(in srgb, var(--cat-본업) 8%, transparent);
+      --cta-add-outline-border: 1px solid var(--cat-본업);
+      --cta-add-outline-text: var(--cat-본업);
+      --cta-add-outline-padding: 7px 12px;
+      --cta-add-outline-font-weight: 600;
+
+      /* L4 — Subtle inline CTA (deepest, e.g. + 새 항목 in body) */
+      --cta-add-subtle-bg: transparent;
+      --cta-add-subtle-bg-hover: color-mix(in srgb, var(--cat-본업) 6%, transparent);
+      --cta-add-subtle-border: 1px dashed var(--border-color);
+      --cta-add-subtle-border-hover: 1px dashed var(--cat-본업);
+      --cta-add-subtle-text: var(--text-muted);
+      --cta-add-subtle-text-hover: var(--cat-본업);
+      --cta-add-subtle-padding: 6px 10px;
+      --cta-add-subtle-font-weight: 500;
+      --cta-add-subtle-font-size: 13px;
+
+      /* Generic icon action — edit / rename / copy / date / move (muted, no add intent) */
+      --action-icon-bg: transparent;
+      --action-icon-bg-hover: var(--bg-tertiary);
+      --action-icon-color: var(--text-muted);
+      --action-icon-color-hover: var(--text-primary);
+
+      /* Destructive — delete (hover-surface, sparse use) */
+      --action-destructive-color: var(--cat-미분류);
+
+      /* Depth containment — data hierarchy mapped to visual layer
+         (project=L1 page, stage=L2 card, subcategory=L3 card, task=L4 row) */
+      --depth-2-bg: var(--bg-secondary);
+      --depth-2-padding: var(--space-2);
+      --depth-2-radius: var(--radius-md);
+      --depth-2-border: 1px solid var(--border-light);
+
+      --depth-3-bg: var(--bg-card);
+      --depth-3-padding: var(--space-1);
+      --depth-3-radius: var(--radius-sm);
+      --depth-3-border: 1px solid var(--border-light);
+
+      --depth-4-bg: transparent;
+      --depth-4-padding: 8px 12px;
+
+      /* ═══════════════════════════════════════════
+         Semantic — purpose aliases
+         ═══════════════════════════════════════════ */
+
+      /* 액센트 색상 */
+      --accent-primary: #667eea;
+      --accent-primary-hover: #5a6fd6;
+      --accent-success: #48bb78;
+      --accent-success-hover: #38a169;
+      --accent-warning: #f6ad55;
+      --accent-warning-hover: #ed8936;
+      --accent-danger: #f5576c;
+      --accent-danger-hover: #e04460;
+      --accent-purple: #764ba2;
+      --accent-neutral: #a0a0a0;
+      --accent-amber: #EAB308;
+      --pulse-warning: #ff9500;
+      --accent-celebration: #ffd93d;
+
+      /* Alpha variants */
+      --accent-primary-alpha: rgba(102, 126, 234, 0.15);
+      --accent-success-alpha: rgba(72, 187, 120, 0.15);
+      --accent-success-alpha-30: rgba(72, 187, 120, 0.3);
+      --accent-success-alpha-50: rgba(72, 187, 120, 0.5);
+      --accent-success-alpha-70: rgba(72, 187, 120, 0.7);
+      --accent-warning-alpha: rgba(246, 173, 85, 0.15);
+      --accent-danger-alpha: rgba(245, 87, 108, 0.15);
+
+      /* 그림자 */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.25);
+      --shadow-color: rgba(0, 0, 0, 0.4);
+
+      /* 오버레이 */
+      --overlay-backdrop: rgba(0, 0, 0, 0.7);
+      --overlay-heavy: rgba(0, 0, 0, 0.85);
+
+      /* 트랜지션 */
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+      /* ═══════════════════════════════════════════
+         Component — feature-specific tokens
+         ═══════════════════════════════════════════ */
+
+      /* 레이아웃 토큰 */
+      --sidebar-width: 220px;
+      --task-gap: 8px;
+      --focus-ring: 0 0 0 3px var(--accent-primary-alpha);
+
+      /* ═══════════════════════════════════════════
+         Legacy aliases — brownfield compat
+         ═══════════════════════════════════════════ */
+      --primary: var(--accent-primary);
+      --success: var(--accent-success);
+      --danger: var(--accent-danger);
+      --accent-green: var(--accent-success);
+      --accent-blue: var(--accent-primary);
+      --text-tertiary: var(--text-muted);
+      --bg-hover: var(--bg-tertiary);
+      --border-primary: var(--border-color);
+      --accent-color: var(--accent-primary);
+      --accent-pink: var(--cat-부업);
+    }
+
+    /* 라이트 테마 */
+    body[data-theme="light"] {
+      --bg-primary: #f8f9fa;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f3f4;
+      --bg-card: #ffffff;
+      --text-primary: #1a1a1a;
+      --text-secondary: #5f6368;
+      --text-muted: #636870;
+      --border-color: #d0d4d8;
+      --border-light: #dde0e3;
+      --shadow-color: rgba(0, 0, 0, 0.15);
+      --overlay-backdrop: rgba(0, 0, 0, 0.5);
+      --overlay-heavy: rgba(0, 0, 0, 0.7);
+      --accent-neutral: #8e8e93;
+      --accent-success-alpha-30: rgba(72, 187, 120, 0.35);
+      --accent-success-alpha-50: rgba(72, 187, 120, 0.55);
+      --accent-success-alpha-70: rgba(72, 187, 120, 0.75);
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 16px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
+      line-height: 1.6;
+      letter-spacing: -0.02em;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* 폼 요소는 UA 기본 폰트를 강제함 — body 상속 복원 (버튼 한글만 시스템 폰트로 떨어지는 문제 차단) */
+    button, input, select, textarea {
+      font: inherit;
+      letter-spacing: inherit;
+    }
+
+    /* 키보드 포커스 링 — 모든 인터랙티브 요소 (WCAG 2.4.7) */
+    button:focus-visible,
+    [role="button"]:focus-visible,
+    a:focus-visible,
+    .tab-btn:focus-visible,
+    .btn:focus-visible,
+    .btn-small:focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+    }
+
+    /* 동작 감소 선호 — WCAG 2.3.3, 전정장애/ADHD 사용자 배려 */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    .app {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-bottom: 100px;
+    }
+
+    /* PC 레이아웃 (1024px 이상) — 폰트 토큰 전반 확대 (live user feedback 2026-05-22) */
+    @media (min-width: 1024px) {
+      :root {
+        --font-xs: 15px;
+        --font-sm: 16px;
+        --font-base: 17px;
+        --font-md: 18px;
+        --font-lg: 20px;
+        --font-xl: 24px;
+
+        /* Typography role PC override (modular ~1.25) + +1-4px font boost per user 2026-05-23. font-family required for valid shorthand. */
+        --text-display:    700 44px/1.2 var(--font-body);
+        --text-title-1:    700 32px/1.3 var(--font-body);
+        --text-title-2:    700 22px/1.4 var(--font-body);
+        --text-body-emph:  600 20px/1.5 var(--font-body);
+        --text-body:       400 18px/1.6 var(--font-body);
+        --text-label:      500 16px/1.4 var(--font-body);
+        --text-caption:    500 15px/1.35 var(--font-body);
+        --text-micro:      600 14px/1.3 var(--font-body);
+      }
+
+      body {
+        font-size: 17px;
+      }
+
+      .app {
+        padding: 30px 40px;
+        max-width: calc(1600px - var(--sidebar-width));
+        margin-left: var(--sidebar-width);
+        zoom: 1.075;  /* PC visible boost — uniform +7.5% (down-tuned from 1.15 per user 2026-05-23) */
+      }
+
+      /* 사이드바 스타일은 nav.css에 정의 */
+
+      .pc-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr 380px;
+        gap: 24px;
+        align-items: start;
+      }
+
+      .pc-column-left {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .pc-column-center {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .pc-column-right {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        position: sticky;
+        top: 30px;
+      }
+
+      /* 4번째 컬럼: 기본 숨김, 4K에서만 표시 */
+      .pc-column-tasklist {
+        display: none;
+      }
+
+      .shuttle-status {
+        padding: 24px;
+      }
+
+      .next-action {
+        padding: 35px;
+      }
+
+      .task-title {
+        font-size: 32px;
+      }
+
+      .quick-add-input {
+        padding: 18px;
+        font-size: 17px;
+      }
+
+      .task-item {
+        padding: 18px;
+      }
+
+      .task-item:hover {
+        border-color: var(--border-color);
+      }
+
+      .stat-card {
+        padding: 20px;
+      }
+
+      .stat-value {
+        font-size: 32px;
+      }
+    }
+
+    /* 와이드 사이드바 (1440px+): 3패널 레이아웃 + 본문 font scale up */
+    @media (min-width: 1440px) {
+      :root {
+        --sidebar-width: 260px;
+      }
+
+      body {
+        font-size: 18px;
+      }
+    }
+
+    /* 대형 모니터 (1920px 이상) */
+    @media (min-width: 1920px) {
+      .app {
+        max-width: calc(1800px - var(--sidebar-width));
+        padding: 36px 60px;
+      }
+
+      body {
+        font-size: 19px;
+      }
+
+      .header h1 {
+        font-size: 48px;
+      }
+
+      .pc-layout {
+        grid-template-columns: 1fr 1fr 420px;
+        gap: 30px;
+      }
+
+      .next-action {
+        padding: 40px;
+      }
+
+      .task-title {
+        font-size: 36px;
+      }
+
+      .quick-add-input {
+        padding: 20px;
+        font-size: 18px;
+      }
+
+      .task-item {
+        padding: 20px;
+      }
+
+      .stat-card {
+        padding: 24px;
+      }
+
+      .stat-value {
+        font-size: 36px;
+      }
+
+      .tab-btn {
+        padding: 16px 32px;
+        font-size: 16px;
+      }
+
+      .modal-content {
+        max-width: 600px;
+      }
+
+      .form-input, .form-select {
+        padding: 16px 18px;
+        font-size: 16px;
+      }
+
+      .quick-template-btn,
+      .quick-filter-btn {
+        padding: 10px 18px;
+        font-size: 16px;
+      }
+
+      .work-project-name {
+        font-size: 18px;
+      }
+
+      .work-subcategory-title {
+        font-size: 16px;
+      }
+
+      .event-card {
+        font-size: 17px;
+      }
+
+      .revenue-card {
+        padding: 20px;
+      }
+
+      .toast {
+        font-size: 17px;
+      }
+    }
+
+    /* 초대형 모니터 / 4K (2560px 이상) */
+    @media (min-width: 2560px) {
+      .app {
+        max-width: calc(2400px - var(--sidebar-width));
+        padding: 48px 80px;
+      }
+
+      body {
+        font-size: 20px;
+        line-height: 1.7;
+      }
+
+      .header h1 {
+        font-size: 58px;
+      }
+
+      .pc-layout {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 40px;
+      }
+
+      /* 4K 3열: 오늘의 나 | 할 일 | 집중 도구 */
+      .pc-column-tasklist {
+        display: none;
+      }
+
+      .next-action {
+        padding: 48px;
+        border-radius: 20px;
+      }
+
+      .task-title {
+        font-size: 42px;
+      }
+
+      .quick-add-input {
+        padding: 24px;
+        font-size: 20px;
+        border-radius: 14px;
+      }
+
+      .quick-add-simple .quick-add-btn {
+        padding: 12px 20px;
+        font-size: 22px;
+      }
+
+      .task-item {
+        padding: 24px;
+        border-radius: 14px;
+        margin-bottom: 14px;
+      }
+
+      .stat-card {
+        padding: 28px;
+        border-radius: 16px;
+      }
+
+      .stat-value {
+        font-size: 42px;
+      }
+
+      .stat-label {
+        font-size: 17px;
+      }
+
+      .tab-nav {
+        gap: 20px;
+      }
+
+      .tab-btn {
+        padding: 18px 40px;
+        font-size: 18px;
+        border-radius: 14px;
+      }
+
+      .modal-content {
+        max-width: 720px;
+        border-radius: 24px;
+        padding: 32px;
+      }
+
+      .form-label {
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+
+      .form-input, .form-select {
+        padding: 18px 20px;
+        font-size: 18px;
+        border-radius: 12px;
+      }
+
+      .quick-template-btn,
+      .quick-filter-btn {
+        padding: 12px 22px;
+        font-size: 16px;
+        border-radius: 24px;
+      }
+
+      .section-header,
+      .quick-filter-title {
+        font-size: 16px;
+      }
+
+      .shuttle-status {
+        padding: 28px;
+        border-radius: 16px;
+      }
+
+      .task-item-mini {
+        padding: 12px 16px;
+        font-size: 16px;
+      }
+
+      .other-tasks-header {
+        padding: 14px 16px;
+        font-size: 16px;
+      }
+
+      .search-input {
+        padding: 14px 18px;
+        font-size: 16px;
+      }
+
+      /* 본업 프로젝트 카드 */
+      .work-project-card {
+        border-radius: 16px;
+      }
+
+      .work-project-card-header {
+        padding: 20px 24px;
+      }
+
+      .work-project-name {
+        font-size: 20px;
+      }
+
+      .work-subcategory {
+        padding: 16px;
+        border-radius: 12px;
+      }
+
+      .work-subcategory-title {
+        font-size: 17px;
+      }
+
+      .work-task-item {
+        padding: 12px 16px;
+        font-size: 17px;
+      }
+
+      /* 이벤트 카드 */
+      .event-card {
+        padding: 14px 18px;
+        border-radius: 12px;
+        font-size: 16px;
+      }
+
+      /* 수익 카드 */
+      .revenue-card {
+        padding: 24px;
+        border-radius: 16px;
+      }
+
+      /* 캘린더 */
+      .calendar-day {
+        border-radius: 12px;
+        font-size: 16px;
+      }
+
+      /* 라이프 리듬 */
+      .rhythm-btn {
+        padding: 12px 20px;
+        font-size: 17px;
+        border-radius: 12px;
+      }
+
+      /* 토스트 알림 */
+      .toast {
+        padding: 16px 24px;
+        font-size: 16px;
+        border-radius: 14px;
+      }
+    }
+
+    /* 4K 네이티브 (3200px 이상, 스케일링 100~125%) */
+    @media (min-width: 3200px) {
+      html {
+        zoom: 1.4;
+      }
+    }
+
+    /* 태블릿 레이아웃 (768px - 1023px) */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .app {
+        max-width: 720px;
+        padding: 25px;
+        margin-left: 0; /* 사이드바 없음 */
+      }
+
+      .stats {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .tablet-two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+    }
+
+    /* 모바일 (767px 이하) - 컬럼 재배치: Next Action 최상단 */
+    @media (max-width: 767px) {
+      .app {
+        max-width: 600px;
+        padding: 15px;
+        margin-left: 0; /* 사이드바 없음 */
+      }
+
+      .tab-nav::before {
+        display: none; /* 사이드바 로고 숨김 */
+      }
+
+      .pc-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .pc-column-right,
+      .pc-column-left,
+      .pc-column-center {
+        width: 100%;
+      }
+      .pc-column-right {
+        order: -1;  /* Next Action + 포모도로를 최상단으로 */
+      }
+      .pc-column-left {
+        order: 0;
+      }
+      .pc-column-center {
+        order: 1;
+      }
+
+      /* 모바일: "전체 목록"은 "다른 작업" mini 목록과 중복 → 숨김 */
+      .task-list-full {
+        display: none;
+      }
+
+      /* 모바일: 탭 네비게이션 축소 (6개 버튼 + 더보기 대응) */
+      .tab-nav {
+        gap: 2px;
+        padding: 4px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .tab-nav::-webkit-scrollbar { display: none; }
+      .tab-btn {
+        padding: 10px 8px;
+        font-size: var(--font-sm);
+        min-height: var(--touch-target-min);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .tab-btn svg {
+        display: none;
+      }
+
+      /* 모바일: 더보기 드롭다운이 화면 밖으로 잘리지 않도록 */
+      .more-menu {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: calc(100vw - 32px);
+      }
+
+      /* 모바일: input 포커스 시 iOS 자동 줌 방지 (16px 이상 필요) */
+      input, textarea, select {
+        font-size: 16px !important;
+      }
+
+      /* 모바일: 섹션 간 여백 확보 */
+      .pc-layout {
+        gap: 12px;
+      }
+    }
+
+/* ============================================================
+   P1 primitive — anchor-row (Option B 5-agent design audit 2026-05-24)
+   Consolidates 7 classes → 1 primitive:
+     .action-anchors .anchor / .anchor-widget / .life-anchor /
+     .commute-anchor / .events-summary-item / .reflection-stat /
+     .history-metric
+   See PLAN-NAVIGATOR-DESIGN-OPTB-PRIMITIVE-20260524-01.md M1
+   ============================================================ */
+.tab-anchor-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.tab-anchor {
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.tab-anchor:hover {
+  border-color: var(--accent-primary);
+}
+
+.tab-anchor:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.tab-anchor-label {
+  display: block;
+  color: var(--text-muted);
+  font: var(--text-micro);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab-anchor-value {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-0);
+  margin-top: 3px;
+  color: var(--text-primary);
+  font: var(--text-title-2);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Tone modifiers */
+.tab-anchor.urgent {
+  background: color-mix(in srgb, var(--accent-danger) 8%, var(--bg-tertiary));
+  border-color: color-mix(in srgb, var(--accent-danger) 24%, var(--border-light));
+}
+
+.tab-anchor.warn {
+  background: color-mix(in srgb, var(--accent-warning) 8%, var(--bg-tertiary));
+  border-color: color-mix(in srgb, var(--accent-warning) 24%, var(--border-light));
+}
+
+.tab-anchor.success {
+  background: color-mix(in srgb, var(--accent-success) 8%, var(--bg-tertiary));
+  border-color: color-mix(in srgb, var(--accent-success) 24%, var(--border-light));
+}
+
+.tab-anchor.celebration {
+  background: color-mix(in srgb, var(--accent-celebration) 8%, var(--bg-tertiary));
+  border-color: color-mix(in srgb, var(--accent-celebration) 24%, var(--border-light));
+}
+
+.tab-anchor.active {
+  background: color-mix(in srgb, var(--accent-primary) 12%, var(--bg-tertiary));
+  border-color: var(--accent-primary);
+}
+

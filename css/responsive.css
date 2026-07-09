@@ -1,0 +1,762 @@
+/* responsive.css - 모바일 최적화, 접근성, 감속 모션, 게이미피케이션, 스케줄 */
+    /* ============================================
+       설정 모달 스타일
+       ============================================ */
+
+    .settings-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      font-size: 20px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .settings-btn:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .settings-modal {
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .settings-section {
+      margin-bottom: 24px;
+    }
+
+    .settings-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .settings-section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .settings-row:last-child {
+      border-bottom: none;
+    }
+
+    .settings-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .settings-label-icon {
+      font-size: 20px;
+    }
+
+    .settings-label-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .settings-label-title {
+      font-weight: 500;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .settings-label-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      font-weight: 400;
+    }
+
+    .settings-input {
+      width: 150px;
+      padding: 10px 16px;
+      padding-right: 36px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 16px;
+      text-align: center;
+      font-family: inherit;
+      font-weight: 500;
+      color-scheme: dark;
+      position: relative;
+    }
+
+    .settings-input::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(1.5);
+      cursor: pointer;
+      padding: 6px;
+      margin-left: 4px;
+      opacity: 0.9;
+      width: 20px;
+      height: 20px;
+      position: absolute;
+      right: 8px;
+    }
+
+    .settings-input::-webkit-calendar-picker-indicator:hover {
+      opacity: 1;
+    }
+
+    /* Firefox 시간 입력 */
+    .settings-input::-moz-focus-inner {
+      border: 0;
+    }
+
+    .settings-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+
+    /* 라이트 모드 시간 입력 */
+    [data-theme="light"] .settings-input {
+      color-scheme: light;
+    }
+
+    [data-theme="light"] .settings-input::-webkit-calendar-picker-indicator {
+      filter: none;
+      opacity: 0.7;
+    }
+
+    [data-theme="light"] .settings-input::-webkit-calendar-picker-indicator:hover {
+      opacity: 1;
+    }
+
+    .settings-time-preview {
+      margin-top: 20px;
+      padding: 15px;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .settings-time-preview-title {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .settings-time-preview-timeline {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .timeline-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .timeline-icon {
+      font-size: 20px;
+    }
+
+    .timeline-time {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .timeline-arrow {
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    /* ============================================
+       일일 목표 진행률 스타일
+       ============================================ */
+
+    .daily-goal-section {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+    }
+
+    .daily-goal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .daily-goal-title {
+      font-size: 16px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .daily-goal-count {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    .daily-goal-count strong {
+      color: var(--accent-primary);
+      font-size: 18px;
+    }
+
+    .daily-goal-progress {
+      height: 12px;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .daily-goal-fill {
+      height: 100%;
+      background: var(--accent-primary);
+      border-radius: 6px;
+      transition: width 0.5s ease;
+    }
+
+    .daily-goal-fill.complete {
+      background: var(--accent-success);
+    }
+
+    .daily-goal-fill.over {
+      background: var(--accent-warning);
+    }
+
+    .daily-goal-message {
+      text-align: center;
+      font-size: 16px;
+      color: var(--text-secondary);
+      padding: 10px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+    }
+
+    .daily-goal-message.success {
+      background: var(--accent-success-alpha);
+      color: var(--accent-success);
+    }
+
+    .daily-goal-message.over {
+      background: var(--accent-warning-alpha);
+      color: var(--accent-warning);
+    }
+
+    /* 일일 목표 (게이미피케이션 버전) */
+    .daily-goal-compact {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .daily-goal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .daily-goal-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .daily-goal-emoji {
+      font-size: 20px;
+    }
+
+    .daily-goal-text {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    .daily-goal-text strong {
+      color: var(--accent-primary);
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .daily-goal-percentage {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent-primary);
+    }
+
+    .daily-goal-percentage.complete {
+      color: var(--accent-success);
+    }
+
+    .daily-goal-track {
+      position: relative;
+      height: 24px;
+      background: var(--bg-primary);
+      border-radius: 12px;
+      overflow: visible;
+      margin-bottom: 8px;
+    }
+
+    .daily-goal-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      border-radius: 12px;
+      transition: width 0.5s ease;
+    }
+
+    .daily-goal-bar-fill {
+      height: 100%;
+      background: var(--accent-primary);
+      border-radius: 12px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .daily-goal-bar-fill.complete {
+      background: var(--accent-success);
+    }
+
+    .daily-goal-runner {
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      filter: drop-shadow(0 2px 4px var(--shadow-color));
+      /* persistent looping bounce removed (workspace rule: no persistent looping animation;
+         also reduces constant motion that distracts ADHD focus). Runner sits static at progress edge. */
+    }
+
+    .daily-goal-finish {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+    }
+
+    .daily-goal-message {
+      font-size: 14px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    .daily-goal-message.positive {
+      color: var(--accent-success);
+    }
+
+    .daily-goal-message.encourage {
+      color: var(--accent-primary);
+    }
+
+    /* 주간 통계 그래프 */
+    .weekly-chart {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      height: 120px;
+      padding: 10px 0;
+      margin-top: 15px;
+    }
+
+    .weekly-chart-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .weekly-chart-fill {
+      width: 30px;
+      background: var(--accent-primary);
+      border-radius: 4px 4px 0 0;
+      min-height: var(--touch-target-min);
+      transition: height 0.3s ease;
+    }
+
+    .weekly-chart-fill.today {
+      background: var(--accent-success);
+    }
+
+    .weekly-chart-fill.empty {
+      background: var(--bg-tertiary);
+    }
+
+    .weekly-chart-label {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .weekly-chart-label.today {
+      color: var(--accent-success);
+      font-weight: bold;
+    }
+
+    .weekly-chart-value {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* 목표 설정 인풋 */
+    .settings-input-number {
+      width: 80px;
+      padding: 10px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 18px;
+      text-align: center;
+      font-family: inherit;
+    }
+
+    .settings-input-number:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+
+    /* ============================================
+       템플릿 스타일
+       ============================================ */
+
+    .templates-section {
+      margin-top: 10px;
+    }
+
+    .templates-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 15px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .templates-toggle:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    .templates-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border-radius: 10px;
+    }
+
+    .template-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .template-chip:hover {
+      border-color: var(--accent-primary);
+      background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+    }
+
+    .template-chip-icon {
+      font-size: 16px;
+    }
+
+    .template-chip-delete {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 50%;
+      margin-left: 4px;
+    }
+
+    .template-chip-delete:hover {
+      background: color-mix(in srgb, var(--accent-danger) 20%, transparent);
+      color: var(--accent-danger);
+    }
+
+    .template-add-btn {
+      padding: 8px 12px;
+      background: transparent;
+      border: 1px dashed var(--border-color);
+      border-radius: 20px;
+      color: var(--text-muted);
+      font-size: 15px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .template-add-btn:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    .template-empty {
+      color: var(--text-muted);
+      font-size: 15px;
+      text-align: center;
+      padding: 10px;
+    }
+
+    /* ============================================
+       스와이프 힌트 & UX 개선
+       ============================================ */
+
+    .swipe-hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      padding: 12px;
+      margin-bottom: 15px;
+      background: var(--accent-primary-alpha);
+      border: 1px dashed color-mix(in srgb, var(--accent-primary) 30%, transparent);
+      border-radius: 12px;
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .swipe-hint-icon {
+      font-size: 20px;
+    }
+
+    .swipe-hint-text {
+      line-height: 1.4;
+    }
+
+    .swipe-hint-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .swipe-hint-close:hover {
+      background: var(--border-light);
+    }
+
+    /* 저장 표시 */
+    .save-indicator {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 16px;
+      background: var(--accent-success);
+      color: white;
+      border-radius: 8px;
+      font-size: 15px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 1000;
+    }
+
+    .save-indicator.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 동기부여 메시지 스타일 */
+    .motivation-message {
+      text-align: center;
+      padding: 20px;
+      background: var(--accent-success-alpha);
+      border-radius: 12px;
+      margin: 10px 0;
+    }
+
+    .motivation-icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+
+    .motivation-text {
+      font-size: 16px;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .motivation-sub {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    /* ============================================
+       통근 트래커 스타일
+       ============================================ */
+    .commute-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .commute-title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+    .commute-sub-tabs { display: flex; gap: 4px; background: var(--bg-secondary); border-radius: 12px; padding: 3px; margin-bottom: 16px; }
+    .commute-sub-tab { flex: 1; padding: 8px 12px; border: none; background: transparent; border-radius: 10px; font-size: 15px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: background-color 0.2s, color 0.2s, box-shadow 0.2s; min-height: 44px; }
+    .commute-sub-tab.active { background: var(--accent-primary); color: white; box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-primary) 30%, transparent); }
+    .commute-route-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .commute-route-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg-card); border-radius: 14px; border: 2px solid transparent; cursor: pointer; transition: border-color 0.2s, background-color 0.2s; min-height: 44px; }
+    .commute-route-card:hover { border-color: var(--accent-primary); }
+    .commute-route-card.selected { border-color: var(--accent-primary); background: color-mix(in srgb, var(--accent-primary) 8%, transparent); }
+    .commute-route-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .commute-route-info { flex: 1; min-width: 0; }
+    .commute-route-name { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+    .commute-route-desc { font-size: 14px; color: var(--text-secondary); margin-top: 2px; }
+    .commute-route-time { font-size: 15px; color: var(--text-muted); font-weight: 500; }
+    .commute-route-actions { display: flex; gap: 4px; }
+    .commute-route-action-btn { width: 32px; height: 32px; border: none; background: var(--bg-secondary); border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+    .commute-route-action-btn:hover { background: var(--bg-hover); }
+    .commute-time-display { background: var(--bg-card); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .commute-time-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+    .commute-time-row + .commute-time-row { border-top: 1px solid var(--border-color); }
+    .commute-time-label { font-size: 16px; color: var(--text-secondary); }
+    .commute-time-value { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+    .commute-time-value.empty { color: var(--text-muted); font-weight: 400; }
+    .commute-duration-badge { display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px; border-radius: 20px; font-size: 17px; font-weight: 700; margin-top: 8px; }
+    .commute-duration-badge.good { background: var(--accent-success-alpha); color: var(--accent-success); }
+    .commute-duration-badge.normal { background: color-mix(in srgb, var(--accent-warning-hover) 15%, transparent); color: var(--accent-warning-hover); }
+    .commute-duration-badge.bad { background: var(--accent-danger-alpha); color: var(--accent-danger); }
+    .commute-recommend-card { background: var(--accent-primary-alpha); border-radius: 16px; padding: 18px; margin-bottom: 16px; }
+    .commute-recommend-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+    .commute-recommend-time { font-size: 28px; font-weight: 700; color: var(--accent-primary); }
+    .commute-recommend-detail { font-size: 14px; color: var(--text-secondary); margin-top: 6px; }
+    .commute-recommend-confidence { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 14px; font-weight: 600; margin-top: 6px; }
+    .commute-recommend-confidence.high { background: var(--accent-success-alpha); color: var(--accent-success); }
+    .commute-recommend-confidence.medium { background: color-mix(in srgb, var(--accent-warning-hover) 15%, transparent); color: var(--accent-warning-hover); }
+    .commute-recommend-confidence.low { background: color-mix(in srgb, var(--text-secondary) 15%, transparent); color: var(--text-secondary); }
+    .commute-recent-summary { background: var(--bg-card); border-radius: 14px; padding: 16px; margin-bottom: 16px; }
+    .commute-recent-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px; }
+    .commute-recent-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 15px; }
+    .commute-recent-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .commute-recent-name { flex: 1; color: var(--text-primary); font-weight: 500; }
+    .commute-recent-avg { color: var(--text-secondary); }
+    .commute-recent-detail-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; font-size: 15px; border-bottom: 1px solid var(--border-color); }
+    .commute-recent-detail-row:last-of-type { border-bottom: none; }
+    .commute-recent-day { width: 70px; font-weight: 500; color: var(--text-secondary); font-size: 14px; flex-shrink: 0; }
+    .commute-recent-times { flex: 1; font-family: var(--font-mono); font-size: 14px; color: var(--text-primary); }
+    .commute-recent-duration { font-weight: 600; color: var(--primary); white-space: nowrap; }
+    .commute-recent-avg-summary { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); font-size: 15px; font-weight: 600; color: var(--text-primary); text-align: center; }
+    .commute-history-list { display: flex; flex-direction: column; gap: 12px; }
+    .commute-history-day { background: var(--bg-card); border-radius: 12px; padding: 12px; }
+    .commute-history-date { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
+    .commute-history-trip { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 14px; }
+    .commute-history-trip + .commute-history-trip { border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 4px; }
+    .commute-history-dir { font-weight: 500; width: 50px; flex-shrink: 0; }
+    .commute-history-route { font-weight: 600; width: 80px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .commute-history-times { flex: 1; font-family: var(--font-mono); color: var(--text-secondary); }
+    .commute-history-dur { font-weight: 600; color: var(--primary); white-space: nowrap; }
+    .commute-history-edit-btn { background: none; border: none; cursor: pointer; font-size: 14px; padding: 2px 4px; opacity: 0.6; transition: opacity 0.15s; flex-shrink: 0; }
+    .commute-history-edit-btn:hover { opacity: 1; }
+    .commute-date-nav { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; }
+    .commute-date-nav-btn { background: var(--bg-secondary); border: none; border-radius: 8px; padding: 6px 12px; font-size: 15px; font-weight: 600; color: var(--text-secondary); cursor: pointer; min-height: var(--touch-target-min); }
+    .commute-date-nav-btn:hover:not(:disabled) { background: var(--bg-hover); color: var(--text-primary); }
+    .commute-date-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .commute-date-nav-btn.today-btn { background: var(--accent-primary); color: white; font-size: var(--font-sm); padding: 4px 10px; }
+    .commute-date-nav-label { font-size: 16px; font-weight: 700; color: var(--text-primary); min-width: 80px; text-align: center; }
+    .commute-date-nav-label.past { color: var(--text-secondary); }
+    .commute-history-add-row { display: flex; gap: 8px; margin-top: 6px; }
+    .commute-history-add-btn { background: var(--bg-secondary); border: 1px dashed var(--border-primary); border-radius: 8px; padding: 4px 12px; font-size: var(--font-sm); color: var(--text-secondary); cursor: pointer; }
+    .commute-history-add-btn:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--accent-primary); }
+    .commute-stats-card { background: var(--bg-card); border-radius: 16px; padding: 18px; margin-bottom: 12px; }
+    .commute-stats-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .commute-stats-route-name { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+    .commute-stats-count { font-size: 14px; color: var(--text-muted); padding: 2px 8px; background: var(--bg-secondary); border-radius: 10px; }
+    .commute-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .commute-stat-item { text-align: center; padding: 10px 6px; background: var(--bg-secondary); border-radius: 10px; }
+    .commute-stat-value { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+    .commute-stat-label { font-size: 14px; color: var(--text-secondary); margin-top: 2px; }
+    .commute-freq-bar-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .commute-freq-bar-label { width: 80px; font-size: 14px; font-weight: 500; color: var(--text-secondary); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .commute-freq-bar-track { flex: 1; height: 20px; background: var(--bg-secondary); border-radius: 10px; overflow: hidden; }
+    .commute-freq-bar-fill { height: 100%; border-radius: 10px; transition: width 0.4s ease; min-width: var(--touch-target-min); }
+    .commute-freq-bar-count { width: 40px; font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .commute-weekday-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+    .commute-weekday-item { padding: 8px 2px; background: var(--bg-secondary); border-radius: 8px; }
+    .commute-weekday-label { font-size: 14px; color: var(--text-muted); font-weight: 600; }
+    .commute-weekday-value { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
+    .commute-weekday-count { font-size: 14px; color: var(--text-muted); }
+    .commute-best-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 14px; font-weight: 700; background: var(--accent-success-alpha); color: var(--accent-success); margin-left: 8px; }
+    .commute-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--overlay-backdrop); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .commute-modal { background: var(--bg-primary); border-radius: 20px; padding: 24px; max-width: 400px; width: 100%; max-height: 80vh; overflow-y: auto; }
+    .commute-modal-title { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }
+    .commute-modal-field { margin-bottom: 14px; }
+    .commute-modal-label { font-size: 15px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block; }
+    .commute-modal-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-card); color: var(--text-primary); font-size: 16px; box-sizing: border-box; }
+    .commute-modal-input:focus { outline: none; border-color: var(--accent-primary); }
+    .commute-modal-select { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-card); color: var(--text-primary); font-size: 16px; box-sizing: border-box; }
+    .commute-color-options { display: flex; gap: 8px; flex-wrap: wrap; }
+    .commute-color-btn { width: 32px; height: 32px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: border-color 0.15s; }
+    .commute-color-btn:hover { border-color: var(--text-secondary); }
+    .commute-color-btn.selected { border-color: var(--text-primary); }
+    .commute-modal-actions { display: flex; gap: 8px; margin-top: 18px; }
+    .commute-modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; min-height: 44px; }
+    .commute-modal-cancel { background: var(--bg-secondary); color: var(--text-secondary); }
+    .commute-modal-save { background: var(--accent-primary); color: white; }
+    .commute-tag-prompt { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--bg-card); border-radius: 16px; padding: 16px 20px; box-shadow: 0 8px 32px var(--shadow-color); z-index: 999; max-width: 360px; width: calc(100% - 40px); animation: commuteSlideUp 0.3s ease; }
+    .commute-tag-prompt-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px; }
+    .commute-tag-prompt-routes { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .commute-tag-prompt-btn { padding: 8px 14px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); font-size: 15px; font-weight: 500; cursor: pointer; min-height: var(--touch-target-min); transition: border-color 0.15s, background-color 0.15s; }
+    .commute-tag-prompt-btn:hover { border-color: var(--accent-primary); background: color-mix(in srgb, var(--accent-primary) 8%, transparent); }
+    .commute-tag-prompt-later { font-size: 14px; color: var(--text-muted); cursor: pointer; text-align: center; }
+    .commute-empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+    .commute-empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .commute-empty-text { font-size: 16px; margin-bottom: 16px; }
+    .commute-add-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: var(--accent-primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; min-height: 44px; }
+    .commute-conditions-row { display: flex; gap: 6px; margin-top: 8px; }
+    .commute-condition-btn { padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); font-size: 15px; cursor: pointer; min-height: var(--touch-target-min); transition: border-color 0.15s, background-color 0.15s, color 0.15s; }
+    .commute-condition-btn.selected { border-color: var(--accent-primary); background: color-mix(in srgb, var(--accent-primary) 10%, transparent); color: var(--accent-primary); font-weight: 600; }
+    @keyframes commuteSlideUp { from { transform: translateX(-50%) translateY(20px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+    /* SVG 아이콘 시스템 */
+    .svg-icon { display: inline-block; vertical-align: -0.15em; flex-shrink: 0; }
+    /* 접근성: 스킵 네비게이션 */
+    .skip-link { position: absolute; top: -50px; left: 0; background: var(--accent-primary); color: white; padding: 10px 20px; z-index: 10000; font-size: 16px; font-weight: 600; border-radius: 0 0 8px 0; transition: top 0.2s; text-decoration: none; }
+    .skip-link:focus { top: 0; outline: 2px solid white; }
+    /* 접근성: 스크린 리더 전용 */
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+

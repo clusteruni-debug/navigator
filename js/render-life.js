@@ -1,0 +1,861 @@
+// ============================================
+// 렌더링 - 일상 탭
+// ============================================
+
+const LIFE_RHYTHM_ITEMS = [
+  { key: 'wakeUp', label: '기상', icon: 'sun' },
+  { key: 'homeDepart', label: '집에서 출발', icon: 'arrow-right' },
+  { key: 'workArrive', label: '출근', icon: 'briefcase' },
+  { key: 'workDepart', label: '퇴근', icon: 'clock' },
+  { key: 'homeArrive', label: '집 도착', icon: 'home' },
+  { key: 'sleep', label: '취침', icon: 'moon' }
+];
+
+function _lifeIcon(name, size = 16, className = 'life-svg-icon') {
+  if (typeof _renderActionIcon === 'function') {
+    const icon = _renderActionIcon(name, size, className);
+    if (icon) return icon;
+  }
+  if (typeof svgIcon === 'function') return svgIcon(name, size);
+  return '';
+}
+
+function _getTodayLifeRhythm() {
+  const today = getLogicalDate();
+  const lifeRhythm = appState.lifeRhythm || {};
+  const todayBlock = lifeRhythm.today || {};
+  const fallback = {
+    date: today,
+    wakeUp: null,
+    homeDepart: null,
+    workArrive: null,
+    workDepart: null,
+    homeArrive: null,
+    sleep: null,
+    medications: {}
+  };
+  return todayBlock.date === today ? Object.assign({}, fallback, todayBlock) : fallback;
+}
+
+function _getLifeRhythmItems() {
+  const rhythm = _getTodayLifeRhythm();
+  return LIFE_RHYTHM_ITEMS.map(item => Object.assign({}, item, { value: rhythm[item.key] || null }));
+}
+
+function _getLifeMedicationRecords(todayRhythm) {
+  if (typeof _getActionMedicationRecords === 'function') return _getActionMedicationRecords(todayRhythm);
+  return Object.assign({}, (todayRhythm && todayRhythm.medications) || {});
+}
+
+function _getLifeMedicationSummary() {
+  const slots = (typeof getMedicationSlots === 'function') ? getMedicationSlots() : [];
+  const todayRhythm = _getTodayLifeRhythm();
+  const records = _getLifeMedicationRecords(todayRhythm);
+  const withIndex = slots.map((slot, idx) => ({ slot: slot, idx: idx }));
+  const visible = withIndex.filter(item => item && item.slot);
+  const taken = visible.filter(item => !!records[item.slot.id]).length;
+  return {
+    records: records,
+    required: visible.filter(item => !!item.slot.required),
+    optional: visible.filter(item => !item.slot.required),
+    taken: taken,
+    total: visible.length
+  };
+}
+
+function _lifeShortMedicationLabel(slot) {
+  if (typeof _getMedicationSlotShortLabel === 'function') return _getMedicationSlotShortLabel(slot);
+  const match = String(slot.label || '').match(/\(([^)]+)\)/);
+  return match ? match[1] : String(slot.label || slot.id || '슬롯');
+}
+
+function _getLifeHabitTitles() {
+  const titles = new Set();
+  const tasks = appState.tasks || [];
+  tasks.forEach(task => {
+    if (task.category === '일상' && task.repeatType && task.repeatType !== 'none' && task.title) {
+      titles.add(task.title);
+    }
+  });
+  Object.keys(appState.habitStreaks || {}).forEach(title => {
+    if (!title) return;
+    const linkedTask = tasks.find(task => task.title === title);
+    // strict: linkedTask 있고 카테고리 '일상' 일 때만 추가 (옛 ghost streak entry 차단 — task 삭제됐는데 streak key 잔존 case)
+    if (linkedTask && linkedTask.category === '일상') titles.add(title);
+  });
+  if (titles.size === 0 && typeof getRecurringHabits === 'function') {
+    // strict: getRecurringHabits()도 category 무필터로 본업/부업/이벤트 title 반환 가능 — 일상 task 만 cross-check
+    getRecurringHabits().forEach(title => {
+      if (!title) return;
+      const linkedTask = tasks.find(task => task.title === title);
+      if (linkedTask && linkedTask.category === '일상') titles.add(title);
+    });
+  }
+  return Array.from(titles).sort();
+}
+
+function _isLifeHabitDoneToday(title) {
+  const logicalToday = getLogicalDate();
+  const localToday = getLocalDateStr();
+  const entries = []
+    .concat((appState.completionLog || {})[logicalToday] || [])
+    .concat(localToday === logicalToday ? [] : ((appState.completionLog || {})[localToday] || []));
+  if (entries.some(entry => entry && entry.t === title && (!entry.c || entry.c === '일상'))) return true;
+  return (appState.tasks || []).some(task => {
+    if (task.category !== '일상' || task.title !== title || !task.completed || !task.completedAt) return false;
+    const completedAt = new Date(task.completedAt);
+    return !isNaN(completedAt.getTime()) && getLogicalDate(completedAt) === logicalToday;
+  });
+}
+
+function _findHabitTaskId(title) {
+  const tasks = appState.tasks || [];
+  const match = tasks.find(task =>
+    task.category === '일상' &&
+    task.title === title &&
+    task.repeatType &&
+    task.repeatType !== 'none'
+  );
+  return match ? match.id : null;
+}
+
+function _getLifeHabitRows() {
+  return _getLifeHabitTitles().slice(0, 6).map(title => {
+    const done = _isLifeHabitDoneToday(title);
+    const streak = (appState.habitStreaks && appState.habitStreaks[title] && appState.habitStreaks[title].current) || (done ? 1 : 0);
+    const taskId = _findHabitTaskId(title);
+    return { title: title, done: done, streak: streak, taskId: taskId };
+  });
+}
+
+function toggleLifeHabit(title) {
+  const logicalToday = getLogicalDate();
+  const matching = (appState.tasks || []).filter(task =>
+    task.category === '일상' &&
+    task.title === title &&
+    task.repeatType &&
+    task.repeatType !== 'none'
+  );
+  const completedToday = matching.find(task => {
+    if (!task.completed || !task.completedAt) return false;
+    const completedAt = new Date(task.completedAt);
+    return !isNaN(completedAt.getTime()) && getLogicalDate(completedAt) === logicalToday;
+  });
+  if (completedToday) {
+    uncompleteTask(completedToday.id);
+    return;
+  }
+  const pending = matching.find(task => !task.completed);
+  if (pending) {
+    completeTask(pending.id);
+    return;
+  }
+  showToast('오늘 체크할 반복 습관 task가 없습니다', 'info');
+}
+window.toggleLifeHabit = toggleLifeHabit;
+
+function setLifeTaskFilter(filter) {
+  appState.lifeTaskFilter = ['all', 'life', 'family', 'event', 'selfdev'].includes(filter) ? filter : 'all';
+  renderStatic();
+}
+window.setLifeTaskFilter = setLifeTaskFilter;
+
+function setLifeMainSubTab(view) {
+  appState.lifeMainSubTab = ['habits', 'tasks'].includes(view) ? view : 'habits';
+  renderStatic();
+}
+window.setLifeMainSubTab = setLifeMainSubTab;
+
+function _renderLifeMainSubTabNav(activeSubTab) {
+  const tabs = [
+    { id: 'habits', label: '습관', icon: 'target', desc: '리듬·약·습관·결심' },
+    { id: 'tasks', label: '할일', icon: 'list', desc: '일상·가족·이벤트 task' }
+  ];
+  return `
+    <div class="life-subtab-nav" role="tablist" aria-label="일상 탭 sub-view 선택">
+      ${tabs.map(tab => `
+        <button class="life-subtab-btn ${activeSubTab === tab.id ? 'active' : ''}"
+                type="button"
+                role="tab"
+                aria-selected="${activeSubTab === tab.id}"
+                onclick="setLifeMainSubTab('${tab.id}')"
+                data-life-subtab="${tab.id}">
+          ${_lifeIcon(tab.icon, 14)}
+          <span class="life-subtab-label">${escapeHtml(tab.label)}</span>
+          <span class="life-subtab-desc">${escapeHtml(tab.desc)}</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function _isLifeTaskDueToday(task, todayEnd) {
+  if (task.completed) return false;
+  if (task.deadline && task.repeatType && task.repeatType !== 'none') {
+    const deadline = new Date(task.deadline);
+    if (!isNaN(deadline.getTime()) && deadline > todayEnd) return false;
+  }
+  return true;
+}
+
+function _sortLifeTasks(a, b) {
+  if (a.deadline && b.deadline) return new Date(a.deadline) - new Date(b.deadline);
+  if (a.deadline) return -1;
+  if (b.deadline) return 1;
+  if (a.category !== b.category) return a.category === '일상' ? -1 : 1;
+  return String(a.title || '').localeCompare(String(b.title || ''), 'ko');
+}
+
+function _getLifeCompletedToday(lifeTasks) {
+  const logicalToday = getLogicalDate();
+  return lifeTasks.filter(task => {
+    if (!task.completed || !task.completedAt) return false;
+    const completedAt = new Date(task.completedAt);
+    return !isNaN(completedAt.getTime()) && getLogicalDate(completedAt) === logicalToday;
+  });
+}
+
+function _lifeTaskUrgencyClass(task) {
+  if (!task.deadline || typeof getUrgencyLevel !== 'function') return '';
+  const urgency = getUrgencyLevel(task);
+  // 반복 연체는 칩 텍스트('오늘')와 톤 일치 — 빨간 '오늘' 칩/행 방지 (오늘 탭 preview와 동일 규칙)
+  const isRepeat = task.repeatType && task.repeatType !== 'none';
+  if (isRepeat && urgency === 'expired') return 'warn';
+  if (urgency === 'expired' || urgency === 'urgent') return 'urgent';
+  if (urgency === 'warning') return 'warn';
+  return '';
+}
+
+function _renderLifeDeadlineChip(task) {
+  if (!task.deadline || typeof formatDeadline !== 'function') {
+    if (task.repeatType && task.repeatType !== 'none') return '<span class="life-dday-chip none">오늘</span>';
+    return '';
+  }
+  const text = formatDeadline(task.deadline, task.repeatType && task.repeatType !== 'none');
+  if (!text) return '';
+  const urgency = _lifeTaskUrgencyClass(task);
+  return `<span class="life-dday-chip ${urgency || 'none'}">${escapeHtml(text)}</span>`;
+}
+
+function _renderLifeSectionHeading(label, countText, iconName, labelId) {
+  const idAttr = labelId ? ` id="${escapeAttr(labelId)}"` : '';
+  return `
+    <div class="life-section-heading">
+      <span${idAttr} class="life-section-label">${iconName ? _lifeIcon(iconName, 14) : ''}${escapeHtml(label)}</span>
+      ${countText ? `<span class="life-section-count">${escapeHtml(countText)}</span>` : ''}
+    </div>
+  `;
+}
+
+function _renderLifeRhythmSection(rhythmItems) {
+  const recordedCount = rhythmItems.filter(item => item.value).length;
+  return `
+    <section class="life-section-card life-rhythm-primary" aria-labelledby="life-rhythm-title">
+      <div class="life-section-heading split">
+        <span id="life-rhythm-title" class="life-section-label">${_lifeIcon('clock', 14)}라이프 리듬</span>
+        <div class="life-section-heading-actions">
+          <span class="life-section-count">${recordedCount} / ${rhythmItems.length}</span>
+          <button class="life-soft-action" type="button" onclick="appState.activeLifeSubView='rhythmHistory'; renderStatic();" aria-label="리듬 히스토리 보기">
+            ${_lifeIcon('calendar', 13)}
+            <span>히스토리</span>
+          </button>
+        </div>
+      </div>
+      <div class="rhythm-strip life-rhythm-strip" role="group" aria-labelledby="life-rhythm-title">
+        ${rhythmItems.map(item => `
+          <button class="rhythm-btn life-rhythm-strip-btn ${item.value ? 'recorded' : ''}"
+                  type="button"
+                  onclick="handleLifeRhythmClick('${escapeAttr(item.key)}', ${item.value ? 'true' : 'false'}, event)"
+                  aria-label="${escapeAttr(item.label + (item.value ? ' ' + item.value + ' 기록됨' : ' 기록'))}">
+            ${_lifeIcon(item.icon, 18)}
+            <span class="rhythm-label">${escapeHtml(item.label)}</span>
+            <span class="rhythm-time">${escapeHtml(item.value || '--:--')}</span>
+          </button>
+        `).join('')}
+      </div>
+    </section>
+  `;
+}
+
+function _renderLifeMedicationSlot(item, records, requiredGroup) {
+  const slot = item.slot;
+  const slotIdx = item.idx;
+  const taken = !!records[slot.id];
+  const value = records[slot.id];
+  const timeText = taken && typeof value === 'string' ? value : (taken ? '완료' : '--:--');
+  const shortLabel = _lifeShortMedicationLabel(slot);
+  const stateLabel = taken ? '기록됨, 탭하여 수정' : '탭하여 기록';
+  const editLabel = (slot.label || shortLabel) + ' 슬롯 편집';
+  const deleteLabel = (slot.label || shortLabel) + ' 슬롯 삭제';
+  return `
+    <button class="life-med-slot ${taken ? 'taken' : ''} ${requiredGroup ? 'required' : 'optional'}"
+            type="button"
+            onclick="handleMedicationClick('${escapeAttr(slot.id)}', ${taken ? 'true' : 'false'}, event)"
+            aria-label="${escapeAttr((slot.label || shortLabel) + ' ' + timeText + ' ' + stateLabel)}">
+      <span class="life-med-slot-main">
+        ${_lifeIcon(taken ? 'check' : 'circle', 14)}
+        <span class="life-med-slot-label">${escapeHtml(shortLabel)}</span>
+      </span>
+      <span class="life-med-slot-time">${escapeHtml(timeText)}</span>
+      <span class="life-med-slot-actions">
+        <span class="life-med-slot-action life-med-slot-edit"
+              role="button"
+              tabindex="0"
+              title="슬롯 편집"
+              aria-label="${escapeAttr(editLabel)}"
+              onclick="event.stopPropagation(); editMedicationSlot(${slotIdx})"
+              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();editMedicationSlot(${slotIdx})}">
+          ${_lifeIcon('edit', 11)}
+        </span>
+        <span class="life-med-slot-action life-med-slot-delete"
+              role="button"
+              tabindex="0"
+              title="슬롯 삭제"
+              aria-label="${escapeAttr(deleteLabel)}"
+              onclick="event.stopPropagation(); deleteMedicationSlot(${slotIdx})"
+              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();deleteMedicationSlot(${slotIdx})}">
+          ${_lifeIcon('x', 11)}
+        </span>
+      </span>
+    </button>
+  `;
+}
+
+function _renderLifeMedicationGroup(label, iconName, items, records, requiredGroup) {
+  const taken = items.filter(item => !!records[item.slot.id]).length;
+  const total = items.length;
+  const complete = total > 0 && taken === total;
+  const slotsClass = total >= 3 ? 'life-med-slots three' : 'life-med-slots';
+  return `
+    <div class="life-med-group ${requiredGroup ? 'required' : 'optional'}">
+      <div class="life-med-group-header">
+        <span class="life-med-group-label ${requiredGroup ? 'required' : ''}">
+          ${_lifeIcon(iconName, 14)}
+          <span>${escapeHtml(label)}</span>
+          ${requiredGroup ? '<span class="life-med-tag">필수</span>' : ''}
+        </span>
+        <span class="life-med-count ${complete ? 'complete' : ''}">${taken} / ${total}</span>
+      </div>
+      ${total > 0 ? `
+        <div class="${slotsClass}">
+          ${items.map(item => _renderLifeMedicationSlot(item, records, requiredGroup)).join('')}
+        </div>
+      ` : '<div class="life-empty-inline">등록된 슬롯이 없습니다</div>'}
+    </div>
+  `;
+}
+
+function _renderLifeMedicationSection(summary) {
+  return `
+    <section class="life-section-card life-medication-section" aria-labelledby="life-medication-title">
+      ${_renderLifeSectionHeading('약 복용', summary.taken + ' / ' + summary.total, 'pill', 'life-medication-title')}
+      <div class="life-med-grid">
+        ${_renderLifeMedicationGroup('ADHD 약', 'pill', summary.required, summary.records, true)}
+        ${_renderLifeMedicationGroup('영양제', 'leaf', summary.optional, summary.records, false)}
+      </div>
+      <div class="life-section-foot">
+        <button class="life-soft-action" type="button" onclick="addMedicationSlot()" aria-label="복약 또는 영양제 슬롯 추가">
+          ${_lifeIcon('plus', 13)}
+          <span>슬롯 추가</span>
+        </button>
+      </div>
+    </section>
+  `;
+}
+
+function _renderLifeHabitSection(habitRows) {
+  const doneCount = habitRows.filter(row => row.done).length;
+  return `
+    <section class="life-section-card life-habit-section" aria-labelledby="life-habit-title">
+      ${_renderLifeSectionHeading('오늘 습관', doneCount + ' / ' + habitRows.length, 'target', 'life-habit-title')}
+      <div class="life-habit-criteria-caption" role="note">
+        카테고리 '일상' + 반복 task 상위 6개 자동 표시. 항목 변경은 원본 task 편집 ✎
+      </div>
+      ${habitRows.length > 0 ? `
+        <div class="life-habit-grid" role="list">
+          ${habitRows.map(row => `
+            <div class="life-habit-row ${row.done ? 'done' : ''}" role="listitem">
+              <span class="life-habit-name">${escapeHtml(row.title)}</span>
+              <span class="life-habit-streak" aria-label="연속 ${row.streak}일">
+                ${_lifeIcon('flame', 13)}
+                <span>${row.streak}</span>
+              </span>
+              <div class="life-habit-actions">
+                ${row.taskId ? `<button class="life-habit-edit"
+                        type="button"
+                        onclick="event.stopPropagation(); editTask('${escapeAttr(row.taskId)}')"
+                        aria-label="${escapeAttr(row.title + ' 원본 task 편집')}"
+                        title="원본 task 편집">
+                  ${_lifeIcon('edit', 14)}
+                </button>` : ''}
+                <button class="life-habit-toggle ${row.done ? 'done' : ''}"
+                        type="button"
+                        onclick="toggleLifeHabit('${escapeAttr(row.title)}')"
+                        aria-pressed="${row.done ? 'true' : 'false'}"
+                        aria-label="${escapeAttr(row.title + (row.done ? ' 완료됨' : ' 완료'))}">
+                  ${row.done ? _lifeIcon('check', 14) : ''}
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : '<div class="life-empty-inline">반복 task를 만들면 습관 체크가 여기에 표시됩니다</div>'}
+    </section>
+  `;
+}
+
+/**
+ * 일상/가족 개별 작업 아이템 HTML
+ */
+function _renderLifeTaskItem(task) {
+  const category = safeCatId(task.category);
+  const hasSubtasks = Array.isArray(task.subtasks) && task.subtasks.length > 0;
+  const doneCount = hasSubtasks ? task.subtasks.filter(s => s.completed).length : 0;
+  const totalCount = hasSubtasks ? task.subtasks.length : 0;
+  const repeatLabel = task.repeatType && task.repeatType !== 'none'
+    ? getRepeatLabel(task.repeatType, task)
+    : '';
+  const estimatedMinutes = Number(task.estimatedTime);
+  const urgencyClass = _lifeTaskUrgencyClass(task);
+  const checkAction = task.completed ? 'uncompleteTask' : 'completeTask';
+  const checkLabel = task.completed ? '완료 되돌리기' : '완료';
+
+  return `
+    <div class="life-task-row cat-${category} ${urgencyClass} ${task.completed ? 'completed' : ''}"
+         style="--task-cat-color: var(--cat-${category})"
+         data-task-id="${escapeAttr(task.id)}">
+      <button class="life-task-check cat-${category} ${task.completed ? 'checked' : ''}"
+              type="button"
+              onclick="if(this._longPressed){this._longPressed=false;return;}event.stopPropagation(); ${checkAction}('${escapeAttr(task.id)}')"
+              ${task.completed ? '' : `onpointerdown="this._lpTimer = setTimeout(() => { this._longPressed = true; showBackdateMenu('${escapeAttr(task.id)}', this); }, 500)" onpointerup="clearTimeout(this._lpTimer)" onpointerleave="clearTimeout(this._lpTimer)"`}
+              aria-label="${escapeAttr(task.title + ' ' + checkLabel)}">
+        ${_lifeIcon(task.completed ? 'check' : 'circle', 15)}
+      </button>
+      <div class="life-task-main"
+           role="button"
+           tabindex="0"
+           onclick="editTask('${escapeAttr(task.id)}')"
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();editTask('${escapeAttr(task.id)}')}">
+        <span class="life-task-title">${escapeHtml(task.title)}</span>
+        <span class="life-task-meta">
+          <span class="cat-tag cat-${category}">${escapeHtml(category)}</span>
+          ${repeatLabel ? `<span class="life-meta-chip">${_lifeIcon('repeat', 12)}${escapeHtml(repeatLabel)}</span>` : ''}
+          ${Number.isFinite(estimatedMinutes) && estimatedMinutes > 0 ? `<span class="life-meta-chip">${_lifeIcon('clock', 12)}${estimatedMinutes}분</span>` : ''}
+          ${hasSubtasks ? `<span class="life-meta-chip">${doneCount}/${totalCount}</span>` : ''}
+        </span>
+      </div>
+      ${_renderLifeDeadlineChip(task)}
+      <div class="life-task-actions" aria-label="작업 동작">
+        <button class="life-icon-btn" type="button" onclick="event.stopPropagation(); editTask('${escapeAttr(task.id)}')" title="수정" aria-label="${escapeAttr(task.title)} 수정">${_lifeIcon('edit', 14)}</button>
+        <button class="life-icon-btn danger" type="button" onclick="event.stopPropagation(); deleteTask('${escapeAttr(task.id)}')" title="삭제" aria-label="${escapeAttr(task.title)} 삭제">${_lifeIcon('trash', 14)}</button>
+      </div>
+      ${hasSubtasks ? `
+        <div class="life-subtasks" onclick="event.stopPropagation();">
+          ${task.subtasks.map((st, idx) => `
+            <button class="life-subtask-chip ${st.completed ? 'done' : ''}"
+                    type="button"
+                    onclick="if(this._longPressed){this._longPressed=false;return;}toggleSubtaskComplete('${escapeAttr(task.id)}', ${idx})"
+                    onpointerdown="this._lpTimer = setTimeout(() => { this._longPressed = true; showSubtaskBackdateMenu('${escapeAttr(task.id)}', ${idx}, this); }, 500)"
+                    onpointerup="clearTimeout(this._lpTimer)"
+                    onpointerleave="clearTimeout(this._lpTimer)"
+                    aria-pressed="${st.completed ? 'true' : 'false'}">
+              ${_lifeIcon(st.completed ? 'check' : 'circle', 12)}
+              <span>${escapeHtml(st.text)}</span>
+            </button>
+          `).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function _renderLifeTaskFilter(activeFilter) {
+  const filters = [
+    { key: 'all', label: '전체', cat: '' },
+    { key: 'life', label: '일상', cat: '일상' },
+    { key: 'family', label: '가족', cat: '가족' },
+    { key: 'event', label: '이벤트', cat: '이벤트' },
+    { key: 'selfdev', label: '자기계발', cat: '자기계발' }
+  ];
+  return `
+    <div class="life-filter-chips" role="group" aria-label="일상 task 필터">
+      ${filters.map(filter => `
+        <button class="life-filter-chip ${activeFilter === filter.key ? 'active' : ''} ${filter.cat ? 'cat-' + filter.cat : ''}"
+                type="button"
+                onclick="setLifeTaskFilter('${filter.key}')"
+                aria-pressed="${activeFilter === filter.key ? 'true' : 'false'}">
+          ${filter.cat ? '<span class="life-filter-swatch"></span>' : ''}
+          <span>${escapeHtml(filter.label)}</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function _renderLifeTaskSection(pendingTasks, completedTasks) {
+  const activeFilter = appState.lifeTaskFilter || 'all';
+  const filtered = pendingTasks.filter(task => {
+    if (activeFilter === 'life') return task.category === '일상';
+    if (activeFilter === 'family') return task.category === '가족';
+    if (activeFilter === 'event') return task.category === '이벤트';
+    if (activeFilter === 'selfdev') return task.category === '자기계발';
+    return true;
+  });
+  const lifeCount = pendingTasks.filter(task => task.category === '일상').length;
+  const familyCount = pendingTasks.filter(task => task.category === '가족').length;
+  const eventCount = pendingTasks.filter(task => task.category === '이벤트').length;
+  const selfDevCount = pendingTasks.filter(task => task.category === '자기계발').length;
+
+  const lifeGroup = filtered.filter(t => t.category === '일상');
+  const familyGroup = filtered.filter(t => t.category === '가족');
+  const eventGroup = filtered.filter(t => t.category === '이벤트');
+  const selfDevGroup = filtered.filter(t => t.category === '자기계발');
+
+  const renderSubGroup = (groupTasks, label, catClass) => `
+    <div class="life-section-header cat-${catClass}" role="group" aria-label="${escapeAttr(label)} 그룹">
+      <span class="life-section-header-label">${escapeHtml(label)}</span>
+      <span class="life-section-header-count">${groupTasks.length}</span>
+    </div>
+    ${groupTasks.length > 0 ? `
+      <div class="life-task-list life-sub-list">
+        ${groupTasks.map(task => _renderLifeTaskItem(task)).join('')}
+      </div>
+    ` : '<div class="life-empty-inline life-sub-empty">표시할 task 없음</div>'}
+  `;
+
+  return `
+    <section class="life-section-card life-task-section" aria-labelledby="life-task-title">
+      <div class="life-section-heading split">
+        <span id="life-task-title" class="life-section-label">${_lifeIcon('list', 14)}일상 task</span>
+        ${_renderLifeTaskFilter(activeFilter)}
+      </div>
+      <div class="life-task-count-row">
+        <span>일상 ${lifeCount}</span>
+        <span>자기계발 ${selfDevCount}</span>
+        <span>가족 ${familyCount}</span>
+        <span>이벤트 ${eventCount}</span>
+      </div>
+      <div class="life-quick-input-hint" style="font-size: var(--font-xs); color: var(--text-muted); margin: 2px 0 6px;">prefix: #자기계발 #이벤트 #가족 (없으면 일상)</div>
+      ${filtered.length > 0 ? (
+        activeFilter === 'all'
+          ? `<div class="life-task-groups">
+              ${renderSubGroup(lifeGroup, '일상', '일상')}
+              ${renderSubGroup(selfDevGroup, '자기계발', '자기계발')}
+              ${renderSubGroup(familyGroup, '가족', '가족')}
+              ${renderSubGroup(eventGroup, '이벤트', '이벤트')}
+            </div>`
+          : `<div class="life-task-list">
+              ${filtered.map(task => _renderLifeTaskItem(task)).join('')}
+            </div>`
+      ) : '<div class="life-empty-inline">표시할 일상/자기계발/가족/이벤트 task가 없습니다</div>'}
+      ${completedTasks.length > 0 ? `
+        <details class="life-completed-details">
+          <summary>오늘 완료 ${completedTasks.length}</summary>
+          <div class="life-task-list completed-list">
+            ${completedTasks.slice(0, 5).map(task => _renderLifeTaskItem(task)).join('')}
+          </div>
+        </details>
+      ` : ''}
+    </section>
+  `;
+}
+
+/**
+ * 결심 시작일(YYYY-MM-DD) ~ 기준 시각(ms) 사이 경과 일수.
+ */
+function _resolutionDaysBetween(startDateStr, endMs) {
+  const [sy, sm, sd] = String(startDateStr || '').split('-').map(Number);
+  if (!sy) return 0;
+  const startMs = new Date(sy, sm - 1, sd).getTime();
+  return isNaN(startMs) ? 0 : Math.max(0, Math.floor((endMs - startMs) / 86400000));
+}
+
+/**
+ * YYYY-MM-DD -> "M/D" (요약/타임라인 표시용).
+ */
+function _fmtResolutionDate(dateStr) {
+  const [, m, d] = String(dateStr || '').split('-');
+  return (m && d) ? `${Number(m)}/${Number(d)}` : '—';
+}
+
+// 결심 타임라인에 한 번에 보여줄 과거 리셋 기록 최대 행 수 (초과분은 "N개 더 있음"으로 요약).
+const RESOLUTION_TIMELINE_MAX_ROWS = 20;
+
+/**
+ * 결심 1개 카드 + 요약 + 타임라인 토글 HTML.
+ */
+function _renderResolutionItem(r, todayMs) {
+  const id = escapeAttr(r.id);
+  const days = _resolutionDaysBetween(r.startDate, todayMs);
+  // resetHistory 항목이 손상돼(null/비객체) 들어와도 렌더 전체가 죽지 않도록 객체만 통과시킨다.
+  const history = (Array.isArray(r.resetHistory) ? r.resetHistory : []).filter(h => h && typeof h === 'object');
+  const resetCount = history.length;
+  const best = history.reduce((max, h) => Math.max(max, Number(h.days) || 0), days);
+  const expanded = !!(appState.expandedResolutions && appState.expandedResolutions[r.id]);
+
+  // 타임라인: 진행 중 구간(최상단) + 과거 리셋 기록(최신순). 다른 리스트와 동일하게 행 수를 cap.
+  const pastRows = history.slice().reverse();
+  const shownRows = pastRows.slice(0, RESOLUTION_TIMELINE_MAX_ROWS);
+  const hiddenRowCount = pastRows.length - shownRows.length;
+  const timelineRows = [
+    `<div class="resolution-timeline-row current">
+       <span class="resolution-timeline-period">${_fmtResolutionDate(r.startDate)} ~ 진행 중</span>
+       <span class="resolution-timeline-days">${days}일</span>
+     </div>`,
+    ...shownRows.map(h => `
+      <div class="resolution-timeline-row">
+        <span class="resolution-timeline-period">${_fmtResolutionDate(h.start)} ~ ${_fmtResolutionDate(h.end)}</span>
+        <span class="resolution-timeline-days">${Number(h.days) || 0}일</span>
+      </div>`),
+    hiddenRowCount > 0
+      ? `<div class="resolution-timeline-row resolution-timeline-more">이전 기록 ${hiddenRowCount}개 더 있음</div>`
+      : ''
+  ].join('');
+
+  return `
+    <div class="resolution-item">
+      <div class="resolution-card ${r.icon ? 'has-icon' : ''}" role="button" tabindex="0" onclick="editResolution('${id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();editResolution('${id}')}">
+        ${r.icon ? `<div class="resolution-icon" aria-hidden="true">${escapeHtml(r.icon)}</div>` : ''}
+        <div class="resolution-info">
+          <div class="resolution-name">${escapeHtml(r.title)}</div>
+          <div class="resolution-days"><span class="resolution-day-count">${days}</span>일째</div>
+          <div class="resolution-meta">시작 ${_fmtResolutionDate(r.startDate)} · 리셋 ${resetCount}회 · 최장 ${best}일</div>
+        </div>
+        <div class="resolution-actions">
+          <button class="life-icon-btn" type="button" onclick="event.stopPropagation(); resetResolution('${id}')" title="리셋" aria-label="${escapeAttr(r.title)} 리셋">${_lifeIcon('rotate-ccw', 14)}</button>
+          <button class="life-icon-btn danger" type="button" onclick="event.stopPropagation(); deleteResolution('${id}')" title="삭제" aria-label="${escapeAttr(r.title)} 삭제">${_lifeIcon('trash', 14)}</button>
+        </div>
+      </div>
+      <button class="resolution-timeline-toggle ${expanded ? 'expanded' : ''}" type="button" onclick="toggleResolutionTimeline('${id}')" aria-expanded="${expanded}" aria-label="${escapeAttr(r.title)} 타임라인 ${expanded ? '접기' : '펼치기'}">
+        <span>타임라인 ${expanded ? '접기' : '펼치기'}${resetCount > 0 ? ` (${resetCount + 1})` : ''}</span>
+        ${_lifeIcon('chevron-down', 13)}
+      </button>
+      ${expanded ? `<div class="resolution-timeline">${timelineRows}</div>` : ''}
+    </div>
+  `;
+}
+
+/**
+ * 결심 트래커 섹션 HTML (오늘 탭 + 일상 탭 공통)
+ */
+function _renderResolutionSection() {
+  const resolutions = appState.resolutions || [];
+  const now = new Date();
+  const todayMs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+  return `
+    <section class="life-section-card resolution-section" aria-labelledby="life-resolution-title">
+      ${_renderLifeSectionHeading('결심 트래커', resolutions.length ? resolutions.length + '개' : '', 'target', 'life-resolution-title')}
+      ${resolutions.length > 0 ? `
+        <div class="resolution-list">
+          ${resolutions.map(r => _renderResolutionItem(r, todayMs)).join('')}
+        </div>
+      ` : '<div class="resolution-empty">결심을 추가하면 오늘 탭의 기록 버튼과 연결됩니다</div>'}
+      <div class="life-section-foot">
+        <button class="life-soft-action" type="button" onclick="addResolution()" aria-label="결심 추가">
+          ${_lifeIcon('plus', 13)}
+          <span>결심 추가</span>
+        </button>
+      </div>
+    </section>
+  `;
+}
+
+/**
+ * 일상 탭 HTML을 반환한다.
+ */
+function renderLifeTab() {
+  // rhythm history sub-view 분기 — 일상 탭 안 swap
+  if (appState.activeLifeSubView === 'rhythmHistory' && typeof renderLifeRhythmHistory === 'function') {
+    return `
+      <div class="life-shell">
+        <div class="life-topbar">
+          <button type="button" class="life-back-btn" onclick="appState.activeLifeSubView=null; renderStatic();" aria-label="일상 탭으로 돌아가기">
+            ${_lifeIcon('arrow-left', 14)}
+            <span>일상</span>
+          </button>
+          <h2 class="life-title">리듬 히스토리</h2>
+        </div>
+        ${renderLifeRhythmHistory()}
+      </div>
+    `;
+  }
+
+  const now = new Date();
+  const todayEnd = new Date(now);
+  todayEnd.setHours(23, 59, 59, 999);
+
+  const lifeTasks = (appState.tasks || []).filter(task => task.category === '일상' || task.category === '가족' || task.category === '이벤트' || task.category === '자기계발');
+  const pendingTasks = lifeTasks
+    .filter(task => _isLifeTaskDueToday(task, todayEnd))
+    .sort(_sortLifeTasks);
+  const completedTasks = _getLifeCompletedToday(lifeTasks);
+  const rhythmItems = _getLifeRhythmItems();
+  const rhythmDone = rhythmItems.filter(item => item.value).length;
+  const medicationSummary = _getLifeMedicationSummary();
+  const habitRows = _getLifeHabitRows();
+  const habitDone = habitRows.filter(row => row.done).length;
+  const familyTasks = pendingTasks.filter(task => task.category === '가족');
+  const maxHabitStreak = habitRows.reduce((max, row) => Math.max(max, row.streak || 0), 0);
+  const subTab = ['habits', 'tasks'].includes(appState.lifeMainSubTab) ? appState.lifeMainSubTab : 'habits';
+
+  return `
+    <div class="life-shell">
+      <div class="life-topbar">
+        <div class="life-title-group">
+          <span class="life-title-bar"></span>
+          <div>
+            <h2 class="life-title">일상</h2>
+            <p class="life-subtitle">리듬, 약, 습관, 가족 task</p>
+          </div>
+        </div>
+        <button class="life-add-focus" type="button" onclick="var input=document.getElementById('life-quick-input'); if(input) input.focus();" aria-label="일상 task 추가 입력으로 이동">
+          ${_lifeIcon('plus', 14)}
+          <span>추가</span>
+        </button>
+      </div>
+
+      <div class="life-anchors tab-anchor-row" aria-label="일상 안정 앵커">
+        <div class="life-anchor cat-life">
+          <span class="life-anchor-label">${_lifeIcon('clock', 13)}오늘 리듬</span>
+          <span class="life-anchor-value">${rhythmDone}/6</span>
+        </div>
+        <div class="life-anchor success">
+          <span class="life-anchor-label">${_lifeIcon('pill', 13)}약 복용</span>
+          <span class="life-anchor-value">${medicationSummary.taken}/${medicationSummary.total}</span>
+        </div>
+        <div class="life-anchor cat-family life-anchor-clickable" role="button" tabindex="0" onclick="setLifeTaskFilter('family')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setLifeTaskFilter('family')}" aria-label="가족 task ${familyTasks.length}개 필터 적용">
+          <span class="life-anchor-label">${_lifeIcon('home', 13)}가족</span>
+          <span class="life-anchor-value">${familyTasks.length}</span>
+        </div>
+        <div class="life-anchor celebration">
+          <span class="life-anchor-label">${_lifeIcon('flame', 13)}습관 streak</span>
+          <span class="life-anchor-value">${maxHabitStreak || habitDone}</span>
+        </div>
+      </div>
+
+      ${_renderLifeMainSubTabNav(subTab)}
+
+      ${subTab === 'habits' ? `
+        ${_renderLifeRhythmSection(rhythmItems)}
+        ${_renderLifeMedicationSection(medicationSummary)}
+        ${_renderLifeHabitSection(habitRows)}
+        ${_renderResolutionSection()}
+      ` : `
+        <div class="life-quick-add">
+          <input
+            type="text"
+            class="life-quick-input"
+            placeholder="일상/가족/이벤트 task 추가 (#가족 #이벤트 prefix)"
+            id="life-quick-input"
+            aria-label="일상 task 빠른 추가"
+            onkeydown="if(event.key==='Enter') quickAddLifeTask()"
+          >
+          <button class="life-quick-btn" type="button" onclick="quickAddLifeTask()" aria-label="빠른 작업 추가">${_lifeIcon('plus', 16)}</button>
+        </div>
+        ${_renderLifeTaskSection(pendingTasks, completedTasks)}
+      `}
+    </div>
+  `;
+}
+
+// ============================================
+// 결심 트래커 CRUD
+// ============================================
+
+function addResolution() {
+  const title = prompt('결심 이름을 입력하세요 (예: 간식 끊기)');
+  if (!title || !title.trim()) return;
+
+  const icon = prompt('아이콘 이모지 (비우면 없음)', '🎯') || '';
+  const startDateInput = prompt('시작일 (YYYY-MM-DD, 비우면 오늘)', '');
+  const startDate = startDateInput && /^\d{4}-\d{2}-\d{2}$/.test(startDateInput)
+    ? startDateInput
+    : getLocalDateStr();
+
+  if (!appState.resolutions) appState.resolutions = [];
+  const now = new Date().toISOString();
+  appState.resolutions.push({
+    id: generateId(),
+    title: title.trim(),
+    startDate,
+    icon: icon.trim(),
+    createdAt: now,
+    updatedAt: now
+  });
+  saveStateImmediate();
+  renderStatic();
+}
+window.addResolution = addResolution;
+
+function resetResolution(id) {
+  const r = (appState.resolutions || []).find(item => item.id === id);
+  if (!r) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn(`"${r.title}" 카운터를 리셋하시겠습니까?\n(현재 기록이 타임라인에 저장되고 시작일이 오늘로 변경됩니다)`, 'resolution-reset-' + id)) return;
+  const today = getLocalDateStr();
+  const now = new Date();
+  const todayMs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const days = _resolutionDaysBetween(r.startDate, todayMs);
+  if (!Array.isArray(r.resetHistory)) r.resetHistory = [];
+  // KNOWN LIMITATION: resetHistory rides the whole-object last-writer-wins merge
+  // (firebase-merge.js mergeById keeps the resolution with the newer updatedAt).
+  // If another device makes ANY edit to the SAME resolution before this reset syncs
+  // — not just a competing reset, but also a title/icon/startDate edit via
+  // editResolution — that newer-updatedAt object wins and this reset's appended
+  // resetHistory row AND startDate change are silently dropped (no per-field/array
+  // union). Acceptable for infrequent deliberate resets on a single primary device;
+  // revisit with a union-merge on resetHistory if multi-device history fidelity
+  // becomes a requirement.
+  r.resetHistory.push({ start: r.startDate || today, end: today, days });
+  r.startDate = today;
+  r.updatedAt = new Date().toISOString();
+  saveStateImmediate();
+  renderStatic();
+}
+window.resetResolution = resetResolution;
+
+function toggleResolutionTimeline(id) {
+  if (!appState.expandedResolutions) appState.expandedResolutions = {};
+  if (appState.expandedResolutions[id]) {
+    delete appState.expandedResolutions[id];
+  } else {
+    appState.expandedResolutions[id] = true;
+  }
+  renderStatic();
+}
+window.toggleResolutionTimeline = toggleResolutionTimeline;
+
+function deleteResolution(id) {
+  const r = (appState.resolutions || []).find(item => item.id === id);
+  if (!r) return;
+  const confirmFn = (typeof destructiveConfirm === 'function') ? destructiveConfirm : (msg) => window.confirm(msg);
+  if (!confirmFn(`"${r.title}" 결심을 삭제하시겠습니까?`, 'resolution-del-' + id)) return;
+  if (!appState.deletedIds.resolutions) appState.deletedIds.resolutions = {};
+  appState.deletedIds.resolutions[id] = new Date().toISOString();
+  appState.resolutions = appState.resolutions.filter(item => item.id !== id);
+  if (appState.expandedResolutions) delete appState.expandedResolutions[id];
+  saveStateImmediate();
+  renderStatic();
+}
+window.deleteResolution = deleteResolution;
+
+function editResolution(id) {
+  const r = (appState.resolutions || []).find(item => item.id === id);
+  if (!r) return;
+
+  const newTitle = prompt('결심 이름', r.title);
+  if (newTitle === null) return;
+  if (newTitle.trim()) r.title = newTitle.trim();
+
+  const newIcon = prompt('아이콘 이모지 (비우면 없음)', r.icon || '');
+  if (newIcon !== null) r.icon = newIcon.trim();
+
+  const newDate = prompt('시작일 (YYYY-MM-DD)', r.startDate);
+  if (newDate !== null && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) r.startDate = newDate;
+
+  r.updatedAt = new Date().toISOString();
+  saveStateImmediate();
+  renderStatic();
+}
+window.editResolution = editResolution;

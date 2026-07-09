@@ -1,0 +1,116 @@
+/* modals.css - 모달, 브레인 덤프, 온보딩, 퀵 에디트 (tasks.css에서 분리) */
+    /* 모달 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--overlay-heavy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      max-width: 450px;
+      width: 100%;
+      border: 1px solid var(--border-color);
+      animation: modalIn 0.3s ease;
+      box-shadow: 0 20px 60px var(--shadow-color);
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal-header {
+      padding: 24px 24px 0;
+      text-align: center;
+    }
+
+    .modal-header h2 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      padding: 0 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* 브레인 덤프 */
+    .brain-dump-textarea {
+      width: 100%;
+      min-height: 200px;
+      padding: 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 17px;
+      line-height: 1.8;
+      resize: vertical;
+    }
+    .brain-dump-textarea:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+    .brain-dump-hint {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+    .brain-dump-count {
+      font-size: 15px;
+      color: var(--text-secondary);
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    /* 온보딩 */
+    .onboarding-feature {
+      display: flex;
+      gap: 15px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .onboarding-feature:last-child {
+      border-bottom: none;
+    }
+
+    .onboarding-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .onboarding-feature strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .onboarding-feature p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
