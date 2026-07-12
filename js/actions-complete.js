@@ -354,16 +354,25 @@ function completeTask(id) {
   const timeStr = now.toTimeString().slice(0, 5); // "HH:MM"
   const logEntry = { id: id, t: task.title, c: task.category, at: timeStr };
   const eventId = typeof getTelegramEventIdFromTask === "function" ? getTelegramEventIdFromTask(task) : null;
-  if (eventId) logEntry.eventId = eventId;
+  const hasExistingEventLog = !!eventId && Object.values(appState.completionLog || {}).some(entries =>
+    (entries || []).some(entry => String(entry.eventId || '') === String(eventId))
+  );
+  if (eventId && !hasExistingEventLog) {
+    logEntry.eventId = eventId;
+    logEntry.eventUpdatedAt = completedAt;
+    if (typeof clearCompletionLogEventTombstones === "function") clearCompletionLogEventTombstones(eventId);
+  }
   if (task.repeatType && task.repeatType !== 'none') logEntry.r = task.repeatType;
   if (task.expectedRevenue) logEntry.rv = Number(task.expectedRevenue);
   if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
     const doneCount = task.subtasks.filter(s => s.completed).length;
     if (doneCount > 0) logEntry.st = doneCount;
   }
-  if (!appState.completionLog[dateKey]) appState.completionLog[dateKey] = [];
-  appState.completionLog[dateKey].push(logEntry);
-  saveCompletionLog();
+  if (!hasExistingEventLog) {
+    if (!appState.completionLog[dateKey]) appState.completionLog[dateKey] = [];
+    appState.completionLog[dateKey].push(logEntry);
+    saveCompletionLog();
+  }
 
   // 오늘 통계 업데이트 — completedToday는 논리일(dayStartHour) 기준 재계산
   // (단순 ++ 는 새벽 완료 시 recomputeTodayStats와 어긋나 카운터가 튀었다 되돌아옴)

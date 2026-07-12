@@ -68,7 +68,7 @@ function loadCompletionLog() {
 
 /**
  * completionLog 병합 (Firebase 동기화용)
- * 날짜별 합집합, title+at 기준 중복 제거
+ * 레거시 항목은 날짜별 title+at, eventId 항목은 전체 날짜에서 중복 제거
  */
 function mergeCompletionLog(local, cloud) {
   const merged = {};
@@ -77,6 +77,14 @@ function mergeCompletionLog(local, cloud) {
   // 삭제 여부 확인 헬퍼
   const isDeleted = (date, entry) => {
     if (typeof isCompletionLogEntryDeleted === "function") return isCompletionLogEntryDeleted(date, entry);
+    if (entry && entry.eventId) {
+      const eventKey = 'event:' + String(entry.eventId);
+      const tombstone = Object.entries(deletedLog).reduce((latest, [key, timestamp]) => {
+        if (key !== eventKey && !key.endsWith('|' + eventKey)) return latest;
+        return typeof timestamp === 'string' && timestamp > latest ? timestamp : latest;
+      }, '');
+      if (tombstone && (!entry.eventUpdatedAt || entry.eventUpdatedAt <= tombstone)) return true;
+    }
     const key = date + '|' + (entry.t || '') + '|' + (entry.at || '');
     return !!deletedLog[key];
   };
@@ -109,13 +117,38 @@ function mergeCompletionLog(local, cloud) {
         const existing = new Set(merged[date].map(entryKey));
         for (const entry of cloudEntries) {
           if (entry._summary) continue; // 압축 항목은 병합하지 않음
-          if (!existing.has(entryKey(entry))) {
+          const key = entryKey(entry);
+          if (!existing.has(key)) {
             merged[date].push(entry);
+            existing.add(key);
           }
         }
       }
     }
   }
+
+  // Event entries represent one logical completion even when a fresh device
+  // backfills it under a later detection date. Keep the latest explicit recompletion, otherwise the earliest
+  // surviving date; legacy title/time entries intentionally remain date-scoped.
+  const eventWinners = new Map();
+  Object.keys(merged).sort().forEach(date => {
+    (merged[date] || []).forEach(entry => {
+      if (entry._summary || !entry.eventId) return;
+      const eventId = String(entry.eventId);
+      const updatedAt = entry.eventUpdatedAt || '';
+      const current = eventWinners.get(eventId);
+      if (!current || updatedAt > current.updatedAt) {
+        eventWinners.set(eventId, { entry, updatedAt });
+      }
+    });
+  });
+  Object.keys(merged).sort().forEach(date => {
+    merged[date] = (merged[date] || []).filter(entry => {
+      if (entry._summary || !entry.eventId) return true;
+      return eventWinners.get(String(entry.eventId)).entry === entry;
+    });
+    if (merged[date].length === 0) delete merged[date];
+  });
   return merged;
 }
 
@@ -343,4 +376,10 @@ function getRecurringHabits() {
     if (count >= 5) habits.add(title);
   });
   return [...habits].sort();
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    mergeCompletionLog
+  };
 }

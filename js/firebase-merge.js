@@ -253,9 +253,31 @@ function mergeDailyLoopState(local, cloud) {
   const normalize = typeof normalizeDailyLoopState === "function" ? normalizeDailyLoopState : (value) => value || {};
   const l = normalize(local);
   const c = normalize(cloud);
-  const top3 = [...new Set([...(c.tomorrowTop3 || []), ...(l.tomorrowTop3 || [])].map(String))].slice(0, 3);
+  const mergeTimestampMaps = (left, right) => {
+    const merged = {};
+    for (const taskId of new Set([...Object.keys(left || {}), ...Object.keys(right || {})])) {
+      const leftTime = (left && left[taskId]) || "";
+      const rightTime = (right && right[taskId]) || "";
+      merged[taskId] = leftTime > rightTime ? leftTime : rightTime;
+    }
+    return merged;
+  };
+  const tombstones = mergeTimestampMaps(c.tomorrowTop3Tombstones, l.tomorrowTop3Tombstones);
+  const updatedAt = mergeTimestampMaps(c.tomorrowTop3UpdatedAt, l.tomorrowTop3UpdatedAt);
+  const candidates = [...new Set([...(c.tomorrowTop3 || []), ...(l.tomorrowTop3 || [])].map(String))];
+  const top3 = candidates.filter(taskId => {
+    const removedAt = tombstones[taskId] || "";
+    const selectedAt = updatedAt[taskId] || "";
+    return !removedAt || (selectedAt && selectedAt > removedAt);
+  }).slice(0, 3);
+  const selectedUpdatedAt = {};
+  top3.forEach(taskId => {
+    if (updatedAt[taskId]) selectedUpdatedAt[taskId] = updatedAt[taskId];
+  });
   return {
     tomorrowTop3: top3,
+    tomorrowTop3Tombstones: tombstones,
+    tomorrowTop3UpdatedAt: selectedUpdatedAt,
     shutdownNotes: { ...(c.shutdownNotes || {}), ...(l.shutdownNotes || {}) },
     lastMorningOpenDate: (l.lastMorningOpenDate || "") > (c.lastMorningOpenDate || "") ? l.lastMorningOpenDate : (c.lastMorningOpenDate || null),
     lastShutdownDate: (l.lastShutdownDate || "") > (c.lastShutdownDate || "") ? l.lastShutdownDate : (c.lastShutdownDate || null),

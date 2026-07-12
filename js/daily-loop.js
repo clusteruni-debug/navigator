@@ -6,6 +6,20 @@ const LOOP_STATS_STORAGE_KEY = 'navigator-loop-stats';
 const DAILY_LOOP_STORAGE_KEY = 'navigator-daily-loop';
 const LOOP_STATS_RETENTION_DAYS = 56;
 
+function normalizeTop3TimestampMap(value, pruneExpired) {
+  const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const cutoff = Date.now() - (LOOP_STATS_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  const normalized = {};
+  Object.entries(source).forEach(([taskId, timestamp]) => {
+    if (typeof timestamp !== 'string') return;
+    const time = Date.parse(timestamp);
+    if (!Number.isFinite(time)) return;
+    if (pruneExpired && time < cutoff) return;
+    normalized[String(taskId)] = timestamp;
+  });
+  return normalized;
+}
+
 function getDailyLoopDate(date) {
   if (typeof getLogicalDate === 'function') return getLogicalDate(date);
   if (typeof getLocalDateStr === 'function') return getLocalDateStr(date || new Date());
@@ -40,8 +54,16 @@ function pruneLoopStats(stats) {
 
 function normalizeDailyLoopState(value) {
   const source = value && typeof value === 'object' ? value : {};
+  const tomorrowTop3 = Array.isArray(source.tomorrowTop3) ? source.tomorrowTop3.map(String).slice(0, 3) : [];
+  const rawUpdatedAt = normalizeTop3TimestampMap(source.tomorrowTop3UpdatedAt, false);
+  const tomorrowTop3UpdatedAt = {};
+  tomorrowTop3.forEach(taskId => {
+    if (rawUpdatedAt[taskId]) tomorrowTop3UpdatedAt[taskId] = rawUpdatedAt[taskId];
+  });
   return {
-    tomorrowTop3: Array.isArray(source.tomorrowTop3) ? source.tomorrowTop3.map(String).slice(0, 3) : [],
+    tomorrowTop3,
+    tomorrowTop3Tombstones: normalizeTop3TimestampMap(source.tomorrowTop3Tombstones, true),
+    tomorrowTop3UpdatedAt,
     shutdownNotes: source.shutdownNotes && typeof source.shutdownNotes === 'object' ? source.shutdownNotes : {},
     lastMorningOpenDate: source.lastMorningOpenDate || null,
     lastShutdownDate: source.lastShutdownDate || null,
@@ -291,9 +313,20 @@ function toggleTomorrowTop3(taskId) {
   if (!appState.dailyLoop) appState.dailyLoop = normalizeDailyLoopState(null);
   const state = normalizeDailyLoopState(appState.dailyLoop);
   const id = String(taskId);
-  state.tomorrowTop3 = state.tomorrowTop3.includes(id)
-    ? state.tomorrowTop3.filter(item => item !== id)
-    : state.tomorrowTop3.concat(id).slice(0, 3);
+  const now = new Date().toISOString();
+  if (state.tomorrowTop3.includes(id)) {
+    state.tomorrowTop3 = state.tomorrowTop3.filter(item => item !== id);
+    state.tomorrowTop3Tombstones[id] = now;
+    delete state.tomorrowTop3UpdatedAt[id];
+  } else {
+    if (state.tomorrowTop3.length >= 3) {
+      showToast('내일 Top 3는 3개까지 선택할 수 있어요', 'info');
+      return;
+    }
+    state.tomorrowTop3 = state.tomorrowTop3.concat(id);
+    state.tomorrowTop3UpdatedAt[id] = now;
+    delete state.tomorrowTop3Tombstones[id];
+  }
   appState.dailyLoop = state;
   persistLoopLocalOnly();
   saveState();

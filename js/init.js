@@ -63,8 +63,14 @@ window.addEventListener('online', async () => {
     } catch (e) {
       console.error('[sync] 온라인 복귀 동기화 실패:', e);
     }
-    if (typeof flushPendingEventStatusSync === "function") await flushPendingEventStatusSync();
     renderStatic();
+  }
+  if (typeof flushPendingEventStatusSync === "function") {
+    try {
+      await flushPendingEventStatusSync();
+    } catch (e) {
+      console.error('[sync] 이벤트 상태 큐 flush 실패:', e);
+    }
   }
 });
 window.addEventListener('offline', () => {
